@@ -206,7 +206,7 @@
           this.onConfirm();
         } },
         { label: 'CANCEL', action: () => Engine.pop() },
-      ], { x: DM.W / 2, y: 392, w: 380, align: 'center', itemH: 52, size: 24, onBack: () => Engine.pop() });
+      ], { x: DM.W / 2, y: 374, w: 380, align: 'center', itemH: 52, size: 24, onBack: () => Engine.pop() });
       this.menu.sel = 1; // the safe choice is the default
     }
     update(dt) {
@@ -218,10 +218,12 @@
       ctx.fillStyle = `rgba(2,4,9,${0.82 * k})`;
       ctx.fillRect(0, 0, DM.W, DM.H);
       const w = 640, x = DM.W / 2 - w / 2;
-      Gfx.panel(ctx, x, 220, w, 250, { accent: DM.C.yellow });
-      Gfx.text(ctx, 'START A NEW GAME?', DM.W / 2, 282, { size: 38, color: '#eefbff', align: 'center', weight: 700, spacing: 8 });
-      const lines = this.where ? [`Continue now leads to ${this.where}.`, 'Starting over replaces it. Chapters you reached stay unlocked.'] : ['Chapters you reached stay unlocked.'];
-      lines.forEach((l, i) => Gfx.text(ctx, l, DM.W / 2, 322 + i * 24, { size: 15, color: 'rgba(220,238,255,0.75)', align: 'center', font: DM.FONTS.type }));
+      Gfx.panel(ctx, x, 200, w, 310, { accent: DM.C.yellow });
+      Gfx.text(ctx, 'START A NEW GAME?', DM.W / 2, 262, { size: 38, color: '#eefbff', align: 'center', weight: 700, spacing: 8 });
+      const lines = this.where
+        ? [`Continue now leads to ${this.where}.`, 'Starting over replaces it. Chapters you reached stay unlocked.']
+        : ['The story starts again from the Prologue.', 'Chapters you reached stay unlocked.'];
+      lines.forEach((l, i) => Gfx.text(ctx, l, DM.W / 2, 304 + i * 24, { size: 15, color: 'rgba(220,238,255,0.75)', align: 'center', font: DM.FONTS.type }));
       this.menu.render(ctx);
     }
   }
