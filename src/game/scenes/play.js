@@ -16,6 +16,7 @@
   class Play {
     constructor() {
       this.debug = false;
+      this.memo = {}; // ctx.memo / ctx.once: remembered across retries of this chapter
     }
 
     // A targeting reticle only once Jon has powers to aim.
@@ -33,20 +34,39 @@
         DM.Events.on('memory:found', (m) => {
           if (!this.ctx) return;
           this.ctx.stats.memories++;
+          if (m.year != null && !this.ctx.foundMemories.includes(m.year)) this.ctx.foundMemories.push(m.year);
           this.hud.caption(`${m.year}. ${m.text}`, { dur: 6 + m.text.length * 0.03 });
         }),
+        // Alt-tab, a notification or a hidden tab pauses the fight (Settings can turn this off).
+        DM.Events.on('app:blur', () => this.focusLost()),
       ];
-      this.begin(params.chapter, params.stage || 0);
+      this.begin(params.chapter, params.stage || 0, params.carry || null);
+    }
+
+    focusLost() {
+      const s = Save.settings;
+      if ((s && s.focusPause === false) || this.failed || !this.ctx || this.ctx.done) return;
+      if (!Engine.stack.includes(this)) return;
+      // Mid-fade (map change, retry): pause as soon as the new scene is up.
+      if (Engine.fading) {
+        clearTimeout(this.blurTimer);
+        this.blurTimer = setTimeout(() => this.focusLost(), 120);
+        return;
+      }
+      if (Engine.top() === this) Engine.push(new Scenes.Pause(this));
     }
 
     exit() {
+      clearTimeout(this.blurTimer);
       for (const off of this.offs || []) off();
       if (this.ctx) this.ctx.dispose();
       DM.Audio.stopHums();
       DM.Audio.setMusicFilter(18000);
     }
 
-    begin(chapterId, stage) {
+    // Start (or restart) the chapter at `stage`. `carry` is the checkpoint
+    // snapshot to resume with; `retry` is true for REASSEMBLE / restart.
+    begin(chapterId, stage, carry, retry) {
       if (this.ctx) this.ctx.dispose();
       const ch = DM.Chapters.get(chapterId);
       this.chapter = ch;
@@ -59,13 +79,17 @@
       this.failed = false;
       this.failT = 0;
       this.ctx = new DM.ChapterContext(this, ch);
+      this.ctx.memo = this.memo;
+      this.ctx.applyCarry(carry);
       this.ctx.start(stage);
       this.ctx.step(0);
       DM.Audio.stopHums();
       DM.Audio.setMusicFilter(18000);
       DM.Audio.music.play(ch.music);
-      Save.data.checkpoint = { chapter: ch.id, stage: this.ctx.checkpoint || stage };
-      Save.write();
+      // Checkpoint stages record themselves (stageLoop); a fresh start records the
+      // chapter start, which only moves Continue if it is not behind it.
+      if (!stage) Save.checkpointAt(ch.id, 0, null);
+      DM.Events.emit('play:begin', { scene: this, chapter: ch.id, stage, retry: !!retry });
     }
 
     setWorld(world) {
@@ -141,11 +165,14 @@
       }
     }
 
+    // Back to the last checkpoint with the stats it was reached with, so the
+    // failed attempt's kills and spares are discarded but earlier ones are kept.
     retry() {
       const stage = this.ctx.checkpoint || 0;
+      const carry = this.ctx.checkpointCarry;
       Engine.fadeTo(() => {
         while (Engine.top() !== this && Engine.stack.length > 1) Engine.pop();
-        this.begin(this.chapter.id, stage);
+        this.begin(this.chapter.id, stage, carry, true);
       });
     }
 
@@ -154,13 +181,13 @@
       const st = this.ctx.stats;
       const next = DM.Chapters.next(ch.id);
       const d = Save.data;
-      d.completed[ch.id] = { time: st.time, disintegrated: st.disintegrated, spared: st.spared, memories: st.memories };
+      // Story choices a chapter declares in `persistFlags` travel to the ending.
+      d.completed[ch.id] = { time: st.time, disintegrated: st.disintegrated, spared: st.spared, memories: st.memories, flags: this.ctx.persistedFlags() };
       d.reached = Math.max(d.reached, ch.index + 1);
       d.totals.disintegrated += st.disintegrated;
       d.totals.spared += st.spared;
       d.totals.memories += st.memories;
-      d.checkpoint = next ? { chapter: next.id, stage: 0 } : null;
-      Save.write();
+      Save.chapterDone(ch.id);
       Engine.push(new Scenes.ChapterComplete(this, st, next));
     }
 

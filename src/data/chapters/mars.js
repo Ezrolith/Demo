@@ -165,7 +165,9 @@
       const p = freeSpot(W, 520, 880, 30);
       W.add(new Shard(p.x, p.y, true));
     }
-    for (const m of MEMORIES) W.add(new Memory(m.x, m.y, m));
+    // Memories already found this run (carried by Retry/Continue) stay found.
+    const found = ctx.foundMemories || [];
+    for (const m of MEMORIES) if (!found.includes(m.year)) W.add(new Memory(m.x, m.y, m));
     W.overlays.push((g, world) => {
       const t = world.realTime || 0;
       const v = world.camera.view();

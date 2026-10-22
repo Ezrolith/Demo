@@ -83,7 +83,9 @@
     ctx.textAlign = o.align || 'left';
     ctx.textBaseline = o.baseline || 'alphabetic';
     if (hasSpacing(ctx)) ctx.letterSpacing = (o.spacing || 0) + 'px';
-    if (o.alpha != null) ctx.globalAlpha *= o.alpha;
+    // Restore alpha by assignment: dividing it back out breaks for 0 and for values above 1.
+    const ga = ctx.globalAlpha;
+    if (o.alpha != null) ctx.globalAlpha = ga * (Number.isFinite(o.alpha) ? U.clamp(o.alpha, 0, 1) : 1);
     if (o.shadow) {
       ctx.fillStyle = o.shadow;
       ctx.fillText(str, x + (o.shadowOff || 2), y + (o.shadowOff || 2));
@@ -96,7 +98,7 @@
     }
     ctx.fillStyle = o.color || '#fff';
     ctx.fillText(str, x, y);
-    if (o.alpha != null) ctx.globalAlpha /= o.alpha;
+    ctx.globalAlpha = ga;
     if (hasSpacing(ctx)) ctx.letterSpacing = '0px';
   };
 
@@ -130,6 +132,8 @@
     wrapCache.set(key, lines);
     return lines;
   };
+  // Forget measured line breaks, e.g. once web fonts replace the fallback faces.
+  Gfx.clearTextCache = () => wrapCache.clear();
 
   // Wrapped text. `chars` reveals only the first N characters (typewriter effect).
   Gfx.paragraph = (ctx, text, x, y, maxW, lh, o = {}) => {

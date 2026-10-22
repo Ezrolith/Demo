@@ -6,8 +6,11 @@
  *
  * Keys use KeyboardEvent.code (physical position), so WASD stays WASD on
  * AZERTY/Dvorak layouts. Mac specifics handled here:
- *   - Ctrl+click counts as right click.
+ *   - Ctrl+click counts as right click, and game keys still work while Ctrl
+ *     is held (Ctrl+letter is not a browser shortcut on macOS).
  *   - Releasing Cmd clears all keys (macOS swallows keyup while Cmd is held).
+ * Losing focus (window blur, hidden tab) releases everything and emits the
+ * DM.Events 'app:blur' event, which the Play scene turns into a pause.
  */
 (function () {
   'use strict';
@@ -95,20 +98,30 @@
       this._press = press;
       this._release = release;
 
+      const isMac = /Mac|iP(hone|ad)/.test(navigator.platform || navigator.userAgent || '');
       window.addEventListener('keydown', (e) => {
-        // Leave browser/OS shortcuts (Cmd+R, Ctrl+F, Alt+Tab, F11...) alone.
-        if (e.metaKey || e.ctrlKey || e.altKey) return;
+        // Leave browser/OS shortcuts (Cmd+R, Ctrl+F, Alt+Tab, F11...) alone. On a Mac,
+        // Ctrl is held for Ctrl+click, so bound keys keep working with it.
+        if (e.metaKey || e.altKey || (e.ctrlKey && !(isMac && bound.has(e.code)))) return;
         if (bound.has(e.code) || e.code === 'Tab') e.preventDefault();
-        if (!e.repeat) press(e.code);
+        if (e.repeat) {
+          // OS auto-repeat of a key that is still held: re-arm it after a clearAll()
+          // (fades, closed cards, refocus) without creating a new press.
+          get(e.code).down = true;
+        } else press(e.code);
         DM.Audio && DM.Audio.unlock();
       });
       window.addEventListener('keyup', (e) => {
         release(e.code);
         if (e.key === 'Meta') this.clearAll();
       });
-      window.addEventListener('blur', () => this.clearAll());
+      const lostFocus = () => {
+        this.clearAll();
+        if (DM.Events) DM.Events.emit('app:blur');
+      };
+      window.addEventListener('blur', lostFocus);
       document.addEventListener('visibilitychange', () => {
-        if (document.hidden) this.clearAll();
+        if (document.hidden) lostFocus();
       });
 
       canvas.addEventListener('mousedown', (e) => {
@@ -154,6 +167,7 @@
         e.preventDefault();
         release('Mouse0');
       }, touchOpts);
+      canvas.addEventListener('touchcancel', () => release('Mouse0'), touchOpts);
     },
 
     updateMouse(e) {
