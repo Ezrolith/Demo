@@ -8,6 +8,7 @@
   const U = DM.U;
   const Gfx = DM.Gfx;
   const Input = DM.Input;
+  const Schema = DM.SettingsSchema;
   const F = DM.FONTS;
 
   // Soft dark backing so HUD text stays readable on bright maps (snow, desert).
@@ -25,7 +26,9 @@
       this.banners = [];
       this.toasts = [];
       this.hintMsg = null;
+      this.lastHint = null; // { text, essential, chapter, stage }: what H and the Pause screen recall
       this.flashA = 0;
+      this.flashPeak = 1;
       this.flashColor = '#fff';
       this.flashDur = 0.6;
       this.cinematic = false;
@@ -41,7 +44,7 @@
         this.objective = null;
         return;
       }
-      this.objective = { text, progress: progress || null, t: 0, done: false };
+      this.objective = { text, progress: progress || null, t: 0, idleT: 0, nudged: false, done: false };
       DM.Audio.play('objective');
     }
     completeObjective() {
@@ -56,8 +59,10 @@
         DM.Audio.play('success');
       }
     }
+    // Narration. TEXT SPEED sets the typewriter rate; SLOW also leaves it up longer.
     caption(text, o = {}) {
-      const c = { text, t: 0, dur: o.dur || 2.6 + text.length * 0.05, style: o.style || 'jon', gone: false };
+      const dur = (o.dur || 2.6 + text.length * 0.05) * Schema.readTime();
+      const c = { text, t: 0, dur, chars: 0, style: o.style || 'jon', gone: false, skippable: false };
       this.captions.push(c);
       return c;
     }
@@ -66,17 +71,40 @@
       this.banners.push(b);
       return b;
     }
-    hint(text, dur = 7) {
-      if (DM.Save.settings.hints === false) return;
-      this.hintMsg = text ? { text, t: 0, dur } : null;
+    // Tips respect the HINTS setting; essential ones (ctx.tutorial) always show.
+    // Either way the latest is kept, so H and the Pause screen can bring it back.
+    // hint(null) clears both.
+    hint(text, dur = 7, o = {}) {
+      if (!text) {
+        this.hintMsg = null;
+        this.lastHint = null;
+        return;
+      }
+      const sc = this.scene;
+      this.lastHint = { text, essential: !!o.essential, chapter: sc && sc.chapter ? sc.chapter.id : null, stage: sc && sc.ctx ? sc.ctx.stageIndex : 0 };
+      if (!o.essential && !Schema.hintsAll()) return;
+      this.hintMsg = { text, t: 0, dur };
+    }
+    recallHint(dur = 6) {
+      if (!this.lastHint) return false;
+      this.hintMsg = { text: this.lastHint.text, t: 0, dur };
+      return true;
     }
     toast(text, color) {
       this.toasts.push({ text, color: color || DM.C.yellow, t: 0 });
     }
-    flash(color, dur) {
+    // Full-screen flash. With FLASHING LIGHTS on REDUCED it peaks at a quarter
+    // strength and fades 1.5x slower, and strobes ({ strobe: true }) are dropped.
+    flash(color, dur, o = {}) {
+      const reduced = Schema.reducedFlashing();
+      if (reduced && o.strobe) return;
       this.flashColor = color;
-      this.flashDur = dur;
+      this.flashDur = dur * (reduced ? 1.5 : 1);
+      this.flashPeak = Schema.flashCap();
       this.flashA = 1;
+    }
+    get flashAlpha() {
+      return this.flashA * this.flashPeak;
     }
     startCountdown(seconds, label) {
       this.countdownState = { left: seconds, total: seconds, label: label || '' };
@@ -90,23 +118,30 @@
       this.cinematic = false;
     }
 
+    // Objective, hints and power slots are hidden during dialogue and letterboxed cutscenes.
+    gameHudVisible() {
+      const d = this.scene.dialog;
+      return this.cineK < 0.5 && !(d && d.active);
+    }
+    // Narration can be hurried along only while the player is held for a cutscene.
+    captionSkippable() {
+      const sc = this.scene;
+      return !!(sc.ctx && sc.ctx.locked && !(sc.dialog && sc.dialog.active));
+    }
+
     update(dt) {
       this.t += dt;
-      if (this.objective) {
-        this.objective.t += dt;
-        if (this.objective.done) {
-          this.objective.doneT += dt;
-          if (this.objective.doneT > 2.2) this.objective = null;
-        }
+      const shown = this.gameHudVisible();
+      const p = this.scene.player;
+      const o = this.objective;
+      if (o) {
+        o.t += dt;
+        if (o.done) {
+          o.doneT += dt;
+          if (o.doneT > 2.2) this.objective = null;
+        } else if (shown && p && !p.locked) o.idleT += dt;
       }
-      if (this.captions.length) {
-        const c = this.captions[0];
-        c.t += dt;
-        if (c.t >= c.dur) {
-          c.gone = true;
-          this.captions.shift();
-        }
-      }
+      this.updateCaption(dt);
       if (this.banners.length) {
         const b = this.banners[0];
         b.t += dt;
@@ -115,9 +150,23 @@
           this.banners.shift();
         }
       }
-      if (this.hintMsg) {
+      // A hint's clock only runs while it can be seen, so dialogue never eats it.
+      if (this.hintMsg && shown) {
         this.hintMsg.t += dt;
         if (this.hintMsg.t > this.hintMsg.dur) this.hintMsg = null;
+      }
+      if (shown && Input.pressed('hint')) {
+        Input.consume('hint');
+        if (!this.recallHint()) this.toast('NO FIELD NOTES YET', '#bff1ff');
+      }
+      // Stuck: the same objective for 45 s of free play brings the last tip back, once.
+      if (o && !o.done && !o.nudged && o.idleT >= 45 && !this.hintMsg) {
+        const h = this.lastHint;
+        const ch = this.scene.chapter;
+        if (h && ch && h.chapter === ch.id && (h.essential || Schema.hintsAll())) {
+          o.nudged = true;
+          this.recallHint(8);
+        }
       }
       for (const t of this.toasts) t.t += dt;
       this.toasts = this.toasts.filter((t) => t.t < 2.6);
@@ -128,6 +177,25 @@
         this.countdownState.left -= dt;
         const after = Math.ceil(this.countdownState.left);
         if (after !== before && after >= 0) DM.Audio.play('tick', { alt: after % 2 });
+      }
+    }
+
+    updateCaption(dt) {
+      const c = this.captions[0];
+      if (!c) return;
+      c.t += dt;
+      c.chars += dt * Schema.textCPS();
+      if (c.t > c.dur - 1) c.chars = Infinity; // always fully legible before it fades
+      // In a cutscene the first press finishes the line and the second moves on.
+      c.skippable = this.captionSkippable();
+      if (c.skippable && c.t > 0.15 && Input.pressed('confirm')) {
+        for (const a of ['confirm', 'interact', 'teleport', 'telekinesis']) Input.consume(a);
+        if (c.chars < c.text.length) c.chars = Infinity;
+        else c.t = Math.max(c.t, c.dur - 0.3);
+      }
+      if (c.t >= c.dur) {
+        c.gone = true;
+        this.captions.shift();
       }
     }
 
@@ -162,8 +230,8 @@
       this.renderHint(ctx, showGameHud);
       this.renderToasts(ctx);
 
-      if (this.flashA > 0) {
-        ctx.globalAlpha = this.flashA;
+      if (this.flashAlpha > 0) {
+        ctx.globalAlpha = this.flashAlpha;
         ctx.fillStyle = this.flashColor;
         ctx.fillRect(0, 0, DM.W, DM.H);
         ctx.globalAlpha = 1;
@@ -277,9 +345,17 @@
       const c = this.captions[0];
       if (!c) return;
       const a = Math.min(1, c.t * 3, (c.dur - c.t) * 2.5);
+      if (a <= 0) return;
       const y = this.cineK > 0.5 ? 92 : 122;
       const style = c.style === 'paper' ? {} : { bg: '#dff2ff', border: '#0d2a44', color: '#0d2a44' };
-      Gfx.caption(ctx, c.text, DM.W / 2, y, 620, Object.assign({ alpha: a, chars: c.t * 70, size: 18 }, style));
+      const h = Gfx.caption(ctx, c.text, DM.W / 2, y, 620, Object.assign({ alpha: a, chars: c.chars, size: 18 }, style));
+      // ▸ in the corner: this caption can be hurried along.
+      if (c.skippable && c.t > 0.8 && Math.sin(this.t * 5) > -0.3) {
+        ctx.font = Gfx.font(18, F.type);
+        let w = 0;
+        for (const l of Gfx.wrap(ctx, c.text, 620 - 28)) w = Math.max(w, ctx.measureText(l).width);
+        Gfx.text(ctx, '▸', DM.W / 2 + (w + 28) / 2 - 11, y + h - 5, { size: 15, color: style.border || DM.C.ink, alpha: a, align: 'center' });
+      }
     }
 
     renderBanner(ctx) {
