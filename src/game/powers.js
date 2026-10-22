@@ -444,7 +444,8 @@
       const k = e.friction * 0.22;
       const len = k > 0 ? (sp * (1 - Math.exp(-k * TK.preview))) / k : sp * TK.preview;
       const ux = plan.vx / sp, uy = plan.vy / sp;
-      let L = len;
+      // The path ends where it meets the target, or the first wall in the way.
+      let L = plan.target ? Math.min(len, U.dist(e.x, e.y, plan.target.x, plan.target.y) - plan.target.r) : len;
       for (const w of world.walls) {
         if (w.noCollide || (e.flying && w.low)) continue;
         const hit = U.segRect(e.x, e.y, e.x + ux * len, e.y + uy * len, w);
