@@ -349,12 +349,21 @@
       const y = this.cineK > 0.5 ? 92 : 122;
       const style = c.style === 'paper' ? {} : { bg: '#dff2ff', border: '#0d2a44', color: '#0d2a44' };
       const h = Gfx.caption(ctx, c.text, DM.W / 2, y, 620, Object.assign({ alpha: a, chars: c.chars, size: 18 }, style));
-      // ▸ in the corner: this caption can be hurried along.
-      if (c.skippable && c.t > 0.8 && Math.sin(this.t * 5) > -0.3) {
+      // A ▸ tab under the caption's corner: this one can be hurried along.
+      if (c.skippable && c.t > 0.8) {
         ctx.font = Gfx.font(18, F.type);
         let w = 0;
         for (const l of Gfx.wrap(ctx, c.text, 620 - 28)) w = Math.max(w, ctx.measureText(l).width);
-        Gfx.text(ctx, '▸', DM.W / 2 + (w + 28) / 2 - 11, y + h - 5, { size: 15, color: style.border || DM.C.ink, alpha: a, align: 'center' });
+        const tx = DM.W / 2 + (w + 28) / 2 - 34, ty = y + h - 1;
+        ctx.save();
+        ctx.globalAlpha *= a;
+        ctx.fillStyle = style.bg || DM.C.paper;
+        ctx.strokeStyle = style.border || DM.C.ink;
+        ctx.lineWidth = 2;
+        ctx.fillRect(tx, ty, 30, 17);
+        ctx.strokeRect(tx, ty, 30, 17);
+        Gfx.text(ctx, '▸', tx + 15, ty + 13, { size: 14, color: style.border || DM.C.ink, align: 'center', alpha: 0.65 + Math.sin(this.t * 5) * 0.35 });
+        ctx.restore();
       }
     }
 

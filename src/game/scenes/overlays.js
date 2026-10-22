@@ -62,7 +62,7 @@
       this.menu.update(dt);
     }
     render(ctx) {
-      dim(ctx, 0.72);
+      dim(ctx, 0.8);
       Gfx.text(ctx, 'PAUSED', DM.W / 2, 146, { size: 56, color: '#eefbff', align: 'center', weight: 700, spacing: 12 });
       const ch = this.play.chapter;
       Gfx.text(ctx, `${ch.numeral} · ${ch.title.toUpperCase()}`, DM.W / 2, 178, { size: 15, color: DM.C.blue, align: 'center', spacing: 4 });
@@ -207,7 +207,7 @@
       if (!cur || cur.id !== this.armed) this.armed = null;
     }
     render(ctx) {
-      dim(ctx, 0.88);
+      dim(ctx, 0.92);
       if (Engine.top() !== this) return; // the controls list is open on top
       Gfx.text(ctx, 'SETTINGS', DM.W / 2, 100, { size: 44, color: '#eefbff', align: 'center', weight: 700, spacing: 10 });
       this.renderTabs(ctx);
