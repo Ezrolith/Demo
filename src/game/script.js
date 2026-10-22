@@ -53,9 +53,14 @@
       if (carry.flags) Object.assign(this.flags, carry.flags);
     }
     snapshot() {
-      const flags = {};
-      for (const k of this.chapter.persistFlags || []) if (k in this.flags) flags[k] = this.flags[k];
-      return { stats: Object.assign({}, this.stats), found: this.foundMemories.slice(), flags };
+      return { stats: Object.assign({}, this.stats), found: this.foundMemories.slice(), flags: this.persistedFlags() };
+    }
+    // The story flags the chapter declares in `persistFlags`: carried through
+    // checkpoints and saved with the chapter's completion for the ending.
+    persistedFlags() {
+      const out = {};
+      for (const k of this.chapter.persistFlags || []) if (k in this.flags) out[k] = this.flags[k];
+      return out;
     }
 
     // Subscribe to a DM.Events event for the life of this attempt.
@@ -220,7 +225,7 @@
       const seen = DM.Save.data.seen && DM.Save.data.seen.unlocks;
       const def = DM.Powers.get(id);
       if (seen && seen[id] && def) {
-        const key = DM.Input.short[def.action] || DM.Input.short[def.id];
+        const key = DM.Input.short[def.action];
         this.hud.toast(def.name.toUpperCase() + (key ? '  ·  ' + key : ''), def.color);
         return { update: () => true };
       }
@@ -238,16 +243,11 @@
     // (frame-rate independent); resolves once fn(1) has run.
     tween(dur, fn) {
       let e = 0;
-      if (!(dur > 0)) {
-        fn(1);
-        return { update: () => true };
-      }
-      fn(0);
       return {
         update: (dt) => {
           e += dt;
-          const k = Math.min(1, e / dur);
-          if (dt > 0 || k >= 1) fn(k);
+          const k = dur > 0 ? Math.min(1, e / dur) : 1;
+          fn(k);
           return k >= 1;
         },
       };

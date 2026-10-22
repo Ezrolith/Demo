@@ -127,7 +127,10 @@
     }
     // With progress saved, New Game asks first: it replaces the Continue point.
     newGame() {
-      if (Save.hasProgress()) Engine.push(new ConfirmNewGame(() => this.startNewGame()));
+      const t = Save.continueTarget();
+      const ch = t && DM.Chapters.get(t.chapter);
+      const progress = Save.data.reached > 0 || (ch && (t.stage > 0 || ch.index > 0));
+      if (progress) Engine.push(new ConfirmNewGame(() => this.startNewGame()));
       else this.startNewGame();
     }
     startNewGame() {

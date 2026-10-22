@@ -42,6 +42,7 @@
 
   function merge(base, over) {
     for (const k in over) {
+      if (k === '__proto__' || k === 'constructor' || k === 'prototype') continue;
       const v = over[k];
       if (v && typeof v === 'object' && !Array.isArray(v) && base[k] && typeof base[k] === 'object') merge(base[k], v);
       else base[k] = v;
@@ -74,7 +75,7 @@
   function cleanCheckpoint(chapter, stage, carry) {
     const ch = DM.Chapters && DM.Chapters.get(chapter);
     if (!ch) return null;
-    const s = typeof stage === 'number' ? stage : NaN;
+    const s = num(stage, NaN);
     if (!Number.isInteger(s) || s < 0 || s >= ch.stages.length) return null;
     return { chapter, stage: s, carry: cleanCarry(carry) };
   }

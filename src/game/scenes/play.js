@@ -182,9 +182,7 @@
       const next = DM.Chapters.next(ch.id);
       const d = Save.data;
       // Story choices a chapter declares in `persistFlags` travel to the ending.
-      const flags = {};
-      for (const k of ch.persistFlags || []) if (k in this.ctx.flags) flags[k] = this.ctx.flags[k];
-      d.completed[ch.id] = { time: st.time, disintegrated: st.disintegrated, spared: st.spared, memories: st.memories, flags };
+      d.completed[ch.id] = { time: st.time, disintegrated: st.disintegrated, spared: st.spared, memories: st.memories, flags: this.ctx.persistedFlags() };
       d.reached = Math.max(d.reached, ch.index + 1);
       d.totals.disintegrated += st.disintegrated;
       d.totals.spared += st.spared;
