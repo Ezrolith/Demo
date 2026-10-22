@@ -1,4 +1,8 @@
-/* Boot: load save + settings, wait briefly for web fonts, start on the title screen. */
+/*
+ * Boot: load save + settings, wait briefly for web fonts, start on the title
+ * screen. Nothing stored or fetched may stop the title from appearing: a bad
+ * save falls back to defaults, and the font wait is capped.
+ */
 (function () {
   'use strict';
   const DM = window.DM;
@@ -8,11 +12,28 @@
     if (booted) return;
     booted = true;
     const canvas = document.getElementById('game');
-    DM.Save.load();
-    DM.Audio.setVolumes({ music: DM.Save.settings.music, sfx: DM.Save.settings.sfx });
-    DM.Input.init(canvas);
+    try {
+      DM.Save.load();
+      DM.Audio.setVolumes({ music: DM.Save.settings.music, sfx: DM.Save.settings.sfx });
+    } catch (e) {
+      console.error('Could not apply the saved game; starting with defaults.', e);
+      DM.Save.data = DM.Save.defaults();
+    }
+    try {
+      DM.Input.init(canvas);
+    } catch (e) {
+      console.error(e);
+    }
     DM.Engine.init(canvas);
-    DM.Engine.set(new DM.Scenes.Title());
+    try {
+      DM.Engine.set(new DM.Scenes.Title());
+    } catch (e) {
+      // Last resort: a save the sanitizer did not anticipate. Retry on defaults, else show the crash screen.
+      console.error(e);
+      DM.Save.data = DM.Save.defaults();
+      DM.Engine.stack = [];
+      DM.Engine.guard(() => DM.Engine.set(new DM.Scenes.Title()));
+    }
     const loading = document.getElementById('boot');
     if (loading) loading.remove();
     if (canvas.focus) canvas.focus({ preventScroll: true });
@@ -48,7 +69,19 @@
     };
   }
 
+  // Web fonts: the stylesheet loads without blocking scripts (index.html), so
+  // wait for it, then for the four faces, but never more than ~2.5 s after the
+  // page started loading. Late fonts still arrive; wrapped text is re-measured.
   const fonts = ['700 20px Oswald', '400 20px Oswald', '20px "Special Elite"', '20px "Patrick Hand"'];
-  const ready = document.fonts && document.fonts.load ? Promise.all(fonts.map((f) => document.fonts.load(f).catch(() => null))) : Promise.resolve();
-  Promise.race([ready, new Promise((r) => setTimeout(r, 2500))]).then(boot, boot);
+  const css = document.getElementById('fontcss');
+  const sheet = new Promise((resolve) => {
+    if (!css || css.dataset.ready || css.sheet) return resolve();
+    css.addEventListener('load', resolve);
+    css.addEventListener('error', resolve);
+  });
+  const faces = () => (document.fonts && document.fonts.load ? Promise.all(fonts.map((f) => document.fonts.load(f).catch(() => null))) : null);
+  const ready = sheet.then(faces);
+  const cap = Math.max(600, 2500 - (window.performance ? performance.now() : 0));
+  if (document.fonts && document.fonts.addEventListener) document.fonts.addEventListener('loadingdone', () => DM.Gfx.clearTextCache && DM.Gfx.clearTextCache());
+  Promise.race([ready, new Promise((r) => setTimeout(r, cap))]).then(boot, boot);
 })();

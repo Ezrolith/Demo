@@ -14,6 +14,8 @@
  * ctx.fork(fn*) runs a side script in parallel (NPC conversations, spawners).
  * Stages marked `checkpoint: true` are where a retry restarts from; a stage's
  * `restore(ctx)` re-applies its lasting effects when a later checkpoint loads.
+ * Entering a checkpoint snapshots the "carry" (stats, Mars memories found, the
+ * chapter's persistFlags), so Retry and Continue keep what the player earned.
  */
 (function () {
   'use strict';
@@ -34,8 +36,26 @@
       this.skipRequested = false;
       this.done = false;
       this.stats = { time: 0, disintegrated: 0, spared: 0, memories: 0 };
+      this.foundMemories = []; // years of the Mars memories found so far this run
+      this.carry = null; // the snapshot this attempt resumed from (see applyCarry)
+      this.checkpointCarry = null; // the snapshot taken on entering the current checkpoint
+      this.memo = {}; // survives retries of the same chapter (Play passes its own)
       this.refs = {};
       this.offs = [];
+    }
+
+    // Resume with what the player had earned when the checkpoint was reached.
+    applyCarry(carry) {
+      if (!carry) return;
+      this.carry = carry;
+      if (carry.stats) for (const k in this.stats) if (Number.isFinite(carry.stats[k])) this.stats[k] = carry.stats[k];
+      if (Array.isArray(carry.found)) this.foundMemories = carry.found.slice();
+      if (carry.flags) Object.assign(this.flags, carry.flags);
+    }
+    snapshot() {
+      const flags = {};
+      for (const k of this.chapter.persistFlags || []) if (k in this.flags) flags[k] = this.flags[k];
+      return { stats: Object.assign({}, this.stats), found: this.foundMemories.slice(), flags };
     }
 
     // Subscribe to a DM.Events event for the life of this attempt.
@@ -125,8 +145,8 @@
         if (i === from) for (let k = 0; k < from; k++) if (stages[k].restore) stages[k].restore(this);
         if (st.checkpoint) {
           this.checkpoint = i;
-          DM.Save.data.checkpoint = { chapter: this.chapter.id, stage: i };
-          DM.Save.write();
+          this.checkpointCarry = this.snapshot();
+          DM.Save.checkpointAt(this.chapter.id, i, this.checkpointCarry);
         }
         yield* this.runStage(st);
       }
@@ -193,11 +213,51 @@
       const b = this.hud.banner(title, sub, o);
       return { update: () => b.gone };
     }
+    // A power's card is shown once per save; afterwards (retries, replays) a
+    // toast names the power and its key and the script carries straight on.
     unlock(id) {
       this.player.unlock(id);
+      const seen = DM.Save.data.seen && DM.Save.data.seen.unlocks;
+      const def = DM.Powers.get(id);
+      if (seen && seen[id] && def) {
+        const key = DM.Input.short[def.action] || DM.Input.short[def.id];
+        this.hud.toast(def.name.toUpperCase() + (key ? '  ·  ' + key : ''), def.color);
+        return { update: () => true };
+      }
       let closed = false;
-      DM.Engine.push(new DM.Scenes.PowerUnlock(id, () => (closed = true)));
+      DM.Engine.push(new DM.Scenes.PowerUnlock(id, () => {
+        closed = true;
+        if (seen) {
+          seen[id] = true;
+          DM.Save.write();
+        }
+      }));
       return { update: () => closed };
+    }
+    // Calls fn(k) every frame with k going 0 -> 1 over `dur` seconds of real time
+    // (frame-rate independent); resolves once fn(1) has run.
+    tween(dur, fn) {
+      let e = 0;
+      if (!(dur > 0)) {
+        fn(1);
+        return { update: () => true };
+      }
+      fn(0);
+      return {
+        update: (dt) => {
+          e += dt;
+          const k = Math.min(1, e / dur);
+          if (dt > 0 || k >= 1) fn(k);
+          return k >= 1;
+        },
+      };
+    }
+    // True the first time `key` is asked about in this chapter, false on every
+    // retry after that: for briefings that should not repeat.
+    once(key) {
+      if (this.memo[key]) return false;
+      this.memo[key] = true;
+      return true;
     }
     minigame(SceneClass, opts) {
       let result = null;
@@ -237,9 +297,28 @@
     }
 
     // ---- actions ------------------------------------------------------------
+    // Cutscene lock. Locking also clears hostile shots in flight, so nothing
+    // lands on Jon while he cannot act.
     lock(on) {
       this.locked = on;
-      if (on) DM.Audio.hum('tk', false);
+      if (on) {
+        DM.Audio.hum('tk', false);
+        this.clearHostiles();
+      }
+    }
+    // Fizzle every enemy projectile in the world (bullets, shells, missiles,
+    // discs). Thrown-back missiles belong to the player and are left alone.
+    clearHostiles() {
+      const W = this.scene.world;
+      if (!W) return 0;
+      let n = 0;
+      for (const e of W.entities.slice()) {
+        if (e.dead || !e.isProjectile || e.team === 'player') continue;
+        W.particles.burst(e.x, e.y, 6, { color: ['#bff1ff', '#ffffff'], speed: [30, 140], life: [0.15, 0.4], size: [1, 2.5], shape: 'spark' });
+        e.die('fizzle');
+        n++;
+      }
+      return n;
     }
     add(e) {
       return this.world.add(e);

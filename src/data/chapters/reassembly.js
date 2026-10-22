@@ -181,18 +181,15 @@
           }
           ctx.focus(body.x, body.y);
           const sx = P.x, sy = P.y;
-          for (let k = 0; k < 1; k += 1 / 70) {
+          // Timed in seconds, not frames, so it plays the same at 60, 120 or 240 Hz.
+          yield ctx.tween(1.15, (k) => {
             const e = U.ease.inOutCubic(k);
             P.x = U.lerp(sx, body.x, e);
             P.y = U.lerp(sy, body.y - 60, e);
-            yield;
-          }
+          });
           P.hidden = true;
           DM.Audio.play('unlock');
-          for (let k = 0; k <= 1; k += 0.025) {
-            body.skin = k;
-            yield ctx.wait(0.03);
-          }
+          yield ctx.tween(1.25, (k) => (body.skin = k));
           ctx.flash('#dff7ff', 1.6);
           W.camera.shake(0.5);
           ctx.setForm('manhattan');
@@ -212,10 +209,12 @@
           ctx.player.hidden = false;
           if (ctx.refs.body) ctx.refs.body.dead = true;
           for (const e of ctx.world.entities) if (e instanceof Vortex || e instanceof Atom) e.dead = true;
+          ctx.place(C.x, C.y, Math.PI / 2); // where the new body stood up
         },
       },
       {
         id: 'naming',
+        checkpoint: true,
         run: function* (ctx) {
           ctx.lock(true);
           ctx.focus(null);

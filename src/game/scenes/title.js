@@ -1,4 +1,8 @@
-/* Title screen (with a click-to-begin gate that unlocks audio) and chapter select. */
+/*
+ * Title screen (with a click-to-begin gate that unlocks audio), the New Game
+ * confirmation and chapter select. Continue names where it leads; Chapter
+ * Select can resume a chapter from its last checkpoint.
+ */
 (function () {
   'use strict';
   const DM = window.DM;
@@ -43,6 +47,41 @@
   }
   Scenes.backdrop = backdrop;
 
+  // 'waves2' -> 'Waves 2'. Stages may set a `label` to name themselves.
+  function stageName(ch, stage) {
+    const st = ch && ch.stages[stage];
+    if (!st) return '';
+    if (st.label) return st.label;
+    const s = String(st.id).replace(/[_-]+/g, ' ').replace(/(\D)(\d)/g, '$1 $2');
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  }
+  // Where a saved point leads, for menus: 'Karnak · Veidt'.
+  function whereText(cp) {
+    const ch = cp && DM.Chapters.get(cp.chapter);
+    if (!ch) return '';
+    return `${ch.title}  ·  ${cp.stage ? stageName(ch, cp.stage) : 'from the beginning'}`;
+  }
+  const inRect = (m, r) => m.x >= r.x && m.x <= r.x + r.w && m.y >= r.y && m.y <= r.y + r.h;
+
+  // The title menu: an item may carry a `sub` line, drawn small beneath its label.
+  const SUB_H = 22;
+  class TitleMenu extends DM.UI.Menu {
+    rowRect(i) {
+      const r = super.rowRect(i);
+      for (let k = 0; k < i; k++) if (this.items[k].sub) r.y += SUB_H;
+      return r;
+    }
+    render(ctx) {
+      super.render(ctx);
+      this.items.forEach((it, i) => {
+        if (!it.sub) return;
+        const r = this.rowRect(i);
+        const sel = i === this.sel;
+        Gfx.text(ctx, it.sub, r.x + 34, r.y + r.h + 10, { size: 14, color: sel ? 'rgba(191,241,255,0.85)' : 'rgba(200,225,240,0.5)', font: DM.FONTS.type });
+      });
+    }
+  }
+
   class Title {
     constructor() {
       this.t = 0;
@@ -61,24 +100,43 @@
     }
     buildMenu() {
       const items = [];
-      if (Save.hasProgress()) items.push({ label: 'CONTINUE', action: () => this.continueGame() });
-      items.push({ label: 'NEW GAME', action: () => Engine.fadeTo(() => Engine.set(new Scenes.Interlude('prologue'))) });
-      items.push({ label: 'CHAPTERS', action: () => Engine.push(new ChapterSelect()) });
+      const target = Save.continueTarget();
+      const chapters = { label: 'CHAPTERS', action: () => Engine.push(new ChapterSelect()) };
+      if (target) {
+        const ch = DM.Chapters.get(target.chapter);
+        items.push({ label: `CONTINUE  ·  ${ch.numeral}`, sub: whereText(target), action: () => this.continueGame() });
+      } else if (Save.finished) {
+        // The story is over: there is nothing to continue, so lead with replaying it.
+        chapters.sub = 'The story is complete. Replay any chapter.';
+        items.push(chapters);
+      }
+      items.push({ label: 'NEW GAME', action: () => this.newGame() });
+      if (!items.includes(chapters)) items.push(chapters);
       items.push({ label: 'SETTINGS', action: () => Engine.push(new Scenes.Settings()) });
       items.push({ label: 'CONTROLS', action: () => Engine.push(new Scenes.Controls()) });
       const keep = this.menu ? this.menu.sel : 0;
-      this.menu = new DM.UI.Menu(items, { x: 84, y: 340, w: 360, itemH: 50, size: 25 });
+      this.menu = new TitleMenu(items, { x: 84, y: 340, w: 360, itemH: 50, size: 25 });
       this.menu.sel = Math.min(keep, items.length - 1);
     }
     continueGame() {
-      const cp = Save.data.checkpoint;
+      const cp = Save.continueTarget();
       const ch = cp && DM.Chapters.get(cp.chapter);
-      if (!ch) return Engine.fadeTo(() => Engine.set(new Scenes.Interlude('prologue')));
+      if (!ch) return this.startNewGame();
       if (!cp.stage) Engine.fadeTo(() => Engine.set(new Scenes.Interlude(ch.id)));
-      else Engine.fadeTo(() => Engine.set(new Scenes.Play(), { chapter: ch.id, stage: cp.stage }));
+      else Engine.fadeTo(() => Engine.set(new Scenes.Play(), { chapter: ch.id, stage: cp.stage, carry: cp.carry }));
+    }
+    // With progress saved, New Game asks first: it replaces the Continue point.
+    newGame() {
+      if (Save.hasProgress()) Engine.push(new ConfirmNewGame(() => this.startNewGame()));
+      else this.startNewGame();
+    }
+    startNewGame() {
+      Save.startOver();
+      Engine.fadeTo(() => Engine.set(new Scenes.Interlude(DM.Chapters.list[0].id)));
     }
     update(dt) {
       this.t += dt;
+      for (const m of this.motes) m.a += 0.15 * m.s * dt;
       if (this.gate) {
         if (Input.anyPressed()) {
           Input.clearAll();
@@ -98,7 +156,6 @@
       backdrop(ctx, t);
       const hx = 900, hy = 300;
       for (const m of this.motes) {
-        m.a += 0.0025 * m.s * 60 * (1 / 60);
         const r = m.r * (0.85 + Math.sin(t * m.s + m.a) * 0.15);
         const x = hx + Math.cos(m.a + t * 0.05 * m.s) * r, y = hy + Math.sin(m.a + t * 0.05 * m.s) * r * 0.55;
         Gfx.glow(ctx, x, y, 7 * m.z, '#5fd4ff', 0.6 * m.z);
@@ -130,22 +187,70 @@
     }
   }
 
+  // ---- New Game confirmation -------------------------------------------------
+  class ConfirmNewGame {
+    constructor(onConfirm) {
+      this.onConfirm = onConfirm;
+      this.opaque = false;
+      this.cursor = 'pointer';
+      this.t = 0;
+    }
+    enter() {
+      this.where = whereText(Save.continueTarget());
+      this.menu = new DM.UI.Menu([
+        { label: 'START OVER', action: () => {
+          Engine.pop();
+          this.onConfirm();
+        } },
+        { label: 'CANCEL', action: () => Engine.pop() },
+      ], { x: DM.W / 2, y: 392, w: 380, align: 'center', itemH: 52, size: 24, onBack: () => Engine.pop() });
+      this.menu.sel = 1; // the safe choice is the default
+    }
+    update(dt) {
+      this.t += dt;
+      this.menu.update(dt);
+    }
+    render(ctx) {
+      const k = U.ease.outCubic(Math.min(1, this.t * 4));
+      ctx.fillStyle = `rgba(2,4,9,${0.82 * k})`;
+      ctx.fillRect(0, 0, DM.W, DM.H);
+      const w = 640, x = DM.W / 2 - w / 2;
+      Gfx.panel(ctx, x, 220, w, 250, { accent: DM.C.yellow });
+      Gfx.text(ctx, 'START A NEW GAME?', DM.W / 2, 282, { size: 38, color: '#eefbff', align: 'center', weight: 700, spacing: 8 });
+      const lines = this.where ? [`Continue now leads to ${this.where}.`, 'Starting over replaces it. Chapters you reached stay unlocked.'] : ['Chapters you reached stay unlocked.'];
+      lines.forEach((l, i) => Gfx.text(ctx, l, DM.W / 2, 322 + i * 24, { size: 15, color: 'rgba(220,238,255,0.75)', align: 'center', font: DM.FONTS.type }));
+      this.menu.render(ctx);
+    }
+  }
+
+  // ---- Chapter select --------------------------------------------------------------
   class ChapterSelect {
     constructor() {
       this.t = 0;
       this.cursor = 'pointer';
       this.sel = 0;
+      this.sub = 0; // 0 = play from the start, 1 = resume from the chapter's checkpoint
+      this.backRect = { x: 40, y: 36, w: 128, h: 40 };
     }
     enter() {
       const reached = DM.DEV ? 99 : Save.data.reached;
-      this.cards = DM.Chapters.list.map((c, i) => ({ c, locked: i > reached }));
+      const cps = Save.data.checkpoints || {};
+      this.cards = DM.Chapters.list.map((c, i) => {
+        const cp = cps[c.id];
+        return { c, locked: i > reached, resume: i <= reached && cp && cp.stage > 0 ? cp : null };
+      });
       this.sel = Math.min(reached, this.cards.length - 1);
+      this.anyResume = this.cards.some((c) => c.resume);
     }
     rect(i) {
       const n = this.cards.length;
       const w = 182, gap = 14;
       const x0 = DM.W / 2 - (n * w + (n - 1) * gap) / 2;
       return { x: x0 + i * (w + gap), y: 190, w, h: 330 };
+    }
+    resumeRect(i) {
+      const r = this.rect(i);
+      return { x: r.x, y: r.y + r.h + 14, w: r.w, h: 46 };
     }
     pick(i) {
       const card = this.cards[i];
@@ -156,34 +261,59 @@
       DM.Audio.play('ui_select');
       Engine.fadeTo(() => Engine.set(new Scenes.Interlude(card.c.id)));
     }
+    resume(i) {
+      const card = this.cards[i];
+      if (!card || card.locked || !card.resume) return this.pick(i);
+      const cp = card.resume;
+      DM.Audio.play('ui_select');
+      Engine.fadeTo(() => Engine.set(new Scenes.Play(), { chapter: card.c.id, stage: cp.stage, carry: cp.carry }));
+    }
+    select(i, sub) {
+      const card = this.cards[i];
+      sub = card && card.resume ? sub : 0;
+      if (i === this.sel && sub === this.sub) return;
+      this.sel = i;
+      this.sub = sub;
+      DM.Audio.play('ui_move');
+    }
     update(dt) {
       this.t += dt;
       const m = Input.mouse;
-      let hover = -1;
-      this.cards.forEach((_, i) => {
-        const r = this.rect(i);
-        if (m.x >= r.x && m.x <= r.x + r.w && m.y >= r.y && m.y <= r.y + r.h) hover = i;
+      let hover = -1, hoverSub = 0;
+      this.cards.forEach((card, i) => {
+        if (inRect(m, this.rect(i))) hover = i;
+        else if (card.resume && inRect(m, this.resumeRect(i))) {
+          hover = i;
+          hoverSub = 1;
+        }
       });
-      if (m.moved && hover >= 0 && hover !== this.sel) {
-        this.sel = hover;
-        DM.Audio.play('ui_move');
-      }
+      this.hoverBack = inRect(m, this.backRect);
+      if (m.moved && hover >= 0) this.select(hover, hoverSub);
       if (Input.clicked()) {
         Input.consume('confirm');
-        if (hover >= 0) this.pick(hover);
-        else if (m.y > 560) this.back();
+        if (hover >= 0) {
+          if (hoverSub) this.resume(hover);
+          else this.pick(hover);
+        } else if (this.hoverBack) this.back();
         return;
       }
-      if (Input.pressed('menuRight') || Input.pressed('menuDown')) {
-        this.sel = Math.min(this.cards.length - 1, this.sel + 1);
-        DM.Audio.play('ui_move');
+      const n = this.cards.length;
+      const card = this.cards[this.sel];
+      if (Input.pressed('menuRight')) this.select(Math.min(n - 1, this.sel + 1), 0);
+      if (Input.pressed('menuLeft')) this.select(Math.max(0, this.sel - 1), 0);
+      // Down/up walk the cards in reading order: a card, then its Resume button.
+      if (Input.pressed('menuDown')) {
+        if (card && card.resume && !this.sub) this.select(this.sel, 1);
+        else this.select(Math.min(n - 1, this.sel + 1), 0);
       }
-      if (Input.pressed('menuLeft') || Input.pressed('menuUp')) {
-        this.sel = Math.max(0, this.sel - 1);
-        DM.Audio.play('ui_move');
+      if (Input.pressed('menuUp')) {
+        if (this.sub) this.select(this.sel, 0);
+        else this.select(Math.max(0, this.sel - 1), 0);
       }
-      if (Input.pressed('confirm')) this.pick(this.sel);
-      else if (Input.pressed('back')) this.back();
+      if (Input.pressed('confirm')) {
+        if (this.sub) this.resume(this.sel);
+        else this.pick(this.sel);
+      } else if (Input.pressed('back')) this.back();
     }
     back() {
       DM.Audio.play('ui_back');
@@ -193,6 +323,9 @@
       backdrop(ctx, this.t, { mars: false });
       Gfx.text(ctx, 'CHAPTERS', DM.W / 2, 110, { size: 44, color: '#eefbff', align: 'center', weight: 700, spacing: 10 });
       Gfx.text(ctx, 'The clock moves closer to midnight with every chapter.', DM.W / 2, 146, { size: 16, color: 'rgba(200,225,240,0.6)', align: 'center', font: DM.FONTS.type });
+      const b = this.backRect;
+      Gfx.panel(ctx, b.x, b.y, b.w, b.h, { fill: this.hoverBack ? 'rgba(95,212,255,0.16)' : DM.C.uiBg, accent: this.hoverBack ? '#eefbff' : DM.C.uiEdge });
+      Gfx.text(ctx, '‹  BACK', b.x + b.w / 2, b.y + 26, { size: 17, color: this.hoverBack ? '#ffffff' : 'rgba(200,225,240,0.8)', align: 'center', spacing: 3, weight: 600 });
       this.cards.forEach((card, i) => {
         const r = this.rect(i);
         const c = card.c;
@@ -206,8 +339,8 @@
         ctx.fillRect(r.x, r.y, r.w, 170);
         ctx.fillStyle = card.locked ? '#121822' : '#f1e7cc';
         ctx.fillRect(r.x, r.y + 170, r.w, r.h - 170);
-        ctx.strokeStyle = sel ? '#eefbff' : DM.C.ink;
-        ctx.lineWidth = sel ? 3 : 2;
+        ctx.strokeStyle = sel && !this.sub ? '#eefbff' : DM.C.ink;
+        ctx.lineWidth = sel && !this.sub ? 3 : 2;
         ctx.strokeRect(r.x, r.y, r.w, r.h);
         Gfx.clock(ctx, r.x + r.w / 2, r.y + 78, 46, c.clock, { blood: !card.locked, face: card.locked ? '#2a3240' : DM.C.paper });
         Gfx.text(ctx, c.numeral, r.x + r.w / 2, r.y + 156, { size: 14, color: card.locked ? '#55606e' : DM.C.ink, align: 'center', spacing: 3, weight: 600 });
@@ -223,11 +356,20 @@
           if (done) Gfx.text(ctx, '✓ ' + U.fmtTime(done.time), r.x + r.w / 2, r.y + 316, { size: 13, color: '#2f6b3a', align: 'center', spacing: 2, weight: 600 });
         }
         ctx.restore();
+        if (card.resume) {
+          const rr = this.resumeRect(i);
+          const on = sel && this.sub === 1;
+          Gfx.panel(ctx, rr.x, rr.y, rr.w, rr.h, { fill: on ? 'rgba(95,212,255,0.2)' : DM.C.uiBg, accent: on ? '#eefbff' : DM.C.uiEdge });
+          Gfx.text(ctx, '▸ RESUME', rr.x + rr.w / 2, rr.y + 20, { size: 15, color: on ? '#ffffff' : 'rgba(200,225,240,0.85)', align: 'center', spacing: 3, weight: 600 });
+          Gfx.text(ctx, stageName(c, card.resume.stage), rr.x + rr.w / 2, rr.y + 37, { size: 12, color: on ? DM.C.blue : 'rgba(200,225,240,0.55)', align: 'center', font: DM.FONTS.type });
+        }
       });
-      Gfx.text(ctx, '←  →  CHOOSE     ENTER / CLICK  PLAY     ESC  BACK', DM.W / 2, 600, { size: 13, color: 'rgba(200,225,240,0.5)', align: 'center', spacing: 3 });
+      const hint = '←  →  CHOOSE' + (this.anyResume ? '     ↓  RESUME' : '') + '     ENTER / CLICK  PLAY     ESC  BACK';
+      Gfx.text(ctx, hint, DM.W / 2, 636, { size: 13, color: 'rgba(200,225,240,0.5)', align: 'center', spacing: 3 });
     }
   }
 
   Scenes.Title = Title;
   Scenes.ChapterSelect = ChapterSelect;
+  Scenes.ConfirmNewGame = ConfirmNewGame;
 })();

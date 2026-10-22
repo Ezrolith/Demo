@@ -375,6 +375,7 @@
       },
       {
         id: 'calibrate',
+        checkpoint: true,
         run: function* (ctx) {
           yield ctx.wait(0.6);
           yield ctx.dialog([['wally', "Jon? It's Wally. Glass wants the field generator calibrated before tonight's test. Could you check the panel in the test chamber? Door's open.", { name: 'Wally Weaver — Intercom' }]]);
@@ -410,6 +411,7 @@
       },
       {
         id: 'accident',
+        checkpoint: true,
         run: function* (ctx) {
           const R = ctx.refs, W = ctx.world, P = ctx.player;
           ctx.objective(null);
