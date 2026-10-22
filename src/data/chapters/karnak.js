@@ -227,7 +227,7 @@
           ctx.on('shield:block', () => {
             if (told) return;
             told = true;
-            ctx.hint('The shield stops anything thrown or fired from outside. It will not stop you. SPACE: teleport inside.', 10);
+            ctx.tutorial('The shield stops anything thrown or fired from outside. It will not stop you. SPACE: teleport inside.', 10);
           });
           ctx.fork(function* () {
             while (left().length) {

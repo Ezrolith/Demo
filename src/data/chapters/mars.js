@@ -258,7 +258,7 @@
                 if (U.chance(0.3)) W.bark(r, U.pick(barks), 1.2);
               }
               if (U.chance(0.6)) {
-                ctx.flash('#ffffff', 0.25);
+                ctx.flash('#ffffff', 0.25, { strobe: true });
                 DM.Audio.play('tick');
               }
               yield ctx.wait(0.8);
@@ -267,7 +267,7 @@
           ctx.lock(false);
           const before = P.teleportedAt;
           ctx.objective('Leave');
-          ctx.hint('Press SPACE to teleport. Somewhere far away.', 99);
+          ctx.tutorial('Aim somewhere far away, then press SPACE to teleport.', 99);
           yield ctx.until(() => P.teleportedAt !== before);
           ctx.flags.left = true;
           ctx.hint(null);

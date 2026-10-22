@@ -332,14 +332,18 @@
     hint(text, dur) {
       this.hud.hint(text, dur);
     }
+    // An instruction the player needs to progress: shown even with HINTS on ESSENTIAL.
+    tutorial(text, dur) {
+      this.hud.hint(text, dur, { essential: true });
+    }
     toast(text, color) {
       this.hud.toast(text, color);
     }
     marker(x, y, label) {
       this.hud.marker = x == null ? null : { x, y, label };
     }
-    flash(color = '#ffffff', dur = 0.6) {
-      this.hud.flash(color, dur);
+    flash(color = '#ffffff', dur = 0.6, o) {
+      this.hud.flash(color, dur, o);
     }
     cinematic(on) {
       this.hud.cinematic = on;

@@ -19,7 +19,7 @@
     checkpoints: {}, // chapterId -> { stage, carry } — latest mid-chapter checkpoint (Chapter Select "Resume")
     seen: { unlocks: {} }, // things shown once per save (power unlock cards)
     totals: { disintegrated: 0, spared: 0, decoherences: 0, memories: 0 },
-    settings: { music: 0.6, sfx: 0.8, shake: 1, hints: true },
+    settings: DM.SettingsSchema.defaults(), // one entry per option in settings.js
   });
 
   // migrations[n] upgrades a save object from version n to n + 1.

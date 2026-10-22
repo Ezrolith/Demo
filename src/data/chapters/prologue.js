@@ -351,11 +351,11 @@
         id: 'lunch',
         map: 'gila',
         run: function* (ctx) {
-          ctx.lock(true);
+          // Jon can walk from the first frame; the scene-setting caption plays over it.
+          ctx.lock(false);
+          ctx.tutorial('Move with W A S D or the arrow keys. Press E to talk and interact.', 12);
           yield ctx.wait(0.6);
           yield ctx.narrate('Gila Flats Research Base. The desert holds its heat long after sundown. Janey said she would be in the canteen.');
-          ctx.lock(false);
-          ctx.hint('Move with W A S D or the arrow keys. Press E to talk and interact.', 9);
           ctx.objective('Find Janey in the canteen');
           ctx.marker(ctx.refs.janey.x, ctx.refs.janey.y, 'JANEY');
           yield ctx.until(() => ctx.flags.metJaney && !ctx.scene.dialog.active);
@@ -421,13 +421,17 @@
           ctx.flags.lockdown = true;
           ctx.music('tension');
           ctx.fork(function* () {
+            W.alarm = true; // rotating beacons, drawn by the lighting layer
             while (!ctx.flags.flashed) {
               DM.Audio.play('alarm');
-              W.tint = 'rgba(255,40,30,0.13)';
+              // REDUCED flashing: a steady, dimmer red instead of a blinking one.
+              const steady = DM.SettingsSchema.reducedFlashing();
+              W.tint = steady ? 'rgba(255,40,30,0.065)' : 'rgba(255,40,30,0.13)';
               yield ctx.wait(0.42);
-              W.tint = null;
+              if (!steady) W.tint = null;
               yield ctx.wait(0.43);
             }
+            W.alarm = false;
             W.tint = null;
           });
           R.wally.walkTo(1074, 230);

@@ -182,6 +182,9 @@
         const a = 0.55 + Math.sin(t * 3) * 0.45;
         Gfx.text(ctx, this.touchOnly ? 'TAP TO BEGIN' : 'CLICK OR PRESS ANY KEY', 86, 400, { size: 24, color: `rgba(238,251,255,${a})`, spacing: 6 });
         Gfx.text(ctx, 'Sound on, if you can. The music is part of it.', 86, 432, { size: 15, color: 'rgba(200,225,240,0.5)', font: DM.FONTS.type });
+        // Photosensitivity notice, before anything can flash.
+        const reduced = DM.SettingsSchema.reducedFlashing();
+        Gfx.text(ctx, reduced ? 'Contains flashing lights. Reduced flashing is on; change it in Settings.' : 'Contains flashing lights. Reduce them in Settings.', 86, 476, { size: 15, color: 'rgba(242,196,24,0.8)', font: DM.FONTS.type });
       } else this.menu.render(ctx);
 
       Gfx.text(ctx, `v${DM.VERSION}  ·  KEYBOARD & MOUSE  ·  PROGRESS SAVES AUTOMATICALLY${DM.DEV ? '  ·  DEV MODE' : ''}`, 86, DM.H - 30, { size: 11, color: 'rgba(200,225,240,0.4)', spacing: 2 });
