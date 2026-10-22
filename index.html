@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Dr. Manhattan</title>
+<meta name="description" content="A Watchmen fan game: play Jon Osterman's journey to Dr. Manhattan, gaining powers chapter by chapter.">
+<!-- build:fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=Patrick+Hand&family=Special+Elite&display=swap">
+<!-- /build:fonts -->
+<style>
+  :root { --bg: #04060b; --fg: #7fc8ec; color-scheme: dark; }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); overflow: hidden; }
+  canvas { display: block; outline: none; cursor: none; touch-action: none; -webkit-tap-highlight-color: transparent; }
+  #boot { position: fixed; inset: 0; display: grid; place-items: center; font: 600 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: 0.3em; text-transform: uppercase; }
+</style>
+</head>
+<body>
+<canvas id="game" tabindex="0" aria-label="Dr. Manhattan: The Watchmaker's Son"></canvas>
+<div id="boot">Assembling…</div>
+<noscript><p style="padding:24px">This game needs JavaScript enabled.</p></noscript>
+
+<!-- build:scripts — load order matters; tools/build.mjs inlines these into dist/ -->
+<script src="src/core/namespace.js"></script>
+<script src="src/core/util.js"></script>
+<script src="src/core/events.js"></script>
+<script src="src/core/input.js"></script>
+<script src="src/core/audio.js"></script>
+<script src="src/data/music.js"></script>
+<script src="src/core/save.js"></script>
+<script src="src/core/gfx.js"></script>
+<script src="src/core/particles.js"></script>
+<script src="src/core/camera.js"></script>
+<script src="src/core/engine.js"></script>
+
+<script src="src/game/entity.js"></script>
+<script src="src/game/world.js"></script>
+<script src="src/game/entities/npc.js"></script>
+<script src="src/game/entities/player.js"></script>
+<script src="src/game/powers.js"></script>
+<script src="src/game/entities/props.js"></script>
+<script src="src/game/entities/projectiles.js"></script>
+<script src="src/game/entities/enemies.js"></script>
+<script src="src/game/entities/special.js"></script>
+<script src="src/game/chapters.js"></script>
+<script src="src/game/script.js"></script>
+
+<script src="src/game/ui/widgets.js"></script>
+<script src="src/game/ui/dialog.js"></script>
+<script src="src/game/ui/hud.js"></script>
+
+<script src="src/game/scenes/title.js"></script>
+<script src="src/game/scenes/interlude.js"></script>
+<script src="src/game/scenes/play.js"></script>
+<script src="src/game/scenes/overlays.js"></script>
+<script src="src/game/scenes/minigames.js"></script>
+<script src="src/game/scenes/ending.js"></script>
+
+<!-- chapters play in this order -->
+<script src="src/data/chapters/prologue.js"></script>
+<script src="src/data/chapters/reassembly.js"></script>
+<script src="src/data/chapters/superman.js"></script>
+<script src="src/data/chapters/deterrent.js"></script>
+<script src="src/data/chapters/mars.js"></script>
+<script src="src/data/chapters/karnak.js"></script>
+
+<script src="src/main.js"></script>
+<!-- /build:scripts -->
+</body>
+</html>
