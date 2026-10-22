@@ -214,7 +214,7 @@
     if (e.type === 'slider') {
       if (typeof raw !== 'number' || !isFinite(raw)) return resolveDef(e);
       const v = U.clamp(raw, e.min, e.max);
-      return Math.round((v - e.min) / e.step) * e.step + e.min;
+      return Number((Math.round((v - e.min) / e.step) * e.step + e.min).toFixed(6)); // 0.3, not 0.30000000000000004
     }
     if (e.type === 'toggle') return typeof raw === 'boolean' ? raw : resolveDef(e);
     if (e.type === 'choice') {

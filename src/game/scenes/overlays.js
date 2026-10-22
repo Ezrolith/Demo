@@ -451,6 +451,7 @@
   }
 
   Scenes.Pause = Pause;
+  Settings.FOOT_Y = FOOT_Y;
   Scenes.Settings = Settings;
   Scenes.Controls = Controls;
   Scenes.PowerUnlock = PowerUnlock;
