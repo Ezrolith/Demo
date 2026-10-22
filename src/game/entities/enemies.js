@@ -1,7 +1,7 @@
 /*
  * Enemies. All share the Enemy base: targeting, stun/held handling, and the
- * lethal/non-lethal split (humans knocked out by impacts are "spared";
- * disintegrated ones are not — the game tracks both).
+ * lethal/non-lethal split (humans knocked out by throws, blasts or bolts are
+ * "spared"; only disintegrated ones are not — the game tracks both).
  *
  * To add an enemy: extend Enemy, implement think(dt, world) and render(ctx, world).
  */
@@ -82,8 +82,19 @@
       this.vx = U.damp(this.vx, n.x * speed, k, dt);
       this.vy = U.damp(this.vy, n.y * speed, k, dt);
     }
+    // A knocked-out body takes no further damage: explosions and later wall
+    // bounces still push it around, but it can never go down a second time.
+    damage(amount, source, kind) {
+      if (this.ko) return false;
+      return super.damage(amount, source, kind);
+    }
+    // The ledger: exactly one 'enemy:down' per enemy. A human goes down
+    // lethally only when disintegrated; anything else (throws, blasts, bolts)
+    // knocks him out.
     die(kind, source) {
-      if (this.human && kind === 'impact') {
+      if (this.ko || this.dead) return;
+      const w = this.world;
+      if (this.human && kind !== 'disintegrate') {
         this.ko = true;
         this.body = false;
         this.layer = 0;
@@ -91,12 +102,19 @@
         this.disintegratable = false;
         this.hp = 0;
         this.aim = 0;
+        this.burst = 0;
+        this.thrown = 0;
+        this.stun = 0;
+        this.vx *= 0.5;
+        this.vy *= 0.5;
         Events.emit('enemy:down', { enemy: this, lethal: false, kind, human: true });
+        if (w && w.hitstop) w.hitstop(0.06);
+        if (this.onKO && w) this.onKO(w, kind, source);
         return;
       }
-      if (this.dead) return;
       super.die(kind, source);
       Events.emit('enemy:down', { enemy: this, lethal: true, kind, human: this.human });
+      if (this.human && w && w.hitstop) w.hitstop(0.09);
     }
     get neutralized() {
       return this.dead || this.ko;

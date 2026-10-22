@@ -1,4 +1,12 @@
-/* Camera: smooth follow, trauma-based screen shake, zoom, world bounds. */
+/*
+ * Camera: smooth follow, trauma-based screen shake, directional kicks, zoom,
+ * world bounds.
+ *
+ * Shake: shake(amount) adds trauma (0..1, decays 1.5/s); the offset is
+ * trauma² × 30 px (capped at 22) along smooth noise, so it rumbles instead of
+ * jittering. kick(dx, dy, px) shoves the view along a direction and springs
+ * back. Both scale with Settings > shake (0 turns them off).
+ */
 (function () {
   'use strict';
   const DM = window.DM;
@@ -11,8 +19,12 @@
       this.zoom = 1;
       this.targetZoom = 1;
       this.trauma = 0;
-      this.ox = 0;
+      this.ox = 0; // total offset this frame (shake + kick), in world px
       this.oy = 0;
+      this.kx = 0; // directional kick, decaying
+      this.ky = 0;
+      this.t = 0;
+      this.seed = Math.random() * 100;
       this.bounds = null; // {w, h}
     }
     snap(x, y) {
@@ -26,14 +38,31 @@
       this.clamp();
     }
     shake(amount) {
-      const s = DM.Save.settings.shake == null ? 1 : DM.Save.settings.shake;
-      this.trauma = Math.min(1, this.trauma + amount * s);
+      if (amount > 0) this.trauma = Math.min(1, this.trauma + amount);
+    }
+    // Shove the view px pixels along (dx, dy); it springs back in ~0.15 s.
+    kick(dx, dy, px) {
+      const l = Math.hypot(dx, dy);
+      if (!(l > 0) || !(px > 0)) return;
+      this.kx += (dx / l) * px;
+      this.ky += (dy / l) * px;
+      const m = Math.hypot(this.kx, this.ky);
+      if (m > 16) {
+        this.kx *= 16 / m;
+        this.ky *= 16 / m;
+      }
     }
     update(dt) {
+      this.t += dt;
       this.trauma = Math.max(0, this.trauma - dt * 1.5);
-      const s = this.trauma * this.trauma * 16;
-      this.ox = (Math.random() * 2 - 1) * s;
-      this.oy = (Math.random() * 2 - 1) * s;
+      const k = Math.exp(-18 * dt);
+      this.kx *= k;
+      this.ky *= k;
+      const set = DM.Save.settings.shake == null ? 1 : DM.Save.settings.shake;
+      const s = Math.min(22, this.trauma * this.trauma * 30) * set;
+      const t = this.t, q = this.seed;
+      this.ox = s * Math.sin(t * 47 + q) * Math.sin(t * 31 + q * 1.7) + this.kx * set;
+      this.oy = s * Math.sin(t * 41 + q * 2.3) * Math.sin(t * 29 + q * 0.6) + this.ky * set;
       this.zoom = U.damp(this.zoom, this.targetZoom, 3, dt);
       this.clamp();
     }

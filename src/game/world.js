@@ -174,7 +174,10 @@
       P.burst(x, y, 14, { color: ['#2a2522', '#3a332e', '#1d1a18'], speed: [20, 90], life: [0.7, 1.5], size: [8, 15], size1: 24, shape: 'smoke', add: false, drag: 2, alpha: 0.7 });
       P.emit(x, y, { shape: 'ring', size: r * 0.3, size1: r * 1.1, life: 0.35, color: '#ffe2a8', drag: 0 });
       DM.Audio.play('explosion');
-      this.camera.shake(Math.min(0.7, 0.3 * (r / 70)));
+      // Felt in proportion to size, and less from the far side of the map.
+      const near = U.clamp(1.25 - U.dist(x, y, this.camera.x, this.camera.y) / 900, 0.25, 1);
+      this.camera.shake(Math.min(0.8, 0.45 * (r / 70)) * near);
+      if (r >= 90 && near > 0.5) this.hitstop(0.05);
     }
 
     // Broadcast that a disintegration is about to land (bosses may dodge).
@@ -183,12 +186,33 @@
     }
 
     // ---- simulation -------------------------------------------------------
+    // Hitstop: freeze the simulation for a few frames so a hit lands. Capped
+    // at 0.2 s, never stacked (the longest request wins), and off when screen
+    // shake is turned off in Settings.
+    hitstop(t) {
+      if (!(DM.Save.settings.shake > 0)) return;
+      this.freezeT = Math.max(this.freezeT || 0, Math.min(t, 0.2));
+    }
+
     update(dt) {
-      this.timeScale = U.damp(this.timeScale, this.slowmo ? 0.28 : 1, 9, dt);
+      this.realTime = (this.realTime || 0) + dt;
+      if (this.freezeT > 0) {
+        // Frozen: only the camera, speech bubbles and a trickle of particles move.
+        this.freezeT -= dt;
+        for (const b of this.barks) b.t -= dt;
+        this.particles.update(dt * 0.15);
+        this.camera.update(dt);
+        return;
+      }
+      // Scripted slow motion (slowmoT seconds at slowmoTarget, real time) and
+      // Temporal Sight (slowmoScale, default 0.28): the slower one wins.
+      if (this.slowmoT > 0) this.slowmoT -= dt;
+      const sight = this.slowmo ? (this.slowmoScale == null ? 0.28 : this.slowmoScale) : 1;
+      const scripted = this.slowmoT > 0 ? (this.slowmoTarget == null ? 0.3 : this.slowmoTarget) : 1;
+      this.timeScale = U.damp(this.timeScale, Math.min(sight, scripted), 9, dt);
       const wdt = dt * this.timeScale;
       const pdt = dt * (this.slowmo ? 0.8 : 1);
       this.time += wdt;
-      this.realTime = (this.realTime || 0) + dt;
 
       const list = this.entities;
       const n = list.length;
