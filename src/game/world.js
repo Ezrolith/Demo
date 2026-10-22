@@ -198,7 +198,11 @@
       this.realTime = (this.realTime || 0) + dt;
       if (this.freezeT > 0) {
         // Frozen: only the camera, speech bubbles and a trickle of particles move.
+        // Jon still reads his controls (a zero-length step), so a key pressed
+        // during the freeze is acted on instead of lost.
         this.freezeT -= dt;
+        const p = this.player;
+        if (p && !p.dead && this.entities.includes(p)) p.update(0, this);
         for (const b of this.barks) b.t -= dt;
         this.particles.update(dt * 0.15);
         this.camera.update(dt);
@@ -206,11 +210,13 @@
       }
       // Scripted slow motion (slowmoT seconds at slowmoTarget, real time) and
       // Temporal Sight (slowmoScale, default 0.28): the slower one wins.
-      // sightScale tracks Sight's share alone, for its screen overlay.
+      // sightScale tracks Sight's share alone, for its screen overlay. Scripted
+      // slow motion usually follows a hitstop, so it bites faster than Sight.
       if (this.slowmoT > 0) this.slowmoT -= dt;
       const sight = this.slowmo ? (this.slowmoScale == null ? 0.28 : this.slowmoScale) : 1;
       const scripted = this.slowmoT > 0 ? (this.slowmoTarget == null ? 0.3 : this.slowmoTarget) : 1;
-      this.timeScale = U.damp(this.timeScale, Math.min(sight, scripted), 9, dt);
+      const ts = Math.min(sight, scripted);
+      this.timeScale = U.damp(this.timeScale, ts, scripted < sight && ts < this.timeScale ? 18 : 9, dt);
       this.sightScale = U.damp(this.sightScale == null ? 1 : this.sightScale, sight, 9, dt);
       const wdt = dt * this.timeScale;
       const pdt = dt * (this.slowmo ? 0.8 : 1);

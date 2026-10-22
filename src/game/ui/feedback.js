@@ -79,12 +79,18 @@
         }
         ctx.restore();
       }
+      // FLASHING LIGHTS: REDUCED keeps it under the full-screen flash cap and
+      // lets it fade half as long again (as HUD.flash does).
       const f = p.hurtFlash;
       if (f) {
+        const S = DM.SettingsSchema;
+        const reduced = !!(S && S.reducedFlashing && S.reducedFlashing());
+        const cap = Math.min(0.35, S && S.flashCap ? S.flashCap() * 0.6 : 0.35);
+        const dur = reduced ? 0.3 : 0.2;
         const age = now - f.at;
-        if (age >= 0 && age < 0.2) {
+        if (age >= 0 && age < dur) {
           ctx.save();
-          ctx.globalAlpha = Math.min(0.35, f.amt / 40) * (1 - age / 0.2);
+          ctx.globalAlpha = Math.min(cap, f.amt / 40) * (1 - age / dur);
           ctx.drawImage(edgeSprite(), 0, 0, DM.W, DM.H);
           ctx.restore();
         }
