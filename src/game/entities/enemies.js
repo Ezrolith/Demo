@@ -125,6 +125,17 @@
   const ALERT_BARKS = ["It's the blue guy!", 'Holy— it\'s him!', 'Shoot him! Shoot!', 'Nobody said nothin\' about HIM!', 'Light him up!'];
   const HELD_BARKS = ['Put me down!', 'Whoa— WHOA!', 'Mama!', 'This ain\'t natural!'];
 
+  // A knocked-out man is drawn washed out, so he never reads as a live threat.
+  const greyLooks = new WeakMap();
+  function greyed(look) {
+    let g = greyLooks.get(look);
+    if (g) return g;
+    g = Object.assign({}, look);
+    for (const k of ['skin', 'hair', 'hat', 'hatBrim', 'body', 'sleeve', 'legs']) if (typeof g[k] === 'string' && g[k][0] === '#') g[k] = U.mix(g[k], '#8a8a8e', 0.5);
+    greyLooks.set(look, g);
+    return g;
+  }
+
   class Gangster extends Enemy {
     constructor(o = {}) {
       super(Object.assign({ hp: 40, colors: ['#2e2a28', '#d9b08c', '#8a2d2a', '#4b4038'] }, o));
@@ -136,10 +147,54 @@
       this.burst = 0;
       this.burstT = 0;
       this.heldBarked = false;
+      this.kick = 0; // recoil 0..1, decays 10/s
+      this.flinch = 0;
+      this.muzzleT = 0;
       if (this.gun === 'tommy') {
         this.hp = this.maxHp = 60;
         this.mass = 1.5;
       }
+    }
+    update(dt, world) {
+      if (this.kick > 0) this.kick = Math.max(0, this.kick - dt * 10);
+      if (this.muzzleT > 0) this.muzzleT -= dt;
+      // A solid hit makes him flinch: he stops, and his aim is set back.
+      if (this.flinch > 0 && !this.ko && !this.heldBy) {
+        this.flinch -= dt;
+        this.vx = U.damp(this.vx, 0, 10, dt);
+        this.vy = U.damp(this.vy, 0, 10, dt);
+        return;
+      }
+      super.update(dt, world);
+    }
+    damage(amount, source, kind) {
+      const hit = super.damage(amount, source, kind);
+      if (hit && amount >= 10 && !this.ko && !this.dead && !this.heldBy) {
+        this.flinch = Math.max(this.flinch, 0.12);
+        this.kick = 1;
+        if (this.aim > 0) this.aim = Math.max(this.aim, this.aimTime * 0.6);
+      }
+      return hit;
+    }
+    // Spared: he lies where he fell, gun skidding away.
+    onKO(world, kind) {
+      const sp = Math.hypot(this.vx, this.vy);
+      this.koAngle = sp > 30 ? Math.atan2(-this.vy, -this.vx) : this.facing + Math.PI;
+      this.flinch = 0;
+      this.kick = 0;
+      if (DM.FX) DM.FX.knockout(world, this, { gun: this.gun });
+    }
+    // Gone: he comes apart from the side facing Jon.
+    disintegrate(world, source) {
+      if (this.dead || this.ko) return;
+      const L = this.look;
+      const aim = !!this.target || this.aim > 0;
+      const key = ['gangster', L.skin, L.hat, L.hatBrim, L.body, L.legs, this.gun, aim].join('|');
+      const draw = (g) => Gfx.figure(g, Object.assign({}, L, { x: 0, y: 0, angle: 0, aim, gun: this.gun }));
+      if (!DM.FX || !DM.FX.unbind(world, this, { source, key, draw, angle: this.facing, step: 2, max: 600 })) return super.disintegrate(world, source);
+      world.particles.burst(this.x, this.y, 12, { color: ['#bff1ff', '#5fd4ff'], speed: [60, 300], life: [0.2, 0.6], size: [1.5, 3], drag: 3 });
+      this.wasDisintegrated = true;
+      this.die('disintegrate', source);
     }
     onAlert(world) {
       if (Math.random() < 0.6) world.bark(this, U.pick(ALERT_BARKS));
@@ -218,33 +273,85 @@
       const mx = this.x + Math.cos(a) * 20, my = this.y + Math.sin(a) * 20;
       world.add(new Bullet({ x: mx, y: my, vx: Math.cos(a) * 560, vy: Math.sin(a) * 560, team: 'enemy', dmg: this.gun === 'tommy' ? 4 : 6 }));
       world.particles.burst(mx, my, 4, { color: ['#fff2c4', '#ffd27a'], speed: [60, 160], life: [0.05, 0.12], size: [2, 4], angle: a, spread: 0.6 });
+      this.kick = 1;
+      this.muzzleT = 0.035;
       Audio.play('shot');
     }
     render(ctx, world) {
       if (this.ko) {
-        Gfx.figure(ctx, Object.assign({}, this.look, { x: this.x, y: this.y, angle: this.facing + 1.2, alpha: 0.85 }));
+        const a = this.koAngle == null ? this.facing + Math.PI : this.koAngle;
+        Gfx.figure(ctx, Object.assign({}, greyed(this.look), { x: this.x, y: this.y, angle: a, pose: 'down', alpha: 0.8, ink: 'rgba(48,48,54,0.55)' }));
         const t = world.realTime || 0;
+        const hx = this.x + Math.cos(a) * 18.5, hy = this.y + Math.sin(a) * 18.5 - 3;
         ctx.fillStyle = '#f2c418';
         for (let i = 0; i < 3; i++) {
-          const a = t * 3 + (i * Math.PI * 2) / 3;
-          Gfx.circle(ctx, this.x + Math.cos(a) * 10, this.y - 4 + Math.sin(a) * 4, 1.8);
+          const b = t * 3 + (i * Math.PI * 2) / 3;
+          Gfx.circle(ctx, hx + Math.cos(b) * 9, hy + Math.sin(b) * 3.5, 1.8);
           ctx.fill();
         }
         return;
       }
-      if (this.aim > 0 && this.target) {
-        const k = 1 - this.aim / this.aimTime;
-        ctx.save();
-        ctx.strokeStyle = `rgba(255,70,50,${0.15 + k * 0.5})`;
-        ctx.lineWidth = 1;
-        ctx.setLineDash([6, 6]);
-        Gfx.line(ctx, this.x, this.y, this.x + Math.cos(this.facing) * 160, this.y + Math.sin(this.facing) * 160);
-        ctx.restore();
-      }
       Gfx.figure(ctx, Object.assign({}, this.look, {
         x: this.x, y: this.y, angle: this.facing, walk: this.walk, moving: this.speed > 20,
-        aim: !!this.target || this.aim > 0, gun: this.gun, flash: this.hitFlash > 0 ? 0.7 : 0,
+        aim: !!this.target || this.aim > 0, gun: this.gun, flash: this.hitFlash > 0 ? 0.7 : 0, kick: this.kick,
       }));
+      if (!world.lit) this.renderEmissive(ctx, world);
+    }
+    // Light that the night must not swallow: the aim telegraph and muzzle flash.
+    // (Drawn after the light layer when world.lit is set; see World.render.)
+    renderEmissive(ctx, world) {
+      if (this.ko || this.dead) return;
+      const f = this.facing, c = Math.cos(f), s = Math.sin(f);
+      const tip = (this.gun === 'tommy' ? 29 : 22) - this.kick * 4.2;
+      const mx = this.x + c * tip, my = this.y + s * tip;
+      const t = this.target;
+      const tommy = this.gun === 'tommy';
+      if (t && !t.dead && (this.aim > 0 || (tommy && this.burst > 0))) {
+        const len = Math.max(20, Math.min(U.dist(mx, my, t.x, t.y) + 20, 420));
+        const k = this.aim > 0 ? U.clamp(1 - this.aim / this.aimTime, 0, 1) : 1;
+        ctx.save();
+        if (tommy) {
+          // The spray: a translucent cone the burst will fill.
+          const sp = 0.13;
+          ctx.fillStyle = `rgba(255,70,50,${0.05 + k * 0.13})`;
+          ctx.strokeStyle = `rgba(255,90,70,${0.2 + k * 0.45})`;
+          ctx.lineWidth = this.aim > 0 && this.aim < 0.15 ? 2 : 1;
+          ctx.beginPath();
+          ctx.moveTo(mx, my);
+          ctx.lineTo(mx + Math.cos(f - sp) * len, my + Math.sin(f - sp) * len);
+          ctx.lineTo(mx + Math.cos(f + sp) * len, my + Math.sin(f + sp) * len);
+          ctx.closePath();
+          ctx.fill();
+          ctx.stroke();
+        } else {
+          // Two sight lines closing in on the target as the aim settles.
+          const sp = 0.25 * (1 - k);
+          const late = this.aim < 0.15;
+          ctx.strokeStyle = `rgba(255,70,50,${0.25 + k * 0.6})`;
+          ctx.lineWidth = late ? 2.4 : 1.2;
+          if (!late) ctx.setLineDash([6, 5]);
+          for (const side of sp > 0.01 ? [-1, 1] : [0]) {
+            const a = f + side * sp;
+            Gfx.line(ctx, mx, my, mx + Math.cos(a) * len, my + Math.sin(a) * len);
+          }
+        }
+        ctx.restore();
+      }
+      if (this.muzzleT > 0) {
+        // A one- or two-frame star at the barrel.
+        Gfx.glow(ctx, mx, my, 16, '#ffd27a', 0.9);
+        ctx.save();
+        ctx.strokeStyle = '#fff6d8';
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        for (let i = 0; i < 4; i++) {
+          const a = f + (i * Math.PI) / 2 + Math.PI / 4;
+          const r = i % 2 ? 5 : 8;
+          Gfx.line(ctx, mx, my, mx + Math.cos(a) * r, my + Math.sin(a) * r);
+        }
+        Gfx.line(ctx, mx, my, mx + c * 12, my + s * 12);
+        ctx.restore();
+      }
     }
   }
 
