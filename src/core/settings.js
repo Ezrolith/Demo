@@ -27,8 +27,10 @@
 
   // Damage taken, seconds before coherence recovers, and recovery per second.
   // Player.damage reads damageMul / regenDelayBase; Player.update reads coherenceRegen.
+  // Story is tuned so standing idle lasts at least twice as long as Normal even in
+  // Operation Blue Fire, whose waves open quietly and then converge (0.45 managed 1.4x).
   const CHALLENGE = {
-    story: { label: 'STORY', dmg: 0.45, regenDelay: 1.4, regen: 16 },
+    story: { label: 'STORY', dmg: 0.3, regenDelay: 1.2, regen: 18 },
     normal: { label: 'NORMAL', dmg: 1, regenDelay: 2.6, regen: 9 },
     hard: { label: 'HARD', dmg: 1.35, regenDelay: 3.2, regen: 7 },
   };
@@ -138,7 +140,7 @@
       id: 'challenge', section: 'GAMEPLAY', label: 'CHALLENGE', type: 'choice',
       options: [['story', 'STORY'], ['normal', 'NORMAL'], ['hard', 'HARD']], def: 'normal',
       desc: (v) => ({
-        story: 'STORY: attacks hurt less than half as much and you pull yourself together quickly.',
+        story: 'STORY: attacks hurt a third as much and you pull yourself together quickly.',
         normal: 'NORMAL: the fights as designed.',
         hard: 'HARD: attacks hurt more and you take longer to recover.',
       })[v],
@@ -194,7 +196,7 @@
     },
   ];
 
-  const byId = {};
+  const byId = Object.create(null);
   const index = () => {
     for (const k in byId) delete byId[k];
     for (const e of Schema) byId[e.id] = e;

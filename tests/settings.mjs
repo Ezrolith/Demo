@@ -235,7 +235,7 @@ for (const lvl of ['story', 'normal', 'hard']) {
     return [p.damageMul, p.regenDelayBase, p.coherenceRegen];
   });
 }
-assert('challenge levels set damage, regen delay and regen on the player', JSON.stringify(tuning) === JSON.stringify({ story: [0.45, 1.4, 16], normal: [1, 2.6, 9], hard: [1.35, 3.2, 7] }), JSON.stringify(tuning));
+assert('challenge levels set damage, regen delay and regen on the player', JSON.stringify(tuning) === JSON.stringify({ story: [0.3, 1.2, 18], normal: [1, 2.6, 9], hard: [1.35, 3.2, 7] }), JSON.stringify(tuning));
 
 const assist = await ev(() => {
   const DM = window.DM;
@@ -254,7 +254,7 @@ await set('challenge', 'story');
 await ev(() => window.DM.dev.play().retry());
 await wait(1100);
 const retried = await ev(() => ({ mul: window.DM.dev.play().player.damageMul, last: window.__begins[window.__begins.length - 1] }));
-assert("'play:begin' re-applies the challenge on retry", retried.mul === 0.45 && retried.last && retried.last.retry === true, JSON.stringify(retried));
+assert("'play:begin' re-applies the challenge on retry", retried.mul === 0.3 && retried.last && retried.last.retry === true, JSON.stringify(retried));
 
 // Idle time-to-decoherence under a steady stream of hits (the same idea as review/playability/ttk.mjs).
 const merged = await ev(() => /damageMul/.test(window.DM.Player.prototype.damage.toString()) && /coherenceRegen/.test(window.DM.Player.prototype.update.toString()));
@@ -317,7 +317,7 @@ await page.waitForFunction(() => window.DM.Engine.top().constructor.name === 'Pl
 const afterOffer = await ev(() => window.DM.dev.play().player.damageMul);
 assert('the first two decoherences offer no switch', !offers[0].includes('TRY STORY CHALLENGE') && !offers[1].includes('TRY STORY CHALLENGE'), JSON.stringify(offers.slice(0, 2)));
 assert("three decoherences at one checkpoint offer 'TRY STORY CHALLENGE'", offers[2].includes('TRY STORY CHALLENGE'), JSON.stringify(offers[2]));
-assert('choosing it switches the setting and retries', choose === 'story' && afterOffer === 0.45, `${choose}, damageMul ${afterOffer}`);
+assert('choosing it switches the setting and retries', choose === 'story' && afterOffer === 0.3, `${choose}, damageMul ${afterOffer}`);
 
 const ccRows = await ev(() => {
   const DM = window.DM;
