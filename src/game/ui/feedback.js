@@ -178,15 +178,16 @@
     },
   };
 
-  // REASSEMBLE: Jon's atoms rush back together at the checkpoint, and he gets a
-  // moment's grace before anything can touch him. ('play:begin' comes from Play.begin.)
+  // REASSEMBLE: Jon's atoms rush back together at the checkpoint (as soon as the
+  // fade-in clears, see DM.FX.Reassembly), and he gets a moment's grace before
+  // anything can touch him. ('play:begin' comes from Play.begin.)
   DM.Events.on('play:begin', (e) => {
     if (!e || !e.retry || !e.scene) return;
     const w = e.scene.world, p = e.scene.player;
     if (!w || !p) return;
     p.invuln = Math.max(p.invuln || 0, 0.6);
-    w.particles.implode(p.x, p.y, 160, 80, { life: 0.6, size: 3, color: '#bff1ff' });
-    w.particles.emit(p.x, p.y, { shape: 'ring', size: 150, size1: 6, life: 0.6, color: '#7fe3ff', drag: 0, alpha: 0.8 });
+    if (DM.FX && DM.FX.Reassembly) w.add(new DM.FX.Reassembly(p));
+    else w.particles.implode(p.x, p.y, 160, 80, { life: 0.6, size: 3, color: '#bff1ff' });
   });
 
   DM.Feedback = Feedback;

@@ -257,10 +257,32 @@
     }
   }
 
+  // ---- the reassembly (retry) ----------------------------------------------------
+  // Jon's atoms rush back together where he stands. It waits for the retry's
+  // fade-in to clear (so it is seen), and nothing can touch him meanwhile.
+  class Reassembly extends Entity {
+    constructor(p) {
+      super({ x: p.x, y: p.y, r: 1, static: true, body: false, solid: false, disintegratable: false, layer: 5, team: 'neutral' });
+      this.p = p;
+      this.t = 0;
+    }
+    update(dt, world) {
+      const p = this.p;
+      const fade = DM.Engine && DM.Engine.fade ? DM.Engine.fade.a : 0;
+      this.t += dt;
+      p.invuln = Math.max(p.invuln || 0, 0.6);
+      if (fade > 0.3 && this.t < 1) return;
+      world.particles.implode(p.x, p.y, 160, 80, { life: 0.6, size: 3, color: '#bff1ff' });
+      world.particles.emit(p.x, p.y, { shape: 'ring', size: 150, size1: 6, life: 0.6, color: '#7fe3ff', drag: 0, alpha: 0.8 });
+      this.dead = true;
+    }
+  }
+
   const FX = {
     Unbinding,
     DroppedGun,
     FloatText,
+    Reassembly,
     snapshot,
     // Returns true if the unbinding was spawned (false: draw nothing new).
     unbind(world, e, o = {}) {
