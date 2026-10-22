@@ -1,4 +1,13 @@
-/* Camera: smooth follow, trauma-based screen shake, zoom, world bounds. */
+/*
+ * Camera: smooth follow, trauma-based screen shake, directional kicks, zoom,
+ * world bounds.
+ *
+ * Shake: shake(amount) adds trauma (0..1, decays 1.3/s); the offset is
+ * trauma² × 44 px (capped at 22) along smooth noise, so it rumbles instead of
+ * jittering. Rough guide: 0.12 a nudge, 0.35 a solid hit, 0.6 a big blast.
+ * kick(dx, dy, px) shoves the view along a direction and springs back. Both
+ * scale with Settings > shake (0 turns them off).
+ */
 (function () {
   'use strict';
   const DM = window.DM;
@@ -11,8 +20,12 @@
       this.zoom = 1;
       this.targetZoom = 1;
       this.trauma = 0;
-      this.ox = 0;
+      this.ox = 0; // total offset this frame (shake + kick), in world px
       this.oy = 0;
+      this.kx = 0; // directional kick, decaying
+      this.ky = 0;
+      this.t = 0;
+      this.seed = Math.random() * 100;
       this.bounds = null; // {w, h}
     }
     snap(x, y) {
@@ -26,14 +39,33 @@
       this.clamp();
     }
     shake(amount) {
-      const s = DM.Save.settings.shake == null ? 1 : DM.Save.settings.shake;
-      this.trauma = Math.min(1, this.trauma + amount * s);
+      if (amount > 0) this.trauma = Math.min(1, this.trauma + amount);
+    }
+    // Shove the view px pixels along (dx, dy); it springs back in ~0.15 s.
+    kick(dx, dy, px) {
+      const l = Math.hypot(dx, dy);
+      if (!(l > 0) || !(px > 0)) return;
+      this.kx += (dx / l) * px;
+      this.ky += (dy / l) * px;
+      const m = Math.hypot(this.kx, this.ky);
+      if (m > 16) {
+        this.kx *= 16 / m;
+        this.ky *= 16 / m;
+      }
     }
     update(dt) {
-      this.trauma = Math.max(0, this.trauma - dt * 1.5);
-      const s = this.trauma * this.trauma * 16;
-      this.ox = (Math.random() * 2 - 1) * s;
-      this.oy = (Math.random() * 2 - 1) * s;
+      this.t += dt;
+      this.trauma = Math.max(0, this.trauma - dt * 1.3);
+      const k = Math.exp(-18 * dt);
+      this.kx *= k;
+      this.ky *= k;
+      const set = DM.Save.settings.shake == null ? 1 : DM.Save.settings.shake;
+      const s = Math.min(22, this.trauma * this.trauma * 44) * set;
+      // Two detuned sines per axis: smooth, never repeating in step, and it
+      // reaches full swing within a few frames of the hit.
+      const t = this.t, q = this.seed;
+      this.ox = s * (0.7 * Math.sin(t * 53 + q) + 0.3 * Math.sin(t * 89 + q * 1.7)) + this.kx * set;
+      this.oy = s * (0.7 * Math.sin(t * 47 + q * 2.3) + 0.3 * Math.sin(t * 97 + q * 0.6)) + this.ky * set;
       this.zoom = U.damp(this.zoom, this.targetZoom, 3, dt);
       this.clamp();
     }

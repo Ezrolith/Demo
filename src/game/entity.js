@@ -74,12 +74,16 @@
       if (this.onDeath) this.onDeath(kind, source);
     }
 
-    // Default: scatter into particles of this entity's colours.
+    // Default: the thing comes apart from the side facing Jon (DM.FX.unbind,
+    // coarse cells for crates, vehicles and machines). Small things such as
+    // projectiles just scatter.
     disintegrate(world, source) {
       if (this.dead) return;
       const n = Math.min(110, 18 + this.r * 2.5);
-      world.particles.burst(this.x, this.y, n, { color: this.colors, speed: [30, 280], life: [0.4, 1.3], size: [2, 4.5], drag: 2.5, add: false, radius: this.r });
-      world.particles.burst(this.x, this.y, Math.round(n / 2), { color: ['#bff1ff', '#5fd4ff'], speed: [60, 340], life: [0.3, 0.9], size: [1.5, 3], drag: 3 });
+      const big = this.r > 40;
+      const unbound = !this.isProjectile && this.r >= 9 && DM.FX && DM.FX.unbind(world, this, { source, step: big ? 4 : 3, max: big ? 400 : 600 });
+      if (!unbound) world.particles.burst(this.x, this.y, n, { color: this.colors, speed: [30, 280], life: [0.4, 1.3], size: [2, 4.5], drag: 2.5, add: false, radius: this.r });
+      world.particles.burst(this.x, this.y, Math.round(n / (unbound ? 4 : 2)), { color: ['#bff1ff', '#5fd4ff'], speed: [60, 340], life: [0.3, 0.9], size: [1.5, 3], drag: 3 });
       this.wasDisintegrated = true;
       this.die('disintegrate', source);
     }
@@ -90,10 +94,11 @@
       const m = other ? U.clamp(other.mass, 0.6, 6) : 1.4;
       const dmg = (speed - 200) * 0.12 * m * (this.impactMul || 1);
       if (dmg <= 1) return;
-      this.damage(dmg, other, 'impact');
+      if (!this.damage(dmg, other, 'impact')) return;
       world.particles.burst(this.x, this.y, 8, { color: ['#d8d0c0', '#9a9080'], speed: [40, 160], life: [0.2, 0.5], size: [2, 3.5], add: false });
       DM.Audio.play('impact');
-      world.camera.shake(Math.min(0.3, dmg / 220));
+      world.camera.shake(Math.min(0.55, 0.15 + dmg / 180));
+      if (dmg > 30 && world.hitstop) world.hitstop(0.03 + dmg / 2000);
     }
 
     impulse(ix, iy) {
