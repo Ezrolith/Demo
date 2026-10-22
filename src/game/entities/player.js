@@ -126,18 +126,26 @@
         this.facing = U.dampAngle(this.facing, U.angleTo(this.x, this.y, world.mouse.x, world.mouse.y), 14, dt);
       }
 
+      // Channelled powers set this.drain and slow energy regen to their
+      // channelRegen while active (telekinesis 0.5, Temporal Sight 0.4, Coalesce 0).
       this.drain = false;
+      this.regenMul = 1;
+      this.reticleFail = Math.max(0, (this.reticleFail || 0) - dt);
       for (const def of DM.Powers.list) {
         const st = this.powers[def.id];
         if (!st || !def.forms.includes(this.form)) continue;
         st.cd = Math.max(0, st.cd - dt);
         def.update(this, st, world, dt);
+        if (st.active && def.channelRegen != null) this.regenMul = Math.min(this.regenMul, def.channelRegen);
       }
-      if (!this.drain) this.energy = Math.min(this.maxEnergy, this.energy + this.energyRegen * (this.jammed ? 0.35 : 1) * dt);
-      this.energy = Math.max(0, this.energy);
+      if (this.drain && this.regenMul === 1) this.regenMul = 0; // a drain that declares no rate stops regen
+      this.powerFrame = DM.Powers.frame; // powers saw this frame's presses (see Powers.latch)
+      const regen = this.energyRegen * this.regenMul * (this.jammed ? 0.35 : 1);
+      this.energy = U.clamp(this.energy + regen * dt, 0, this.maxEnergy);
 
+      // coherenceRegen: recovery per second, set per challenge level (settings.js).
       if (this.regenDelay > 0) this.regenDelay -= dt;
-      else if (!this.down) this.coherence = Math.min(this.maxCoherence, this.coherence + 9 * dt);
+      else if (!this.down) this.coherence = Math.min(this.maxCoherence, this.coherence + (this.coherenceRegen ?? 9) * dt);
 
       if (this.expandT > 0) {
         this.expandT -= dt;

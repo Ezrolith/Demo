@@ -90,6 +90,8 @@
   // Frames where the world is frozen (hitstop) skip the player's update, so the
   // powers never see presses made during them. At the end of each frame, presses
   // the powers did not get to read are latched into their buffers instead.
+  // Player.update stamps p.powerFrame; only a scene that was already on top last
+  // frame counts, so the key that closes an overlay is not replayed into Jon.
   Powers.latch = (p) => {
     for (const def of Powers.list) {
       const s = p.powers[def.id];
@@ -102,7 +104,8 @@
   Input.endFrame = function () {
     const top = DM.Engine && DM.Engine.top();
     const p = top && top.player;
-    if (p && p.powers && p.world === top.world && p.powerFrame !== Powers.frame && p.canUsePowers) Powers.latch(p);
+    if (p && p.powers && top === Powers.lastTop && p.world === top.world && p.powerFrame !== Powers.frame && p.canUsePowers) Powers.latch(p);
+    Powers.lastTop = top;
     Powers.frame++;
     return endFrame.apply(this, arguments);
   };
@@ -137,7 +140,8 @@
   const TK = {
     grabMin: 8, // energy needed to start a lift
     relock: 0.3, // seconds before the next lift after running dry
-    hist: 0.12,
+    hist: 0.12, // how far back a release looks for the throwing motion
+    histToggle: 0.2, // toggle mode: a click lands a moment after the flick
     flick: 150,
     throwV: 800,
     aimRange: 650,
@@ -164,9 +168,11 @@
     return best;
   }
 
-  // Someone worth throwing things at.
+  // Someone worth throwing `held` at: an active enemy it can actually hit (crates
+  // pass under flying drones; a thrown missile bursts next to anything).
   function isFoe(t, held) {
-    return t !== held && t.team === 'enemy' && !t.dead && !t.ko && !t.isProjectile && !t.yielded && !t.hidden;
+    if (t === held || t.team !== 'enemy' || t.dead || t.ko || t.isProjectile || t.yielded || t.hidden) return false;
+    return !!t.flying === !!held.flying || !!held.isProjectile;
   }
 
   // The enemy best lined up with a throw from e along (vx, vy), if any.
@@ -202,8 +208,11 @@
     const big = Math.max(1, p.scale * 0.8);
     const maxV = (1150 / sq) * big * 1.15;
     const minV = Math.min(maxV, (TK.throwV / sq) * big);
+    const now = world.realTime || 0;
+    const hist = DM.Save.settings.tkMode === 'toggle' ? TK.histToggle : TK.hist;
     let fast = null, fs = 0;
     for (const h of s.vHist) {
+      if (now - h.t > hist) continue;
       const v = Math.hypot(h.vx, h.vy);
       if (v > fs) {
         fs = v;
@@ -242,18 +251,16 @@
     if (!e) return;
     if (e.heldBy === p) {
       e.heldBy = null;
-      e.thrown = 1.0;
-      if (why === 'release') {
-        const plan = throwPlan(p, s, world, e);
-        if (plan) {
-          e.vx = plan.vx;
-          e.vy = plan.vy;
-        }
-      }
+      const plan = why === 'release' ? throwPlan(p, s, world, e) : null;
+      if (plan) {
+        e.vx = plan.vx;
+        e.vy = plan.vy;
+        e.thrown = 1.0;
+      } else e.thrown = 0; // set down: ordinary friction stops it where it was left
       if (e.team === 'enemy') e.stun = Math.max(e.stun, 0.9); // no mid-air recovery
       // Expanded, Jon throws with far more than his usual strength.
-      if (p.expandT > 0 && e.hp != null) {
-        boosted.push({ e, mul: e.impactMul });
+      if (plan && p.expandT > 0 && e.hp != null) {
+        if (!boosted.some((b) => b.e === e)) boosted.push({ e, mul: e.impactMul });
         e.impactMul = 2;
       }
       if (e.onRelease) e.onRelease(p, world);
@@ -313,7 +320,7 @@
       s.vHist = s.vHist || [];
       for (let i = boosted.length - 1; i >= 0; i--) {
         const b = boosted[i];
-        if (b.e.dead || b.e.heldBy || b.e.thrown <= 0) {
+        if (b.e.dead || b.e.heldBy || b.e.thrown <= 0 || b.e.world !== world) {
           b.e.impactMul = b.mul;
           boosted.splice(i, 1);
         }
@@ -353,7 +360,7 @@
       // so pressing it against a wall and letting go reads as a drop.
       const now = world.realTime || 0;
       s.vHist.push({ t: now, vx: e.vx, vy: e.vy });
-      while (s.vHist.length > 1 && now - s.vHist[0].t > TK.hist) s.vHist.shift();
+      while (s.vHist.length > 1 && now - s.vHist[0].t > TK.histToggle) s.vHist.shift();
       const settle = Math.exp(-TK.settle * dt);
       s.offX *= settle;
       s.offY *= settle;
@@ -859,12 +866,14 @@
   // back to him from the body as a visible pip.
   const SPARE_ENERGY = 10;
   const SPARE_COHERENCE = 4;
+  const rewarded = new WeakSet(); // one reward per person, however often a body is knocked about
   DM.Events.on('enemy:down', (ev) => {
-    if (!ev || !ev.human || ev.lethal || !ev.enemy) return;
+    if (!ev || !ev.human || ev.lethal || !ev.enemy || rewarded.has(ev.enemy)) return;
     const e = ev.enemy;
     const w = e.world;
     const p = w && w.player;
     if (!p || p.down || p.form === 'human') return;
+    rewarded.add(e);
     p.energy = Math.min(p.maxEnergy, p.energy + SPARE_ENERGY);
     p.coherence = Math.min(p.maxCoherence, p.coherence + SPARE_COHERENCE);
     const life = U.clamp(U.dist(e.x, e.y, p.x, p.y) / 650, 0.25, 0.9);
