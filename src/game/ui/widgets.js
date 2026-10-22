@@ -1,7 +1,10 @@
 /*
  * Menu: a vertical list driven by keyboard (W/S/arrows + Enter/Space) and mouse.
- * Items: { label, action(), disabled, value() -> string, adjust(dir) }.
- * Items with `adjust` are sliders/toggles: left/right or clicking changes them.
+ * Items: { label, action(), disabled, value() -> string, adjust(dir), desc }.
+ * Items with `adjust` are sliders/choices/toggles: left/right change them. With
+ * the mouse, the ‹ and › glyphs step down/up and a click anywhere else on the
+ * row steps forward. Sliders also give `frac()` (0..1, drawn as a bar) and
+ * `setFrac(f)`, so clicking the bar sets the value directly.
  */
 (function () {
   'use strict';
@@ -9,6 +12,9 @@
   const Gfx = DM.Gfx;
   const Input = DM.Input;
   const Audio = DM.Audio;
+
+  const BAR_W = 150;
+  const inside = (x, z) => !!z && x >= z[0] && x <= z[1];
 
   class Menu {
     constructor(items, o = {}) {
@@ -21,6 +27,7 @@
       this.align = o.align || 'left';
       this.onBack = o.onBack || null;
       this.accent = o.accent || DM.C.blue;
+      this.valueW = o.valueW || 120; // width of the value column between ‹ and ›
       this.sel = Math.max(0, items.findIndex((i) => !i.disabled));
       this.t = 0;
     }
@@ -34,6 +41,16 @@
         if (mx >= r.x && mx <= r.x + r.w && my >= r.y && my <= r.y + r.h) return i;
       }
       return -1;
+    }
+    // Horizontal hit zones of an adjustable row: the two glyphs and the slider bar.
+    zones(i) {
+      const r = this.rowRect(i);
+      const right = r.x + r.w - 16;
+      const gw = this.size * 0.8;
+      const lx = right - gw - 8 - this.valueW - 8; // right edge of the ‹ glyph
+      const z = { left: [lx - gw - 10, lx + 6], right: [right - gw - 6, right + 12], value: [lx + 8, right - gw - 8] };
+      if (this.items[i].frac) z.bar = [lx - gw - 14 - BAR_W, lx - gw - 14];
+      return z;
     }
     move(dir) {
       const n = this.items.length;
@@ -61,15 +78,14 @@
         Input.consume('confirm');
         if (i >= 0) {
           this.sel = i;
-          const r = this.rowRect(i);
-          this.activate(i, m.x < r.x + r.w * 0.55 ? -1 : 1);
+          this.click(i, m.x);
         }
         return;
       }
       if (Input.pressed('menuDown')) this.move(1);
       if (Input.pressed('menuUp')) this.move(-1);
       const it = this.items[this.sel];
-      if (it && it.adjust) {
+      if (it && it.adjust && !it.disabled) {
         if (Input.pressed('menuLeft')) {
           it.adjust(-1);
           Audio.play('ui_move');
@@ -87,6 +103,18 @@
         Audio.play('ui_back');
         this.onBack();
       }
+    }
+    click(i, mx) {
+      const it = this.items[i];
+      if (!it || it.disabled) return;
+      if (!it.adjust) return this.activate(i, 1);
+      const z = this.zones(i);
+      if (inside(mx, z.bar) && it.setFrac) {
+        it.setFrac(Math.max(0, Math.min(1, (mx - z.bar[0]) / (z.bar[1] - z.bar[0]))));
+        Audio.play('ui_move');
+        return;
+      }
+      this.activate(i, inside(mx, z.left) ? -1 : 1);
     }
     activate(i, dir) {
       const it = this.items[i];
@@ -115,11 +143,20 @@
         }
         const color = it.disabled ? 'rgba(160,180,200,0.3)' : sel ? '#ffffff' : 'rgba(200,225,240,0.72)';
         Gfx.text(ctx, it.label, tx, cy, { size: this.size, color, align: this.align === 'center' ? 'center' : 'left', spacing: 2, weight: sel ? 600 : 400 });
-        if (it.value) {
-          const v = it.value();
-          const vx = r.x + r.w - 16;
-          Gfx.text(ctx, (it.adjust ? '‹  ' : '') + v + (it.adjust ? '  ›' : ''), vx, cy, { size: this.size * 0.8, color: sel ? this.accent : 'rgba(200,225,240,0.6)', align: 'right', spacing: 1 });
+        if (!it.value) continue;
+        const v = it.value();
+        const vs = this.size * 0.8;
+        const vcol = sel ? this.accent : 'rgba(200,225,240,0.6)';
+        if (!it.adjust) {
+          Gfx.text(ctx, v, r.x + r.w - 16, cy, { size: vs, color: vcol, align: 'right', spacing: 1 });
+          continue;
         }
+        const z = this.zones(i);
+        const gcol = sel ? this.accent : 'rgba(200,225,240,0.35)';
+        Gfx.text(ctx, '‹', z.left[1] - 6, cy, { size: vs, color: gcol, align: 'right' });
+        Gfx.text(ctx, '›', z.right[0] + 6, cy, { size: vs, color: gcol });
+        Gfx.text(ctx, v, (z.value[0] + z.value[1]) / 2, cy, { size: vs, color: vcol, align: 'center', spacing: 1 });
+        if (z.bar) Gfx.bar(ctx, z.bar[0], r.y + r.h / 2 - 3, z.bar[1] - z.bar[0], 6, it.frac(), sel ? this.accent : 'rgba(200,225,240,0.45)', { segments: 10 });
       }
     }
   }
