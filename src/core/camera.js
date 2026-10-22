@@ -2,10 +2,11 @@
  * Camera: smooth follow, trauma-based screen shake, directional kicks, zoom,
  * world bounds.
  *
- * Shake: shake(amount) adds trauma (0..1, decays 1.5/s); the offset is
- * trauma² × 30 px (capped at 22) along smooth noise, so it rumbles instead of
- * jittering. kick(dx, dy, px) shoves the view along a direction and springs
- * back. Both scale with Settings > shake (0 turns them off).
+ * Shake: shake(amount) adds trauma (0..1, decays 1.3/s); the offset is
+ * trauma² × 44 px (capped at 22) along smooth noise, so it rumbles instead of
+ * jittering. Rough guide: 0.12 a nudge, 0.35 a solid hit, 0.6 a big blast.
+ * kick(dx, dy, px) shoves the view along a direction and springs back. Both
+ * scale with Settings > shake (0 turns them off).
  */
 (function () {
   'use strict';
@@ -54,15 +55,17 @@
     }
     update(dt) {
       this.t += dt;
-      this.trauma = Math.max(0, this.trauma - dt * 1.5);
+      this.trauma = Math.max(0, this.trauma - dt * 1.3);
       const k = Math.exp(-18 * dt);
       this.kx *= k;
       this.ky *= k;
       const set = DM.Save.settings.shake == null ? 1 : DM.Save.settings.shake;
-      const s = Math.min(22, this.trauma * this.trauma * 30) * set;
+      const s = Math.min(22, this.trauma * this.trauma * 44) * set;
+      // Two detuned sines per axis: smooth, never repeating in step, and it
+      // reaches full swing within a few frames of the hit.
       const t = this.t, q = this.seed;
-      this.ox = s * Math.sin(t * 47 + q) * Math.sin(t * 31 + q * 1.7) + this.kx * set;
-      this.oy = s * Math.sin(t * 41 + q * 2.3) * Math.sin(t * 29 + q * 0.6) + this.ky * set;
+      this.ox = s * (0.7 * Math.sin(t * 53 + q) + 0.3 * Math.sin(t * 89 + q * 1.7)) + this.kx * set;
+      this.oy = s * (0.7 * Math.sin(t * 47 + q * 2.3) + 0.3 * Math.sin(t * 97 + q * 0.6)) + this.ky * set;
       this.zoom = U.damp(this.zoom, this.targetZoom, 3, dt);
       this.clamp();
     }

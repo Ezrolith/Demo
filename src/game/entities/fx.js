@@ -194,7 +194,7 @@
       if (this.t < 0.3) {
         const k = this.t / 0.3;
         ctx.scale(1 + k * 0.35, 1 + k * 0.35);
-        ctx.globalAlpha = (1 - k) * 0.5;
+        ctx.globalAlpha = (1 - k) * 0.4;
         ctx.beginPath();
         for (let i = 0; i < S.n; i++) ctx.rect(S.xs[i] - h, S.ys[i] - h, st, st);
         ctx.fillStyle = '#5fd4ff';

@@ -109,6 +109,7 @@ await page.evaluate(() => {
   const play = window.DM.dev.play();
   play.ctx.lock(false);
   play.dialog.close();
+  play.player.locked = false; // a locked (cutscene) player takes no damage; Play.update would clear this next frame
   play.player.invuln = 0;
   play.player.damage(999, null, 'test');
 });

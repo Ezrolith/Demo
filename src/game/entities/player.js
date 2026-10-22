@@ -208,8 +208,8 @@
       }
       this.hurtFlash = { amt: amount, at: now };
       if (w) {
-        w.camera.shake(Math.min(0.45, 0.25 + amount / 50));
-        if (ang != null) w.camera.kick(-Math.cos(ang), -Math.sin(ang), 4);
+        w.camera.shake(Math.min(0.42, 0.18 + amount / 60));
+        if (ang != null) w.camera.kick(-Math.cos(ang), -Math.sin(ang), 3);
         if (amount >= 10 && w.hitstop) w.hitstop(0.04);
       }
       if (this.coherence <= 0) {

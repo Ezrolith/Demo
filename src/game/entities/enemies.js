@@ -313,7 +313,7 @@
         if (tommy) {
           // The spray: a translucent cone the burst will fill.
           const sp = 0.13;
-          ctx.fillStyle = `rgba(255,70,50,${0.05 + k * 0.13})`;
+          ctx.fillStyle = `rgba(255,70,50,${0.04 + k * 0.1})`;
           ctx.strokeStyle = `rgba(255,90,70,${0.2 + k * 0.45})`;
           ctx.lineWidth = this.aim > 0 && this.aim < 0.15 ? 2 : 1;
           ctx.beginPath();
@@ -325,7 +325,7 @@
           ctx.stroke();
         } else {
           // Two sight lines closing in on the target as the aim settles.
-          const sp = 0.25 * (1 - k);
+          const sp = 0.25 * (1 - k) * (1 - k);
           const late = this.aim < 0.15;
           ctx.strokeStyle = `rgba(255,70,50,${0.25 + k * 0.6})`;
           ctx.lineWidth = late ? 2.4 : 1.2;
