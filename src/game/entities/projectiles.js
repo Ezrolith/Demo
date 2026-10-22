@@ -6,6 +6,8 @@
   const Gfx = DM.Gfx;
   const Entity = DM.Entity;
 
+  const TRAIL = 0.04; // tracer length, in seconds of travel
+
   // Fast straight shot. Moves itself with a swept segment test so it never tunnels.
   class Bullet extends Entity {
     constructor(o) {
@@ -41,13 +43,18 @@
       this.x = nx;
       this.y = ny;
     }
+    // A dark underline first, so bright tracers still read on sand and snow.
     render(ctx) {
+      const tx = this.x - this.vx * TRAIL, ty = this.y - this.vy * TRAIL;
       ctx.save();
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = 'rgba(20,10,0,0.6)';
+      ctx.lineWidth = this.width + 2;
+      Gfx.line(ctx, tx, ty, this.x, this.y);
       ctx.globalCompositeOperation = 'lighter';
       ctx.strokeStyle = this.color;
       ctx.lineWidth = this.width;
-      ctx.lineCap = 'round';
-      Gfx.line(ctx, this.x - this.vx * 0.025, this.y - this.vy * 0.025, this.x, this.y);
+      Gfx.line(ctx, tx, ty, this.x, this.y);
       ctx.restore();
     }
     renderFuture(ctx, world) {
@@ -145,9 +152,12 @@
         this.body = !this.heldBy;
         if (this.speed > 40) this.angle = Math.atan2(this.vy, this.vx);
         if (!this.heldBy) {
+          // Looks one step ahead, so it bursts on contact rather than after bouncing off.
+          const nx = this.x + this.vx * dt, ny = this.y + this.vy * dt;
           for (const e of world.entities) {
             if (e.dead || e.team !== 'enemy' || e === this || e.isProjectile || e.ko) continue;
-            if (U.dist(this.x, this.y, e.x, e.y) < e.r + this.r + 4) return this.boom(world);
+            const reach = e.r + this.r + 4;
+            if (U.dist(this.x, this.y, e.x, e.y) < reach || U.dist(nx, ny, e.x, e.y) < reach) return this.boom(world);
           }
         }
         return;
@@ -213,18 +223,20 @@
     }
   }
 
-  // Veidt's tachyon disc: leaves a cloud that blinds Temporal Sight.
+  // Veidt's tachyon disc: thrown along a line to its full range (a dodged disc
+  // bursts beyond Jon or against a wall), it leaves a cloud that clouds Temporal Sight.
+  const DISC = { speed: 480, range: 520, dmg: 8, jam: 1 };
+
   class TachyonDisc extends Entity {
     constructor(o) {
       super({ x: o.x, y: o.y, r: 6, body: false, solid: false, layer: 2, disintegratable: true, team: 'enemy' });
       this.selfMove = true;
       this.isProjectile = true;
-      this.tx = o.tx;
-      this.ty = o.ty;
-      const n = U.norm(o.tx - o.x, o.ty - o.y);
-      this.vx = n.x * 480;
-      this.vy = n.y * 480;
-      this.travel = n.l;
+      let n = U.norm(o.tx - o.x, o.ty - o.y);
+      if (!n.l) n = { x: 1, y: 0 };
+      this.vx = n.x * DISC.speed;
+      this.vy = n.y * DISC.speed;
+      this.travel = o.range || DISC.range;
       this.spin = 0;
     }
     update(dt, world) {
@@ -234,8 +246,8 @@
       this.travel -= step;
       const p = world.player;
       if (p && !p.dead && U.segCircle(this.x, this.y, nx, ny, p.x, p.y, p.r + 6)) {
-        p.damage(8, this, 'disc');
-        p.jamT = Math.max(p.jamT, 2);
+        p.damage(DISC.dmg, this, 'disc');
+        p.jamT = Math.max(p.jamT, DISC.jam);
         return this.burst(world);
       }
       if (this.travel <= 0 || world.shotHit(this.x, this.y, nx, ny) >= 0) return this.burst(world);

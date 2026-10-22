@@ -17,6 +17,17 @@
     Gfx.rr(ctx, x, y, w, h, 4);
     ctx.fill();
   }
+  // Edge-indicator arrowhead pointing along +x (stroked, then filled).
+  function chevron(ctx, s) {
+    ctx.beginPath();
+    ctx.moveTo(s, 0);
+    ctx.lineTo(-s * 0.55, -s * 0.8);
+    ctx.lineTo(-s * 0.15, 0);
+    ctx.lineTo(-s * 0.55, s * 0.8);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fill();
+  }
 
   class HUD {
     constructor(scene) {
@@ -208,6 +219,7 @@
 
       if (p && world) this.renderPrompt(ctx, p, world);
       if (this.marker && world) this.renderMarker(ctx, world);
+      if (world) this.renderThreats(ctx, world);
 
       if (this.cineK > 0.01) {
         const bh = 70 * this.cineK;
@@ -324,7 +336,128 @@
       const x = DM.W / 2 - w / 2, y = 30;
       backing(ctx, x - 12, 8, w + 24, 38);
       Gfx.text(ctx, boss.name || 'TARGET', DM.W / 2, y - 6, { size: 13, color: '#ffd9a0', align: 'center', spacing: 4, weight: 600 });
-      Gfx.bar(ctx, x, y, w, 8, Math.max(0, boss.hp) / boss.maxHp, '#ff9a3c', { segments: 20 });
+      const frac = Math.max(0, boss.hp) / boss.maxHp;
+      Gfx.bar(ctx, x, y, w, 8, frac, '#ff9a3c', { segments: 20 });
+      // Phase notches: a tick above and below the bar where the fight changes.
+      for (const m of boss.phaseMarks || []) {
+        const nx = Math.round(x + w * m) + 0.5;
+        ctx.strokeStyle = frac > m ? '#fff2c4' : 'rgba(255,242,196,0.4)';
+        ctx.lineWidth = 2;
+        Gfx.line(ctx, nx, y - 3, nx, y + 11);
+      }
+    }
+
+    // ---- threat awareness ------------------------------------------------------
+    // Edge indicators for danger Jon cannot see: a red chevron for each offscreen
+    // enemy that is winding up an attack and for each hostile missile, an orange
+    // triangle for each shell coming down near him (plus its impact ring), and,
+    // once the fight thins out or has wandered offscreen, grey chevrons pointing
+    // to every enemy still in it. Hidden during cutscenes. Returns how many
+    // indicators it drew (this.threats lists them).
+    renderThreats(ctx, world) {
+      const list = (this.threats = []);
+      const p = world.player;
+      const live = [];
+      let anyOn = false, remaining = 0;
+      if (this.threatSeenT == null) this.threatSeenT = this.t; // last time an enemy was on screen
+      if (!p || world.ceasefire || !this.gameHudVisible()) {
+        this.threatSeenT = this.t;
+        return 0;
+      }
+      const cam = world.camera;
+      const v = cam.view();
+      const inView = (x, y, m = 0) => x > v.x0 - m && x < v.x1 + m && y > v.y0 - m && y < v.y1 + m;
+      const Proj = DM.Proj;
+      for (const e of world.entities) {
+        if (e.dead || e.team !== 'enemy') continue;
+        if (e.isProjectile) {
+          if (e instanceof Proj.Missile && !e.heldBy && !inView(e.x, e.y)) list.push({ kind: 'missile', x: e.x, y: e.y, k: 1 });
+          else if (e instanceof Proj.Shell && U.dist(e.tx, e.ty, p.x, p.y) < 140) {
+            const m = e.r + 120; // the world only draws a shell near the view
+            list.push({ kind: 'shell', x: e.x, y: e.y, tx: e.tx, ty: e.ty, r: e.radius, k: Math.min(1, e.t / e.T), off: !inView(e.x, e.y), culled: !inView(e.x, e.y, m) });
+          }
+          continue;
+        }
+        if (!e.active || e.hp == null || e.yielded) continue;
+        if (!e.alerted && world.boss !== e) continue;
+        remaining++;
+        if (inView(e.x, e.y)) {
+          anyOn = true;
+          continue;
+        }
+        const aiming = e.aim > 0 || e.burst > 0 || e.mgShots > 0;
+        if (aiming) list.push({ kind: 'aim', x: e.x, y: e.y, k: e.aim > 0 && e.aimTime ? 1 - e.aim / e.aimTime : 1 });
+        else live.push(e);
+      }
+      // 'Last enemies': with three or fewer left, or none in view for 3 s, point to them all.
+      if (anyOn || !remaining) this.threatSeenT = this.t;
+      if (remaining && (remaining <= 3 || this.t - this.threatSeenT >= 3)) for (const e of live) list.push({ kind: 'last', x: e.x, y: e.y, k: 0 });
+
+      const cx = DM.W / 2, cy = DM.H / 2;
+      const pad = 34, top = pad + 50, bottom = DM.H - pad - 90;
+      let drawn = 0;
+      for (const th of list) {
+        if (th.kind === 'shell') {
+          // Its ring at the impact point, in case the shell itself is too far off to be drawn.
+          if (th.culled) {
+            const s = cam.toScreen(th.tx, th.ty);
+            ctx.save();
+            ctx.strokeStyle = `rgba(255,80,60,${0.3 + th.k * 0.55})`;
+            ctx.fillStyle = `rgba(255,80,60,${0.05 + th.k * 0.12})`;
+            ctx.lineWidth = 2;
+            Gfx.circle(ctx, s.x, s.y, th.r * cam.zoom);
+            ctx.fill();
+            ctx.stroke();
+            Gfx.circle(ctx, s.x, s.y, th.r * cam.zoom * th.k);
+            ctx.stroke();
+            ctx.restore();
+          }
+          if (!th.off) continue;
+        }
+        const s = cam.toScreen(th.x, th.y);
+        const dx = s.x - cx, dy = s.y - cy;
+        // Where the ray from the screen centre leaves the inset frame.
+        const tx = dx > 0 ? (DM.W - pad - cx) / dx : dx < 0 ? (pad - cx) / dx : Infinity;
+        const ty = dy > 0 ? (bottom - cy) / dy : dy < 0 ? (top - cy) / dy : Infinity;
+        const f = Math.min(tx, ty, 1);
+        const ex = cx + dx * f, ey = cy + dy * f;
+        const a = Math.atan2(dy, dx);
+        const dist = U.dist(p.x, p.y, th.x, th.y);
+        const near = U.clamp(1 - dist / 1200, 0.3, 1);
+        ctx.save();
+        ctx.translate(ex, ey);
+        ctx.rotate(a);
+        if (th.kind === 'last') {
+          ctx.globalAlpha = 0.55 * Math.max(0.6, near);
+          ctx.fillStyle = '#c8ccd2';
+          ctx.strokeStyle = 'rgba(0,0,0,0.5)';
+          ctx.lineWidth = 1.5;
+          chevron(ctx, 8);
+        } else if (th.kind === 'shell') {
+          ctx.globalAlpha = near * (0.7 + Math.sin(this.t * 14) * 0.3);
+          ctx.fillStyle = '#ff9a3c';
+          ctx.strokeStyle = 'rgba(40,10,0,0.7)';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(13, 0);
+          ctx.lineTo(-7, -11);
+          ctx.lineTo(-7, 11);
+          ctx.closePath();
+          ctx.stroke();
+          ctx.fill();
+        } else {
+          // Pulses faster as the wind-up nears its end.
+          const rate = 6 + th.k * 18;
+          ctx.globalAlpha = near * (0.65 + Math.sin(this.t * rate) * 0.35);
+          ctx.fillStyle = '#ff3a2a';
+          ctx.strokeStyle = 'rgba(40,0,0,0.7)';
+          ctx.lineWidth = 2;
+          chevron(ctx, 13 + th.k * 3);
+        }
+        ctx.restore();
+        drawn++;
+      }
+      return drawn;
     }
 
     renderCountdown(ctx) {

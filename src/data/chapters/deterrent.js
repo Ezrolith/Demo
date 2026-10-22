@@ -37,6 +37,38 @@
   const CANYON = { x: 760, w: 110 };
   const POST = { x: 1450, y: 900 };
 
+  // The minefield: a grid of cells, most of them mined. Three zig-zag lanes are
+  // left clear (seeded, so every attempt is the same) with the mines beside them
+  // pushed back, and a trodden path in the sand gives them away.
+  const FIELD = { x: 930, y: 260, cols: 5, rows: 13, cw: 92, ch: 88 };
+  const LANES = (() => {
+    const rnd = U.seeded(1973);
+    const cells = new Set();
+    const paths = [];
+    for (const start of [2, 6, 10]) {
+      let r = U.clamp(start + Math.floor(rnd() * 3) - 1, 1, FIELD.rows - 2);
+      const pts = [];
+      for (let c = 0; c < FIELD.cols; c++) {
+        cells.add(c + ',' + r);
+        pts.push([c, r]);
+        if (c === FIELD.cols - 1) break;
+        let step = (rnd() < 0.5 ? 1 : 2) * (rnd() < 0.5 ? -1 : 1);
+        if (r + step < 1 || r + step > FIELD.rows - 2) step = -step;
+        for (let k = 1; k <= Math.abs(step); k++) {
+          const rr = r + Math.sign(step) * k;
+          cells.add(c + ',' + rr);
+          pts.push([c, rr]);
+        }
+        r += step;
+      }
+      paths.push(pts);
+    }
+    return { cells, paths };
+  })();
+  const inLane = (c, r) => LANES.cells.has(c + ',' + r);
+  // Centre of a cell's clear spot (mines sit in the top-left 50 x 40 of their cell).
+  const cellCentre = (c, r) => ({ x: FIELD.x + c * FIELD.cw + 25, y: FIELD.y + r * FIELD.ch + 20 });
+
   function bakeProving(g) {
     const rnd = U.seeded(1971);
     g.fillStyle = '#c49a62';
@@ -77,6 +109,27 @@
       g.fillText('DANGER', 870, y - 10);
       g.fillText('MINES', 874, y);
     }
+    // Boot prints along the cleared lanes, and a survey stake at each end.
+    for (const pts of LANES.paths) {
+      for (let i = 0; i < pts.length; i++) {
+        const a = cellCentre(pts[i][0], pts[i][1]);
+        const b = i + 1 < pts.length ? cellCentre(pts[i + 1][0], pts[i + 1][1]) : { x: a.x + 80, y: a.y };
+        const d = U.dist(a.x, a.y, b.x, b.y), ang = Math.atan2(b.y - a.y, b.x - a.x);
+        for (let k = 0, n = 0; k < d; k += 13, n++) {
+          const side = n % 2 ? 4 : -4;
+          g.fillStyle = 'rgba(95,62,30,0.22)';
+          Gfx.ellipse(g, a.x + Math.cos(ang) * k - Math.sin(ang) * side, a.y + Math.sin(ang) * k + Math.cos(ang) * side, 4, 2.4, ang);
+          g.fill();
+        }
+      }
+      const s0 = cellCentre(pts[0][0], pts[0][1]), s1 = cellCentre(pts[pts.length - 1][0], pts[pts.length - 1][1]);
+      for (const [x, y] of [[s0.x - 70, s0.y], [s1.x + 70, s1.y]]) {
+        g.fillStyle = '#5a4028';
+        g.fillRect(x - 2, y - 18, 4, 22);
+        g.fillStyle = '#f2ead8';
+        g.fillRect(x + 2, y - 18, 12, 7);
+      }
+    }
     g.fillStyle = 'rgba(0,0,0,0.15)';
     g.font = '700 40px Oswald, Arial Narrow, sans-serif';
     g.fillText('AREA 7 · OPERATION BLUE FIRE', 1600, 80);
@@ -94,10 +147,17 @@
     for (const [x, y, w, h] of [[1800, 300, 120, 80], [2100, 1100, 160, 90], [1900, 780, 70, 140], [2300, 500, 100, 100], [1650, 1260, 140, 60], [2250, 1380, 90, 70], [300, 400, 120, 70], [420, 1200, 90, 110]]) W.wall(x, y, w, h, 'rock');
 
     const rnd = U.seeded(7);
-    for (let x = 930; x < 1300; x += 92) {
-      for (let y = 260; y < 1350; y += 88) {
+    for (let c = 0; c < FIELD.cols; c++) {
+      for (let r = 0; r < FIELD.rows; r++) {
         if (rnd() < 0.22) continue;
-        ctx.add(new Mine(x + rnd() * 50, y + rnd() * 40));
+        let u = rnd() * 50, v = rnd() * 40;
+        if (inLane(c, r)) continue;
+        // Beside a lane, the mine sits at the far side of its cell.
+        if (inLane(c + 1, r)) u = 0;
+        else if (inLane(c - 1, r)) u = 50;
+        if (inLane(c, r + 1)) v = 0;
+        else if (inLane(c, r - 1)) v = 40;
+        ctx.add(new Mine(FIELD.x + c * FIELD.cw + u, FIELD.y + r * FIELD.ch + v));
       }
     }
     ctx.add(new NPC({ x: 1450, y: 840, look: 'general', facing: Math.PI / 2 }));
@@ -136,7 +196,7 @@
       const n = from + i;
       yield ctx.banner(`WAVE ${n}`, specs[i].title, { dur: 2.2, color: DM.C.orange });
       const enemies = spawnWave(ctx, specs[i]);
-      ctx.objective('Survive Operation Blue Fire', () => `Wave ${n}/5 · ${enemies.filter((e) => !e.dead).length} left`);
+      ctx.objective('Break Operation Blue Fire', () => `Wave ${n}/5 · ${enemies.filter((e) => !e.dead).length} left`);
       if (specs[i].hint) ctx.hint(specs[i].hint, 8);
       yield ctx.until(() => enemies.every((e) => e.dead));
       ctx.objectiveDone();
@@ -184,7 +244,7 @@
           ctx.marker(POST.x, POST.y, 'COMMAND POST');
           yield ctx.wait(0.6);
           ctx.objective('Reach the command post');
-          ctx.hint('A minefield. You could walk through it carefully. Or you could not walk at all.', 8);
+          ctx.hint('A minefield. You could pick your way through. Or you could not walk at all.', 8);
           yield ctx.until(() => U.dist(P.x, P.y, POST.x, POST.y) < 90);
           ctx.objectiveDone();
           ctx.marker(null);
@@ -238,8 +298,9 @@
           ctx.focus(null);
           ctx.lock(false);
           ctx.objective('Destroy the Behemoth');
-          ctx.hint('Too heavy to lift. Its own missiles, thrown back, will hurt it badly.', 9);
+          ctx.hint('Too heavy to lift. Throw its own missiles back at it, or get behind it: the engine at the rear has no armour.', 10);
           yield ctx.until(() => b.dead);
+          ctx.clearHostiles(); // nothing still in the air lands on the victory
           W.boss = null;
           ctx.objectiveDone();
           yield ctx.wait(2);
