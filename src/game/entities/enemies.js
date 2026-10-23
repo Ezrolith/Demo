@@ -1083,7 +1083,7 @@
   // copy, recovering after any dash, winded after three dodges in a row, and most
   // of the time while Jon watches through Temporal Sight.
   const VEIDT = {
-    hp: 1050,
+    hp: 1000,
     speed: 230,
     orbitR: [200, 300],
     dashSpeed: 760,
@@ -1097,15 +1097,15 @@
     skateK: 5, // steering response while recovering
     streak: 3, // dodges in quick succession (within streakSpan s, no hit between) wind him...
     streakSpan: 1.8,
-    fatigueT: 2, // ...for this long, orbiting slower
+    fatigueT: 2, // ...for up to this long (until the first hit lands), orbiting slower
     fatigueSpeed: 0.55,
     fatigueCooldown: 8, // before he can be winded again (he also starts the duel rested)
-    windupOpen: 0.3, // committed (guard down) while winding up a disc...
-    windupSpeed: 1.8, // ...but stepping fast into the throw: lead him
+    windupOpen: 0.24, // committed (guard down) for the end of a disc wind-up...
+    windupSpeed: 2.2, // ...but stepping fast into the throw: lead him
     sightRead: 0, // seconds Temporal Sight needs to read him; then his guard is
     sightPeriod: 1, // down for 80% of each (real-time) period
     sightGuard: 0.2,
-    reposition: [4.5, 6], // phase 2: he dashes to a new spot this often (and recovers after)
+    reposition: [4, 5.5], // phase 2: he dashes to a new spot this often (and recovers after)
     pinR: 110, // a Duplicate this close pins him
     impactMul: 1,
     boltMul: 0.6,
@@ -1204,6 +1204,7 @@
       this.hp -= amount;
       this.hitFlash = 0.15;
       this.dodges.length = 0;
+      if (this.fatigueT > 0) this.fatigueT = 0.001; // a hit snaps him out of it
       if (kind === 'disintegrate') {
         this.disHits++;
         // Never caught mid-boast.

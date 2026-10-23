@@ -17,6 +17,8 @@
     Gfx.rr(ctx, x, y, w, h, 4);
     ctx.fill();
   }
+  const THREAT_LOST = 0.5; // seconds with no enemy in view before grey chevrons point to them all
+
   // Edge-indicator arrowhead pointing along +x (stroked, then filled).
   function chevron(ctx, s) {
     ctx.beginPath();
@@ -362,6 +364,7 @@
       if (this.threatSeenT == null) this.threatSeenT = this.t; // last time an enemy was on screen
       if (!p || world.ceasefire || !this.gameHudVisible()) {
         this.threatSeenT = this.t;
+        this.threatsDrawn = 0;
         return 0;
       }
       const cam = world.camera;
@@ -389,9 +392,9 @@
         if (aiming) list.push({ kind: 'aim', x: e.x, y: e.y, k: e.aim > 0 && e.aimTime ? 1 - e.aim / e.aimTime : 1 });
         else live.push(e);
       }
-      // 'Last enemies': with three or fewer left, or none in view for 3 s, point to them all.
+      // 'Last enemies': with three or fewer left, or none in view for a moment, point to them all.
       if (anyOn || !remaining) this.threatSeenT = this.t;
-      if (remaining && (remaining <= 3 || this.t - this.threatSeenT >= 3)) for (const e of live) list.push({ kind: 'last', x: e.x, y: e.y, k: 0 });
+      if (remaining && (remaining <= 3 || this.t - this.threatSeenT >= THREAT_LOST)) for (const e of live) list.push({ kind: 'last', x: e.x, y: e.y, k: 0 });
 
       const cx = DM.W / 2, cy = DM.H / 2;
       const pad = 34, top = pad + 50, bottom = DM.H - pad - 90;
@@ -421,9 +424,11 @@
         const ty = dy > 0 ? (bottom - cy) / dy : dy < 0 ? (top - cy) / dy : Infinity;
         const f = Math.min(tx, ty, 1);
         const ex = cx + dx * f, ey = cy + dy * f;
+        th.sx = ex;
+        th.sy = ey;
         const a = Math.atan2(dy, dx);
         const dist = U.dist(p.x, p.y, th.x, th.y);
-        const near = U.clamp(1 - dist / 1200, 0.3, 1);
+        const near = U.clamp(1 - dist / 1200, 0.45, 1);
         ctx.save();
         ctx.translate(ex, ey);
         ctx.rotate(a);
@@ -457,6 +462,7 @@
         ctx.restore();
         drawn++;
       }
+      this.threatsDrawn = drawn;
       return drawn;
     }
 

@@ -221,6 +221,8 @@
       'The Pentagon wants proof that nothing on Earth can stop me. They will spend a great deal of money finding out.',
     ],
     maps: { proving: buildProving },
+    // The minefield layout, for tests and tools: lane paths as [col, row] cells.
+    minefield: { field: FIELD, lanes: LANES.paths, centre: cellCentre },
     stages: [
       {
         id: 'blink',
