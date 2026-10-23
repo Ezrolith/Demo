@@ -448,7 +448,12 @@ const MAPS = [['prologue', 'lunch', 'gila'], ['reassembly', 'gather', 'void'], [
 const motion = [];
 for (const [ch, id, map] of MAPS) {
   await start(ch, id, 1500);
-  const r = await ev(async () => {
+  // Up to three windows: an unlock card or pause opening mid-window freezes the
+  // world (and its weather) for reasons that have nothing to do with weather.
+  let r;
+  for (let attempt = 0; attempt < 3 && !(r && r.diff >= 40); attempt++) {
+  if (attempt) await clear();
+  r = await ev(async () => {
     const DM = window.DM, play = DM.dev.play(), w = play.world;
     const grab = () => {
       const c = document.createElement('canvas');
@@ -462,14 +467,15 @@ for (const [ch, id, map] of MAPS) {
     const b = grab();
     let diff = 0;
     for (let i = 3; i < a.length; i += 16) if (Math.abs(a[i] - b[i]) > 8) diff++;
-    return { map: w.mapId, diff, particles: DM.Weather.stats.particles };
+    return { map: w.mapId, diff, particles: DM.Weather.stats.particles, top: DM.Engine.top().constructor.name };
   });
+  }
   motion.push(r);
   await ev(() => window.DM.Engine.render());
   await shot('map-' + map);
 }
 const still = motion.filter((m) => m.diff < 40);
-assert('every map has ambient motion between frames 0.5 s apart', !still.length, motion.map((m) => `${m.map} ${m.diff}`).join(', '));
+assert('every map has ambient motion between frames 0.5 s apart', !still.length, motion.map((m) => `${m.map} ${m.diff}${m.diff < 40 ? ' (' + m.top + ')' : ''}`).join(', '));
 
 await start('reassembly', 'gather', 1500);
 const par = await ev(() => {

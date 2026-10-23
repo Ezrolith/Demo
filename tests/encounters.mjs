@@ -405,7 +405,8 @@ const missileDmg = await ev(() => Math.round(window.__hp0 - window.__b.hp));
 assert('one of its own missiles, thrown back, deals at least 150', thrown && missileDmg >= 150 && missileDmg <= 200, `${missileDmg}`);
 // Phase transitions.
 await ev(() => { const b = window.__b; b.damage(b.hp - b.maxHp * 0.66 - 5, null, 'test'); window.__sounds.length = 0; b.damage(10, null, 'test'); });
-await step(0.05);
+// Its wake (mines and escort) arrives at the end of the frame after the phase's hitstop.
+await step(0.4);
 const ph2 = await ev(() => {
   const DM = window.DM, b = window.__b, W = DM.dev.play().world;
   return { phase: b.phase, mines: b.spawned.filter((e) => e instanceof DM.Special.Mine).length, drones: b.spawned.filter((e) => e instanceof DM.Enemies.Drone).length, bark: W.barks.some((x) => x.e === b), sound: window.__sounds.includes('phase') };
