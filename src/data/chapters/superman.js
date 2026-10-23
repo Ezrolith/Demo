@@ -98,8 +98,8 @@
   const RIVER = { x: 20, y: 1300, w: 2160, h: 80, bank: 1262 };
   // The getaway: out of the loading bay, down to the road, west along it to the gate.
   const GETAWAY = { x: 1425, y: 770, speed: 165, route: [{ x: 1425, y: 1112 }, { x: 52, y: 1112 }] };
-  // The officers, most exposed first (a checkpoint after some were hit restores
-  // the wounded in this order): [x, y, the way they face the threat].
+  // Stable indices identify individual officers in checkpoint story flags.
+  // [x, y, the way they face the threat].
   const COPS = [[620, 1064, -Math.PI / 2], [150, 974, -0.7], [1690, 1104, -Math.PI / 2]];
   const PRESSES = [[1590, 520, 0.05], [1770, 700, -0.08]];
 
@@ -117,6 +117,25 @@
     return best;
   }
   const safeCount = (R) => (R.cops || []).filter((c) => !c.down).length;
+  // Preserve WHICH officers/presses changed, not just their counts. Older
+  // checkpoints without masks retain the original count-based fallback.
+  function restoreOfficers(ctx) {
+    const R = ctx.refs, f = ctx.flags;
+    if (!R.cops) return;
+    const mask = Number.isInteger(f.officersDownMask) ? f.officersDownMask : null;
+    const down = Number.isFinite(f.officersSafe) ? R.cops.length - f.officersSafe : 0;
+    R.cops.forEach((c, i) => {
+      if (mask !== null ? (mask & (1 << i)) : i < down) c.setWounded();
+    });
+  }
+  function restorePresses(ctx) {
+    const R = ctx.refs, f = ctx.flags;
+    if (!R.presses) return;
+    const mask = Number.isInteger(f.pressesDownMask) ? f.pressesDownMask : null;
+    R.presses.forEach((p, i) => {
+      if (mask !== null ? (mask & (1 << i)) : i < (f.pressesDown || 0)) p.setBroken();
+    });
+  }
   // A spot beside the car where a man can stand.
   function freeBeside(W, car) {
     for (const [dx, dy] of [[0, -46], [0, 46], [-50, 0], [50, 0], [-40, -40], [40, 40]]) {
@@ -278,14 +297,21 @@
     ctx.add(new Vehicle(620, 1020, { kind: 'sedan', rot: 0.2 }));
     ctx.add(new Vehicle(1700, 1060, { kind: 'sedan', rot: -0.1 }));
     // Three officers pinned down behind the cars. Gunmen shoot at them as they do at Jon.
-    const countSafe = () => (f.officersSafe = R.cops.filter((c) => !c.down).length);
+    const countSafe = () => {
+      f.officersDownMask = R.cops.reduce((mask, c, i) => mask | (c.down ? 1 << i : 0), 0);
+      f.officersSafe = R.cops.filter((c) => !c.down).length;
+    };
     R.cops = COPS.map(([x, y, facing]) => ctx.add(new DM.Officer({ x, y, facing, onWound: countSafe })));
     // Two counterfeit presses in the warehouse: shutting them down is optional.
     const pressStopped = () => {
+      f.pressesDownMask = R.presses.reduce((mask, p, i) => mask | (p.stopped ? 1 << i : 0), 0);
       const n = (f.pressesDown = R.presses.filter((p) => p.stopped).length);
       if (n === R.presses.length) ctx.toast('PRESSES SHUT DOWN', '#bcd3a6');
     };
     R.presses = PRESSES.map(([x, y, rot]) => ctx.add(new Press(x, y, { rot, onStop: pressStopped })));
+    // Apply carry at map creation, including presses disabled during the yard.
+    restoreOfficers(ctx);
+    restorePresses(ctx);
     // Two crates carry a contractor's gold V.
     const crates = [[460, 470], [500, 470], [780, 560], [1020, 1000], [1080, 980], [1180, 420], [1600, 300, 'v'], [1640, 320, 'v'], [1560, 820], [1900, 700], [1960, 760], [1320, 820]];
     for (const [x, y, mark] of crates) ctx.add(new Crate(x, y, mark ? { mark, rot: U.rand(-0.25, 0.25) } : undefined));
@@ -329,7 +355,7 @@
       'Within a year I am on the cover of every newspaper in the world. Within two, the Russians are building more bombs.',
     ],
     // Carried through checkpoints and saved for the ending.
-    persistFlags: ['officersSafe', 'pressesDown', 'fished', 'molochArrested', 'molochEscaped', 'molochGone'],
+    persistFlags: ['officersSafe', 'officersDownMask', 'pressesDown', 'pressesDownMask', 'fished', 'molochArrested', 'molochEscaped', 'molochGone'],
     maps: { range: buildRange, pier: buildPier },
     stages: [
       {
@@ -410,11 +436,7 @@
           ctx.objectiveDone();
         },
         // Officers hit before a later checkpoint are still down when it loads.
-        restore(ctx) {
-          const R = ctx.refs, n = ctx.flags.officersSafe;
-          if (!Number.isFinite(n) || !R.cops) return;
-          for (const c of R.cops.slice(0, Math.max(0, R.cops.length - n))) c.setWounded();
-        },
+        restore: restoreOfficers,
       },
       {
         id: 'warehouse',
@@ -437,10 +459,7 @@
           ctx.marker(null);
         },
         // Presses already shut down stay down.
-        restore(ctx) {
-          const R = ctx.refs, n = ctx.flags.pressesDown || 0;
-          if (R.presses) for (const p of R.presses.slice(0, n)) p.setBroken();
-        },
+        restore: restorePresses,
       },
       {
         id: 'office',

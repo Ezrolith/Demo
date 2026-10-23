@@ -80,6 +80,10 @@
         text: 'Three police officers walked off Pier 9 on their own feet. One of them named his son after me. I have watched the boy grow up, from every side at once.',
       },
       {
+        when: (run) => run.flags.pressesDown === 2,
+        text: 'At Pier 9 I stopped two printing presses. For the first time that night, the warehouse was quiet. Their last counterfeit notes fluttered to the floor, and nobody had to die for it.',
+      },
+      {
         when: flag('molochArrested'),
         text: 'Pier 9, 1966: I set a getaway car down as gently as a cup on a saucer, and a frightened man climbed out with his hands up. He stood trial. He grew old. Some things can be put back together.',
       },
@@ -121,7 +125,7 @@
         when: tone('gentle'),
         text: (run) => `I set ${people(run.spared)} down gently, when it would have been easier not to. Not one of them came apart at my touch.`,
       },
-      { when: tone('gentle'), text: 'Perhaps I am not finished with human beings. Perhaps I will make some of my own.' },
+      { when: tone('gentle'), text: 'For once, the numbers do not describe a loss. Somewhere there are people living the years I left them. I find that I want to stay and see what they do with them.' },
       {
         when: tone('mixed'),
         text: (run) => `I set ${people(run.spared)} down gently. ${cap(people(run.killed))} I unmade. I hold both numbers at once, the way I hold everything.`,
@@ -131,7 +135,7 @@
         when: tone('detached'),
         text: (run) => `${cap(people(run.killed))} came apart at my touch. I remember each of them; I remember them still being alive.`,
       },
-      { when: tone('detached'), text: 'I am leaving this galaxy for one less complicated.' },
+      { when: tone('detached'), text: 'Beyond this galaxy there are worlds without witnesses. I turn towards them. Even here, at the edge of everything, leaving is easier than answering.' },
 
       {
         text: (run) => (run.flags.heldWatch

@@ -15,7 +15,10 @@
     "test:ledger": "node tests/ledger.mjs",
     "test:encounters": "node tests/encounters.mjs",
     "test:audio": "node tests/audio.mjs",
-    "test:visual": "node tests/visual.mjs"
+    "test:visual": "node tests/visual.mjs",
+    "test:story": "node tests/story.mjs",
+    "build:preview": "node tools/build.mjs && node tools/build-story-preview.mjs",
+    "test:preview": "npm run build:preview && node tests/story-preview.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"
