@@ -1,4 +1,4 @@
-/* Projectiles: bullets, energy bolts, artillery shells, homing missiles, tachyon discs. */
+/* Projectiles: bullets, energy bolts, artillery shells, homing missiles, grenades, tachyon discs. */
 (function () {
   'use strict';
   const DM = window.DM;
@@ -19,6 +19,7 @@
       this.color = o.color || '#ffd27a';
       this.kind = o.kind || 'bullet';
       this.width = o.width || 2;
+      this.push = o.push || 0; // impulse along the shot's line on whatever it hits
     }
     update(dt, world) {
       this.life -= dt;
@@ -37,6 +38,10 @@
         if (!U.segCircle(this.x, this.y, nx, ny, e.x, e.y, e.r + this.r)) continue;
         if (e.shieldR && U.dist(this.x, this.y, e.x, e.y) > e.shieldR - 2) continue;
         e.damage(this.dmg, this, this.kind);
+        if (this.push && !e.static && e.impulse) {
+          const n = U.norm(this.vx, this.vy);
+          e.impulse(n.x * this.push, n.y * this.push);
+        }
         world.particles.burst(this.x, this.y, 6, { color: [this.color, '#ffffff'], speed: [40, 180], life: [0.1, 0.3], size: [1, 2.5], shape: 'spark' });
         return this.die('hit');
       }
@@ -69,10 +74,10 @@
     }
   }
 
-  // Energy bolt fired by Dr. Manhattan's duplicates.
+  // Energy bolt fired by Dr. Manhattan's duplicates: it shoves what it hits.
   class Bolt extends Bullet {
     constructor(o) {
-      super(Object.assign({ color: '#7fe3ff', team: 'player', dmg: 18, r: 4, width: 3, kind: 'bolt', life: 1.4 }, o));
+      super(Object.assign({ color: '#7fe3ff', team: 'player', dmg: 18, r: 4, width: 3, kind: 'bolt', life: 1.4, push: 60 }, o));
     }
     render(ctx) {
       super.render(ctx);
@@ -129,7 +134,9 @@
     }
   }
 
-  // Homing missile. Grab it with telekinesis and it's yours.
+  // Homing missile. Grab it with telekinesis and it's yours. o.target gives it
+  // one thing to home on (a battery told to hit the command post); arriving
+  // there calls target.onMissileHit(missile, world).
   class Missile extends Entity {
     constructor(o) {
       super({ x: o.x, y: o.y, r: 8, mass: 0.5, friction: 0, bounce: 0, team: 'enemy', grabbable: true, hp: 1, layer: 2, colors: ['#d8d8d0', '#ff9a3c'] });
@@ -141,9 +148,11 @@
       this.vx = Math.cos(this.angle) * this.speedBase;
       this.vy = Math.sin(this.angle) * this.speedBase;
       this.body = false;
+      this.aimAt = o.target || null;
     }
     onGrab() {
       this.team = 'player';
+      this.aimAt = null;
     }
     update(dt, world) {
       this.life -= dt;
@@ -163,12 +172,17 @@
         return;
       }
       let target = null, bd = 900;
-      for (const e of world.entities) {
-        if (e.dead || e.team !== 'player' || !e.targetable) continue;
-        const d = U.dist(this.x, this.y, e.x, e.y);
-        if (d < bd) {
-          bd = d;
-          target = e;
+      if (this.aimAt && !this.aimAt.dead) {
+        target = this.aimAt;
+        bd = U.dist(this.x, this.y, target.x, target.y);
+      } else {
+        for (const e of world.entities) {
+          if (e.dead || e.team !== 'player' || !e.targetable) continue;
+          const d = U.dist(this.x, this.y, e.x, e.y);
+          if (d < bd) {
+            bd = d;
+            target = e;
+          }
         }
       }
       if (target) {
@@ -195,6 +209,8 @@
       if (this.dead) return;
       this.dead = true;
       const mine = this.team === 'player';
+      const t = this.aimAt;
+      if (!mine && t && !t.dead && t.onMissileHit && U.dist(this.x, this.y, t.x, t.y) < t.r + 45) t.onMissileHit(this, world);
       world.explode(this.x, this.y, mine ? 75 : 60, mine ? 90 : 16, { team: this.team, source: this });
     }
     render(ctx) {
@@ -219,6 +235,158 @@
       ctx.strokeStyle = 'rgba(255,154,60,0.4)';
       ctx.setLineDash([3, 5]);
       Gfx.line(ctx, this.x, this.y, this.x + this.vx * 1.2, this.y + this.vy * 1.2);
+      ctx.restore();
+    }
+  }
+
+  // Grenade: lobbed by a Grenadier. A red ring marks where it lands and how far
+  // it will reach; it bursts 1.6 s after the throw. Grabbed, it is Jon's (it
+  // changes team), and thrown it bursts on the first enemy or wall it meets.
+  // Disintegrate takes it apart harmlessly.
+  const GRENADE = { fuse: 1.6, minFuse: 0.5, r: 70, dmg: 18, mineR: 80, mineDmg: 80, arc: 64 };
+
+  class Grenade extends Entity {
+    constructor(o) {
+      super({ x: o.x, y: o.y, r: 6, mass: 0.4, friction: 5, bounce: 0.35, body: false, layer: 2, grabbable: true, disintegratable: true, team: o.team || 'enemy', colors: ['#4a5634', '#2a2f22'] });
+      this.isProjectile = true;
+      this.hazard = true; // in colour through Temporal Sight's grade
+      this.fuse = o.fuse || GRENADE.fuse;
+      this.sx = o.x;
+      this.sy = o.y;
+      this.tx = o.tx == null ? o.x : o.tx;
+      this.ty = o.ty == null ? o.y : o.ty;
+      this.T = o.T || 0.75;
+      this.t = 0;
+      this.h = 0;
+      this.lobbing = this.T > 0;
+      this.selfMove = this.lobbing;
+      this.spin = 0;
+    }
+    get blastR() {
+      return this.team === 'player' ? GRENADE.mineR : GRENADE.r;
+    }
+    // Jon's now: a moment to throw it, whatever the fuse says.
+    onGrab() {
+      this.team = 'player';
+      this.fuse = Math.max(this.fuse, GRENADE.minFuse);
+      this.land();
+    }
+    land() {
+      this.lobbing = false;
+      this.selfMove = false;
+      this.h = 0;
+    }
+    update(dt, world) {
+      this.fuse -= dt;
+      if (this.fuse <= 0) return this.boom(world);
+      if (this.heldBy) return;
+      if (this.lobbing) {
+        this.t += dt;
+        const k = Math.min(1, this.t / this.T);
+        this.x = U.lerp(this.sx, this.tx, k);
+        this.y = U.lerp(this.sy, this.ty, k);
+        this.h = Math.sin(k * Math.PI) * Math.min(GRENADE.arc, 20 + U.dist(this.sx, this.sy, this.tx, this.ty) * 0.2);
+        this.spin += dt * 14;
+        if (k >= 1) {
+          this.land();
+          // A short roll on from where it lands.
+          const n = U.norm(this.tx - this.sx, this.ty - this.sy);
+          this.vx = n.x * 70;
+          this.vy = n.y * 70;
+          DM.Audio.play('grenade_land');
+        }
+        return;
+      }
+      this.spin += (this.speed / 8) * dt;
+      // Thrown by Jon: bursts on the first enemy it reaches.
+      if (this.team === 'player' && this.thrown > 0) {
+        const nx = this.x + this.vx * dt, ny = this.y + this.vy * dt;
+        for (const e of world.entities) {
+          if (e.dead || e.team !== 'enemy' || e === this || e.isProjectile || e.ko || e.hazard) continue;
+          const reach = e.r + this.r + 4;
+          if (U.dist(this.x, this.y, e.x, e.y) < reach || U.dist(nx, ny, e.x, e.y) < reach) return this.boom(world);
+        }
+      }
+    }
+    onWall(speed, w, world) {
+      if (this.team === 'player' && this.thrown > 0 && speed > 150) this.boom(world);
+    }
+    boom(world) {
+      if (this.dead) return;
+      this.dead = true;
+      const mine = this.team === 'player';
+      world.explode(this.x, this.y, mine ? GRENADE.mineR : GRENADE.r, mine ? GRENADE.mineDmg : GRENADE.dmg, { team: this.team, source: this });
+    }
+    // Where it will burst: its landing point while it is in the air.
+    get restX() {
+      return this.lobbing ? this.tx : this.x;
+    }
+    get restY() {
+      return this.lobbing ? this.ty : this.y;
+    }
+    light() {
+      return { r: 60, i: 0.7, color: this.team === 'player' ? '#7fe3ff' : '#ff6a3a', k: 0.2, y: this.y - this.h };
+    }
+    render(ctx, world) {
+      const y = this.y - this.h;
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      Gfx.ellipse(ctx, this.x + 2, this.y + 3, 6, 4);
+      ctx.fill();
+      ctx.save();
+      ctx.translate(this.x, y);
+      ctx.rotate(this.spin);
+      ctx.fillStyle = this.team === 'player' ? '#6f8a8a' : '#4a5634';
+      ctx.strokeStyle = 'rgba(10,12,8,0.8)';
+      ctx.lineWidth = 1.2;
+      Gfx.ellipse(ctx, 0, 0, 6.5, 5);
+      ctx.fill();
+      ctx.stroke();
+      ctx.strokeStyle = 'rgba(0,0,0,0.45)';
+      Gfx.line(ctx, -2, -4.6, -2, 4.6);
+      Gfx.line(ctx, 2, -4.6, 2, 4.6);
+      ctx.fillStyle = '#b8b2a4'; // the lever
+      ctx.fillRect(4, -1.5, 4, 3);
+      ctx.restore();
+      if (!world.lit) this.renderEmissive(ctx, world);
+    }
+    // The blast ring (filling as the fuse burns) and the fuse spark.
+    renderEmissive(ctx, world) {
+      if (this.dead) return;
+      const t = world.realTime || 0;
+      const k = U.clamp(1 - this.fuse / GRENADE.fuse, 0, 1);
+      const mine = this.team === 'player';
+      const x = this.restX, y = this.restY;
+      ctx.save();
+      if (mine) {
+        ctx.strokeStyle = 'rgba(127,227,255,0.55)';
+        ctx.setLineDash([6, 6]);
+        ctx.lineDashOffset = -t * 30;
+        ctx.lineWidth = 1.5;
+        Gfx.circle(ctx, x, y, this.blastR);
+        ctx.stroke();
+      } else {
+        ctx.strokeStyle = `rgba(255,70,50,${0.4 + k * 0.5})`;
+        ctx.fillStyle = `rgba(255,70,50,${0.05 + k * 0.12})`;
+        ctx.lineWidth = 2;
+        Gfx.circle(ctx, x, y, this.blastR);
+        ctx.fill();
+        ctx.stroke();
+        Gfx.circle(ctx, x, y, this.blastR * k);
+        ctx.stroke();
+      }
+      ctx.restore();
+      // The spark blinks faster as the fuse runs down (steady with reduced flashing).
+      const S = DM.SettingsSchema;
+      const steady = S && S.reducedFlashing && S.reducedFlashing();
+      const on = steady || Math.sin(t * (10 + k * 30)) > -0.2;
+      if (on) Gfx.glow(ctx, this.x, this.y - this.h - 5, 9 + k * 6, mine ? '#bff1ff' : '#ffb04a', 0.95);
+    }
+    renderFuture(ctx) {
+      if (!this.lobbing) return;
+      ctx.save();
+      ctx.strokeStyle = 'rgba(255,120,80,0.45)';
+      ctx.setLineDash([3, 5]);
+      Gfx.line(ctx, this.x, this.y, this.tx, this.ty);
       ctx.restore();
     }
   }
@@ -271,5 +439,5 @@
     }
   }
 
-  DM.Proj = { Bullet, Bolt, Shell, Missile, TachyonDisc };
+  DM.Proj = { Bullet, Bolt, Shell, Missile, Grenade, TachyonDisc, TUNING: { GRENADE } };
 })();

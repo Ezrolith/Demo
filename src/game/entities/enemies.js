@@ -3,6 +3,12 @@
  * lethal/non-lethal split (humans knocked out by throws, blasts or bolts are
  * "spared"; only disintegrated ones are not — the game tracks both).
  *
+ * The mob: gangsters take cover, hear gunfire and can lose their nerve and
+ * surrender; grenadiers lob grenades Jon can catch; bruisers rush. Chapter III:
+ * drones, kamikaze drones, tanks (whose crews bail out of a wreck and run for
+ * the command post), missile batteries and the Behemoth. Machines show their
+ * damage: HP pips after a hit and smoke below half health.
+ *
  * To add an enemy: extend Enemy, implement think(dt, world) and render(ctx, world).
  */
 (function () {
@@ -12,7 +18,42 @@
   const Gfx = DM.Gfx;
   const Audio = DM.Audio;
   const Events = DM.Events;
-  const { Bullet, Shell, Missile, TachyonDisc } = DM.Proj;
+  const { Bullet, Shell, Missile, Grenade, TachyonDisc } = DM.Proj;
+  const TAU = Math.PI * 2;
+
+  // Gameplay randomness: the seeded DM.rng when there is one (tests replay a
+  // fight exactly), else Math.random. Looks and barks keep using U.rand.
+  const R = {
+    random: () => (DM.rng ? DM.rng.random() : Math.random()),
+    range: (a, b) => a + (b - a) * R.random(),
+    chance: (p) => R.random() < p,
+  };
+
+  // Steer toward (tx, ty), feeling ahead for walls and turning along them
+  // (always the same way round until the way ahead is clear again).
+  function steerAround(e, world, tx, ty, speed, dt, k = 6) {
+    const n = U.norm(tx - e.x, ty - e.y);
+    if (!n.l) return;
+    let a = Math.atan2(n.y, n.x);
+    const look = Math.min(n.l, 34);
+    const free = (b) => world.isFree(e.x + Math.cos(b) * look, e.y + Math.sin(b) * look, e.r - 1);
+    if (!free(a)) {
+      const side = e.detour || (U.wrapAngle(a - Math.atan2(e.vy, e.vx)) > 0 ? -1 : 1);
+      let found = false;
+      for (const da of [0.5, 1, 1.5, 2, 2.6]) {
+        for (const s of [side, -side]) {
+          if (!free(a + s * da)) continue;
+          a += s * da;
+          e.detour = s;
+          found = true;
+          break;
+        }
+        if (found) break;
+      }
+    } else e.detour = 0;
+    e.vx = U.damp(e.vx, Math.cos(a) * speed, k, dt);
+    e.vy = U.damp(e.vy, Math.sin(a) * speed, k, dt);
+  }
 
   class Enemy extends DM.Entity {
     constructor(o = {}) {
@@ -24,11 +65,11 @@
       this.target = null;
       this.retarget = 0;
       this.alerted = !!o.alerted;
-      this.fireCd = U.rand(0.8, 1.8);
+      this.fireCd = R.range(0.8, 1.8);
       this.aim = 0;
       this.ko = false;
-      this.strafeDir = U.chance(0.5) ? 1 : -1;
-      this.strafeT = U.rand(1, 3);
+      this.strafeDir = R.chance(0.5) ? 1 : -1;
+      this.strafeT = R.range(1, 3);
       this.needLos = o.needLos !== false;
     }
     get active() {
@@ -90,7 +131,8 @@
     }
     // The ledger: exactly one 'enemy:down' per enemy. A human goes down
     // lethally only when disintegrated; anything else (throws, blasts, bolts)
-    // knocks him out.
+    // knocks him out. kind 'surrender' (a gangster gives up) and 'rescued' (a
+    // tank crewman reaches the command post) go the same, spared way.
     die(kind, source) {
       if (this.ko || this.dead) return;
       const w = this.world;
@@ -108,7 +150,7 @@
         this.vx *= 0.5;
         this.vy *= 0.5;
         Events.emit('enemy:down', { enemy: this, lethal: false, kind, human: true });
-        if (w && w.hitstop) w.hitstop(0.06);
+        if (w && w.hitstop && kind !== 'surrender' && kind !== 'rescued') w.hitstop(0.06);
         if (this.onKO && w) this.onKO(w, kind, source);
         return;
       }
@@ -124,6 +166,72 @@
   // ---- 1960s mob ------------------------------------------------------------
   const ALERT_BARKS = ["It's the blue guy!", 'Holy— it\'s him!', 'Shoot him! Shoot!', 'Nobody said nothin\' about HIM!', 'Light him up!'];
   const HELD_BARKS = ['Put me down!', 'Whoa— WHOA!', 'Mama!', 'This ain\'t natural!'];
+  const SURRENDER_BARKS = ['Okay, okay! I give up!', "I'm done! I'm done!", 'I got kids, mister!', "I'll talk! I'll tell 'em everything!", "It ain't worth it. It ain't worth it."];
+
+  // Cover: every 1.5-3 s, when not aiming, a gangster looks over spots within
+  // reach (8 random ones, plus the far sides of nearby walls) for one that a
+  // wall hides from Jon, with a peek spot beside it that has a clear shot at
+  // his man. He runs there, waits out his cooldown, steps out to aim and fire,
+  // and ducks back.
+  const COVER = { every: [1.5, 3], first: [0.1, 0.5], samples: 8, reach: 160, wallReach: 220, near: 110, peek: 52, memory: 5, run: 1.3, giveUp: 2.6, check: 0.4 };
+  // Nerve: each time one of his squad goes down, a gangster whose squad within
+  // 500 px is at least half down has a 35% chance to give up a moment later;
+  // so does anyone within 300 px of Jon lifting a car or expanding.
+  const MORALE = { allies: 500, chance: 0.35, scare: 300, react: [0.35, 0.9] };
+  const HEAR = 450; // gunfire and a man going down carry this far
+
+  // Can a body of radius r walk straight from (x1, y1) to (x2, y2)?
+  function walkable(world, x1, y1, x2, y2, r) {
+    const m = r * 0.6;
+    for (const w of world.walls) {
+      if (w.noCollide) continue;
+      if (U.segRect(x1, y1, x2, y2, { x: w.x - m, y: w.y - m, w: w.w + m * 2, h: w.h + m * 2 }) >= 0) return false;
+    }
+    return true;
+  }
+
+  // Gangsters within `radius` of src hear it: they are alerted, and those with
+  // nobody in sight come looking where `about` is.
+  function alertNear(world, src, radius, about) {
+    if (!world) return;
+    for (const e of world.entities) {
+      if (e === src || !(e instanceof Gangster) || !e.active || e.heldBy) continue;
+      if (U.dist(src.x, src.y, e.x, e.y) > radius) continue;
+      if (!e.alerted) {
+        e.alerted = true;
+        if (e.onAlert) e.onAlert(world);
+      }
+      if (about && !about.dead && !e.target) e.lastSeen = { x: about.x, y: about.y };
+    }
+  }
+
+  // Jon lifting a car or expanding shakes everyone close by. Checked once a
+  // frame, by whichever gangster updates first.
+  function watchJon(world) {
+    const m = world._morale || (world._morale = { t: null, lift: null, expandT: 0 });
+    if (m.t === world.time) return;
+    m.t = world.time;
+    const p = world.player;
+    if (!p) return;
+    const tk = p.powers && p.powers.telekinesis;
+    const V = DM.Props && DM.Props.Vehicle;
+    const lift = tk && tk.target && V && tk.target instanceof V ? tk.target : null;
+    if (lift && lift !== m.lift) scare(world, [p, lift]);
+    m.lift = lift;
+    const ex = p.expandT || 0;
+    if (ex > m.expandT + 0.5) scare(world, [p]);
+    m.expandT = ex;
+  }
+  function scare(world, from) {
+    for (const e of world.entities) {
+      if (!(e instanceof Gangster) || !e.canBreak()) continue;
+      if (from.some((s) => U.dist(s.x, s.y, e.x, e.y) < MORALE.scare)) e.loseNerve();
+    }
+  }
+  // After a man goes down: each of the rest whose squad is at least half down may break.
+  function rattle(world) {
+    for (const e of world.entities) if (e instanceof Gangster && e.canBreak() && e.shaken(world)) e.loseNerve();
+  }
 
   // A knocked-out man is drawn washed out, so he never reads as a live threat.
   const greyLooks = new WeakMap();
@@ -134,6 +242,66 @@
     for (const k of ['skin', 'hair', 'hat', 'hatBrim', 'body', 'sleeve', 'legs']) if (typeof g[k] === 'string' && g[k][0] === '#') g[k] = U.mix(g[k], '#8a8a8e', 0.5);
     greyLooks.set(look, g);
     return g;
+  }
+
+  // Hands up, seen from above: arms out to the sides, hands either side of his head.
+  function handsUp(ctx, look, x, y, angle, t) {
+    const s = look.size || 1;
+    const paint = (c) => {
+      ctx.fillStyle = c;
+      ctx.fill();
+      ctx.stroke();
+    };
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.fillStyle = 'rgba(0,0,0,0.26)';
+    Gfx.ellipse(ctx, 3 * s, 4 * s, 14 * s, 11 * s);
+    ctx.fill();
+    ctx.rotate(angle);
+    ctx.scale(s, s);
+    ctx.strokeStyle = 'rgba(16,12,10,0.6)';
+    ctx.lineWidth = 1.4;
+    ctx.lineJoin = 'round';
+    const bob = Math.sin(t * 5) * 0.8;
+    Gfx.ellipse(ctx, 0, -5, 6.5, 4);
+    paint(look.legs || '#333');
+    Gfx.ellipse(ctx, 0, 5, 6.5, 4);
+    paint(look.legs || '#333');
+    const sleeve = look.sleeve || look.body || '#777';
+    for (const sy of [-1, 1]) {
+      Gfx.ellipse(ctx, -1, sy * (12.5 + bob), 4.4, 3.4);
+      paint(sleeve);
+    }
+    Gfx.ellipse(ctx, 0, 0, 8.5, 12.5);
+    paint(look.body || '#777');
+    const skin = look.skin || '#e0b896';
+    Gfx.circle(ctx, 1, 0, 7.2);
+    paint(skin);
+    if (look.hat) {
+      const brim = look.hatBrim || look.hat;
+      if (look.hatStyle === 'cap') {
+        Gfx.circle(ctx, 0.5, 0, 7.8);
+        paint(brim);
+        Gfx.ellipse(ctx, 7.5, 0, 3.6, 6.2);
+        paint(brim);
+      } else {
+        Gfx.circle(ctx, 0, 0, 10.5);
+        paint(brim);
+        Gfx.circle(ctx, 0, 0, 6.8);
+        paint(look.hat);
+      }
+    } else if (look.hair && look.hairStyle !== 'bald') {
+      ctx.beginPath();
+      ctx.arc(0.5, 0, 7.6, Math.PI * 0.36, Math.PI * 1.64);
+      ctx.closePath();
+      ctx.fillStyle = look.hair;
+      ctx.fill();
+    }
+    for (const sy of [-1, 1]) {
+      Gfx.circle(ctx, 3, sy * (15.5 + bob), 2.7);
+      paint(skin);
+    }
+    ctx.restore();
   }
 
   class Gangster extends Enemy {
@@ -154,12 +322,34 @@
         this.hp = this.maxHp = 60;
         this.mass = 1.5;
       }
+      this.cover = null; // { x, y, peek: { x, y } } while he is using cover
+      this.coverPhase = 'hide'; // 'hide' at the spot, 'peek' stepping out to shoot
+      this.coverT = R.range(COVER.first[0], COVER.first[1]);
+      this.coverCheckT = 0;
+      this.coverRunT = 0;
+      this.peekT = 0;
+      this.foe = null; // who he is fighting, remembered for a while out of sight
+      this.foeT = 0;
+      this.canSurrender = o.canSurrender !== false;
+      this.surrenderT = 0; // > 0: about to give up
+      this.surrendered = false;
+    }
+    // Men spawned together are a squad: they count each other's losses.
+    onAdd(world) {
+      this.squad = world.time;
     }
     update(dt, world) {
       if (this.kick > 0) this.kick = Math.max(0, this.kick - dt * 10);
       if (this.muzzleT > 0) this.muzzleT -= dt;
+      if (this.ko) return;
+      // About to give up: he does, as soon as he is back on his feet.
+      if (this.surrenderT > 0) {
+        if (this.heldBy || this.thrown > 0 || this.stun > 0.3) this.surrenderT = Math.max(this.surrenderT, 0.15);
+        else if ((this.surrenderT -= dt) <= 0) return this.surrender(world);
+      }
+      watchJon(world);
       // A solid hit makes him flinch: he stops, and his aim is set back.
-      if (this.flinch > 0 && !this.ko && !this.heldBy) {
+      if (this.flinch > 0 && !this.heldBy) {
         this.flinch -= dt;
         this.vx = U.damp(this.vx, 0, 10, dt);
         this.vy = U.damp(this.vy, 0, 10, dt);
@@ -176,12 +366,63 @@
       }
       return hit;
     }
-    // Spared: he lies where he fell, gun skidding away.
+    // Going down is heard: nearby men turn toward Jon, and his squad may break.
+    die(kind, source) {
+      if (this.ko || this.dead) return;
+      super.die(kind, source);
+      const w = this.world;
+      if (!w || kind === 'surrender') return;
+      if (this.dead) (w.fallen || (w.fallen = [])).push({ x: this.x, y: this.y, squad: this.squad });
+      alertNear(w, this, HEAR, w.player);
+      w.defer(() => rattle(w));
+    }
+    // ---- nerve -------------------------------------------------------------------
+    canBreak() {
+      return this.canSurrender && this.active && !this.heldBy && !(this.surrenderT > 0);
+    }
+    // At least half of his squad within 500 px is down (knocked out, disintegrated or given up).
+    shaken(world) {
+      let allies = 0, out = 0;
+      for (const e of world.entities) {
+        if (e === this || !(e instanceof Gangster) || e.dead || e.squad !== this.squad) continue;
+        if (U.dist(this.x, this.y, e.x, e.y) > MORALE.allies) continue;
+        allies++;
+        if (e.ko) out++;
+      }
+      for (const f of world.fallen || []) {
+        if (f.squad !== this.squad || U.dist(this.x, this.y, f.x, f.y) > MORALE.allies) continue;
+        allies++;
+        out++;
+      }
+      return allies > 0 && out * 2 >= allies;
+    }
+    loseNerve() {
+      if (R.chance(MORALE.chance)) this.surrenderT = R.range(MORALE.react[0], MORALE.react[1]);
+    }
+    // He drops the gun and puts his hands up: spared, once (the 'surrender' kind
+    // of knockout), and out of the fight for good.
+    surrender(world) {
+      if (this.ko || this.dead) return;
+      this.surrenderT = 0;
+      this.surrendered = true;
+      this.cover = null;
+      this.foe = null;
+      const p = world.player;
+      if (p) this.facing = U.angleTo(this.x, this.y, p.x, p.y);
+      world.bark(this, U.pick(SURRENDER_BARKS), 2.4);
+      Audio.play('surrender');
+      this.die('surrender');
+    }
+    // Spared: he lies where he fell, gun skidding away (or stands, hands up).
     onKO(world, kind) {
-      const sp = Math.hypot(this.vx, this.vy);
-      this.koAngle = sp > 30 ? Math.atan2(-this.vy, -this.vx) : this.facing + Math.PI;
       this.flinch = 0;
       this.kick = 0;
+      if (kind === 'surrender') {
+        if (DM.FX) DM.FX.knockout(world, this, { gun: this.gun, text: 'surrendered' });
+        return;
+      }
+      const sp = Math.hypot(this.vx, this.vy);
+      this.koAngle = sp > 30 ? Math.atan2(-this.vy, -this.vx) : this.facing + Math.PI;
       if (DM.FX) DM.FX.knockout(world, this, { gun: this.gun });
     }
     // Gone: he comes apart from the side facing Jon.
@@ -189,7 +430,7 @@
       if (this.dead || this.ko) return;
       const L = this.look;
       const aim = !!this.target || this.aim > 0;
-      const key = ['gangster', L.skin, L.hat, L.hatBrim, L.body, L.legs, this.gun, aim].join('|');
+      const key = [this.constructor.name, L.skin, L.hat, L.hatBrim, L.body, L.legs, this.gun, aim].join('|');
       const draw = (g) => Gfx.figure(g, Object.assign({}, L, { x: 0, y: 0, angle: 0, aim, gun: this.gun }));
       if (!DM.FX || !DM.FX.unbind(world, this, { source, key, draw, angle: this.facing, step: 2, max: 600 })) return super.disintegrate(world, source);
       world.particles.burst(this.x, this.y, 12, { color: ['#bff1ff', '#5fd4ff'], speed: [60, 300], life: [0.2, 0.6], size: [1.5, 3], drag: 3 });
@@ -201,31 +442,156 @@
     }
     onHeld(dt, world) {
       this.facing += dt * 9;
+      this.cover = null;
       if (!this.heldBarked) {
         this.heldBarked = true;
         world.bark(this, U.pick(HELD_BARKS), 1.4);
       }
     }
+    // ---- fighting ----------------------------------------------------------------
     think(dt, world) {
       this.heldBarked = false;
-      const t = this.target;
       this.walk += dt * this.speed * 0.09;
-      if (!t) {
-        if (this.alerted && this.lastSeen && U.dist(this.x, this.y, this.lastSeen.x, this.lastSeen.y) > 30) this.steer(this.lastSeen.x, this.lastSeen.y, this.speedBase * 0.8, dt);
-        else {
-          this.vx = U.damp(this.vx, 0, 5, dt);
-          this.vy = U.damp(this.vy, 0, 5, dt);
-        }
+      const seen = this.target;
+      const foe = this.remember(dt, seen);
+      if (!foe) {
+        this.cover = null;
+        this.lookFor(dt, world);
         return;
       }
-      this.lastSeen = { x: t.x, y: t.y };
+      const fx = seen ? seen.x : this.lastSeen.x, fy = seen ? seen.y : this.lastSeen.y;
+      this.facing = U.dampAngle(this.facing, U.angleTo(this.x, this.y, fx, fy), 10, dt);
+      this.takeCover(dt, world, foe);
+      if (this.cover) this.useCover(dt, world);
+      else this.strafe(dt, world, seen);
+      this.attack(dt, world, seen);
+    }
+    // Who he is fighting: whoever he can see, else whoever he last saw, for a few seconds.
+    remember(dt, seen) {
+      if (seen) {
+        this.foe = seen;
+        this.foeT = 0;
+        this.lastSeen = { x: seen.x, y: seen.y };
+        return seen;
+      }
+      const f = this.foe;
+      if (f && (f.dead || f.down || f.hidden || (this.foeT += dt) > COVER.memory)) this.foe = null;
+      return this.foe;
+    }
+    // Nobody to fight: go and look where the trouble was, else stand.
+    lookFor(dt, world) {
+      const ls = this.lastSeen;
+      if (this.alerted && ls && U.dist(this.x, this.y, ls.x, ls.y) > 30) steerAround(this, world, ls.x, ls.y, this.speedBase * 0.8, dt);
+      else {
+        this.vx = U.damp(this.vx, 0, 5, dt);
+        this.vy = U.damp(this.vy, 0, 5, dt);
+      }
+    }
+    // Which way danger lies: Jon, while he is about (a man trading shots with
+    // the police still keeps a wall between himself and Jon), else his foe.
+    threatOf(world, foe) {
+      const p = world.player;
+      if (!p || foe === p || p.hidden || p.down || p.form !== 'manhattan') return foe;
+      return U.dist(this.x, this.y, p.x, p.y) < this.sight * 1.2 ? p : foe;
+    }
+    takeCover(dt, world, foe) {
+      const threat = this.threatOf(world, foe);
+      // Found out: a hiding spot Jon can see into is no good any more.
+      if (this.cover && this.coverPhase === 'hide' && (this.coverCheckT -= dt) <= 0) {
+        this.coverCheckT = COVER.check;
+        if (world.los(this.cover.x, this.cover.y, threat.x, threat.y)) this.coverT = Math.min(this.coverT, 0);
+      }
+      if ((this.coverT -= dt) > 0 || this.aim > 0 || this.burst > 0) return;
+      this.coverT = R.range(COVER.every[0], COVER.every[1]);
+      if (this.cover && !world.los(this.cover.x, this.cover.y, threat.x, threat.y)) return;
+      this.cover = this.findCover(world, threat, foe);
+      this.coverPhase = 'hide';
+      this.coverRunT = 0;
+      this.coverCheckT = COVER.check;
+    }
+    // Candidate spots: 8 at random within reach, and beside each side of every
+    // wall nearby (the near point of that side, stepped out from it).
+    coverSpots(world) {
+      const out = [];
+      const a0 = R.range(0, TAU);
+      for (let i = 0; i < COVER.samples; i++) {
+        const a = a0 + (i * TAU) / COVER.samples, d = R.range(50, COVER.reach);
+        out.push({ x: this.x + Math.cos(a) * d, y: this.y + Math.sin(a) * d });
+      }
+      const m = this.r + 6, reach = COVER.wallReach;
+      for (const w of world.walls) {
+        if (w.noCollide || w.low || w.seeThrough) continue;
+        if (this.x < w.x - reach || this.x > w.x + w.w + reach || this.y < w.y - reach || this.y > w.y + w.h + reach) continue;
+        const cx = U.clamp(this.x, w.x, w.x + w.w), cy = U.clamp(this.y, w.y, w.y + w.h);
+        out.push({ x: w.x - m, y: cy }, { x: w.x + w.w + m, y: cy }, { x: cx, y: w.y - m }, { x: cx, y: w.y + w.h + m });
+      }
+      return out;
+    }
+    findCover(world, threat, foe) {
+      let best = null;
+      for (const s of this.coverSpots(world)) {
+        const d = U.dist(this.x, this.y, s.x, s.y);
+        if (d > COVER.wallReach || !world.isFree(s.x, s.y, this.r + 3)) continue;
+        if (world.los(s.x, s.y, threat.x, threat.y)) continue; // seen from there
+        if (U.dist(s.x, s.y, threat.x, threat.y) < COVER.near) continue; // not right next to him
+        const peek = this.peekFrom(world, s.x, s.y, foe);
+        if (!peek) continue;
+        const score = d + Math.abs(U.dist(s.x, s.y, foe.x, foe.y) - (this.range[0] + this.range[1]) / 2) * 0.5;
+        if (!best || score < best.score) best = { x: s.x, y: s.y, peek, score };
+      }
+      return best;
+    }
+    // A step out to the side (or forward) from (x, y) with a clear shot at foe.
+    peekFrom(world, x, y, foe) {
+      const n = U.norm(foe.x - x, foe.y - y);
+      for (const [side, fwd] of [[1, 0], [-1, 0], [1, 0.6], [-1, 0.6], [0, 1]]) {
+        for (const k of [1, 1.6]) {
+          const px = x + (-n.y * side + n.x * fwd) * COVER.peek * k, py = y + (n.x * side + n.y * fwd) * COVER.peek * k;
+          if (!world.isFree(px, py, this.r)) continue;
+          if (world.shotHit(px, py, foe.x, foe.y) >= 0) continue;
+          if (!walkable(world, x, y, px, py, this.r)) continue;
+          return { x: px, y: py };
+        }
+      }
+      return null;
+    }
+    useCover(dt, world) {
+      const c = this.cover;
+      const busy = this.aim > 0 || this.burst > 0;
+      if (this.coverPhase === 'hide' && this.fireCd <= 0 && !busy && U.dist(this.x, this.y, c.x, c.y) < 14) {
+        this.coverPhase = 'peek';
+        this.peekT = 0;
+      }
+      const spot = this.coverPhase === 'peek' ? c.peek : c;
+      const d = U.dist(this.x, this.y, spot.x, spot.y);
+      if (busy || d < 5) {
+        this.vx = U.damp(this.vx, 0, 8, dt);
+        this.vy = U.damp(this.vy, 0, 8, dt);
+      } else {
+        const sp = this.speedBase * (this.coverPhase === 'hide' ? COVER.run : 1) * Math.min(1, 0.3 + d / 30);
+        steerAround(this, world, spot.x, spot.y, sp, dt, 8);
+      }
+      // Cannot get there, or the shot from the peek spot never comes: think again.
+      if (this.coverPhase === 'hide') {
+        if (d > 14 && (this.coverRunT += dt) > COVER.giveUp) this.dropCover();
+      } else if (!busy && (this.peekT += dt) > COVER.giveUp) this.dropCover();
+    }
+    dropCover() {
+      this.cover = null;
+      this.coverT = R.range(0.5, 1.2);
+    }
+    // In the open: strafe at his range (or go to where his man was last seen).
+    strafe(dt, world, t) {
+      if (!t) {
+        this.lookFor(dt, world);
+        return;
+      }
       const d = U.dist(this.x, this.y, t.x, t.y);
       const ang = U.angleTo(this.x, this.y, t.x, t.y);
-      this.facing = U.dampAngle(this.facing, ang, 10, dt);
       this.strafeT -= dt;
       if (this.strafeT <= 0) {
         this.strafeDir *= -1;
-        this.strafeT = U.rand(1.2, 2.8);
+        this.strafeT = R.range(1.2, 2.8);
       }
       const nx = Math.cos(ang), ny = Math.sin(ang);
       let mx = -ny * this.strafeDir * 0.7, my = nx * this.strafeDir * 0.7;
@@ -240,44 +606,63 @@
       const sp = this.aim > 0 || this.burst > 0 ? this.speedBase * 0.25 : this.speedBase;
       this.vx = U.damp(this.vx, n.x * sp, 6, dt);
       this.vy = U.damp(this.vy, n.y * sp, 6, dt);
-
+    }
+    // Aim and fire at t (only while he can see him); from cover, only from the peek spot.
+    attack(dt, world, t) {
       if (this.burst > 0) {
+        if (!t) return;
         this.burstT -= dt;
         if (this.burstT <= 0) {
           this.fireOne(world, t, 0.13);
           this.burst--;
           this.burstT = 0.09;
+          if (!this.burst) this.duck();
         }
         return;
       }
       if (this.aim > 0) {
+        if (!t) return; // holds his aim until he sees his man again
         this.aim -= dt;
-        if (this.aim <= 0) this.fire(world, t);
+        if (this.aim <= 0) {
+          this.fire(world, t);
+          if (!this.burst) this.duck();
+        }
         return;
       }
       this.fireCd -= dt;
-      if (this.fireCd <= 0) this.aim = this.aimTime;
+      if (this.fireCd <= 0 && t && (!this.cover || this.coverPhase === 'peek')) this.aim = this.aimTime;
+    }
+    // Shot taken: back behind the wall.
+    duck() {
+      if (!this.cover) return;
+      this.coverPhase = 'hide';
+      this.coverRunT = 0;
     }
     fire(world, t) {
       if (this.gun === 'tommy') {
         this.burst = 6;
         this.burstT = 0;
-        this.fireCd = U.rand(2.4, 3.2);
+        this.fireCd = R.range(2.4, 3.2);
       } else {
         this.fireOne(world, t, 0.05);
-        this.fireCd = U.rand(1.3, 2.1);
+        this.fireCd = R.range(1.3, 2.1);
       }
     }
     fireOne(world, t, spread) {
-      const a = U.angleTo(this.x, this.y, t.x + t.vx * 0.12, t.y + t.vy * 0.12) + U.rand(-spread, spread);
+      const a = U.angleTo(this.x, this.y, t.x + t.vx * 0.12, t.y + t.vy * 0.12) + R.range(-spread, spread);
       const mx = this.x + Math.cos(a) * 20, my = this.y + Math.sin(a) * 20;
       world.add(new Bullet({ x: mx, y: my, vx: Math.cos(a) * 560, vy: Math.sin(a) * 560, team: 'enemy', dmg: this.gun === 'tommy' ? 4 : 6 }));
       world.particles.burst(mx, my, 4, { color: ['#fff2c4', '#ffd27a'], speed: [60, 160], life: [0.05, 0.12], size: [2, 4], angle: a, spread: 0.6 });
       this.kick = 1;
       this.muzzleT = 0.035;
       Audio.play('shot');
+      alertNear(world, this, HEAR, t);
     }
     render(ctx, world) {
+      if (this.surrendered) {
+        handsUp(ctx, greyed(this.look), this.x, this.y, this.facing, world.realTime || 0);
+        return;
+      }
       if (this.ko) {
         const a = this.koAngle == null ? this.facing + Math.PI : this.koAngle;
         Gfx.figure(ctx, Object.assign({}, greyed(this.look), { x: this.x, y: this.y, angle: a, pose: 'down', alpha: 0.8, ink: 'rgba(48,48,54,0.55)' }));
@@ -353,6 +738,320 @@
         ctx.restore();
       }
     }
+  }
+
+  // ---- the grenadier ----------------------------------------------------------
+  // Lobs a grenade where Jon is heading. A 0.6 s wind-up shows an arc and a red
+  // ring where it will land; the grenade can be caught and thrown back.
+  const GRENADIER = { windup: 0.6, cooldown: [3, 4.2], range: [230, 400], lead: 0.45, speed: 95, reach: 480 };
+  const grenadierLook = () => Object.assign(DM.LOOKS.randomGangster(), { name: 'Grenadier', hatStyle: 'cap', trim: '#2a2620' });
+
+  class Grenadier extends Gangster {
+    constructor(o = {}) {
+      super(Object.assign({ look: o.look || grenadierLook() }, o));
+      this.gun = null;
+      this.range = GRENADIER.range;
+      this.speedBase = GRENADIER.speed;
+      this.aimTime = GRENADIER.windup;
+      this.fireCd = R.range(1, 1.8);
+    }
+    // Where a grenade thrown now would land: ahead of t, within reach, on open ground.
+    landing(world, t) {
+      let tx = t.x + t.vx * GRENADIER.lead, ty = t.y + t.vy * GRENADIER.lead;
+      const d = U.dist(this.x, this.y, tx, ty);
+      if (d > GRENADIER.reach) {
+        tx = this.x + ((tx - this.x) * GRENADIER.reach) / d;
+        ty = this.y + ((ty - this.y) * GRENADIER.reach) / d;
+      }
+      for (let k = 0; k < 8 && !world.isFree(tx, ty, 6); k++) {
+        tx = U.lerp(tx, t.x, 0.35);
+        ty = U.lerp(ty, t.y, 0.35);
+      }
+      return { x: tx, y: ty };
+    }
+    handPos() {
+      const f = this.facing;
+      return { x: this.x + Math.cos(f) * 6 - Math.sin(f) * 11, y: this.y + Math.sin(f) * 6 + Math.cos(f) * 11 };
+    }
+    fire(world, t) {
+      const L = this.landing(world, t);
+      const h = this.handPos();
+      const d = U.dist(h.x, h.y, L.x, L.y);
+      world.add(new Grenade({ x: h.x, y: h.y, tx: L.x, ty: L.y, T: U.clamp(d / 520, 0.45, 0.9) }));
+      this.fireCd = R.range(GRENADIER.cooldown[0], GRENADIER.cooldown[1]);
+      this.kick = 1;
+      Audio.play('grenade_throw');
+      alertNear(world, this, HEAR, t);
+    }
+    render(ctx, world) {
+      super.render(ctx, world);
+      if (this.ko || this.dead || !(this.aim > 0)) return;
+      // The grenade in his hand, drawn back for the throw.
+      const h = this.handPos();
+      ctx.save();
+      ctx.fillStyle = '#4a5634';
+      ctx.strokeStyle = 'rgba(10,12,8,0.8)';
+      ctx.lineWidth = 1.2;
+      Gfx.ellipse(ctx, h.x, h.y, 5, 4);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+    }
+    renderEmissive(ctx, world) {
+      if (this.ko || this.dead) return;
+      const t = this.target;
+      if (!(this.aim > 0) || !t || t.dead) return;
+      const k = U.clamp(1 - this.aim / this.aimTime, 0, 1);
+      const L = this.landing(world, t), h = this.handPos();
+      const d = U.dist(h.x, h.y, L.x, L.y);
+      const lift = Math.min(64, 20 + d * 0.2) * 2;
+      ctx.save();
+      ctx.strokeStyle = `rgba(255,90,60,${0.3 + k * 0.5})`;
+      ctx.setLineDash([5, 6]);
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(h.x, h.y);
+      ctx.quadraticCurveTo((h.x + L.x) / 2, (h.y + L.y) / 2 - lift, L.x, L.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.strokeStyle = `rgba(255,70,50,${0.25 + k * 0.6})`;
+      ctx.fillStyle = `rgba(255,70,50,${0.04 + k * 0.1})`;
+      ctx.lineWidth = 2;
+      Gfx.circle(ctx, L.x, L.y, DM.Proj.TUNING.GRENADE.r);
+      ctx.fill();
+      ctx.stroke();
+      ctx.restore();
+      Gfx.glow(ctx, h.x, h.y, 8 + k * 6, '#ffb04a', 0.9); // the fuse, lit
+    }
+  }
+
+  // ---- the bruiser ------------------------------------------------------------
+  // No gun. He closes in and crouches for half a second (a red lane shows where
+  // he will go; it locks for the last 0.15 s), then rushes at 420 px/s. Contact
+  // knocks Jon off his feet for 0.3 s; a wall stops him cold. Caught with
+  // telekinesis mid-rush he keeps his momentum for a moment: let go at once and
+  // he carries on into whatever is ahead.
+  const BRUISER = { hp: 60, speed: 120, reach: 300, crouch: 0.5, lock: 0.15, rush: 420, rushT: 0.75, dmg: 14, stagger: 0.3, shove: 360, recover: 0.9, wallStun: 1.4, rest: [0.8, 1.6], carryT: 0.35 };
+  const BRUISER_BARKS = ["C'mere, pretty boy!", "Nobody's that tough!", "I'll fold you in half!"];
+  const bruiserLook = () => {
+    const skin = U.pick(['#e6bf9b', '#d9a77f', '#c98f66', '#a8714c']);
+    return { name: 'Bruiser', skin, hair: '#2a1d14', hairStyle: 'short', body: '#6e4b36', sleeve: skin, legs: '#26221f', size: 1.25, bg: '#6a5a4a' };
+  };
+
+  class Bruiser extends Gangster {
+    constructor(o = {}) {
+      super(Object.assign({ hp: BRUISER.hp, r: 15, mass: 2.4, look: o.look || bruiserLook() }, o));
+      this.gun = null;
+      this.hp = this.maxHp = BRUISER.hp;
+      this.speedBase = BRUISER.speed;
+      this.aimTime = BRUISER.crouch;
+      this.state = 'stalk'; // 'stalk' | 'crouch' | 'rush' | 'recover'
+      this.stateT = 0;
+      this.restT = R.range(0.6, 1.2);
+      this.rushA = this.facing;
+      this.carry = null;
+    }
+    think(dt, world) {
+      this.heldBarked = false;
+      this.walk += dt * this.speed * 0.09;
+      if (this.state === 'rush') return this.rushStep(dt, world);
+      const seen = this.target;
+      const foe = this.remember(dt, seen);
+      if (this.state === 'recover') {
+        this.vx = U.damp(this.vx, 0, 5, dt);
+        this.vy = U.damp(this.vy, 0, 5, dt);
+        if ((this.stateT -= dt) <= 0) this.state = 'stalk';
+        return;
+      }
+      if (!foe) {
+        this.state = 'stalk';
+        this.aim = 0;
+        this.lookFor(dt, world);
+        return;
+      }
+      if (this.state === 'crouch') {
+        this.vx = U.damp(this.vx, 0, 14, dt);
+        this.vy = U.damp(this.vy, 0, 14, dt);
+        this.stateT -= dt;
+        if (seen && this.stateT > BRUISER.lock) this.rushA = U.angleTo(this.x, this.y, seen.x + seen.vx * 0.15, seen.y + seen.vy * 0.15);
+        this.facing = U.dampAngle(this.facing, this.rushA, 16, dt);
+        this.aim = Math.max(0.001, this.stateT);
+        if (this.stateT <= 0) this.startRush();
+        return;
+      }
+      // Stalking: straight for him.
+      const fx = seen ? seen.x : this.lastSeen.x, fy = seen ? seen.y : this.lastSeen.y;
+      this.facing = U.dampAngle(this.facing, U.angleTo(this.x, this.y, fx, fy), 8, dt);
+      const d = U.dist(this.x, this.y, fx, fy);
+      if (d > 40) steerAround(this, world, fx, fy, this.speedBase, dt);
+      else {
+        this.vx = U.damp(this.vx, 0, 6, dt);
+        this.vy = U.damp(this.vy, 0, 6, dt);
+      }
+      this.restT -= dt;
+      if (seen && this.restT <= 0 && d < BRUISER.reach && d > 50 && walkable(world, this.x, this.y, seen.x, seen.y, this.r)) {
+        this.state = 'crouch';
+        this.stateT = BRUISER.crouch;
+        this.rushA = U.angleTo(this.x, this.y, seen.x, seen.y);
+        this.aim = BRUISER.crouch;
+        Audio.play('bruiser_growl');
+        if (Math.random() < 0.4) world.bark(this, U.pick(BRUISER_BARKS), 1.4);
+      }
+    }
+    startRush() {
+      this.state = 'rush';
+      this.stateT = BRUISER.rushT;
+      this.aim = 0;
+      this.vx = Math.cos(this.rushA) * BRUISER.rush;
+      this.vy = Math.sin(this.rushA) * BRUISER.rush;
+      Audio.play('bruiser_rush');
+    }
+    rushStep(dt, world) {
+      this.stateT -= dt;
+      const vx = Math.cos(this.rushA) * BRUISER.rush, vy = Math.sin(this.rushA) * BRUISER.rush;
+      this.vx = vx;
+      this.vy = vy;
+      this.facing = this.rushA;
+      this.walk += dt * 30;
+      if (Math.random() < dt * 30) world.particles.emit(this.x - Math.cos(this.rushA) * 12, this.y - Math.sin(this.rushA) * 12, { vx: U.rand(-20, 20), vy: U.rand(-20, 20), life: 0.4, size: 4, size1: 9, color: '#6a645a', add: false, shape: 'smoke', alpha: 0.35 });
+      const nx = this.x + vx * dt, ny = this.y + vy * dt;
+      for (const e of world.entities) {
+        if (e.dead || e.team !== 'player' || !e.targetable || e.hidden || e.down) continue;
+        if (U.dist(nx, ny, e.x, e.y) > this.r + e.r + 4) continue;
+        this.slam(world, e);
+        return;
+      }
+      if (this.stateT <= 0) this.rest(BRUISER.recover);
+    }
+    rest(t) {
+      this.state = 'recover';
+      this.stateT = t;
+      this.restT = R.range(BRUISER.rest[0], BRUISER.rest[1]);
+      this.aim = 0;
+    }
+    // Contact: Jon is knocked off his feet; anyone else on his side is shoved.
+    slam(world, e) {
+      const n = U.norm(e.x - this.x, e.y - this.y);
+      e.damage(BRUISER.dmg, this, 'strike');
+      if (e.isPlayer) stagger(world, e, BRUISER.stagger, n.x * BRUISER.shove, n.y * BRUISER.shove);
+      else if (!e.static) {
+        e.vx += n.x * BRUISER.shove;
+        e.vy += n.y * BRUISER.shove;
+      }
+      this.vx = -n.x * 60;
+      this.vy = -n.y * 60;
+      world.particles.burst((this.x + e.x) / 2, (this.y + e.y) / 2, 12, { color: ['#ffffff', '#d8d0c0', '#ffd27a'], speed: [60, 220], life: [0.15, 0.4], size: [2, 4], shape: 'spark' });
+      kick(world, n.x, n.y, 6, 0.3);
+      Audio.play('bruiser_hit');
+      this.rest(BRUISER.recover);
+    }
+    onWall(speed, w, world) {
+      if (this.state !== 'rush' || speed < 200) return;
+      this.stun = Math.max(this.stun, BRUISER.wallStun);
+      this.rest(0);
+      world.bark(this, 'Ngh...', 1.2);
+      world.particles.burst(this.x, this.y, 10, { color: ['#d8d0c0', '#9a9080'], speed: [40, 160], life: [0.2, 0.5], size: [2, 3.5], add: false });
+      Audio.play('impact');
+      if (onScreen(world, this.x, this.y)) world.camera.shake(0.2);
+    }
+    onGrab() {
+      if (this.state === 'rush') this.carry = { vx: Math.cos(this.rushA) * BRUISER.rush, vy: Math.sin(this.rushA) * BRUISER.rush, t: BRUISER.carryT };
+      this.rest(0);
+    }
+    onHeld(dt, world) {
+      super.onHeld(dt, world);
+      const c = this.carry;
+      if (!c || !(c.t > 0)) return;
+      c.t -= dt;
+      const k = Math.max(0, c.t / BRUISER.carryT);
+      this.vx = U.lerp(this.vx, c.vx, k);
+      this.vy = U.lerp(this.vy, c.vy, k);
+    }
+    render(ctx, world) {
+      if (this.ko || this.surrendered) return super.render(ctx, world);
+      const crouch = this.state === 'crouch';
+      const jit = crouch ? Math.sin((world.realTime || 0) * 60) * 0.8 : 0;
+      Gfx.figure(ctx, Object.assign({}, this.look, {
+        x: this.x + jit, y: this.y, angle: this.facing, walk: this.walk, moving: this.speed > 20, scale: crouch ? 0.88 : 1,
+        aim: crouch || this.state === 'rush' || !!this.target, flash: this.hitFlash > 0 ? 0.7 : 0,
+      }));
+      if (!world.lit) this.renderEmissive(ctx, world);
+    }
+    // The lane he is about to rush down: dashed while he still tracks Jon, solid once locked.
+    renderEmissive(ctx, world) {
+      if (this.ko || this.dead || this.state !== 'crouch') return;
+      const k = U.clamp(1 - this.stateT / BRUISER.crouch, 0, 1);
+      const locked = this.stateT <= BRUISER.lock;
+      const len = BRUISER.rush * BRUISER.rushT * (0.45 + 0.55 * k);
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(this.rushA);
+      ctx.fillStyle = `rgba(255,70,50,${0.05 + k * 0.12})`;
+      ctx.strokeStyle = `rgba(255,70,50,${0.3 + k * 0.55})`;
+      ctx.lineWidth = locked ? 2.4 : 1.2;
+      if (!locked) ctx.setLineDash([6, 5]);
+      ctx.beginPath();
+      ctx.rect(this.r * 0.6, -this.r, len, this.r * 2);
+      ctx.fill();
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = `rgba(255,90,70,${0.3 + k * 0.5})`;
+      for (let x = this.r + 24; x < len; x += 46) {
+        ctx.beginPath();
+        ctx.moveTo(x + 10, 0);
+        ctx.lineTo(x, -7);
+        ctx.lineTo(x + 4, 0);
+        ctx.lineTo(x, 7);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+    }
+  }
+
+  // Jon knocked off his feet for a moment (a bruiser's rush): he slides with
+  // the blow and cannot steer until it passes. Stars circle his head.
+  class Stagger extends DM.Entity {
+    constructor(p, t, vx, vy) {
+      super({ x: p.x, y: p.y, r: 1, static: true, body: false, solid: false, disintegratable: false, layer: 5, team: 'neutral' });
+      this.p = p;
+      this.t = this.dur = t;
+      this.svx = vx;
+      this.svy = vy;
+      this.timeless = true;
+    }
+    update(dt, world) {
+      const p = this.p;
+      this.t -= dt;
+      if (this.t <= 0 || p.dead || p.down || p.locked || p.world !== world) {
+        this.dead = true;
+        p.staggerT = 0;
+        return;
+      }
+      const k = this.t / this.dur;
+      p.vx = this.svx * k;
+      p.vy = this.svy * k;
+      p.staggerT = this.t;
+      this.x = p.x;
+      this.y = p.y;
+    }
+    render(ctx, world) {
+      const p = this.p, t = world.realTime || 0;
+      const a = Math.min(1, this.t / 0.1);
+      ctx.save();
+      ctx.globalAlpha *= a;
+      for (let i = 0; i < 3; i++) {
+        const b = t * 7 + (i * TAU) / 3;
+        star(ctx, p.x + Math.cos(b) * 15 * p.scale, p.y - 18 * p.scale + Math.sin(b) * 5, b, 7, '#fff2a8', 0.95);
+      }
+      ctx.restore();
+    }
+  }
+  function stagger(world, p, t, vx, vy) {
+    if (p.locked || p.down) return;
+    for (const e of world.entities) if (e instanceof Stagger && e.p === p) e.dead = true;
+    p.staggerT = t;
+    world.add(new Stagger(p, t, vx, vy));
   }
 
   // ---- machines (Chapter III / V) ---------------------------------------------
