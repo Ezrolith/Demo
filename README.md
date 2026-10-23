@@ -18,15 +18,36 @@ Progress saves automatically in the browser. The game needs a keyboard and mouse
 | Move | W A S D / arrow keys |
 | Aim | Mouse |
 | Interact / talk | E |
-| Telekinesis | Hold left click, move, release to throw |
+| Telekinesis | Hold left click or C, move, release to throw (a slow release sets things down) |
 | Disintegrate | Q / right click (Ctrl+click on Mac) |
-| Teleport | Space |
+| Teleport | Space (the destination is previewed under the cursor) |
 | Duplicate | R |
 | Temporal Sight | Hold F / Shift |
 | Expand | G |
-| Advance dialogue | Space / click / E |
-| Pause | Esc / P |
+| Recall the last hint | H |
+| Advance dialogue | Space / click / E (hold to fast-forward) |
+| Pause | Esc / P (shows the objective and last field note) |
 | Mute | M |
+
+Power presses made just before a cooldown ends are buffered, so they fire as soon as they can. Telekinesis can be switched from hold to toggle in **Settings → Controls**.
+
+### Settings and accessibility
+
+Settings has four tabs, and every option describes itself:
+
+- **Audio:** music, sound effects and ambience volumes.
+- **Display & accessibility:** FLASHING LIGHTS (REDUCED caps full-screen flashes and removes strobes, and is the default when your system asks for reduced motion), SCREEN SHAKE (OFF also removes hit-freeze), film grain, quality, ambient effects, fullscreen.
+- **Gameplay:** CHALLENGE (STORY, NORMAL, HARD; also changeable from Pause), INVULNERABILITY, HINTS (ALL or ESSENTIAL), TEXT SPEED, PAUSE WHEN UNFOCUSED.
+- **Controls:** telekinesis HOLD or TOGGLE, and the full controls list.
+
+After three decoherences at one checkpoint the game offers to switch to STORY challenge. Checkpoints never go backwards, CONTINUE says where it will take you, and Retry keeps what you'd already earned at that checkpoint.
+
+### Reading the fight
+
+- Every enemy attack is telegraphed: gangsters' aim lines reach you, drones and batteries light up before firing, the Behemoth spins up its guns and opens a hatch before a missile, and Veidt's discs wind up with a glint.
+- Red chevrons at the screen edge point to off-screen enemies taking aim and to incoming missiles; orange rings show where shells will land.
+- Red arcs around Jon show where a hit came from. Hits freeze the action for an instant and shake the camera (both follow the SCREEN SHAKE setting).
+- Jon can't be hurt during dialogue or cutscenes.
 
 ## The journey
 
@@ -39,7 +60,9 @@ Progress saves automatically in the browser. The game needs a keyboard and mouse
 | IV | The Watchmaker | 1985 | 3 min | Dr. Manhattan | **Temporal Sight**, **Expand** (the TV studio, building the glass palace on Mars) |
 | V | Karnak | 1985 | 1 min | Dr. Manhattan | All of them: tachyon emitters, the Intrinsic Field Subtractor, Adrian Veidt |
 
-Thrown people are knocked out (spared); disintegrated people are gone. The game counts both, and the ending changes with how you treated people.
+Thrown, blasted or bolted people are knocked out: they lie greyed out, drop their gun and get a "spared" tag. Only Disintegrate kills, and the person comes apart into light. A SPARED · GONE tally sits under the objective, and the ending changes with how you treated people. Knocking someone out also gives Jon back a little energy and coherence.
+
+The bosses have rules you can learn. The Behemoth is armoured at the front, weak at the rear (and at its vent once it's in its last phase), and its own missiles hurt it far more when you throw them back. Veidt can't dodge while stunned, held, pinned by a duplicate, recovering from his own dash or winded after three quick dodges, and Temporal Sight catches him most of the time.
 
 ## Project layout
 
@@ -53,22 +76,23 @@ src/
     events.js              pub/sub bus
     input.js               keyboard/mouse/touch -> named actions
     audio.js               synthesised SFX + step-sequencer music (no audio files)
+    settings.js            settings schema: defaults, ranges, labels, descriptions
     save.js                versioned localStorage saves with migrations
     gfx.js                 procedural drawing: characters, portraits, icons, clock, glow
     particles.js, camera.js
     engine.js              loop, letterboxing, scene stack, fades, crash screen
   game/
-    entity.js, world.js    entity base + physics, collisions, rendering
-    entities/              player, NPCs, props, projectiles, enemies, chapter specials
+    entity.js, world.js    entity base + physics, collisions, hitstop/slow motion, rendering
+    entities/              player, NPCs, props, projectiles, enemies, chapter specials, fx (knockout, unbinding)
     powers.js              the power registry (one definition per power)
     chapters.js            chapter registry + power progression
     script.js              ChapterContext: the scripting API chapters use
-    ui/                    menu widget, dialogue box, HUD
+    ui/                    menu widget, dialogue box, HUD, hit feedback
     scenes/                title, chapter select, interlude, play, overlays, minigames, ending
   data/
     music.js               music tracks as data
     chapters/*.js          the six chapters: maps + stage scripts + narration
-tests/                   Playwright checks (smoke, powers, story flows)
+tests/                   Playwright checks (see Tests below)
 tools/build.mjs          single-file bundler (no dependencies)
 ```
 
@@ -154,11 +178,15 @@ Add `?dev` (or `#dev`) to the URL:
 The tests drive the real game in headless Chromium via Playwright (`npm install`, then `npx playwright install chromium` the first time).
 
 ```
-npm test               # all three suites
-npm run test:powers    # each power, driven by simulated mouse/keyboard input
-npm run test:flows     # story triggers: the prologue's full path, Chapter I, Chapter II's range
-npm run test:smoke     # every chapter start to finish, every checkpoint, death -> retry; screenshots in tests/out/
-npm run build          # rebuild dist/dr-manhattan.html after changing src/
+npm test                   # every suite below
+npm run test:powers        # each power, driven by simulated mouse/keyboard input
+npm run test:flows         # story triggers: the prologue's full path, Chapter I, Chapter II's range
+npm run test:smoke         # every chapter start to finish, every checkpoint, death -> retry; screenshots in tests/out/
+npm run test:saves         # save migrations, checkpoints, Continue/Retry, boot robustness
+npm run test:settings      # settings schema, challenge levels, reduced flashing, hints, text speed
+npm run test:ledger        # spared/gone accounting, hit feedback, hitstop and slow motion, decoherence
+npm run test:encounters    # enemy telegraphs, threat chevrons, Behemoth and Veidt fairness, mines
+npm run build              # rebuild dist/dr-manhattan.html after changing src/
 ```
 
 ## Roadmap ideas
@@ -169,7 +197,7 @@ npm run build          # rebuild dist/dr-manhattan.html after changing src/
 - More chapters: the Crimebusters meeting, the Keene Act riots, the Comedian, Rorschach in Antarctica
 - Power upgrades between chapters (range, cost, duration) using the existing per-power state
 - Branching consequences: the spared/disintegrated tally already feeds the ending
-- Accessibility: key rebinding UI, colour-blind-safe telegraphs, difficulty options
+- Accessibility: key rebinding UI, colour-blind-safe telegraphs
 
 ## Credits
 
