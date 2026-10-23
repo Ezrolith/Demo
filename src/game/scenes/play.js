@@ -108,6 +108,9 @@
       p.x = s.x;
       p.y = s.y;
       p.vx = p.vy = 0;
+      // Hit arcs are timed on the old world's clock; a new world restarts it.
+      p.hurtDirs = [];
+      p.hurtFlash = null;
       if (s.facing != null) p.facing = s.facing;
       world.add(p);
       world.camera.snap(p.x, p.y);

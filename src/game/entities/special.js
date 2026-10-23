@@ -584,7 +584,8 @@
     }
     render(ctx, world) {
       const t = world.realTime || 0;
-      const vis = U.clamp((1 - world.timeScale) / 0.7, 0, 1);
+      // Temporal Sight's own fade, not any slow motion (decoherence, clouds).
+      const vis = U.clamp(world.sightK || 0, 0, 1);
       if (vis < 0.05) {
         if (Math.sin(t * 2 + this.id) > 0.92) Gfx.glow(ctx, this.x, this.y, 10, '#f2c418', 0.35);
         return;
@@ -857,6 +858,7 @@
     constructor(x, y) {
       super({ x, y, r: CLOUD.r, static: true, body: false, solid: false, layer: 0, disintegratable: false });
       this.life = CLOUD.life;
+      this.hazard = true; // stays in colour under Temporal Sight's grade
     }
     update(dt, world) {
       this.life -= dt;

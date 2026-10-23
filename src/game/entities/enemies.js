@@ -819,19 +819,24 @@
       Audio.play('phase');
       const bx = -Math.cos(this.hullA), by = -Math.sin(this.hullA); // straight back
       if (n === 2) {
-        // Sows mines in its wake and calls in an escort.
+        // Sows mines in its wake and calls in an escort. Deferred to the end of
+        // the frame: the blast that caused this phase may still be walking the
+        // entity list, and must not set off the mines it just sowed.
         const Mine = DM.Special && DM.Special.Mine;
-        for (let i = 0; i < BEHEMOTH.mines && Mine; i++) {
-          const s = (i - (BEHEMOTH.mines - 1) / 2) * 55;
-          const x = U.clamp(this.x + bx * 110 - by * s, 40, world.w - 40), y = U.clamp(this.y + by * 110 + bx * s, 40, world.h - 40);
-          const m = world.add(new Mine(x, y));
-          this.spawned.push(m);
-          world.particles.burst(x, y, 6, { color: ['#9a948a', '#6a645a'], speed: [20, 80], life: [0.3, 0.7], size: [4, 8], shape: 'smoke', add: false, alpha: 0.5 });
-        }
-        for (let i = 0; i < BEHEMOTH.escorts; i++) {
-          const x = world.w - 120, y = U.clamp(this.y + (i ? 260 : -260), 120, world.h - 120);
-          this.spawned.push(world.add(new Drone({ x, y, sight: 2400, alerted: true })));
-        }
+        world.defer(() => {
+          if (this.dead) return;
+          for (let i = 0; i < BEHEMOTH.mines && Mine; i++) {
+            const s = (i - (BEHEMOTH.mines - 1) / 2) * 55;
+            const x = U.clamp(this.x + bx * 110 - by * s, 40, world.w - 40), y = U.clamp(this.y + by * 110 + bx * s, 40, world.h - 40);
+            const m = world.add(new Mine(x, y));
+            this.spawned.push(m);
+            world.particles.burst(x, y, 6, { color: ['#9a948a', '#6a645a'], speed: [20, 80], life: [0.3, 0.7], size: [4, 8], shape: 'smoke', add: false, alpha: 0.5 });
+          }
+          for (let i = 0; i < BEHEMOTH.escorts; i++) {
+            const x = world.w - 120, y = U.clamp(this.y + (i ? 260 : -260), 120, world.h - 120);
+            this.spawned.push(world.add(new Drone({ x, y, sight: 2400, alerted: true })));
+          }
+        });
       } else if (n === 3) this.ventT = 0.01;
     }
     // The operation is over: its mines are made safe and its escort powers down.

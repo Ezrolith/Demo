@@ -246,7 +246,11 @@
       this.life -= dt;
       if (this.life <= 0) this.dead = true;
     }
-    render(ctx) {
+    // Drawn above the light layer and Sight's grade, so a "spared" reads at night.
+    render(ctx, world) {
+      if (!world.lit) this.renderEmissive(ctx);
+    }
+    renderEmissive(ctx) {
       const k = 1 - this.life / this.dur;
       const a = Math.min(1, k * 8) * (1 - k * k);
       if (a <= 0.01) return;

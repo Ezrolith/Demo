@@ -181,7 +181,7 @@
         else if (p.form === 'awareness') add(p.x, p.y, 230 * pm, { i: fade, color: '#5fd4ff', k: 0.24 * fade });
       }
       if (L.lights) L.lights(world, add, t);
-      const Proj = DM.Proj || {}, En = DM.Enemies || {}, Sp = DM.Special || {};
+      const Proj = DM.Proj || {}, En = DM.Enemies || {}, Sp = DM.Special || {}, FX = DM.FX || {};
       let atoms = 0;
       for (const e of world.entities) {
         if (e.dead || e.hidden) continue;
@@ -201,7 +201,10 @@
           const a = e.facing || 0;
           if (e.gun && !e.heldBy) add(e.x + Math.cos(a) * 10, e.y + Math.sin(a) * 10, 330, { i: 0.78, cone: a, spread: 0.34, color: '#fff2c4', k: 0.05 });
           add(e.x, e.y, 80, { i: 0.55 });
-        } else if (Sp.Memory && e instanceof Sp.Memory && world.timesight) add(e.x, e.y, 90, { i: 0.7, color: '#f2c418', k: 0.15 });
+        } else if (e.human && e.ko) add(e.x, e.y, 70, { i: 0.4 }); // the spared stay visible
+        else if (FX.Unbinding && e instanceof FX.Unbinding) add(e.x, e.y, 120, { i: 0.6, color: '#bff1ff', k: 0.18 });
+        else if (Sp.TachyonCloud && e instanceof Sp.TachyonCloud) add(e.x, e.y, 110, { i: 0.55, color: '#c06bff', k: 0.18 });
+        else if (Sp.Memory && e instanceof Sp.Memory && world.timesight) add(e.x, e.y, 90, { i: 0.7, color: '#f2c418', k: 0.15 });
       }
       let parts = 0;
       const P = world.particles.list;

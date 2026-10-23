@@ -172,6 +172,7 @@
   // pass under flying drones; a thrown missile bursts next to anything).
   function isFoe(t, held) {
     if (t === held || t.team !== 'enemy' || t.dead || t.ko || t.isProjectile || t.yielded || t.hidden) return false;
+    if (t.hazard || t.downT > 0) return false; // mines, and machines powering down
     return !!t.flying === !!held.flying || !!held.isProjectile;
   }
 
