@@ -1,0 +1,62 @@
+name: Story package validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: story-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: |
+          find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+      - name: Build candidate and source snapshot
+        run: |
+          node tools/build.mjs
+          git archive --format=zip HEAD -o source-snapshot.zip
+      - name: Upload unverified candidate for inspection
+        uses: actions/upload-artifact@v4
+        with:
+          name: story-candidate-${{ github.event.pull_request.head.sha }}
+          path: |
+            source-snapshot.zip
+            dist/dr-manhattan.html
+          retention-days: 7
+      - name: Install test tools
+        run: |
+          npm install --ignore-scripts
+          npx playwright install --with-deps chromium
+      - name: Run existing suites sequentially
+        run: npm test
+      - name: Run story acceptance checks
+        run: |
+          if [ -f tests/story.mjs ]; then
+            node tests/story.mjs
+          else
+            echo 'Story acceptance suite is still pending.'
+            exit 1
+          fi
+      - name: Upload test screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: story-screenshots-${{ github.event.pull_request.head.sha }}
+          path: tests/out/
+          if-no-files-found: ignore
+          retention-days: 7
