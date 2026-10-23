@@ -1089,9 +1089,10 @@
 
   // ---- Adrian Veidt -------------------------------------------------------------
   // A duel with readable rules. While his guard is up he slips every Disintegrate
-  // aimed at him. A gold ring shows when it is down: stunned or held, pinned by a
-  // copy, recovering after any dash, winded after three dodges in a row, and most
-  // of the time while Jon watches through Temporal Sight.
+  // aimed at him (a gold afterimage marks the dodge). A gold ring shows when it is
+  // down: stunned or held (telekinesis), pinned by a copy, mid-dash or recovering
+  // after a dash of his own, winded after three quick dodges, committed at the end
+  // of a disc wind-up, and most of the time while Jon watches through Temporal Sight.
   const VEIDT = {
     hp: 1000,
     speed: 230,
@@ -1102,9 +1103,8 @@
     dodgeDist: 150,
     evadeT: 0.25, // i-frames against disintegrate once he commits to a dodge (real time:
     // under Temporal Sight even his dodge is too slow)
-    recoverT: 0.8, // guard down after a dash of his own (breaking free, escaping a slam)...
-    dodgeRecover: 0, // ...but not after a dodge
-    skateK: 5, // steering response while recovering
+    recoverT: 0.8, // guard down after a dash of his own (breaking free, escaping a slam,
+    // repositioning in phase 2), but not after a dodge
     streak: 3, // dodges in quick succession (within streakSpan s, no hit between) wind him...
     streakSpan: 1.8,
     fatigueT: 2, // ...for up to this long (until the first hit lands), orbiting slower
@@ -1112,9 +1112,8 @@
     fatigueCooldown: 8, // before he can be winded again (he also starts the duel rested)
     windupOpen: 0.24, // committed (guard down) for the end of a disc wind-up...
     windupSpeed: 2.2, // ...but stepping fast into the throw: lead him
-    sightRead: 0, // seconds Temporal Sight needs to read him; then his guard is
-    sightPeriod: 1, // down for 80% of each (real-time) period
-    sightGuard: 0.2,
+    sightPeriod: 1, // under Temporal Sight his guard is down for 80% of each (real-time)
+    sightGuard: 0.2, // period, up for the rest
     reposition: [4, 5.5], // phase 2: he dashes to a new spot this often (and recovers after)
     pinR: 110, // a Duplicate this close pins him
     impactMul: 1,
@@ -1165,7 +1164,6 @@
       this.heldT = 0;
       this.summonT = 0;
       this.repositionT = VEIDT.reposition[1];
-      this.seenSince = null;
       this.orbitR = 240;
       this.orbitDir = 1;
       this.phi = null;
@@ -1199,8 +1197,7 @@
       if (this.recoverT > 0) return 'recovering';
       if (this.fatigueT > 0) return 'winded';
       if (this.aim > 0 && this.aim <= VEIDT.windupOpen) return 'throwing';
-      const now = world.realTime || 0;
-      if (this.seenSince != null && now - this.seenSince >= VEIDT.sightRead && now % VEIDT.sightPeriod < VEIDT.sightPeriod - VEIDT.sightGuard) return 'seen';
+      if (world.timesight && (world.realTime || 0) % VEIDT.sightPeriod < VEIDT.sightPeriod - VEIDT.sightGuard) return 'seen';
       return null;
     }
     disintegrate(world, source) {
@@ -1328,8 +1325,6 @@
       // Letting go and grabbing again does not reset his struggle.
       if (!this.heldBy) this.heldT = Math.max(0, this.heldT - dt * 0.5);
       this.slamT = Math.max(0, this.slamT - dt);
-      if (!world.timesight) this.seenSince = null;
-      else if (this.seenSince == null) this.seenSince = world.realTime || 0;
       // 'Too slow' only when the dodge really took him out of harm's way.
       const pe = this.pendingEvade;
       if (pe) {
@@ -1367,7 +1362,7 @@
         if (Math.random() < dt * 60) world.particles.emit(this.x, this.y, { life: 0.3, size: 10, size1: 4, color: '#6f4aa6', add: false, shape: 'smoke', alpha: 0.35, drag: 0 });
         if (this.dashT <= 0 || U.dist(this.x, this.y, this.dashTarget.x, this.dashTarget.y) < 12) {
           this.state = 'strafe';
-          this.recoverT = this.dashIsDodge ? VEIDT.dodgeRecover : VEIDT.recoverT;
+          this.recoverT = this.dashIsDodge ? 0 : VEIDT.recoverT;
           if (this.fatiguePending) {
             this.fatiguePending = false;
             this.dodges.length = 0;
@@ -1406,7 +1401,7 @@
       if (this.phi == null) this.phi = U.angleTo(p.x, p.y, this.x, this.y);
       this.phi += this.orbitDir * dt * (0.7 + phase * 0.3) * slow;
       const sp = this.speedBase * (phase === 2 ? 1.2 : 1) * slow;
-      this.steer(p.x + Math.cos(this.phi) * this.orbitR, p.y + Math.sin(this.phi) * this.orbitR, sp, dt, this.aim > 0 ? 10 : this.recoverT > 0 ? VEIDT.skateK : 5);
+      this.steer(p.x + Math.cos(this.phi) * this.orbitR, p.y + Math.sin(this.phi) * this.orbitR, sp, dt, this.aim > 0 ? 10 : 5);
       this.facing = U.dampAngle(this.facing, U.angleTo(this.x, this.y, p.x, p.y), 10, dt);
 
       // Tachyon disc: a short wind-up (arm raised, a glint at his hand), then the throw.
