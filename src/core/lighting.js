@@ -186,6 +186,13 @@
       for (const e of world.entities) {
         if (e.dead || e.hidden) continue;
         if (!near(e.x, e.y, 300)) continue;
+        // Any entity can light itself: e.light(world, t) returns null or
+        // { r, i, color, k, cone, spread, x, y } (x/y default to the entity).
+        if (e.light) {
+          const l = e.light(world, t);
+          if (l) add(l.x == null ? e.x : l.x, l.y == null ? e.y : l.y, l.r, l);
+          continue;
+        }
         if (e.isDuplicate) add(e.x, e.y, 170, { i: 0.85, color: '#5fd4ff', k: 0.12 });
         else if (e.isProjectile) {
           if (Proj.Missile && e instanceof Proj.Missile) add(e.x, e.y, 90, { i: 0.8, color: '#ff9a3c', k: 0.2 });
