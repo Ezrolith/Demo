@@ -83,16 +83,17 @@ await wait(150);
 await page.keyboard.press('e');
 await until('watch minigame open', () => window.DM.Engine.top().constructor.name === 'WatchRepair', { talk: false });
 // Play the minigame for real: press when the pivot is inside the gold zone.
-for (let i = 0; i < 400; i++) {
+// Time-bounded (not iteration-bounded) so a slow, loaded machine still gets enough attempts.
+for (const t0 = Date.now(); Date.now() - t0 < 60000; ) {
   const st = await ev(() => {
     const m = window.DM.Engine.top();
     if (m.constructor.name !== 'WatchRepair') return { gone: true };
-    // Slow the needle so page round-trips on a loaded machine can't overshoot the zone.
-    m.speed = Math.min(m.speed, 0.7);
+    // Cap the needle speed so page round-trips on a loaded machine can't overshoot the zone.
+    m.speed = Math.min(m.speed, 1.2);
     const d = Math.abs(window.DM.U.wrapAngle(m.angle - m.zone.a));
     return { gone: false, inZone: d < m.zone.w * 0.3 && !m.finished && m.t > 0.45, finished: m.finished };
   });
-  if (st.gone) break;
+  if (st.gone || st.finished) break;
   if (st.inZone) {
     await page.keyboard.press('Space');
     await wait(60);
