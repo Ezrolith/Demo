@@ -282,6 +282,7 @@
           this._building = null;
         }
         this.mapName = name;
+        world.mapId = name; // keys the map's light, weather and walls (src/data/atmosphere.js)
         this.scene.setWorld(world);
       };
       if (instant) {

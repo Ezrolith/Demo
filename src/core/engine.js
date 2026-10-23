@@ -33,17 +33,62 @@
       requestAnimationFrame((t) => this.frame(t));
     },
 
+    // `dpr` is the backing-store ratio actually used: the device pixel ratio
+    // (capped at 2) times the QUALITY render scale, minus any tiers the frame
+    // governor has dropped this session.
     resize() {
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const device = Math.min(window.devicePixelRatio || 1, 2);
+      const dpr = device * this.renderScale();
       const w = Math.max(1, window.innerWidth), h = Math.max(1, window.innerHeight);
-      this.canvas.width = Math.round(w * dpr);
-      this.canvas.height = Math.round(h * dpr);
+      this.canvas.width = Math.max(1, Math.round(w * dpr));
+      this.canvas.height = Math.max(1, Math.round(h * dpr));
       this.canvas.style.width = w + 'px';
       this.canvas.style.height = h + 'px';
       this.dpr = dpr;
+      this.deviceDpr = device;
       this.scale = Math.min(w / DM.W, h / DM.H);
       this.offX = (w - DM.W * this.scale) / 2;
       this.offY = (h - DM.H * this.scale) / 2;
+    },
+
+    // ---- quality & frame stats ----------------------------------------------
+    QUALITY: ['high', 'balanced', 'low'],
+    RENDER_SCALE: { high: 1, balanced: 0.75, low: 0.5 },
+    stats: { updMs: 0, renderMs: 0, gapMs: 1000 / 60 },
+    // Drops one QUALITY tier (for this session only; the saved setting is kept)
+    // when the frame gap stays above 22 ms for 2 s.
+    governor: { enabled: true, limitMs: 22, holdS: 2, slow: 0, grace: 3, drop: 0 },
+    notice: null, // { text, id } for the Play HUD to toast
+
+    qualityTier() {
+      const S = DM.Save && DM.Save.settings;
+      const i = Math.max(0, this.QUALITY.indexOf(S && S.quality));
+      return this.QUALITY[Math.min(this.QUALITY.length - 1, i + this.governor.drop)];
+    },
+    renderScale() {
+      return this.RENDER_SCALE[this.qualityTier()] || 1;
+    },
+
+    // gapMs: the unclamped time since the previous animation frame.
+    measure(gapMs) {
+      if (!(gapMs > 0) || gapMs > 250 || document.hidden) return; // tab switches, hitches, background tabs
+      const st = this.stats, g = this.governor;
+      st.gapMs = U.lerp(st.gapMs, gapMs, 0.05);
+      if (!g.enabled) return;
+      if (g.grace > 0) {
+        g.grace -= gapMs / 1000;
+        g.slow = 0;
+        return;
+      }
+      g.slow = st.gapMs > g.limitMs ? g.slow + gapMs / 1000 : 0;
+      if (g.slow < g.holdS || this.qualityTier() === 'low') return;
+      g.drop++;
+      g.slow = 0;
+      g.grace = 3;
+      this.resize();
+      const tier = this.qualityTier();
+      this.notice = { text: `QUALITY LOWERED TO ${tier.toUpperCase()} TO KEEP THE GAME SMOOTH`, id: (this.notice ? this.notice.id : 0) + 1 };
+      DM.Events.emit('engine:quality', { quality: tier, auto: true });
     },
 
     toLogical(cx, cy) {
@@ -99,6 +144,7 @@
     // ---- loop -------------------------------------------------------------
     frame(t) {
       requestAnimationFrame((tt) => this.frame(tt));
+      this.measure(t - this.last);
       let dt = (t - this.last) / 1000;
       this.last = t;
       if (!(dt > 0)) dt = 1 / 60;
@@ -129,8 +175,13 @@
       }
 
       const top = this.top();
+      const t0 = performance.now();
       if (top && top.update) this.guard(() => top.update(dt));
+      const t1 = performance.now();
       this.guard(() => this.render());
+      const st = this.stats;
+      st.updMs = U.lerp(st.updMs, t1 - t0, 0.1);
+      st.renderMs = U.lerp(st.renderMs, performance.now() - t1, 0.1);
       DM.Input.endFrame();
     },
 
