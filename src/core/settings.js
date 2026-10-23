@@ -126,7 +126,7 @@
     },
     {
       id: 'fx', section: 'DISPLAY & ACCESSIBILITY', label: 'AMBIENT EFFECTS', type: 'choice',
-      options: [['full', 'FULL'], ['reduced', 'REDUCED'], ['off', 'OFF']], def: 'full',
+      options: [['full', 'FULL'], ['reduced', 'REDUCED'], ['off', 'OFF']], def: () => (prefersReducedMotion() ? 'reduced' : 'full'),
       desc: 'Snow, dust, drizzle and haze drifting through each place.',
     },
     {

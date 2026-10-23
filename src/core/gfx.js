@@ -42,15 +42,19 @@
   };
 
   // ---- glow sprites (cached radial gradients, drawn additively) -----------
-  const glowCache = new Map();
-  Gfx.glowSprite = (color, radius) => {
-    const r = Math.max(4, Math.ceil(radius / 4) * 4);
-    const key = color + r;
-    let c = glowCache.get(key);
-    if (c) return c;
-    if (glowCache.size > 600) glowCache.clear();
-    c = document.createElement('canvas');
-    c.width = c.height = r * 2;
+  // A radial glow looks the same at any size, so each colour gets one 128 px
+  // sprite (and a 256 px one for radii above 200) that callers draw scaled.
+  // Animated radii therefore never create new canvases. The cache keeps the
+  // 64 most recently used colours.
+  const GLOW_SIZES = [128, 256];
+  const GLOW_COLOURS = 64;
+  const glowCache = new Map(); // colour -> [128 px, 256 px], least recently used first
+  let glowLast = null, glowLastEntry = null;
+  Gfx.glowStats = { created: 0 };
+  function makeGlow(color, size) {
+    const r = size / 2;
+    const c = document.createElement('canvas');
+    c.width = c.height = size;
     const g = c.getContext('2d');
     const grad = g.createRadialGradient(r, r, 0, r, r, r);
     grad.addColorStop(0, U.rgba(color, 1));
@@ -58,9 +62,26 @@
     grad.addColorStop(0.55, U.rgba(color, 0.16));
     grad.addColorStop(1, U.rgba(color, 0));
     g.fillStyle = grad;
-    g.fillRect(0, 0, r * 2, r * 2);
-    glowCache.set(key, c);
+    g.fillRect(0, 0, size, size);
+    Gfx.glowStats.created++;
     return c;
+  }
+  // `radius` only picks the tier; draw the sprite at radius * 2.
+  Gfx.glowSprite = (color, radius) => {
+    const tier = radius > 200 ? 1 : 0;
+    let entry = glowLastEntry;
+    if (color !== glowLast) {
+      entry = glowCache.get(color);
+      if (entry) glowCache.delete(color);
+      else {
+        entry = [null, null];
+        if (glowCache.size >= GLOW_COLOURS) glowCache.delete(glowCache.keys().next().value);
+      }
+      glowCache.set(color, entry);
+      glowLast = color;
+      glowLastEntry = entry;
+    }
+    return entry[tier] || (entry[tier] = makeGlow(color, GLOW_SIZES[tier]));
   };
   Gfx.glow = (ctx, x, y, radius, color, alpha = 1) => {
     if (alpha <= 0.003 || radius <= 0) return;
@@ -773,49 +794,119 @@
   };
 
   // ---- screen effects -----------------------------------------------------
-  let vignetteCanvas = null;
-  Gfx.vignette = (ctx, alpha = 1) => {
-    if (!vignetteCanvas) {
-      vignetteCanvas = document.createElement('canvas');
-      vignetteCanvas.width = DM.W / 2;
-      vignetteCanvas.height = DM.H / 2;
-      const g = vignetteCanvas.getContext('2d');
+  // Corner darkening (or a coloured edge glow), drawn per call. Play uses it only
+  // for the pulsing low-coherence edge; the steady vignette is part of Gfx.postFx.
+  const vignettes = new Map(); // colour -> half-resolution canvas
+  Gfx.vignette = (ctx, alpha = 1, color = '#000000') => {
+    let c = vignettes.get(color);
+    if (!c) {
+      c = document.createElement('canvas');
+      c.width = DM.W / 2;
+      c.height = DM.H / 2;
+      const g = c.getContext('2d');
       const grad = g.createRadialGradient(DM.W / 4, DM.H / 4, DM.H * 0.18, DM.W / 4, DM.H / 4, DM.W * 0.42);
-      grad.addColorStop(0, 'rgba(0,0,0,0)');
-      grad.addColorStop(1, 'rgba(0,0,0,0.72)');
+      grad.addColorStop(0, U.rgba(color, 0));
+      grad.addColorStop(1, U.rgba(color, 0.72));
       g.fillStyle = grad;
       g.fillRect(0, 0, DM.W / 2, DM.H / 2);
+      vignettes.set(color, c);
     }
     ctx.save();
     ctx.globalAlpha *= alpha;
-    ctx.drawImage(vignetteCanvas, 0, 0, DM.W, DM.H);
+    ctx.drawImage(c, 0, 0, DM.W, DM.H);
     ctx.restore();
   };
 
-  let grainPattern = null;
-  Gfx.grain = (ctx, alpha = 0.05) => {
-    if (!grainPattern) {
-      const c = document.createElement('canvas');
-      c.width = c.height = 160;
-      const g = c.getContext('2d');
-      const img = g.createImageData(160, 160);
-      for (let i = 0; i < img.data.length; i += 4) {
-        const v = (Math.random() * 255) | 0;
-        img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
-        img.data[i + 3] = 255;
-      }
-      g.putImageData(img, 0, 0);
-      grainPattern = ctx.createPattern(c, 'repeat');
+  // Post effects: the steady vignette and the film grain. As two full-screen
+  // passes per frame (the grain with an 'overlay' blend) they took most of the
+  // frame, so they are pre-composited instead: three overlay frames with the
+  // vignette and grain specks baked in, rendered once per canvas size at device
+  // resolution and drawn 1:1, switching every 4 frames so the grain still
+  // crawls. Without a vignette (the interlude) the grain is one source-over
+  // pattern fill. Grain follows Save.settings.grain.
+  //   Gfx.postFx(ctx)                              vignette 0.55 + grain
+  //   Gfx.postFx(ctx, { vignette: 0, grain: 0.06 }) grain only (0.035 = normal strength)
+  const GRAIN_ALPHA = 0.06;
+  const PostFx = (Gfx.postFxState = { key: '', frames: [], tile: null, patterns: new WeakMap(), n: 0, builds: 0 });
+  const grainTile = () => {
+    if (PostFx.tile) return PostFx.tile;
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const g = c.getContext('2d');
+    const img = g.createImageData(256, 256);
+    const rnd = U.seeded(35);
+    for (let i = 0; i < img.data.length; i += 4) {
+      const v = rnd() < 0.5 ? 0 : 255;
+      img.data[i] = img.data[i + 1] = img.data[i + 2] = v;
+      img.data[i + 3] = rnd() < 0.55 ? 0 : (rnd() * 255) | 0;
     }
+    g.putImageData(img, 0, 0);
+    return (PostFx.tile = c);
+  };
+  // The letterboxed DM.W x DM.H game area, in device pixels.
+  const deviceRect = () => {
+    const E = DM.Engine;
+    const k = E.dpr * E.scale;
+    return { k, x: Math.round(E.dpr * E.offX), y: Math.round(E.dpr * E.offY), w: Math.max(1, Math.round(DM.W * k)), h: Math.max(1, Math.round(DM.H * k)) };
+  };
+  // Grain specks are one CSS pixel, as before, whatever the device ratio.
+  const fillGrain = (g, r, alpha, frame) => {
+    let pat = PostFx.patterns.get(g);
+    if (!pat) PostFx.patterns.set(g, (pat = g.createPattern(grainTile(), 'repeat')));
+    const s = Math.max(1, Math.round(r.k));
+    g.save();
+    g.globalAlpha = alpha;
+    g.fillStyle = pat;
+    g.beginPath();
+    g.rect(r.x, r.y, r.w, r.h);
+    g.clip();
+    g.translate(r.x - ((frame * 83) % 256) * s, r.y - ((frame * 47) % 256) * s);
+    g.scale(s, s);
+    g.fillRect(0, 0, r.w / s + 512, r.h / s + 512);
+    g.restore();
+  };
+  function buildFrames(r, vignette, grain) {
+    for (const f of PostFx.frames) f.width = f.height = 0; // free the old frames now, not at the next GC
+    PostFx.frames = [];
+    PostFx.builds++;
+    for (let i = 0; i < (grain ? 3 : 1); i++) {
+      const c = document.createElement('canvas');
+      c.width = r.w;
+      c.height = r.h;
+      const g = c.getContext('2d');
+      const grad = g.createRadialGradient(r.w / 2, r.h / 2, r.h * 0.18, r.w / 2, r.h / 2, r.w * 0.42);
+      grad.addColorStop(0, 'rgba(0,0,0,0)');
+      grad.addColorStop(1, `rgba(0,0,0,${0.72 * vignette})`);
+      g.fillStyle = grad;
+      g.fillRect(0, 0, r.w, r.h);
+      if (grain) fillGrain(g, { k: r.k, x: 0, y: 0, w: r.w, h: r.h }, GRAIN_ALPHA, i);
+      PostFx.frames.push(c);
+    }
+  }
+  Gfx.postFx = (ctx, o = {}) => {
+    const S = DM.Save && DM.Save.settings;
+    const grain = o.grain !== false && o.grain !== 0 && !(S && S.grain === false);
+    const vignette = o.vignette == null ? 0.55 : o.vignette;
+    if (!DM.Engine || !DM.Engine.canvas || (vignette <= 0 && !grain)) return;
+    const r = deviceRect();
+    const n = PostFx.n++;
     ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.globalCompositeOperation = 'overlay';
-    ctx.fillStyle = grainPattern;
-    const ox = (Math.random() * 160) | 0, oy = (Math.random() * 160) | 0;
-    ctx.translate(-ox, -oy);
-    ctx.fillRect(0, 0, DM.W + 160, DM.H + 160);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    if (vignette > 0) {
+      const key = `${r.w}x${r.h}|${vignette}|${grain}`;
+      if (key !== PostFx.key) {
+        PostFx.key = key;
+        buildFrames(r, vignette, grain);
+      }
+      const f = PostFx.frames;
+      ctx.drawImage(f[(n >> 2) % f.length], r.x, r.y);
+    } else {
+      fillGrain(ctx, r, GRAIN_ALPHA * (typeof o.grain === 'number' ? o.grain / 0.035 : 1), (n >> 2) % 3);
+    }
     ctx.restore();
   };
+  // Film grain alone, for older callers.
+  Gfx.grain = (ctx, alpha = 0.035) => Gfx.postFx(ctx, { vignette: 0, grain: alpha });
 
   // Seeded starfield
   Gfx.makeStars = (seed, n, w, h) => {

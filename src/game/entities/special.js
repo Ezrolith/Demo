@@ -610,6 +610,7 @@
   class Meteor extends Entity {
     constructor(x, y, o = {}) {
       super({ x, y, r: 70, static: true, body: false, solid: false, layer: 3, disintegratable: false });
+      this.hazard = true; // stays in colour under Temporal Sight's grade
       this.T = o.T || 2.6;
       this.t = 0;
       this.radius = o.radius || 70;

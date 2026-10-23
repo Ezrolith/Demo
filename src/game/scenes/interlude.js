@@ -99,7 +99,7 @@
 
       if (this.finished && Math.sin(t * 4) > -0.4) Gfx.text(ctx, 'CLICK OR PRESS SPACE TO BEGIN', DM.W - 60, DM.H - 46, { size: 14, color: '#ffffff', align: 'right', spacing: 4 });
       else if (!this.finished) Gfx.text(ctx, 'SPACE TO SKIP', DM.W - 60, DM.H - 46, { size: 12, color: 'rgba(255,255,255,0.45)', align: 'right', spacing: 4 });
-      Gfx.grain(ctx, 0.06);
+      Gfx.postFx(ctx, { vignette: 0, grain: 0.06 });
     }
   }
 

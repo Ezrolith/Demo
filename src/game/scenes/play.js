@@ -197,40 +197,82 @@
       Engine.push(new Scenes.ChapterComplete(this, st, next));
     }
 
+    // The world (with its light layer and emissive pass), the weather, Temporal
+    // Sight, combat feedback, the low-coherence edge, then the pre-composited
+    // vignette and grain, and the HUD and dialogue above it all.
     render(ctx) {
       const w = this.world;
       w.render(ctx);
-      if (w.tint) {
+      // During the lockdown the light layer's beacons carry the alarm's red.
+      if (w.tint && !(w.lighting && w.alarm)) {
         ctx.fillStyle = w.tint;
         ctx.fillRect(0, 0, DM.W, DM.H);
       }
+      if (DM.Weather) DM.Weather.render(ctx, w, w.atmosphere);
       this.renderTimesight(ctx);
-      if (DM.Feedback) DM.Feedback.render(ctx, this);
+      if (DM.Feedback && DM.Feedback.render) DM.Feedback.render(ctx, this);
       const p = this.player;
       if (p.form === 'manhattan' && p.coherence < 35 && !p.down) {
+        // Jon's edges come apart in blue light (steady with REDUCED flashing).
+        const pulse = DM.SettingsSchema && DM.SettingsSchema.reducedFlashing() ? 0.85 : 0.7 + Math.sin(this.hud.t * 6) * 0.3;
         ctx.save();
-        ctx.globalAlpha = (0.35 - p.coherence / 100) * 2 * (0.7 + Math.sin(this.hud.t * 6) * 0.3);
+        ctx.globalAlpha = (0.35 - p.coherence / 100) * 1.6 * pulse;
         ctx.globalCompositeOperation = 'lighter';
-        Gfx.vignette(ctx, 1);
+        Gfx.vignette(ctx, 1, '#2a8ad8');
         ctx.restore();
       }
-      Gfx.vignette(ctx, 0.55);
+      Gfx.postFx(ctx);
+      const n = Engine.notice;
+      if (n && !n.shown) {
+        n.shown = true;
+        this.hud.toast(n.text, '#bff1ff');
+      }
       this.hud.render(ctx);
       this.dialog.render(ctx);
-      Gfx.grain(ctx, 0.035);
       if (this.debug) this.renderDebug(ctx);
     }
 
+    // Temporal Sight: the world fades to an old photograph while Jon, his
+    // duplicates, danger (enemy fire, hazards, telegraphs) and memories are
+    // drawn again over it in full colour, with fading amber ghosts of where
+    // enemies just were, and the clock ring around Jon.
     renderTimesight(ctx) {
       const w = this.world;
-      // Sight's own share of the slowdown (scripted slow motion is not Sight).
-      const k = U.clamp((1 - (w.sightScale == null ? w.timeScale : w.sightScale)) / 0.72, 0, 1);
+      // Sight's own fade (world.sightK): scripted slow motion is not Sight.
+      const k = w.sightK || 0;
       if (k < 0.02) return;
       const p = this.player;
       ctx.save();
-      ctx.globalAlpha = k;
-      ctx.fillStyle = 'rgba(242,196,24,0.07)';
+      ctx.globalAlpha = 0.85 * k;
+      ctx.globalCompositeOperation = 'saturation';
+      ctx.fillStyle = '#808080';
       ctx.fillRect(0, 0, DM.W, DM.H);
+      ctx.globalAlpha = 0.35 * k;
+      ctx.globalCompositeOperation = 'multiply';
+      ctx.fillStyle = '#d9b46a';
+      ctx.fillRect(0, 0, DM.W, DM.H);
+      ctx.restore();
+
+      ctx.save();
+      w.camera.apply(ctx);
+      if (w.ghosts) {
+        ctx.fillStyle = '#f2b440';
+        for (const [e, h] of w.ghosts) {
+          if (e.dead) continue;
+          for (let i = 0; i < h.length - 3; i += 3) {
+            ctx.globalAlpha = (0.05 + 0.22 * (i / h.length)) * k; // older = fainter
+            Gfx.circle(ctx, h[i], h[i + 1], e.r * 1.05);
+            ctx.fill();
+          }
+        }
+        ctx.globalAlpha = 1;
+      }
+      for (const e of w._keep || []) if (!e.dead) e.render(ctx, w);
+      w.renderEmissive(ctx, w._vis || []);
+      ctx.restore();
+
+      ctx.save();
+      ctx.globalAlpha = k;
       const s = w.camera.toScreen(p.x, p.y);
       const R = 150 * w.camera.zoom * p.scale;
       ctx.strokeStyle = 'rgba(242,196,24,0.5)';
@@ -252,15 +294,19 @@
 
     renderDebug(ctx) {
       const w = this.world, p = this.player;
+      const st = Engine.stats;
       const lines = [
         `fps ${Math.round(Engine.fps)}  entities ${w.entities.length}  particles ${w.particles.list.length}`,
+        `update ${st.updMs.toFixed(2)} ms  render ${st.renderMs.toFixed(2)} ms  frame gap ${st.gapMs.toFixed(1)} ms  quality ${Engine.qualityTier()} x${Engine.dpr.toFixed(2)}`,
+        `map ${w.mapId || '-'}  lights ${w.lighting && DM.Lighting ? DM.Lighting.stats.lights : 0}  weather ${DM.Weather ? DM.Weather.stats.particles : 0}`,
         `chapter ${this.chapter.id}  stage ${this.ctx.stageIndex} (${this.chapter.stages[this.ctx.stageIndex] && this.chapter.stages[this.ctx.stageIndex].id})  checkpoint ${this.ctx.checkpoint}`,
         `player ${Math.round(p.x)},${Math.round(p.y)}  form ${p.form}  energy ${Math.round(p.energy)}  coherence ${Math.round(p.coherence)}`,
         `] skip stage   \` toggle debug`,
       ];
+      const h = lines.length * 20 + 10;
       ctx.fillStyle = 'rgba(0,0,0,0.6)';
-      ctx.fillRect(10, DM.H - 100, 560, 90);
-      lines.forEach((l, i) => Gfx.text(ctx, l, 20, DM.H - 78 + i * 20, { size: 13, color: '#9fe8ff', font: DM.FONTS.type }));
+      ctx.fillRect(10, DM.H - 10 - h, 760, h);
+      lines.forEach((l, i) => Gfx.text(ctx, l, 20, DM.H - h + 12 + i * 20, { size: 13, color: '#9fe8ff', font: DM.FONTS.type }));
     }
   }
 
