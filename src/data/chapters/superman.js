@@ -8,7 +8,7 @@
   const DM = window.DM;
   const U = DM.U;
   const Gfx = DM.Gfx;
-  const { Crate, Barrel, Vehicle, Prop, Zone, Dummy } = DM.Props;
+  const { Crate, Barrel, Vehicle, Prop, Zone, Dummy, Press, Getaway, Water } = DM.Props;
   const { Gangster } = DM.Enemies;
   const NPC = DM.NPC;
 
@@ -47,9 +47,10 @@
     g.setLineDash([]);
     g.fillStyle = '#a8a294';
     g.fillRect(120, 120, 340, 280);
+    // Painted on the pad, clear of the sandbag wall along its south edge.
     g.fillStyle = 'rgba(0,0,0,0.12)';
     g.font = '700 28px Oswald, Arial Narrow, sans-serif';
-    g.fillText('U.S. ARMY · RANGE 4', 140, 390);
+    g.fillText('U.S. ARMY · RANGE 4', 140, 262);
   }
 
   function buildRange(ctx) {
@@ -91,6 +92,57 @@
     water: { top: 'rgba(0,0,0,0)', face: null, edge: null, low: true, flat: true },
     desk: { top: '#6a4f30', face: '#4e3a23', edge: '#2e2214', low: true },
   };
+  // The street gate in the west wall (a gap in it), where the road leaves the pier.
+  const GATE = { y: 1050, h: 120 };
+  const BILLBOARD = { x: 640, y: 1224, w: 420, h: 66 };
+  const RIVER = { x: 20, y: 1300, w: 2160, h: 80, bank: 1262 };
+  // The getaway: out of the loading bay, down to the road, west along it to the gate.
+  const GETAWAY = { x: 1425, y: 770, speed: 165, route: [{ x: 1425, y: 1112 }, { x: 52, y: 1112 }] };
+  // Stable indices identify individual officers in checkpoint story flags.
+  // [x, y, the way they face the threat].
+  const COPS = [[620, 1064, -Math.PI / 2], [150, 974, -0.7], [1690, 1104, -Math.PI / 2]];
+  const PRESSES = [[1590, 520, 0.05], [1770, 700, -0.08]];
+
+  // Whoever is closest to lend a hand (or a voice): an officer still on his feet, else the captain.
+  function nearestHelper(R, e) {
+    let best = R.captain, bd = Infinity;
+    for (const c of R.cops || []) {
+      if (c.down) continue;
+      const d = U.dist(c.x, c.y, e.x, e.y);
+      if (d < bd) {
+        bd = d;
+        best = c;
+      }
+    }
+    return best;
+  }
+  const safeCount = (R) => (R.cops || []).filter((c) => !c.down).length;
+  // Preserve WHICH officers/presses changed, not just their counts. Older
+  // checkpoints without masks retain the original count-based fallback.
+  function restoreOfficers(ctx) {
+    const R = ctx.refs, f = ctx.flags;
+    if (!R.cops) return;
+    const mask = Number.isInteger(f.officersDownMask) ? f.officersDownMask : null;
+    const down = Number.isFinite(f.officersSafe) ? R.cops.length - f.officersSafe : 0;
+    R.cops.forEach((c, i) => {
+      if (mask !== null ? (mask & (1 << i)) : i < down) c.setWounded();
+    });
+  }
+  function restorePresses(ctx) {
+    const R = ctx.refs, f = ctx.flags;
+    if (!R.presses) return;
+    const mask = Number.isInteger(f.pressesDownMask) ? f.pressesDownMask : null;
+    R.presses.forEach((p, i) => {
+      if (mask !== null ? (mask & (1 << i)) : i < (f.pressesDown || 0)) p.setBroken();
+    });
+  }
+  // A spot beside the car where a man can stand.
+  function freeBeside(W, car) {
+    for (const [dx, dy] of [[0, -46], [0, 46], [-50, 0], [50, 0], [-40, -40], [40, 40]]) {
+      if (W.isFree(car.x + dx, car.y + dy, 14)) return { x: car.x + dx, y: car.y + dy };
+    }
+    return { x: car.x, y: car.y };
+  }
 
   function bakePier(g) {
     const rnd = U.seeded(1966);
@@ -130,7 +182,7 @@
     g.strokeStyle = 'rgba(240,220,120,0.5)';
     g.lineWidth = 4;
     g.setLineDash([30, 26]);
-    Gfx.line(g, 0, 1100, 1000, 1100);
+    Gfx.line(g, 0, 1100, 1480, 1100);
     g.setLineDash([]);
     g.save();
     g.translate(1560, 935);
@@ -140,13 +192,58 @@
     g.textAlign = 'center';
     g.fillText('WHO WATCHES THE WATCHMEN?', 0, 0);
     g.restore();
+    bakeBillboard(g);
+    // The street gate in the west wall, swung open: the only way out by road.
+    g.fillStyle = '#3a2119';
+    g.fillRect(0, GATE.y - 16, 30, 16);
+    g.fillRect(0, GATE.y + GATE.h, 30, 16);
+    g.strokeStyle = 'rgba(24,24,28,0.9)';
+    g.lineWidth = 3;
+    for (const [y, dy] of [[GATE.y - 8, -1], [GATE.y + GATE.h + 8, 1]]) {
+      Gfx.line(g, 28, y, 82, y + dy * 34);
+      for (let k = 1; k < 5; k++) Gfx.line(g, 28 + k * 11, y + dy * k * 7, 28 + k * 11, y + dy * k * 7 + dy * 10);
+    }
+  }
+
+  // A billboard on the dock, facing the street. An original slogan.
+  function bakeBillboard(g) {
+    const B = BILLBOARD;
+    g.save();
+    g.translate(B.x, B.y);
+    g.fillStyle = 'rgba(0,0,0,0.35)';
+    g.fillRect(-B.w / 2 + 6, -B.h / 2 + 8, B.w, B.h);
+    g.fillStyle = '#1b1620';
+    g.fillRect(-B.w / 2 - 6, -B.h / 2 - 6, B.w + 12, B.h + 12);
+    const face = g.createLinearGradient(0, -B.h / 2, 0, B.h / 2);
+    face.addColorStop(0, '#4a3270');
+    face.addColorStop(1, '#2e1f48');
+    g.fillStyle = face;
+    g.fillRect(-B.w / 2, -B.h / 2, B.w, B.h);
+    g.strokeStyle = '#d4ad3a';
+    g.lineWidth = 2;
+    g.strokeRect(-B.w / 2 + 5, -B.h / 2 + 5, B.w - 10, B.h - 10);
+    // The emblem: a gold V.
+    const vx = -B.w / 2 + 44;
+    g.fillStyle = '#e2b93e';
+    g.beginPath();
+    g.moveTo(vx - 24, -24); g.lineTo(vx - 10, -24); g.lineTo(vx, 6); g.lineTo(vx + 10, -24); g.lineTo(vx + 24, -24); g.lineTo(vx + 7, 25); g.lineTo(vx - 7, 25);
+    g.closePath();
+    g.fill();
+    g.textAlign = 'left';
+    g.fillStyle = '#f2d684';
+    g.font = '700 31px Oswald, "Arial Narrow", sans-serif';
+    g.fillText('VEIDT ENTERPRISES', vx + 38, 2);
+    g.fillStyle = '#efe6d0';
+    g.font = '17px "Special Elite", "Courier New", monospace';
+    g.fillText('TOMORROW, TODAY.', vx + 40, 25);
+    g.restore();
   }
 
   function buildPier(ctx) {
     const W = ctx.newWorld({ w: 2200, h: 1400, bg: '#16171b', wallStyles: PIER_WALLS, zoom: 1.3 });
     W.bake(bakePier);
     W.spawn = { x: 260, y: 1000, facing: 0 };
-    W.room(0, 0, 2200, 1400, { t: 20, kind: 'brick' });
+    W.room(0, 0, 2200, 1400, { t: 20, kind: 'brick', doors: [{ side: 'left', at: GATE.y, w: GATE.h }] });
     W.wall(20, 1300, 2160, 80, 'water');
     W.room(1000, 150, 1100, 750, { t: 24, kind: 'brick', doors: [{ side: 'bottom', at: 350, w: 150 }, { side: 'left', at: 250, w: 120 }] });
     W.wall(1700, 174, 24, 126, 'brick');
@@ -180,12 +277,44 @@
       }
     });
 
-    ctx.add(new NPC({ x: 170, y: 1040, look: 'captain', facing: 0 }));
+    const R = (ctx.refs = {});
+    const f = ctx.flags;
+    // The river: anyone thrown in is fished out (spared); anything else sinks.
+    R.water = ctx.add(new Water(RIVER.x, RIVER.y, RIVER.w, RIVER.h, {
+      bank: RIVER.bank,
+      onFished: (e, world) => {
+        f.fished = (f.fished || 0) + 1;
+        const by = nearestHelper(R, e);
+        if (by) world.bark(by, U.pick(["Got him! He's breathin'.", 'Fished one out!', 'Somebody get this guy a towel.']), 2);
+      },
+    }));
+    // Floodlights on the billboard.
+    const flood = ctx.add(new Prop({ x: BILLBOARD.x, y: BILLBOARD.y - 20, r: 2 }));
+    flood.light = () => ({ r: 230, i: 0.78, color: '#ffe0a8', k: 0.12 });
+
+    R.captain = ctx.add(new NPC({ x: 170, y: 1040, look: 'captain', facing: 0 }));
     ctx.add(new Vehicle(140, 930, { kind: 'sedan', paint: '#1d2b4f', mass: 6 }));
     ctx.add(new Vehicle(620, 1020, { kind: 'sedan', rot: 0.2 }));
     ctx.add(new Vehicle(1700, 1060, { kind: 'sedan', rot: -0.1 }));
-    const crates = [[460, 470], [500, 470], [780, 560], [1020, 1000], [1080, 980], [1180, 420], [1600, 300], [1640, 320], [1560, 820], [1900, 700], [1960, 760], [1320, 820]];
-    for (const [x, y] of crates) ctx.add(new Crate(x, y));
+    // Three officers pinned down behind the cars. Gunmen shoot at them as they do at Jon.
+    const countSafe = () => {
+      f.officersDownMask = R.cops.reduce((mask, c, i) => mask | (c.down ? 1 << i : 0), 0);
+      f.officersSafe = R.cops.filter((c) => !c.down).length;
+    };
+    R.cops = COPS.map(([x, y, facing]) => ctx.add(new DM.Officer({ x, y, facing, onWound: countSafe })));
+    // Two counterfeit presses in the warehouse: shutting them down is optional.
+    const pressStopped = () => {
+      f.pressesDownMask = R.presses.reduce((mask, p, i) => mask | (p.stopped ? 1 << i : 0), 0);
+      const n = (f.pressesDown = R.presses.filter((p) => p.stopped).length);
+      if (n === R.presses.length) ctx.toast('PRESSES SHUT DOWN', '#bcd3a6');
+    };
+    R.presses = PRESSES.map(([x, y, rot]) => ctx.add(new Press(x, y, { rot, onStop: pressStopped })));
+    // Apply carry at map creation, including presses disabled during the yard.
+    restoreOfficers(ctx);
+    restorePresses(ctx);
+    // Two crates carry a contractor's gold V.
+    const crates = [[460, 470], [500, 470], [780, 560], [1020, 1000], [1080, 980], [1180, 420], [1600, 300, 'v'], [1640, 320, 'v'], [1560, 820], [1900, 700], [1960, 760], [1320, 820]];
+    for (const [x, y, mark] of crates) ctx.add(new Crate(x, y, mark ? { mark, rot: U.rand(-0.25, 0.25) } : undefined));
     for (const [x, y] of [[760, 700], [1390, 380], [1980, 620], [1820, 380]]) ctx.add(new Barrel(x, y));
     ctx.add(new Prop({
       x: 1975, y: 230, r: 4,
@@ -225,6 +354,8 @@
       'They want to know what I can do. Honestly, so do I.',
       'Within a year I am on the cover of every newspaper in the world. Within two, the Russians are building more bombs.',
     ],
+    // Carried through checkpoints and saved for the ending.
+    persistFlags: ['officersSafe', 'officersDownMask', 'pressesDown', 'pressesDownMask', 'fished', 'molochArrested', 'molochEscaped', 'molochGone'],
     maps: { range: buildRange, pier: buildPier },
     stages: [
       {
@@ -287,41 +418,48 @@
         map: 'pier',
         checkpoint: true,
         run: function* (ctx) {
+          const R = ctx.refs;
           ctx.lock(true);
           yield ctx.banner('NEW YORK', 'PIER 9 · 1966', { color: DM.C.yellow });
-          if (ctx.startedHere || !ctx.flags.briefed) {
+          // The briefing plays once per chapter: a retry goes straight back in.
+          if (ctx.once('pier.briefing')) {
             yield ctx.dialog([
-              ['captain', "Doctor Manhattan? Captain Rourke, NYPD. Moloch's people are running a counterfeit plant out of that warehouse. They've got my men pinned down."],
-              ['captain', 'Do what you do. Just... try to leave somebody for me to arrest.'],
+              ['captain', "Doctor Manhattan? Captain Rourke, NYPD. Moloch's people are running a counterfeit plant out of that warehouse. They've got three of my men pinned down behind the cars."],
+              ['captain', "Do what you do. Just... try to leave somebody for me to arrest. Anybody ends up in the river, we'll fish 'em out."],
             ]);
-            ctx.flags.briefed = true;
           }
           ctx.lock(false);
           ctx.hint('Thrown people are knocked out. Disintegrated people are gone. The choice is yours.', 9);
           const g = spawnGroup(ctx, YARD);
-          ctx.objective('Clear the yard', () => `${down(g)}/${g.length}`);
+          ctx.objective('Clear the yard', () => `${down(g)}/${g.length}   ·   OFFICERS SAFE ${safeCount(R)}/${R.cops.length}`);
           yield ctx.until(() => g.every((e) => e.neutralized));
           ctx.objectiveDone();
         },
+        // Officers hit before a later checkpoint are still down when it loads.
+        restore: restoreOfficers,
       },
       {
         id: 'warehouse',
         checkpoint: true,
         run: function* (ctx) {
-          const P = ctx.player;
+          const P = ctx.player, R = ctx.refs;
           if (ctx.startedHere) ctx.place(980, 1020, -Math.PI / 2);
           yield ctx.wait(1);
           const g = spawnGroup(ctx, WAREHOUSE);
-          ctx.objective('Clear the warehouse', () => `${down(g)}/${g.length}`);
+          const presses = () => R.presses.filter((p) => p.stopped).length;
+          ctx.objective('Clear the warehouse', () => `${down(g)}/${g.length}   ·   PRESSES ${presses()}/${R.presses.length} (OPTIONAL)`);
           ctx.marker(1425, 900, 'WAREHOUSE');
           ctx.fork(function* () {
             yield ctx.until(() => P.y < 880 && P.x > 1000);
             ctx.marker(null);
+            if (presses() < R.presses.length) ctx.hint('Those machines are printing counterfeit money. Shut down the presses if you like: they break like anything else.', 8);
           });
           yield ctx.until(() => g.every((e) => e.neutralized));
           ctx.objectiveDone();
           ctx.marker(null);
         },
+        // Presses already shut down stay down.
+        restore: restorePresses,
       },
       {
         id: 'office',
@@ -343,21 +481,118 @@
         },
       },
       {
+        // Moloch makes a run for it. Catching the car and setting it down
+        // arrests him (spared); unmaking it unmakes him; past the gate, he is gone.
+        id: 'getaway',
+        checkpoint: true,
+        run: function* (ctx) {
+          const R = ctx.refs, f = ctx.flags;
+          if (ctx.startedHere) ctx.place(1840, 540, Math.PI / 2);
+          let result = null;
+          const car = (R.getaway = ctx.add(new Getaway(GETAWAY.x, GETAWAY.y, {
+            rot: Math.PI / 2, route: GETAWAY.route, speed: GETAWAY.speed,
+            onOutcome: (kind) => {
+              if (kind !== 'caught') result = kind;
+            },
+          })));
+          ctx.lock(true);
+          ctx.focus(car.x, car.y + 90);
+          DM.Audio.play('engine_start');
+          yield ctx.wait(0.7);
+          yield ctx.dialog([
+            ['captain', "Doc! A car just came out of the loading bay. That's Moloch at the wheel! If he makes the gate, he's gone.", { name: 'Captain Rourke — Radio' }],
+          ]);
+          ctx.focus(null);
+          ctx.lock(false);
+          car.go();
+          ctx.objective('Stop the getaway car');
+          ctx.hint('Catch the car with telekinesis and set it down. He will come quietly.', 8);
+          ctx.fork(function* () {
+            while (!result && car.state === 'driving') {
+              ctx.marker(car.x, car.y, 'MOLOCH');
+              yield;
+            }
+            ctx.marker(null);
+          });
+          yield ctx.until(() => result);
+          ctx.marker(null);
+          const W = ctx.world;
+          if (result === 'escaped') {
+            f.molochEscaped = true;
+            ctx.objective(null);
+            yield ctx.wait(0.6);
+            yield ctx.dialog([['captain', "He's through the gate. Dammit!", { name: 'Captain Rourke — Radio' }]]);
+            return;
+          }
+          if (result === 'gone') {
+            // The car, and the man in it.
+            f.molochGone = true;
+            DM.Events.emit('enemy:down', { enemy: car, lethal: true, kind: 'disintegrate', human: true });
+            ctx.objectiveDone();
+            yield ctx.wait(2);
+            return;
+          }
+          // Arrested: he climbs out of the car (or is fished out of the river) with his hands up.
+          if (result === 'sunk') yield ctx.wait(1.6);
+          const at = result === 'sunk' ? { x: U.clamp(car.x, 80, 2120), y: RIVER.bank } : freeBeside(W, car);
+          const m = (R.moloch = ctx.add(new NPC({ x: at.x, y: at.y, look: 'moloch', facing: -Math.PI / 2 })));
+          f.molochArrested = true;
+          if (result === 'sunk') {
+            f.fished = (f.fished || 0) + 1;
+            if (DM.FX && DM.FX.FloatText) W.add(new DM.FX.FloatText(m.x, m.y - 30, 'fished out', { color: '#cfe8ff', dur: 1.6 }));
+          }
+          W.bark(m, result === 'sunk' ? 'Get me outta this water! I give up!' : "All right! All right! I'm comin' out!", 2.4);
+          DM.Events.emit('enemy:down', { enemy: m, lethal: false, kind: 'arrest', human: true });
+          if (DM.FX && DM.FX.FloatText) W.add(new DM.FX.FloatText(m.x, m.y - 16, 'arrested', { dur: 1.8 }));
+          ctx.objectiveDone();
+          yield ctx.wait(2.2);
+        },
+        // Skipped (developer skip): the car goes nowhere.
+        restore(ctx) {
+          const car = ctx.refs.getaway;
+          if (car && !car.dead && car.state !== 'done') {
+            car.onOutcome = null;
+            car.end('skipped');
+            car.dead = true;
+          }
+        },
+      },
+      {
         id: 'aftermath',
         run: function* (ctx) {
+          const R = ctx.refs, f = ctx.flags;
           ctx.lock(true);
           yield ctx.wait(1);
-          yield ctx.dialog([
-            ['captain', "...That's the last of them. Nineteen years on the force, Doctor. I never saw anything like that.", { name: 'Captain Rourke — Radio' }],
+          const radio = { name: 'Captain Rourke — Radio' };
+          const all = R.cops ? R.cops.length : 3;
+          const safe = R.cops ? safeCount(R) : all;
+          f.officersSafe = safe;
+          const hurt = all - safe;
+          const lines = [
+            ['captain', "...That's the last of them. Nineteen years on the force, Doctor. I never saw anything like that.", radio],
             ['manhattan', 'Neither had I, until recently.'],
-          ]);
+            ['captain', hurt === 0
+              ? 'And all three of my men are walking off this pier on their own feet. I owe you one.'
+              : hurt >= all
+                ? "All three of my men are on their way to St. Vincent's. They'll pull through. Next time, maybe a little quicker."
+                : `${hurt === 1 ? 'One of my men is' : 'Two of my men are'} on the way to St. Vincent's. The doc says they'll pull through.`, radio],
+          ];
+          if (f.molochArrested) lines.push(['captain', "And Moloch's in the back of my car, shaking like a leaf. Says he wants a lawyer and a priest, in that order.", radio]);
+          else if (f.molochEscaped) lines.push(['captain', "Moloch got clean away. I'll have every car in the city looking for him.", radio]);
+          else if (f.molochGone) lines.push(['captain', "...Doctor? Where's Moloch? Where's the car?", radio], ['manhattan', 'There is no car. There is no Moloch.']);
+          if (f.fished) lines.push(['captain', f.fished === 1 ? "And somebody tell me why one of 'em is soaking wet." : "And somebody tell me why half of 'em are soaking wet.", radio]);
+          yield ctx.dialog(lines);
           const s = ctx.stats;
           let line;
           if (s.disintegrated === 0) line = 'Every one of them will live to stand trial. It is a small thing. I notice that I wanted it.';
           else if (s.spared === 0) line = 'None of them will stand trial. I notice that I feel nothing about this. I notice that I notice.';
           else line = 'Some of them will stand trial. Some will not. It made no difference at all to my heart rate.';
           yield ctx.narrate(line, { dur: 6 });
-          yield ctx.narrate('The next morning, every newspaper in America runs the same headline. They have found their superman.', { dur: 6 });
+          let news = 'The next morning, every newspaper in America runs the same headline. They have found their superman.';
+          if (f.molochArrested) news = 'The next morning, every newspaper in America runs the same photograph: a getaway car set down in the street as gently as a teacup, and a man climbing out of it with his hands up. They have found their superman.';
+          else if (f.molochEscaped) news = 'The next morning, every newspaper in America has found its superman. On page nine, a smaller story notes that the man who ran the plant is still at large.';
+          else if (f.molochGone) news = 'The next morning, every newspaper in America runs a photograph of an empty stretch of road. They have found their superman. Nobody asks where the driver went.';
+          yield ctx.narrate(news, { dur: 6.5 });
         },
       },
     ],

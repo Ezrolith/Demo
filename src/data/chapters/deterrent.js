@@ -318,6 +318,7 @@
             ['general', "Doctor, I've just watched a billion dollars of hardware turn into weather."],
             ['manhattan', 'The Soviets were watching too.'],
             ['general', '...Yes. Yes, they were.'],
+            ['general', "Half of what you just unmade came from some private contractor. Gold V stamped on every crate. I expect he'll send us the bill."],
           ]);
           yield ctx.narrate('The Doomsday Clock moves forward. Every warhead they build, they build because of me.', { dur: 5.5 });
         },

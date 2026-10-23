@@ -225,6 +225,7 @@
     music: 'mars',
     form: 'manhattan',
     epigraph: { text: 'The distinction between past, present and future is only a stubbornly persistent illusion.', by: 'Albert Einstein' },
+    memories: MEMORIES.length, // hidden memories (Chapter Complete and the ending count them)
     intro: [
       'October 1985. A television studio in New York. The interviewer smiles at me as if we are friends.',
       'Then the questions start: about Wally, about Janey, about the cancers carried by the people who have stood closest to me.',

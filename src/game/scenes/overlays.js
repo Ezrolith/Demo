@@ -419,7 +419,10 @@
         rows.push(['DISINTEGRATED', String(s.disintegrated)]);
         rows.push(['SPARED', String(s.spared)]);
       }
-      if (this.play.chapter.id === 'mars') rows.push(['MEMORIES', `${s.memories} / 6`]);
+      // Chapters declare how many memories they hide (DM.EndingData sums them for the ending).
+      const m = this.play.chapter.memories;
+      const total = Array.isArray(m) ? m.length : Number.isFinite(m) ? m : 0;
+      if (total > 0) rows.push(['MEMORIES', `${s.memories} / ${total}`]);
       // A neutral record of how it was played, never a grade.
       rows.push(['CHALLENGE', Schema.format('challenge') + (Schema.value('invulnerable') ? '  ·  INVULNERABLE' : '')]);
       return rows;

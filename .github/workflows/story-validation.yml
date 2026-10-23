@@ -1,0 +1,96 @@
+name: Story package validation
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: story-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Check JavaScript syntax
+        run: find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+      - name: Rebuild and verify checked-in HTML
+        run: |
+          node tools/build.mjs
+          node tools/build-story-preview.mjs
+          git diff --exit-code -- dist/dr-manhattan.html dist/story-preview.html
+      - name: Install test tools
+        id: install
+        run: |
+          npm install --ignore-scripts
+          npx playwright install --with-deps chromium
+      - name: Story acceptance (source)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 3
+        run: node tests/story.mjs
+      - name: Story acceptance (standalone build)
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 3
+        run: node tests/story.mjs dist/dr-manhattan.html
+      - name: Preview chooser and save isolation
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 3
+        run: node tests/story-preview.mjs
+      - name: Powers
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 5
+        run: node tests/powers.mjs
+      - name: Story flows
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 5
+        run: node tests/flows.mjs
+      - name: Chapter and checkpoint smoke tests
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 8
+        run: node tests/smoke.mjs
+      - name: Saves
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 5
+        run: node tests/saves.mjs
+      - name: Settings
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 5
+        run: node tests/settings.mjs
+      - name: Ledger
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 5
+        run: node tests/ledger.mjs
+      - name: Encounters
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 5
+        run: node tests/encounters.mjs
+      - name: Audio
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 5
+        run: node tests/audio.mjs
+      - name: Visuals
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        timeout-minutes: 5
+        run: node tests/visual.mjs
+      - name: Upload candidate and test screenshots (not a deployment)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: story-review-${{ github.run_id }}
+          path: |
+            dist/dr-manhattan.html
+            dist/story-preview.html
+            tests/out/
+          if-no-files-found: warn
+          retention-days: 7
