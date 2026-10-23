@@ -403,6 +403,40 @@ assert('a bullet from the left draws a red arc on Jon\'s left side', hitFx.after
 assert('the screen edges flash red on a hit', hitFx.after.edge - hitFx.before.edge > 6, `edge redness ${hitFx.before.edge.toFixed(1)} → ${hitFx.after.edge.toFixed(1)}`);
 assert('Player.lastHit records what hit him', hitFx.lastHit && hitFx.lastHit.kind === 'bullet' && hitFx.lastHit.by === 'Bullet', JSON.stringify(hitFx.lastHit));
 
+// FLASHING LIGHTS: REDUCED keeps the edge flash dim.
+await fresh();
+const flashPeak = await ev(() => {
+  const DM = window.DM;
+  const play = DM.dev.play();
+  const p = play.player;
+  const ctx = DM.Engine.ctx;
+  const peak = (mode) => {
+    DM.Save.settings.flashing = mode;
+    p.invuln = 0;
+    p.coherence = 100;
+    p.damage(40, { x: p.x - 30, y: p.y }, 'explosion');
+    let a = 0;
+    const draw = ctx.drawImage;
+    ctx.drawImage = function () {
+      a = Math.max(a, ctx.globalAlpha);
+      return draw.apply(this, arguments);
+    };
+    try {
+      DM.Feedback.renderHurt(ctx, play.world, p);
+    } finally {
+      ctx.drawImage = draw;
+    }
+    return +a.toFixed(3);
+  };
+  const saved = DM.Save.settings.flashing;
+  const r = { full: peak('full'), reduced: peak('reduced') };
+  DM.Save.settings.flashing = saved;
+  play.world.freezeT = 0;
+  p.coherence = 100;
+  return r;
+});
+assert('with FLASHING LIGHTS reduced the red edge flash stays dim', flashPeak.full > 0.3 && flashPeak.reduced > 0 && flashPeak.reduced <= 0.15, JSON.stringify(flashPeak));
+
 await fresh();
 await wait(100);
 const volley = await ev(async () => {
