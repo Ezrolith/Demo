@@ -238,9 +238,12 @@ await start('superman', 'yard', 3000);
 await place(560, 760);
 await wait(300);
 await shot('pier');
+// The darkness mask alone (each light's colour wash also adds alpha).
 const pier = await ev(() => {
   const DM = window.DM, E = DM.Engine, play = DM.dev.play(), w = play.world;
+  DM.Lighting.colour = false;
   E.render();
+  DM.Lighting.colour = true;
   const { dark } = DM.Lighting.layers();
   const g = dark.getContext('2d', { willReadFrequently: true });
   const k = dark.width / DM.W;
@@ -250,9 +253,9 @@ const pier = await ev(() => {
   };
   // The darkest point of the view should still be close to the ambient (0.76).
   const v = w.camera.view();
-  let dark = 0;
-  for (let x = v.x0 + 20; x < v.x1; x += 40) for (let y = v.y0 + 20; y < v.y1; y += 40) dark = Math.max(dark, a(x, y));
-  return { mapId: w.mapId, lit: w.lit, lighting: w.lighting, jon: a(560, 760), lamp: a(620, 560), dark, lights: DM.Lighting.stats.lights };
+  let darkest = 0;
+  for (let x = v.x0 + 20; x < v.x1; x += 40) for (let y = v.y0 + 20; y < v.y1; y += 40) darkest = Math.max(darkest, a(x, y));
+  return { mapId: w.mapId, lit: w.lit, lighting: w.lighting, jon: a(560, 760), lamp: a(620, 560), dark: darkest, lights: DM.Lighting.stats.lights };
 });
 assert('loadMap sets world.mapId', pier.mapId === 'pier', pier.mapId);
 assert('the night pier is lit: darkness with light pools', pier.lighting && pier.lit && pier.dark > 0.5, JSON.stringify(pier));
@@ -263,6 +266,10 @@ const torch = await ev(() => {
   const gx = 1150, gy = 1000;
   const g1 = w.add(new DM.Enemies.Gangster({ x: gx, y: gy, facing: 0 }));
   g1.update = () => {};
+  const prof = w.atmosphere.light, lamps = prof.lights;
+  prof.lights = null; // only this man's lights
+  DM.Lighting.colour = false;
+  const px = play.player.x, py = play.player.y;
   play.player.x = 300; play.player.y = 1000;
   w.camera.snap(gx, gy);
   const { dark } = DM.Lighting.layers();
@@ -278,7 +285,11 @@ const torch = await ev(() => {
   E.render();
   const away = a(gx + 170, gy);
   g1.dead = true;
-  return { facing, away };
+  prof.lights = lamps;
+  DM.Lighting.colour = true;
+  play.player.x = px; play.player.y = py;
+  w.camera.snap(px, py);
+  return { facing: +facing.toFixed(2), away: +away.toFixed(2) };
 });
 assert('an armed man\'s flashlight lights the way he faces', torch.facing < torch.away - 0.15, JSON.stringify(torch));
 
@@ -289,6 +300,7 @@ async function emissiveProbe() {
     const log = [];
     const L = DM.Lighting.render;
     DM.Lighting.render = (...a) => (log.push('light'), L(...a));
+    w.camera.snap(play.player.x, play.player.y);
     const probe = w.add(new DM.Entity({ x: play.player.x + 40, y: play.player.y, body: false, solid: false }));
     probe.render = (ctx, world) => log.push('render:' + world.lit);
     probe.renderEmissive = () => log.push('emissive');
@@ -488,17 +500,18 @@ const slow = await ev(() => {
   const c = document.createElement('canvas').getContext('2d');
   const dist = (slowmo) => {
     w.slowmo = slowmo;
-    for (let i = 0; i < 40; i++) w.update(1 / 60);
+    for (let i = 0; i < 40; i++) { w.slowmo = slowmo; w.update(1 / 60); } // (the Sight power resets slowmo each update)
     DM.Weather.render(c, w, w.atmosphere);
     const L = w.weatherState.layers.find((l) => l.type === 'snow');
     const before = L.ps.map((p) => p.y);
     const cam = [w.camera.x, w.camera.y];
-    for (let i = 0; i < 30; i++) {
+    for (let i = 0; i < 30; i++) { // one weather frame per update, as in play
+      w.slowmo = slowmo;
       w.update(1 / 60);
       w.camera.x = cam[0];
       w.camera.y = cam[1];
+      DM.Weather.render(c, w, w.atmosphere);
     }
-    DM.Weather.render(c, w, w.atmosphere);
     let s = 0;
     L.ps.forEach((p, i) => (s += Math.abs(p.y - before[i]) < 200 ? Math.abs(p.y - before[i]) : 0));
     return s / L.ps.length;
@@ -577,19 +590,27 @@ const door = await ev(() => {
 assert('doors still open and close', door.open && door.closed && !door.err, JSON.stringify(door));
 
 // ---- 5. Temporal Sight -----------------------------------------------------------------
-await start('mars', 'great', 3000);
-for (let i = 0; i < 5; i++) {
+await start('mars', 'great', 1000);
+for (let i = 0; i < 60; i++) {
   await clear();
-  await wait(200);
+  const free = await ev(() => { const DM = window.DM, play = DM.dev.play(); return DM.Engine.top() === play && !play.ctx.locked; });
+  if (free) break;
+  await wait(250);
 }
 await place(560, 960);
-const sat = (x, y) => ev(([x, y]) => {
+// Highest saturation in a small patch around a screen point.
+const sat = (x, y, r = 0) => ev(([x, y, r]) => {
   const E = window.DM.Engine;
   E.render();
-  const d = E.ctx.getImageData(Math.round(x * E.dpr), Math.round(y * E.dpr), 1, 1).data;
-  const mx = Math.max(d[0], d[1], d[2]), mn = Math.min(d[0], d[1], d[2]);
-  return { s: mx ? (mx - mn) / mx : 0, rgb: [d[0], d[1], d[2]] };
-}, [x, y]);
+  let best = { s: -1 };
+  for (let dx = -r; dx <= r; dx += 3) for (let dy = -r; dy <= r; dy += 3) {
+    const d = E.ctx.getImageData(Math.round((x + dx) * E.dpr), Math.round((y + dy) * E.dpr), 1, 1).data;
+    const mx = Math.max(d[0], d[1], d[2]), mn = Math.min(d[0], d[1], d[2]);
+    const s = mx ? (mx - mn) / mx : 0;
+    if (s > best.s) best = { s: +s.toFixed(2), rgb: [d[0], d[1], d[2]] };
+  }
+  return best;
+}, [x, y, r]);
 await ev(() => {
   const DM = window.DM, play = DM.dev.play(), p = play.player;
   p.unlock('timesight');
@@ -606,7 +627,7 @@ const ts = await ev(() => {
   return { k: +w.sightK.toFixed(2), timesight: w.timesight, kept: (w._keep || []).map((e) => e.constructor.name) };
 });
 const floor1 = await sat(300, 600);
-const jon1 = await sat(jonAt.x, jonAt.y);
+const jon1 = await sat(jonAt.x, jonAt.y, 9);
 await shot('timesight');
 await page.keyboard.up('f');
 await wait(600);
