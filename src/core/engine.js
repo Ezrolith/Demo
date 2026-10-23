@@ -58,7 +58,7 @@
     // Drops one QUALITY tier (for this session only; the saved setting is kept)
     // when the frame gap stays above 22 ms for 2 s.
     governor: { enabled: true, limitMs: 22, holdS: 2, slow: 0, grace: 3, drop: 0 },
-    notice: null, // { text, id } for the Play HUD to toast
+    notice: null, // { text, shown } for the Play HUD to toast once
 
     qualityTier() {
       const S = DM.Save && DM.Save.settings;
@@ -87,7 +87,7 @@
       g.grace = 3;
       this.resize();
       const tier = this.qualityTier();
-      this.notice = { text: `QUALITY LOWERED TO ${tier.toUpperCase()} TO KEEP THE GAME SMOOTH`, id: (this.notice ? this.notice.id : 0) + 1 };
+      this.notice = { text: `QUALITY LOWERED TO ${tier.toUpperCase()} TO KEEP THE GAME SMOOTH`, shown: false };
       DM.Events.emit('engine:quality', { quality: tier, auto: true });
     },
 

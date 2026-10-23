@@ -274,7 +274,7 @@
           const sx = l.x * z + ox, sy = l.y * z + oy, r = l.r * z;
           dg.globalAlpha = U.clamp(l.k * l.fl, 0, 1);
           if (l.cone != null) drawCone(dg, colouredCone(l.color), sx, sy, r, l);
-          else dg.drawImage(Gfx.glowSprite(l.color, r), sx - r * 0.8, sy - r * 0.8, r * 1.6, r * 1.6);
+          else dg.drawImage(Gfx.glowSprite(l.color, r), sx - r * 0.65, sy - r * 0.65, r * 1.3, r * 1.3);
         }
       }
       dg.globalAlpha = 1;

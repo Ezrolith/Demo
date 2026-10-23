@@ -217,8 +217,8 @@
       }
       Gfx.postFx(ctx);
       const n = Engine.notice;
-      if (n && n.id !== this.noticeSeen) {
-        this.noticeSeen = n.id;
+      if (n && !n.shown) {
+        n.shown = true;
         this.hud.toast(n.text, '#bff1ff');
       }
       this.hud.render(ctx);
