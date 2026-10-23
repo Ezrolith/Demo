@@ -92,7 +92,9 @@
     onImpact(speed, other, world) {
       if (this.hp == null) return;
       const m = other ? U.clamp(other.mass, 0.6, 6) : 1.4;
-      const dmg = (speed - 200) * 0.12 * m * (this.impactMul || 1);
+      // An expanded Jon's throws hit harder: the thrown object's impactMul applies to what it hits too.
+      const hitBy = other && other.thrown > 0 && other.impactMul ? other.impactMul : 1;
+      const dmg = (speed - 200) * 0.12 * m * (this.impactMul || 1) * hitBy;
       if (dmg <= 1) return;
       if (!this.damage(dmg, other, 'impact')) return;
       world.particles.burst(this.x, this.y, 8, { color: ['#d8d0c0', '#9a9080'], speed: [40, 160], life: [0.2, 0.5], size: [2, 3.5], add: false });

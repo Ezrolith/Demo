@@ -87,6 +87,8 @@ for (let i = 0; i < 400; i++) {
   const st = await ev(() => {
     const m = window.DM.Engine.top();
     if (m.constructor.name !== 'WatchRepair') return { gone: true };
+    // Slow the needle so page round-trips on a loaded machine can't overshoot the zone.
+    m.speed = Math.min(m.speed, 0.7);
     const d = Math.abs(window.DM.U.wrapAngle(m.angle - m.zone.a));
     return { gone: false, inZone: d < m.zone.w * 0.3 && !m.finished && m.t > 0.45, finished: m.finished };
   });
