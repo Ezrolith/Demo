@@ -71,7 +71,7 @@
   // ---- Gila Flats (prologue.js buildGila) ------------------------------------------
   const GEN = { x: 1426, y: 520 };
   const BEACONS = [[1136, 44, 0], [1716, 996, Math.PI / 2], [560, 510, Math.PI]];
-  const GILA_ROOMS = [[320, 230], [850, 250], [300, 800], [840, 800], [560, 510], [1420, 280], [1420, 800]];
+  const GILA_ROOMS = [[320, 230], [850, 250], [300, 800], [840, 800], [560, 510]];
 
   // ---- Studio (mars.js buildStudio) --------------------------------------------------
   const DESK = { x: 700, y: 300 };
@@ -101,7 +101,7 @@
         player: 0,
         ambient(world) {
           const k = ramp(world, 'alarm', world.alarm, 1.6);
-          return k > 0.01 ? `rgba(34,5,8,${(0.68 * k).toFixed(3)})` : null;
+          return k > 0.01 ? `rgba(30,4,8,${(0.74 * k).toFixed(3)})` : null;
         },
         lights(world, add, t) {
           const k = scratch(world).alarm ? scratch(world).alarm.v : 0;
@@ -111,8 +111,8 @@
           const spin = reduced() ? 0.6 : 2.6;
           for (const [x, y, ph] of BEACONS) {
             const a = t * spin + ph;
-            add(x, y, 600, { i: 0.9 * k, cone: a, spread: 0.32, color: '#ff2a1a', k: 0.45 * k });
-            add(x, y, 600, { i: 0.9 * k, cone: a + Math.PI, spread: 0.32, color: '#ff2a1a', k: 0.45 * k });
+            add(x, y, 640, { i: 0.95 * k, cone: a, spread: 0.34, color: '#ff2a1a', k: 0.62 * k });
+            add(x, y, 640, { i: 0.95 * k, cone: a + Math.PI, spread: 0.34, color: '#ff2a1a', k: 0.62 * k });
             add(x, y, 50, { i: k, color: '#ff4a30', k: 0.6 * k });
           }
           const gen = find(world, 'gen', (e) => e.data && e.data.power != null && Math.abs(e.x - GEN.x) < 4 && Math.abs(e.y - GEN.y) < 4);
@@ -227,7 +227,8 @@
     karnak: {
       shadow: 'rgba(80,100,160,0.36)',
       light: {
-        ambient: 'rgba(34,48,96,0.3)',
+        ambient: 'rgba(34,48,96,0.32)',
+        playerK: 0.16,
         zones: [
           { x: COURT.x, y: COURT.y, w: COURT.w, h: COURT.h, ambient: 'rgba(26,18,40,0.46)' },
           { x: SANCTUM.x, y: SANCTUM.y, w: SANCTUM.w, h: SANCTUM.h, ambient: 'rgba(16,6,32,0.66)' },

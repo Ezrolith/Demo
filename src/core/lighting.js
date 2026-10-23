@@ -3,17 +3,17 @@
  *
  * A half-resolution canvas is filled with the map's ambient darkness, lights
  * are punched out of it with 'destination-out' (cached radial and cone falloff
- * sprites, in screen space), and the result is laid over the world. A second
- * half-resolution canvas collects each light's colour and is added on top with
- * 'lighter'. Two full-screen blits per frame, whatever the number of lights.
- * Maps without darkness (daylight) skip all of it and cost nothing.
+ * sprites, in screen space), each light's colour is washed over the pool it
+ * cleared, and the result is laid over the world: one full-screen blit per
+ * frame, whatever the number of lights. Maps without darkness (daylight) skip
+ * all of it and cost nothing.
  *
  * The look of each map comes from its profile in src/data/atmosphere.js
  * (keyed by world.mapId):
  *   light: {
  *     ambient: 'rgba(...)' | fn(world) -> colour or null (null = no darkness)
  *     zones: [{ x, y, w, h, ambient }]   world rects with their own darkness
- *     player: 1                           Jon's light radius multiplier (0 = none)
+ *     player: 1, playerK: 0.34            Jon's light radius multiplier (0 = none), colour strength
  *     lights(world, add, t)               the map's own lights (lamps, beacons...)
  *   }
  * add(x, y, r, o) takes world units; o: { i (strength 0..1), color, k (colour
@@ -31,13 +31,13 @@
   const U = DM.U;
   const Gfx = DM.Gfx;
 
-  const S = 0.5; // light layer resolution relative to the logical screen
   const MAX_LIGHTS = 160;
   const MAX_PARTICLE_LIGHTS = 48;
   const MAX_ATOM_LIGHTS = 64;
   const CONE_SPREAD = 0.5; // half-angle baked into the cone sprite
 
-  let dark = null, tint = null, dg = null, tg = null;
+  let S = 0.5; // light layer resolution relative to the logical screen (Lighting.resolution)
+  let dark = null, dg = null;
   let radial = null, cone = null;
   const pool = [];
   let count = 0;
@@ -86,7 +86,7 @@
     return c;
   }
 
-  // The cone sprite filled with a colour, for the tint pass (cached per colour).
+  // The cone sprite filled with a colour, for the colour wash (cached per colour).
   const cones = new Map();
   function colouredCone(color) {
     let c = cones.get(color);
@@ -102,15 +102,24 @@
     return c;
   }
 
+  // A cone light: the wedge sprite rotated along l.cone and squeezed to l.spread.
+  function drawCone(g, sprite, sx, sy, r, l) {
+    g.save();
+    g.translate(sx, sy);
+    g.rotate(l.cone);
+    g.scale(r / 256, (r / 256) * (Math.tan(l.spread) / Math.tan(CONE_SPREAD)));
+    g.drawImage(sprite, 0, -128);
+    g.restore();
+  }
+
   function setup() {
-    if (dark) return;
+    S = Lighting.resolution;
     const w = Math.round(DM.W * S), h = Math.round(DM.H * S);
+    if (!radial) radial = radialSprite();
+    if (!cone) cone = coneSprite();
+    if (dark && dark.width === w && dark.height === h) return;
     dark = canvas(w, h);
-    tint = canvas(w, h);
     dg = dark.getContext('2d');
-    tg = tint.getContext('2d');
-    radial = radialSprite();
-    cone = coneSprite();
   }
 
   // Lights are pooled objects so a frame of 100 lights allocates nothing.
@@ -129,16 +138,22 @@
     l.spread = (o && o.spread) || 0.4;
     l.flicker = !!(o && o.flicker);
     l.seed = (o && o.seed) || x * 0.013 + y * 0.007;
+    l.on = false;
+    l.fl = 1;
     return l;
   }
 
   const reducedFlashing = () => !!(DM.SettingsSchema && DM.SettingsSchema.reducedFlashing());
 
   const Lighting = {
-    S,
+    resolution: 0.5,
+    colour: true,
+    // Filtered upscale of the layer. Off by default: under film grain the
+    // nearest-sampled layer looks the same and costs a tenth in software raster.
+    smooth: false,
     stats: { lights: 0, ms: 0 },
-    // The half-resolution layers (for tests and debugging).
-    layers: () => ({ dark, tint }),
+    // The half-resolution layer (for tests and debugging).
+    layers: () => ({ dark }),
 
     // Darkness colour for this frame, or null when the map is lit by day.
     ambient(world, profile) {
@@ -162,7 +177,7 @@
       const pm = L.player == null ? 1 : L.player;
       if (p && !p.hidden && pm > 0) {
         const fade = p.down ? 0.4 : 1;
-        if (p.form === 'manhattan') add(p.x, p.y, 260 * (p.scale || 1) * pm, { i: fade, color: '#5fd4ff', k: 0.34 * fade });
+        if (p.form === 'manhattan') add(p.x, p.y, 260 * (p.scale || 1) * pm, { i: fade, color: '#5fd4ff', k: (L.playerK == null ? 0.34 : L.playerK) * fade });
         else if (p.form === 'awareness') add(p.x, p.y, 230 * pm, { i: fade, color: '#5fd4ff', k: 0.24 * fade });
       }
       if (L.lights) L.lights(world, add, t);
@@ -231,50 +246,45 @@
       const n = Lighting.collect(world, profile);
       const steady = reducedFlashing();
       const tm = world.realTime || 0;
-      tg.globalCompositeOperation = 'source-over';
-      tg.globalAlpha = 1;
-      tg.clearRect(0, 0, W, H);
-      tg.globalCompositeOperation = 'lighter';
+      // The falloffs are smooth enough for nearest sampling, which is several
+      // times cheaper than filtering when the browser rasterises in software.
+      dg.imageSmoothingEnabled = false;
       dg.globalCompositeOperation = 'destination-out';
       let drawn = 0;
       for (let i = 0; i < n; i++) {
         const l = pool[i];
         const sx = l.x * z + ox, sy = l.y * z + oy, r = l.r * z;
-        if (sx + r < 0 || sy + r < 0 || sx - r > W || sy - r > H) continue;
+        l.on = !(sx + r < 0 || sy + r < 0 || sx - r > W || sy - r > H);
+        if (!l.on) continue;
         drawn++;
         // Lamps breathe a little; never with REDUCED flashing.
-        const fl = l.flicker && !steady ? 0.9 + 0.1 * Math.sin(tm * 9 + l.seed) * Math.sin(tm * 5.3 + l.seed * 2) : 1;
-        dg.globalAlpha = U.clamp(l.i * fl, 0, 1);
+        l.fl = l.flicker && !steady ? 0.9 + 0.1 * Math.sin(tm * 9 + l.seed) * Math.sin(tm * 5.3 + l.seed * 2) : 1;
+        dg.globalAlpha = U.clamp(l.i * l.fl, 0, 1);
         if (l.cone != null) {
-          const sy2 = Math.tan(l.spread) / Math.tan(CONE_SPREAD);
-          dg.save();
-          dg.translate(sx, sy);
-          dg.rotate(l.cone);
-          dg.scale(r / 256, (r / 256) * sy2);
-          dg.drawImage(cone, 0, -128);
-          dg.restore();
+          drawCone(dg, cone, sx, sy, r, l);
           dg.drawImage(radial, sx - r * 0.12, sy - r * 0.12, r * 0.24, r * 0.24);
         } else dg.drawImage(radial, sx - r, sy - r, r * 2, r * 2);
-        if (l.color && l.k > 0) {
-          tg.globalAlpha = U.clamp(l.k * fl, 0, 1);
-          if (l.cone != null) {
-            tg.save();
-            tg.translate(sx, sy);
-            tg.rotate(l.cone);
-            tg.scale(r / 256, (r / 256) * (Math.tan(l.spread) / Math.tan(CONE_SPREAD)));
-            tg.drawImage(colouredCone(l.color), 0, -128);
-            tg.restore();
-          } else tg.drawImage(Gfx.glowSprite(l.color, r), sx - r * 0.8, sy - r * 0.8, r * 1.6, r * 1.6);
+      }
+      // Then each light's colour, washed over the pool it cleared.
+      if (Lighting.colour) {
+        dg.globalCompositeOperation = 'source-over';
+        for (let i = 0; i < n; i++) {
+          const l = pool[i];
+          if (!l.on || !l.color || !(l.k > 0)) continue;
+          const sx = l.x * z + ox, sy = l.y * z + oy, r = l.r * z;
+          dg.globalAlpha = U.clamp(l.k * l.fl, 0, 1);
+          if (l.cone != null) drawCone(dg, colouredCone(l.color), sx, sy, r, l);
+          else dg.drawImage(Gfx.glowSprite(l.color, r), sx - r * 0.8, sy - r * 0.8, r * 1.6, r * 1.6);
         }
       }
       dg.globalAlpha = 1;
-      tg.globalAlpha = 1;
+      dg.globalCompositeOperation = 'source-over';
+      dg.imageSmoothingEnabled = true;
       ctx.save();
       ctx.globalAlpha = 1;
       ctx.globalCompositeOperation = 'source-over';
+      if (!Lighting.smooth) ctx.imageSmoothingEnabled = false;
       ctx.drawImage(dark, 0, 0, DM.W, DM.H);
-      ctx.globalCompositeOperation = 'lighter';
-      ctx.drawImage(tint, 0, 0, DM.W, DM.H);
       ctx.restore();
       Lighting.stats.lights = drawn;
       Lighting.stats.ms = performance.now() - t0;

@@ -248,7 +248,9 @@
             const p = pud[(L.rnd() * pud.length) | 0];
             if (p.x + p.rx < v.x0 || p.x - p.rx > v.x1 || p.y + p.rx < v.y0 || p.y - p.rx > v.y1) continue;
             const a = L.rnd() * TAU, d = Math.sqrt(L.rnd()) * 0.8;
-            L.rip.push({ x: p.x + Math.cos(a) * p.rx * d, y: p.y + Math.sin(a) * p.rx * 0.45 * d, t: 0 });
+            const x = p.x + Math.cos(a) * p.rx * d, y = p.y + Math.sin(a) * p.rx * 0.45 * d;
+            if (world.walls.some((w) => !w.low && x > w.x && x < w.x + w.w && y > w.y && y < w.y + w.h)) continue; // not on a roof
+            L.rip.push({ x, y, t: 0 });
           }
         }
       },

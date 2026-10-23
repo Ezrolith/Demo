@@ -570,7 +570,7 @@
         // Facet normal (outward) against the light from the top left.
         const mx = (a[0] + b[0]) / 2 - ax, my = (a[1] + b[1]) / 2 - ay;
         const dot = (mx * -0.58 + my * -0.81) / (Math.hypot(mx, my) || 1);
-        const path = dot > 0.35 ? P.lit : dot < -0.3 ? P.dark : P.mid;
+        const path = dot > 0.2 ? P.lit : dot < -0.15 ? P.dark : P.mid;
         path.moveTo(ax, ay);
         path.lineTo(a[0], a[1]);
         path.lineTo(b[0], b[1]);
