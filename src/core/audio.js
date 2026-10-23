@@ -748,8 +748,8 @@
         a.tone({ freq: 90, freqEnd: 28, dur: 1.3, gain: 0.3, type: 'sine' });
         a.noise({ dur: 1.0, gain: 0.25, ftype: 'lowpass', freq: 600, freqEnd: 60 });
         // Body that survives small speakers.
-        a.tone({ freq: 180, freqEnd: 55, dur: 1.1, gain: 0.16, type: 'sawtooth', filter: { freq: 900, freqEnd: 300 }, attack: 0.02 });
-        a.noise({ dur: 0.7, gain: 0.12, ftype: 'bandpass', freq: 420, freqEnd: 160, q: 0.9 });
+        a.tone({ freq: 180, freqEnd: 55, dur: 1.1, gain: 0.22, type: 'sawtooth', filter: { freq: 900, freqEnd: 300 }, attack: 0.02 });
+        a.noise({ dur: 0.7, gain: 0.18, ftype: 'bandpass', freq: 420, freqEnd: 160, q: 0.9 });
       },
     },
     shot: {
@@ -781,7 +781,7 @@
       fn: (a) => {
         a.noise({ dur: 1.1, gain: 0.32, ftype: 'lowpass', freq: 1800, freqEnd: 70 });
         a.tone({ freq: 75, freqEnd: 25, dur: 0.8, gain: 0.22, type: 'sine' });
-        a.tone({ freq: 150, freqEnd: 60, dur: 0.5, gain: 0.2, type: 'triangle' });
+        a.tone({ freq: 150, freqEnd: 60, dur: 0.5, gain: 0.26, type: 'triangle' });
         a.noise({ dur: 0.45, gain: 0.3, ftype: 'bandpass', freq: 400, freqEnd: 220, q: 1 });
       },
     },
@@ -796,9 +796,9 @@
       gap: 0.2,
       fn: (a) => {
         a.noise({ dur: 0.6, gain: 0.3, ftype: 'lowpass', freq: 400, freqEnd: 60 });
-        a.tone({ freq: 70, freqEnd: 38, dur: 0.5, gain: 0.2, type: 'sine' });
-        a.tone({ freq: 140, freqEnd: 70, dur: 0.45, gain: 0.16, type: 'triangle' });
-        a.noise({ dur: 0.35, gain: 0.14, ftype: 'bandpass', freq: 520, freqEnd: 240, q: 1.2 });
+        a.tone({ freq: 70, freqEnd: 38, dur: 0.5, gain: 0.16, type: 'sine' });
+        a.tone({ freq: 140, freqEnd: 70, dur: 0.45, gain: 0.3, type: 'triangle' });
+        a.noise({ dur: 0.35, gain: 0.26, ftype: 'bandpass', freq: 520, freqEnd: 240, q: 1.2 });
       },
     },
     success: {
@@ -823,8 +823,8 @@
     flash: {
       fn: (a) => {
         a.noise({ dur: 3, gain: 0.35, ftype: 'lowpass', freq: 9000, freqEnd: 150, attack: 0.8 });
-        a.tone({ freq: 50, freqEnd: 30, dur: 3, gain: 0.25, type: 'sine', attack: 0.6 });
-        a.noise({ dur: 2.4, gain: 0.1, ftype: 'bandpass', freq: 600, freqEnd: 250, q: 1, attack: 0.7 });
+        a.tone({ freq: 50, freqEnd: 30, dur: 3, gain: 0.2, type: 'sine', attack: 0.6 });
+        a.noise({ dur: 2.4, gain: 0.26, ftype: 'bandpass', freq: 600, freqEnd: 250, q: 1, attack: 0.7 });
       },
     },
     meteor: { gap: 0.2, fn: (a) => a.tone({ freq: 2400, freqEnd: 260, dur: 0.9, gain: 0.04, type: 'sine' }) },

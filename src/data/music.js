@@ -86,7 +86,7 @@
     // Chapter II's test range: open, unhurried, no drums.
     range: {
       bpm: 92,
-      level: 0,
+      level: 6.5,
       barsPerChord: 2,
       echo: 0.3,
       prog: [[62, 66, 69], [59, 62, 66], [55, 59, 62], [57, 61, 64]],
@@ -100,7 +100,7 @@
     // Aftermaths: pads and a few high notes, after the fighting stops.
     reflect: {
       bpm: 54,
-      level: 0,
+      level: 3,
       barsPerChord: 2,
       echo: 0.6,
       prog: [[50, 57, 62, 65], [46, 53, 58, 62], [43, 50, 55, 58], [45, 52, 57, 61]],
@@ -153,7 +153,7 @@
     // chords, slower, with only a clock to keep them company.
     ending_cold: {
       bpm: 46,
-      level: 0,
+      level: 4.5,
       barsPerChord: 2,
       echo: 0.6,
       prog: [[50, 57, 62, 64], [48, 55, 62, 64], [46, 53, 60, 62], [45, 52, 57, 64]],
