@@ -86,6 +86,22 @@
     return c;
   }
 
+  // The cone sprite filled with a colour, for the tint pass (cached per colour).
+  const cones = new Map();
+  function colouredCone(color) {
+    let c = cones.get(color);
+    if (c) return c;
+    c = canvas(256, 256);
+    const g = c.getContext('2d');
+    g.drawImage(cone, 0, 0);
+    g.globalCompositeOperation = 'source-in';
+    g.fillStyle = color;
+    g.fillRect(0, 0, 256, 256);
+    if (cones.size > 16) cones.clear();
+    cones.set(color, c);
+    return c;
+  }
+
   function setup() {
     if (dark) return;
     const w = Math.round(DM.W * S), h = Math.round(DM.H * S);
@@ -146,7 +162,7 @@
       const pm = L.player == null ? 1 : L.player;
       if (p && !p.hidden && pm > 0) {
         const fade = p.down ? 0.4 : 1;
-        if (p.form === 'manhattan') add(p.x, p.y, 260 * (p.scale || 1) * pm, { i: fade, color: '#5fd4ff', k: 0.2 * fade });
+        if (p.form === 'manhattan') add(p.x, p.y, 260 * (p.scale || 1) * pm, { i: fade, color: '#5fd4ff', k: 0.34 * fade });
         else if (p.form === 'awareness') add(p.x, p.y, 230 * pm, { i: fade, color: '#5fd4ff', k: 0.24 * fade });
       }
       if (L.lights) L.lights(world, add, t);
@@ -242,8 +258,12 @@
         if (l.color && l.k > 0) {
           tg.globalAlpha = U.clamp(l.k * fl, 0, 1);
           if (l.cone != null) {
-            const cx = sx + Math.cos(l.cone) * r * 0.45, cy = sy + Math.sin(l.cone) * r * 0.45;
-            tg.drawImage(Gfx.glowSprite(l.color, r), cx - r * 0.5, cy - r * 0.5, r, r);
+            tg.save();
+            tg.translate(sx, sy);
+            tg.rotate(l.cone);
+            tg.scale(r / 256, (r / 256) * (Math.tan(l.spread) / Math.tan(CONE_SPREAD)));
+            tg.drawImage(colouredCone(l.color), 0, -128);
+            tg.restore();
           } else tg.drawImage(Gfx.glowSprite(l.color, r), sx - r * 0.8, sy - r * 0.8, r * 1.6, r * 1.6);
         }
       }

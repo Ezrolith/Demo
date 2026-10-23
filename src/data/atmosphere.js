@@ -70,7 +70,7 @@
 
   // ---- Gila Flats (prologue.js buildGila) ------------------------------------------
   const GEN = { x: 1426, y: 520 };
-  const BEACONS = [[1150, 50, 0], [1712, 992, Math.PI / 2], [560, 510, Math.PI]];
+  const BEACONS = [[1136, 44, 0], [1716, 996, Math.PI / 2], [560, 510, Math.PI]];
   const GILA_ROOMS = [[320, 230], [850, 250], [300, 800], [840, 800], [560, 510], [1420, 280], [1420, 800]];
 
   // ---- Studio (mars.js buildStudio) --------------------------------------------------
@@ -111,8 +111,8 @@
           const spin = reduced() ? 0.6 : 2.6;
           for (const [x, y, ph] of BEACONS) {
             const a = t * spin + ph;
-            add(x, y, 560, { i: 0.85 * k, cone: a, spread: 0.3, color: '#ff2a1a', k: 0.34 * k });
-            add(x, y, 560, { i: 0.85 * k, cone: a + Math.PI, spread: 0.3, color: '#ff2a1a', k: 0.34 * k });
+            add(x, y, 600, { i: 0.9 * k, cone: a, spread: 0.32, color: '#ff2a1a', k: 0.45 * k });
+            add(x, y, 600, { i: 0.9 * k, cone: a + Math.PI, spread: 0.32, color: '#ff2a1a', k: 0.45 * k });
             add(x, y, 50, { i: k, color: '#ff4a30', k: 0.6 * k });
           }
           const gen = find(world, 'gen', (e) => e.data && e.data.power != null && Math.abs(e.x - GEN.x) < 4 && Math.abs(e.y - GEN.y) < 4);
@@ -219,7 +219,7 @@
     mars: {
       shadow: 'rgba(110,30,10,0.45)',
       weather: [{ type: 'dust', color: '#f4b888', devilColor: '#d08058', wind: 45, clouds: true, cloudColor: '#6e2c1a' }],
-      walls: { rock: { pattern: 'rock', height: 1.3, top: '#6a2a14', lit: '#a24a2a', dark: '#3a1408' } },
+      walls: { rock: { pattern: 'rock', height: 1.3, top: '#8a3a1e', lit: '#c4683c', dark: '#56200e' } },
     },
 
     // Chapter V: Antarctic twilight and a blizzard outside; gold halls, braziers

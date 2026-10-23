@@ -434,27 +434,35 @@
         list.push(w);
       }
       let any = false;
-      ctx.beginPath();
+      const sp = new Path2D();
       for (const w of list) {
         const st = this.wallStyles[w.kind] || this.wallStyles.wall;
         const a = look && look[w.kind];
         if (w.noShadow || w.draw || st.flat || st.seeThrough || (st.draw && !a) || (a && a.height === 0)) continue;
         const h = a && a.height != null ? a.height : st.height != null ? st.height : st.low ? 0.5 : 1;
         const dx = LD.x * h, dy = LD.y * h;
-        ctx.moveTo(w.x, w.y);
-        ctx.lineTo(w.x + w.w, w.y);
-        ctx.lineTo(w.x + w.w + dx, w.y + dy);
-        ctx.lineTo(w.x + w.w + dx, w.y + w.h + dy);
-        ctx.lineTo(w.x + dx, w.y + w.h + dy);
-        ctx.lineTo(w.x, w.y + w.h);
-        ctx.closePath();
+        const surf = a && a.pattern && DM.WallSurfaces[a.pattern];
+        const outline = surf && surf.outline && sp.addPath && surf.outline(w);
+        if (outline) {
+          // Irregular shapes (rock) cast their own outline, swept along the light.
+          sp.addPath(outline, new DOMMatrix([1, 0, 0, 1, dx, dy]));
+          sp.addPath(outline, new DOMMatrix([1, 0, 0, 1, dx / 2, dy / 2]));
+        } else {
+          sp.moveTo(w.x, w.y);
+          sp.lineTo(w.x + w.w, w.y);
+          sp.lineTo(w.x + w.w + dx, w.y + dy);
+          sp.lineTo(w.x + w.w + dx, w.y + w.h + dy);
+          sp.lineTo(w.x + dx, w.y + w.h + dy);
+          sp.lineTo(w.x, w.y + w.h);
+          sp.closePath();
+        }
         any = true;
       }
       if (any) {
         ctx.save();
         ctx.globalCompositeOperation = 'multiply';
         ctx.fillStyle = (atmo && atmo.shadow) || 'rgba(0,0,0,0.3)';
-        ctx.fill();
+        ctx.fill(sp);
         ctx.restore();
       }
       for (const w of list) this.drawWall(ctx, w, look || null);
@@ -664,6 +672,7 @@
 
     // Faceted rock: lit top left, dark bottom right.
     rock: {
+      outline: (w) => deco(w, 'rock', (rnd) => rockPaths(w, rnd)).ink,
       body(ctx, w, st, a) {
         const P = deco(w, 'rock', (rnd) => rockPaths(w, rnd));
         const top = (a && a.top) || st.top || '#7a5a3a';

@@ -114,13 +114,13 @@
         ctx.strokeStyle = L.color || '#ffffff';
         for (let b = 0; b < 3; b++) {
           const z0 = 0.35 + b * 0.39, z1 = z0 + 0.39;
-          ctx.globalAlpha = 0.3 + b * 0.18;
-          ctx.lineWidth = 1 + b * 0.8;
+          ctx.globalAlpha = 0.45 + b * 0.2;
+          ctx.lineWidth = 1.3 + b * 0.75;
           ctx.beginPath();
           for (const p of L.ps) {
             if (p.z < z0 || p.z >= z1) continue;
             ctx.moveTo(p.x, p.y);
-            ctx.lineTo(p.x - wind * p.z * 0.03, p.y - fall * p.z * 0.03);
+            ctx.lineTo(p.x - wind * p.z * 0.04, p.y - fall * p.z * 0.04);
           }
           ctx.stroke();
         }
@@ -138,6 +138,7 @@
       n: 150,
       init(L, n, rnd) {
         L.ps = scatter(n, rnd, 0.4, 1.4);
+        L.gusts = scatter(Math.round(n / 6), rnd, 0.8, 1.6); // long faint streaks of blown sand
         L.devil = null;
         L.nextDevil = 2 + rnd() * 4;
         L.rnd = rnd;
@@ -147,6 +148,11 @@
         const wind = L.wind || 60;
         drift(L, dt, dx, dy, wind, 8);
         for (const p of L.ps) p.y += Math.sin(t * 1.3 + p.s * 20) * 6 * dt;
+        for (const p of L.gusts) {
+          p.x += wind * 5 * p.z * dt - dx * p.z;
+          p.y += 12 * p.z * dt - dy * p.z;
+          wrap(p);
+        }
         L.nextDevil -= dt;
         if (!L.devil && L.nextDevil <= 0) {
           const v = world.camera.view();
@@ -189,10 +195,21 @@
           }
           ctx.restore();
         }
-        ctx.fillStyle = L.color || '#e8c89a';
+        const col = L.color || '#e8c89a';
+        ctx.strokeStyle = col;
+        ctx.lineWidth = 1.2;
+        ctx.globalAlpha = 0.16;
+        ctx.beginPath();
+        const sx = (L.wind || 60) >= 0 ? -1 : 1;
+        for (const p of L.gusts) {
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.x + sx * 46 * p.z, p.y - 3 * p.z);
+        }
+        ctx.stroke();
+        ctx.fillStyle = col;
         for (const p of L.ps) {
-          ctx.globalAlpha = 0.18 + p.z * 0.22;
-          const s = 1 + p.z * 1.3;
+          ctx.globalAlpha = 0.3 + p.z * 0.3;
+          const s = 1.4 + p.z * 1.6;
           ctx.fillRect(p.x, p.y, s, s);
         }
         const d = L.devil;
