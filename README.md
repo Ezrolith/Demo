@@ -4,6 +4,8 @@ A browser game inspired by *Watchmen*. You play Jon Osterman's journey: a physic
 
 It runs in any modern browser on Mac or PC, with no installs, no server and no build step.
 
+Picking up development? Start with [HANDOVER.md](HANDOVER.md) (where things stand, how to test, conventions) and [docs/ROADMAP.md](docs/ROADMAP.md) (the next packages, with acceptance criteria).
+
 ## Play
 
 - **Easiest:** open `dist/dr-manhattan.html` (one self-contained file). Double-click it, or drag it into Chrome, Safari, Firefox or Edge.
