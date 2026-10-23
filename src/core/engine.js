@@ -172,13 +172,18 @@
       ctx.restore();
     },
 
+    // The game draws its own cursor inside the 1280x720 view; over the letterbox
+    // bars (where nothing is drawn) the system cursor comes back.
     renderCursor(ctx) {
       const I = DM.Input;
-      if (I.touch || !I.mouse.inside) return;
+      const { x, y } = I.mouse;
+      const outside = x < 0 || y < 0 || x > DM.W || y > DM.H;
+      const sys = outside && !I.touch ? 'default' : 'none';
+      if (this.canvas.style.cursor !== sys) this.canvas.style.cursor = sys;
+      if (I.touch || !I.mouse.inside || outside) return;
       const top = this.top();
       const mode = (top && top.cursor) || 'pointer';
       if (mode === 'none') return;
-      const { x, y } = I.mouse;
       ctx.save();
       if (mode === 'reticle') {
         ctx.strokeStyle = 'rgba(200,245,255,0.9)';
@@ -192,6 +197,8 @@
         ctx.fillStyle = '#ffffff';
         DM.Gfx.circle(ctx, x, y, 1.6);
         ctx.fill();
+        // Power state at the point of aim: cooldown, low energy, grabs, failures.
+        if (top.player && DM.Powers && DM.Powers.renderReticle) DM.Powers.renderReticle(ctx, x, y, top.player);
       } else {
         ctx.fillStyle = '#eefbff';
         ctx.strokeStyle = '#0b1420';

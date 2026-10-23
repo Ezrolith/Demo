@@ -22,13 +22,14 @@
     left: ['KeyA', 'ArrowLeft'],
     right: ['KeyD', 'ArrowRight'],
 
-    telekinesis: ['Mouse0'],
+    telekinesis: ['Mouse0', 'KeyC'],
     disintegrate: ['KeyQ', 'Mouse2'],
     teleport: ['Space'],
     duplicate: ['KeyR'],
     timesight: ['KeyF', 'ShiftLeft', 'ShiftRight'],
     expand: ['KeyG'],
     interact: ['KeyE', 'Enter'],
+    hint: ['KeyH'],
 
     pause: ['Escape', 'KeyP'],
     confirm: ['Enter', 'Space', 'KeyE', 'Mouse0'],
