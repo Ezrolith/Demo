@@ -610,8 +610,9 @@ if (want(8)) for (const hz of [120, 240]) {
     return !!window.__walk;
   }, { timeout: 120000 });
   const walk = await g.ev(() => window.__walk);
-  const want = Math.ceil(1.15 * hz);
-  assert(`at ${hz} Hz the reassembly walk lasts 1.15 s ± 1 frame`, walk.dur === 1.15 && Math.abs(walk.frames - want) <= 1 && Math.abs(walk.s - 1.15) <= 1 / hz + 1e-6, `${walk.s.toFixed(4)} s over ${walk.frames} frames`);
+  // The simulation steps at a fixed 60 Hz whatever the display does (Engine.step).
+  const want = Math.ceil(1.15 * 60);
+  assert(`at ${hz} Hz the reassembly walk lasts 1.15 s ± 1 step, in 60 Hz steps`, walk.dur === 1.15 && Math.abs(walk.frames - want) <= 1 && Math.abs(walk.s - 1.15) <= 1 / 60 + 1e-6, `${walk.s.toFixed(4)} s over ${walk.frames} steps`);
   assert(`at ${hz} Hz the title motes turn at the same speed`, Math.abs(motes - 0.15) < 0.005, `${motes.toFixed(4)} rad/s per unit speed`);
   await g.close();
 }
