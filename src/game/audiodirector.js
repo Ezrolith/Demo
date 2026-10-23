@@ -1,7 +1,8 @@
 /*
  * Audio director: turns what is happening into sound without any scene or
- * entity calling it. It runs its own requestAnimationFrame loop, looks at the
- * scene stack (DM.Engine) and listens to game events:
+ * entity calling it. It ticks once per engine frame (it wraps DM.Engine.frame,
+ * so the game keeps a single requestAnimationFrame chain), looks at the scene
+ * stack (DM.Engine) and listens to game events:
  *   - the ambient bed for the current map (and zone), ducked under Temporal
  *     Sight and Pause, silent outside play;
  *   - music intensity from the threat around Jon, dialogue ducking, stage cues;
@@ -309,8 +310,7 @@
     }));
   }
 
-  function loop(ts) {
-    requestAnimationFrame(loop);
+  function tick(ts) {
     const dt = Director.last ? Math.min(0.1, Math.max(0, (ts - Director.last) / 1000)) : 1 / 60;
     Director.last = ts;
     try {
@@ -319,7 +319,22 @@
       Director.lastError = String((e && e.stack) || e);
     }
   }
-  if (typeof requestAnimationFrame === 'function') requestAnimationFrame(loop);
+  // After each engine frame (update, render, input). A second rAF loop would
+  // also work in a browser, but would double-step virtual displays in tests.
+  const E = DM.Engine;
+  if (E && typeof E.frame === 'function') {
+    const frame = E.frame;
+    E.frame = function (t) {
+      frame.call(this, t);
+      tick(t);
+    };
+  } else if (typeof requestAnimationFrame === 'function') {
+    const loop = (t) => {
+      requestAnimationFrame(loop);
+      tick(t);
+    };
+    requestAnimationFrame(loop);
+  }
 
   DM.AudioDirector = Director;
 })();
