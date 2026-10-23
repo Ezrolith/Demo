@@ -28,7 +28,10 @@
       this.canvas = canvas;
       this.ctx = canvas.getContext('2d');
       this.resize();
-      window.addEventListener('resize', () => this.resize());
+      window.addEventListener('resize', () => {
+        this.governor.grace = Math.max(this.governor.grace, 1); // dragging a window edge is not slowness
+        this.resize();
+      });
       this.last = performance.now();
       requestAnimationFrame((t) => this.frame(t));
     },
@@ -56,7 +59,8 @@
     RENDER_SCALE: { high: 1, balanced: 0.75, low: 0.5 },
     stats: { updMs: 0, renderMs: 0, gapMs: 1000 / 60 },
     // Drops one QUALITY tier (for this session only; the saved setting is kept)
-    // when the frame gap stays above 22 ms for 2 s.
+    // when the frame gap stays above 22 ms for 2 s while the game's own work is
+    // a large share of it (a display or browser capped at 30 fps is not slow).
     governor: { enabled: true, limitMs: 22, holdS: 2, slow: 0, grace: 3, drop: 0 },
     notice: null, // { text, shown } for the Play HUD to toast once
 
@@ -80,7 +84,8 @@
         g.slow = 0;
         return;
       }
-      g.slow = st.gapMs > g.limitMs ? g.slow + gapMs / 1000 : 0;
+      const busy = st.updMs + st.renderMs > 0.45 * st.gapMs;
+      g.slow = st.gapMs > g.limitMs && busy ? g.slow + gapMs / 1000 : 0;
       if (g.slow < g.holdS || this.qualityTier() === 'low') return;
       g.drop++;
       g.slow = 0;

@@ -33,13 +33,18 @@
       this.t += dt;
       if (this.t < 0.6) return;
       if (!this.finished) {
+        // Types at the TEXT SPEED setting, then holds each finished line a beat.
+        const S = DM.SettingsSchema;
         const L = this.lines[this.line];
-        const prev = Math.floor(this.chars);
-        this.chars += dt * 48;
-        if (Math.floor(this.chars) > prev && Math.floor(this.chars) % 3 === 0) DM.Audio.play('type');
-        if (this.chars >= L.length + 22) {
+        if (this.chars < L.length) {
+          const prev = Math.floor(this.chars);
+          this.chars = Math.min(L.length, this.chars + dt * (S ? S.textCPS() : 48));
+          if (Math.floor(this.chars) > prev && Math.floor(this.chars) % 3 === 0) DM.Audio.play('type');
+          this.hold = 0;
+        } else if ((this.hold = (this.hold || 0) + dt) >= 0.46 * (S ? S.readTime() : 1)) {
           this.line++;
           this.chars = 0;
+          this.hold = 0;
         }
       }
       if (Input.pressed('confirm')) {

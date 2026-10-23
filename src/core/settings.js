@@ -121,7 +121,15 @@
       options: [['high', 'HIGH'], ['balanced', 'BALANCED'], ['low', 'LOW']], def: 'high',
       desc: 'Render resolution. Lower it if the game stutters on this machine.',
       apply() {
-        if (DM.Engine && DM.Engine.canvas) DM.Engine.resize();
+        const E = DM.Engine;
+        if (!E || !E.canvas) return;
+        // A choice made here replaces any automatic drop from the frame governor.
+        if (E.governor) {
+          E.governor.drop = 0;
+          E.governor.slow = 0;
+          E.governor.grace = 3;
+        }
+        E.resize();
       },
     },
     {
@@ -173,6 +181,10 @@
     {
       id: 'reset', section: 'GAMEPLAY', label: 'RESET PROGRESS', type: 'action', confirm: true,
       desc: 'Erase chapters, checkpoints and the tally of lives. Settings are kept.',
+      // Only from the title: a chapter still running would write its progress back.
+      get hidden() {
+        return !!(DM.Engine && DM.Scenes && DM.Scenes.Play && DM.Engine.stack.some((sc) => sc instanceof DM.Scenes.Play));
+      },
       action() {
         DM.Save.reset();
         return 'Progress reset.';

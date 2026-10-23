@@ -52,7 +52,8 @@
     update(dt) {
       this.t += dt;
       this.pageT += dt;
-      const auto = !this.onCredits && this.pageT > 4.2 + this.pages[this.page].length * 0.045;
+      const S = DM.SettingsSchema;
+      const auto = !this.onCredits && this.pageT > (4.2 + this.pages[this.page].length * 0.045) * (S ? S.readTime() : 1);
       if (auto || (this.pageT > 0.6 && Input.pressed('confirm'))) {
         Input.consume('confirm');
         if (this.onCredits) {
@@ -76,7 +77,8 @@
         const a = Math.min(1, this.pageT * 1.5);
         ctx.save();
         ctx.globalAlpha = a;
-        Gfx.paragraph(ctx, text, DM.W / 2, 400, 760, 34, { size: 24, font: F.type, color: '#e8f6ff', align: 'center', chars: this.pageT * 45 });
+        const cps = DM.SettingsSchema ? DM.SettingsSchema.textCPS() : 45;
+        Gfx.paragraph(ctx, text, DM.W / 2, 400, 760, 34, { size: 24, font: F.type, color: '#e8f6ff', align: 'center', chars: isFinite(cps) ? this.pageT * cps : Infinity });
         ctx.restore();
         Gfx.text(ctx, 'SPACE / CLICK', DM.W / 2, DM.H - 36, { size: 11, color: 'rgba(200,225,240,0.35)', align: 'center', spacing: 3 });
         return;

@@ -203,7 +203,17 @@ const gov = await ev(() => {
   g.enabled = true;
   g.grace = 0;
   g.slow = 0;
+  E.stats.gapMs = 33.3;
+  // A display capped at 30 fps with light work is not slow: no drop.
+  E.stats.updMs = 2;
+  E.stats.renderMs = 1.5;
+  for (let i = 0; i < 300; i++) E.measure(33.3);
+  const capped = E.qualityTier();
+  // Real overload: the game's own work fills most of each 40 ms frame.
+  E.stats.updMs = 8;
+  E.stats.renderMs = 14;
   E.stats.gapMs = 16.7;
+  g.slow = 0;
   for (let i = 0; i < 40; i++) E.measure(40); // 1.6 s of 40 ms frames: not yet
   const before = E.qualityTier();
   for (let i = 0; i < 30; i++) E.measure(40);
@@ -215,12 +225,17 @@ const gov = await ev(() => {
   const saved = DM.Save.settings.quality;
   for (let i = 0; i < 200; i++) E.measure(1000); // a tab switch is ignored
   const ignored = E.qualityTier();
+  // Choosing a QUALITY in Settings replaces the automatic drop.
+  DM.SettingsSchema.set('quality', 'high');
+  const chosen = E.qualityTier();
   g.enabled = false;
   g.drop = 0;
   E.resize();
-  return { before, after, width, toast, saved, ignored };
+  return { capped, before, after, width, toast, saved, ignored, chosen };
 });
+assert('a 30 fps cap with light work keeps HIGH quality', gov.capped === 'high', JSON.stringify(gov));
 assert('frame governor drops one tier after 2 s above 22 ms', gov.before === 'high' && gov.after === 'balanced' && gov.width === 960, JSON.stringify(gov));
+assert('choosing QUALITY in Settings overrides the automatic drop', gov.chosen === 'high', gov.chosen);
 assert('governor shows a toast and keeps the saved setting', gov.toast && gov.saved === 'high' && gov.ignored === 'balanced');
 
 const dbg = await ev(() => {

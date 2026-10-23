@@ -191,7 +191,8 @@
         this.musicBus.gain.setTargetAtTime(this.volumes.music * 0.6 * m, t, 0.05);
         this.sfxBus.gain.setTargetAtTime(this.volumes.sfx * 0.9 * m, t, 0.05);
         this.uiBus.gain.setTargetAtTime(this.volumes.sfx * 0.9 * m, t, 0.05);
-        this.ambBus.gain.setTargetAtTime(this.ambienceVolume() * this.volumes.sfx * this.ambDuck * m, t, 0.3);
+        // Independent of SOUND EFFECTS; 0.8 keeps the beds at the level they were tuned at.
+        this.ambBus.gain.setTargetAtTime(this.ambienceVolume() * 0.8 * this.ambDuck * m, t, 0.3);
       } catch (e) {
         /* sound must never break the game */
       }

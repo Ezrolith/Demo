@@ -223,7 +223,9 @@
       const it = this.menu.items[this.menu.sel];
       const desc = this.tabFocus ? '← →  to choose a section.' : it && it.desc ? it.desc() : '';
       if (desc) Gfx.paragraph(ctx, desc, DM.W / 2, FOOT_Y + 18, 720, 24, { size: 17, font: F.type, color: 'rgba(220,238,255,0.82)', align: 'center' });
-      const note = this.done || (Save.available ? 'Settings and progress are saved in this browser.' : 'This browser is blocking storage, so progress will not be saved.');
+      const note = this.done || (!Save.available ? 'This browser is blocking storage, so progress will not be saved.'
+        : Save.readOnly ? 'This save is from a newer version of the game, so nothing will be saved here.'
+        : 'Settings and progress are saved in this browser.');
       Gfx.text(ctx, note, DM.W / 2, 652, { size: 14, color: 'rgba(200,225,240,0.5)', align: 'center', font: F.type });
       Gfx.text(ctx, 'Q / E  SECTION     ↑ ↓  CHOOSE     ← →  CHANGE     ESC  BACK', DM.W / 2, 686, { size: 12, color: 'rgba(200,225,240,0.45)', align: 'center', spacing: 3 });
     }
