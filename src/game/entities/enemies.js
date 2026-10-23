@@ -1091,12 +1091,17 @@
     dodgeReach: 70, // casts landing within c.r + this of him are dodged
     dodgeDist: 150,
     evadeT: 0.25, // i-frames against disintegrate once he commits to a dodge
-    recoverT: 0.8, // guard down after any dash
-    streak: 3, // dodges in a row before he is winded...
+    recoverT: 0.8, // guard down after a dash of his own (breaking free, escaping a slam)...
+    dodgeRecover: 0, // ...but not after a dodge
+    skateK: 5, // steering response while recovering
+    streak: 3, // dodges in quick succession (within streakSpan s, no hit between) wind him...
+    streakSpan: 1.8,
     fatigueT: 2, // ...for this long, orbiting slower
     fatigueSpeed: 0.55,
-    sightPeriod: 1, // under Temporal Sight his guard is up only for
-    sightGuard: 0.2, // the first 20% of each (world-time) period
+    fatigueCooldown: 8, // before he can be winded again (he also starts the duel rested)
+    windupOpen: true, // committed (guard down) while winding up a disc
+    sightPeriod: 1, // under Temporal Sight his guard is down for the first
+    sightGuard: 0.2, // 80% of each (world-time) period and up for the last 20%
     pinR: 110, // a Duplicate this close pins him
     impactMul: 1,
     boltMul: 0.6,
@@ -1155,9 +1160,9 @@
       this.evadeT = 0;
       this.recoverT = 0;
       this.fatigueT = 0;
-      this.streak = 0;
+      this.dodges = []; // times of the dodges in the current streak
       this.slamT = 0;
-      this.sightClock = 0;
+      this.fatigueCdT = VEIDT.fatigueCooldown;
       this.pinned = false;
       this.disHits = 0;
       this.pendingEvade = null;
@@ -1169,7 +1174,8 @@
       if (this.state === 'dash') return 'dashing';
       if (this.recoverT > 0) return 'recovering';
       if (this.fatigueT > 0) return 'winded';
-      if (world.timesight && this.sightClock % VEIDT.sightPeriod >= VEIDT.sightGuard) return 'seen';
+      if (VEIDT.windupOpen && this.aim > 0) return 'throwing';
+      if (world.timesight && this.age % VEIDT.sightPeriod < VEIDT.sightPeriod - VEIDT.sightGuard) return 'seen';
       return null;
     }
     disintegrate(world, source) {
@@ -1182,8 +1188,12 @@
       if (kind === 'bolt') amount *= VEIDT.boltMul;
       this.hp -= amount;
       this.hitFlash = 0.15;
-      this.streak = 0;
-      if (kind === 'disintegrate') this.disHits++;
+      this.dodges.length = 0;
+      if (kind === 'disintegrate') {
+        this.disHits++;
+        // Never caught mid-boast.
+        if (this.world) this.world.barks = this.world.barks.filter((b) => !(b.e === this && VEIDT_DODGE.includes(b.text)));
+      }
       if (this.hp <= 1) this.yieldNow();
       return true;
     }
@@ -1195,9 +1205,11 @@
       if (dmg <= 1) return;
       this.damage(dmg, other, 'impact');
       this.stun = Math.max(this.stun, VEIDT.slamStun);
-      // No slam-to-slam stun-lock: he cannot be caught again straight away.
+      // No slam-to-slam stun-lock: he cannot be caught again straight away, and
+      // he gets clear the moment he is back on his feet.
       this.slamT = VEIDT.slamRecover;
       this.grabbable = false;
+      this.escapePending = true;
       world.particles.burst(this.x, this.y, 10, { color: ['#d4ad3a', '#ffffff'], speed: [60, 200], life: [0.2, 0.5], size: [2, 3.5] });
       Audio.play('impact');
       world.camera.shake(0.25);
@@ -1229,8 +1241,9 @@
       }
     }
     // Dashes start at full speed; afterwards he needs a moment (recoverT).
-    dash(x, y) {
+    dash(x, y, dodge) {
       this.state = 'dash';
+      this.dashIsDodge = !!dodge;
       this.dashT = VEIDT.dashT;
       const w = this.world;
       this.dashTarget = { x: U.clamp(x, 60, w.w - 60), y: U.clamp(y, 60, w.h - 60) };
@@ -1254,10 +1267,13 @@
         if (!best || room > best.room) best = { x, y, room };
       }
       world.add(new Echo(this));
-      this.dash(best.x, best.y);
+      this.dash(best.x, best.y, true);
       this.evadeT = VEIDT.evadeT;
       this.pendingEvade = { c, hits: this.disHits, t: 0 };
-      if (++this.streak >= VEIDT.streak) this.fatiguePending = true;
+      const ds = this.dodges;
+      ds.push(this.age);
+      while (ds.length > VEIDT.streak) ds.shift();
+      if (ds.length >= VEIDT.streak && ds[ds.length - 1] - ds[0] <= VEIDT.streakSpan && !(this.fatigueCdT > 0)) this.fatiguePending = true;
       Audio.play('veidt_dodge');
     }
     update(dt, world) {
@@ -1272,8 +1288,6 @@
         this.slamT -= dt;
         if (this.slamT <= 0) this.grabbable = true;
       }
-      if (world.timesight) this.sightClock += dt;
-      else this.sightClock = 0;
       // 'Too slow' only when the dodge really took him out of harm's way.
       const pe = this.pendingEvade;
       if (pe) {
@@ -1293,19 +1307,27 @@
       this.strikeCd -= dt;
       this.summonT -= dt;
       this.recoverT = Math.max(0, this.recoverT - dt);
-      this.fatigueT = Math.max(0, this.fatigueT - dt);
+      if (this.fatigueT > 0 && (this.fatigueT -= dt) <= 0) this.fatigueCdT = VEIDT.fatigueCooldown;
+      this.fatigueT = Math.max(0, this.fatigueT);
+      this.fatigueCdT = Math.max(0, (this.fatigueCdT || 0) - dt);
       const phase = this.hp < this.maxHp * VEIDT.phase2 ? 2 : 1;
 
+      if (this.escapePending) {
+        this.escapePending = false;
+        const n = U.norm(this.x - p.x, this.y - p.y);
+        const side = U.chance(0.5) ? 1 : -1;
+        this.dash(this.x + (n.x - n.y * side * 0.6) * 200, this.y + (n.y + n.x * side * 0.6) * 200);
+      }
       if (this.state === 'dash') {
         this.dashT -= dt;
         this.steer(this.dashTarget.x, this.dashTarget.y, VEIDT.dashSpeed, dt, 14);
         if (Math.random() < dt * 60) world.particles.emit(this.x, this.y, { life: 0.3, size: 10, size1: 4, color: '#6f4aa6', add: false, shape: 'smoke', alpha: 0.35, drag: 0 });
         if (this.dashT <= 0 || U.dist(this.x, this.y, this.dashTarget.x, this.dashTarget.y) < 12) {
           this.state = 'strafe';
-          this.recoverT = VEIDT.recoverT;
+          this.recoverT = this.dashIsDodge ? VEIDT.dodgeRecover : VEIDT.recoverT;
           if (this.fatiguePending) {
             this.fatiguePending = false;
-            this.streak = 0;
+            this.dodges.length = 0;
             this.fatigueT = VEIDT.fatigueT;
           }
         }
@@ -1341,7 +1363,7 @@
       if (this.phi == null) this.phi = U.angleTo(p.x, p.y, this.x, this.y);
       this.phi += this.orbitDir * dt * (0.7 + phase * 0.3) * slow;
       const sp = this.speedBase * (phase === 2 ? 1.2 : 1) * slow;
-      this.steer(p.x + Math.cos(this.phi) * this.orbitR, p.y + Math.sin(this.phi) * this.orbitR, sp, dt, 5);
+      this.steer(p.x + Math.cos(this.phi) * this.orbitR, p.y + Math.sin(this.phi) * this.orbitR, sp, dt, this.recoverT > 0 ? VEIDT.skateK : 5);
       this.facing = U.dampAngle(this.facing, U.angleTo(this.x, this.y, p.x, p.y), 10, dt);
 
       // Tachyon disc: a short wind-up (arm raised, a glint at his hand), then the throw.
