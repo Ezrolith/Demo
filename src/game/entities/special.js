@@ -668,40 +668,59 @@
   }
 
   // ---- shared ------------------------------------------------------------------------
+  // Land mine. Readable rather than instant: stepping close arms a 0.6 s fuse
+  // (a beep and a red ring that grows to the blast radius), so a walker can back
+  // off. Anything heavy or thrown sets it off too: a tank rolling over it, a
+  // crate flung across the field.
+  const MINE = { trigger: 30, fuse: 0.6, r: 80, dmg: 18, heavy: 4 };
+
   class Mine extends Entity {
     constructor(x, y) {
       super({ x, y, r: 10, static: true, body: false, solid: false, hp: 1, layer: 0, team: 'enemy', colors: ['#3a3a30', '#c4302b'] });
       this.trig = -1;
+      this.hazard = true; // drawn in colour through Temporal Sight's grade
+    }
+    triggeredBy(e) {
+      if (e.dead || e === this || e.flying || e.static || e.isProjectile || e.heldBy || e instanceof Mine) return false;
+      return e.team === 'player' || e.thrown > 0 || e.mass >= MINE.heavy;
+    }
+    arm() {
+      if (this.trig >= 0) return;
+      this.trig = MINE.fuse;
+      Audio.play('ui_move');
     }
     update(dt, world) {
       if (this.trig >= 0) {
         this.trig -= dt;
         if (this.trig < 0) {
           this.dead = true;
-          world.explode(this.x, this.y, 80, 28, { team: 'enemy' });
+          world.explode(this.x, this.y, MINE.r, MINE.dmg, { team: 'enemy' });
         }
         return;
       }
       for (const e of world.entities) {
-        if (e.team !== 'player' || e.dead || e.flying) continue;
-        if (U.dist(this.x, this.y, e.x, e.y) < 36 + e.r) {
-          this.trig = 0.3;
-          Audio.play('ui_move');
+        if (!this.triggeredBy(e)) continue;
+        if (U.dist(this.x, this.y, e.x, e.y) < MINE.trigger + e.r) {
+          this.arm();
           break;
         }
       }
     }
+    // Made safe (the operation is over): no blast.
+    defuse(world) {
+      if (this.dead) return;
+      this.dead = true;
+      world.particles.burst(this.x, this.y, 6, { color: ['#9a948a', '#6a645a'], speed: [10, 50], life: [0.3, 0.7], size: [3, 6], shape: 'smoke', add: false, alpha: 0.5 });
+    }
     onDeath(kind) {
       if (kind !== 'disintegrate' && this.world && this.trig < 0) {
         const w = this.world;
-        w.defer(() => w.explode(this.x, this.y, 80, 28, { team: 'enemy' }));
+        w.defer(() => w.explode(this.x, this.y, MINE.r, MINE.dmg, { team: 'enemy' }));
       }
     }
     render(ctx, world) {
-      const t = world.realTime || 0;
-      const vis = world.timesight ? 1 : 0.55;
       ctx.save();
-      ctx.globalAlpha = vis;
+      ctx.globalAlpha = world.timesight ? 1 : 0.8;
       ctx.fillStyle = '#3a3a30';
       Gfx.circle(ctx, this.x, this.y, 9);
       ctx.fill();
@@ -709,13 +728,35 @@
       ctx.lineWidth = 2;
       ctx.stroke();
       ctx.restore();
-      const blink = this.trig >= 0 || Math.sin(t * 6 + this.id) > 0.6;
-      if (blink) Gfx.glow(ctx, this.x, this.y, this.trig >= 0 ? 24 : 9, '#ff3a2a', world.timesight ? 1 : 0.7);
+      if (!world.lit) this.renderEmissive(ctx, world);
+    }
+    renderEmissive(ctx, world) {
+      if (this.dead) return;
+      const t = world.realTime || 0;
+      if (this.trig >= 0) {
+        // Armed: a fast blink and a ring growing out to the blast radius.
+        const k = 1 - this.trig / MINE.fuse;
+        if (Math.sin(t * (20 + k * 30)) > -0.3) Gfx.glow(ctx, this.x, this.y, 20 + k * 10, '#ff3a2a', 1);
+        ctx.save();
+        ctx.strokeStyle = `rgba(255,70,50,${0.35 + k * 0.5})`;
+        ctx.fillStyle = `rgba(255,70,50,${0.05 + k * 0.1})`;
+        ctx.lineWidth = 2;
+        Gfx.circle(ctx, this.x, this.y, 10 + (MINE.r - 10) * k);
+        ctx.fill();
+        ctx.stroke();
+        ctx.setLineDash([4, 5]);
+        ctx.strokeStyle = 'rgba(255,70,50,0.35)';
+        Gfx.circle(ctx, this.x, this.y, MINE.r);
+        ctx.stroke();
+        ctx.restore();
+        return;
+      }
+      if (Math.sin(t * 6 + this.id) > 0.6) Gfx.glow(ctx, this.x, this.y, 9, '#ff3a2a', world.timesight ? 1 : 0.8);
       if (world.timesight) {
         ctx.save();
         ctx.strokeStyle = 'rgba(255,90,60,0.35)';
         ctx.setLineDash([3, 4]);
-        Gfx.circle(ctx, this.x, this.y, 80);
+        Gfx.circle(ctx, this.x, this.y, MINE.r);
         ctx.stroke();
         ctx.restore();
       }
@@ -807,16 +848,20 @@
     }
   }
 
+  // Left by Veidt's discs. Standing in one clouds Temporal Sight (it still
+  // works, but time slows less); only the emitters' jamming blinds it.
+  const CLOUD = { r: 60, life: 3 };
+
   class TachyonCloud extends Entity {
     constructor(x, y) {
-      super({ x, y, r: 90, static: true, body: false, solid: false, layer: 0, disintegratable: false });
-      this.life = 5;
+      super({ x, y, r: CLOUD.r, static: true, body: false, solid: false, layer: 0, disintegratable: false });
+      this.life = CLOUD.life;
     }
     update(dt, world) {
       this.life -= dt;
       if (this.life <= 0) this.dead = true;
       const p = world.player;
-      if (p && U.dist(p.x, p.y, this.x, this.y) < this.r) p.jamT = Math.max(p.jamT, 0.2);
+      if (p && U.dist(p.x, p.y, this.x, this.y) < this.r) p.sightJamT = Math.max(p.sightJamT || 0, 0.2);
       if (Math.random() < dt * 25) {
         const a = U.rand(0, TAU), r = U.rand(0, this.r);
         world.particles.emit(this.x + Math.cos(a) * r, this.y + Math.sin(a) * r, { life: 0.3, size: 2, color: U.pick(['#c06bff', '#ffffff', '#6f4aa6']) });

@@ -732,6 +732,8 @@
   });
 
   // ---- Temporal Sight -------------------------------------------------------
+  const CLOUDED_SLOWMO = 0.6; // world.slowmoScale inside a tachyon cloud (default 0.28)
+
   Powers.register({
     id: 'timesight',
     name: 'Temporal Sight',
@@ -741,6 +743,9 @@
     desc: 'See every moment at once. The world slows; what is about to happen becomes visible.',
     tip: 'HOLD F or SHIFT. Time slows, incoming danger is marked and hidden memories appear. Drains energy.',
     update(p, s, world, dt) {
+      // Only the emitters' jamming (jamT) blinds Sight. A tachyon cloud
+      // (sightJamT) clouds it: it still works, but time slows less.
+      p.sightJamT = Math.max(0, (p.sightJamT || 0) - dt);
       const want = p.canUsePowers && Input.down('timesight') && p.energy > 0.5 && !p.jammed;
       if (want !== s.active) {
         s.active = want;
@@ -750,6 +755,8 @@
       }
       world.slowmo = s.active;
       world.timesight = s.active;
+      if (!('sightBaseScale' in world)) world.sightBaseScale = world.slowmoScale;
+      world.slowmoScale = s.active && p.sightJamT > 0 ? CLOUDED_SLOWMO : world.sightBaseScale;
       if (s.active) {
         p.drain = true;
         p.energy -= 12 * dt;

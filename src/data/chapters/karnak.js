@@ -245,10 +245,17 @@
             ctx.marker(null);
           });
           yield ctx.until(() => left().length === 0);
+          // The grid fed the defences: with it gone, they spark and go dark.
+          const W = ctx.world;
+          ctx.clearHostiles();
+          for (const e of W.entities) if (e instanceof Turret || e instanceof Drone) e.powerDown(W);
+          ctx.hint(null);
           ctx.objectiveDone();
           R.gate.setOpen(true);
+          ctx.lock(true);
           yield ctx.wait(0.8);
           yield ctx.narrate('The static clears. I can see again. I see the next eleven minutes, and I do not like them.', { dur: 5 });
+          ctx.lock(false);
         },
         restore(ctx) {
           const R = ctx.refs;
@@ -330,6 +337,7 @@
           ctx.objective('Stop Adrian Veidt');
           ctx.hint('He is fast enough to dodge you. Slow time, pin him with copies, or catch him and throw him.', 10);
           yield ctx.until(() => v.yielded);
+          ctx.clearHostiles();
           W.boss = null;
           ctx.objectiveDone();
           ctx.lock(true);

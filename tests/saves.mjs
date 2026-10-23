@@ -476,7 +476,8 @@ if (want(6)) {
     const s = await g.ev(() => {
       const DM = window.DM;
       const play = DM.dev.play();
-      return { stage: play.ctx.stageIndex, locked: play.ctx.locked, missiles: play.world.entities.filter((e) => e instanceof DM.Proj.Missile && !e.dead).length };
+      // Enemy missiles only: the thrown-back one made above is Jon's, and is spared on purpose.
+      return { stage: play.ctx.stageIndex, locked: play.ctx.locked, missiles: play.world.entities.filter((e) => e instanceof DM.Proj.Missile && !e.dead && e.team !== 'player').length };
     });
     if (s.stage === 4 && s.locked) {
       outroOk = s.missiles === 0;
