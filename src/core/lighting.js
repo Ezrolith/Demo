@@ -1,7 +1,7 @@
 /*
  * Lighting: darkness and light for night and interior maps.
  *
- * A half-resolution canvas is filled with the map's ambient darkness, lights
+ * A low-resolution canvas is filled with the map's ambient darkness, lights
  * are punched out of it with 'destination-out' (cached radial and cone falloff
  * sprites, in screen space), each light's colour is washed over the pool it
  * cleared, and the result is laid over the world: one full-screen blit per
@@ -36,7 +36,7 @@
   const MAX_ATOM_LIGHTS = 64;
   const CONE_SPREAD = 0.5; // half-angle baked into the cone sprite
 
-  let S = 0.5; // light layer resolution relative to the logical screen (Lighting.resolution)
+  let S = 0.4; // light layer resolution relative to the logical screen (Lighting.resolution)
   let dark = null, dg = null;
   let radial = null, cone = null;
   const pool = [];
@@ -146,13 +146,13 @@
   const reducedFlashing = () => !!(DM.SettingsSchema && DM.SettingsSchema.reducedFlashing());
 
   const Lighting = {
-    resolution: 0.5,
+    resolution: 0.4, // of the logical screen; cost scales with its area
     colour: true,
     // Filtered upscale of the layer. Off by default: under film grain the
     // nearest-sampled layer looks the same and costs a tenth in software raster.
     smooth: false,
     stats: { lights: 0, ms: 0 },
-    // The half-resolution layer (for tests and debugging).
+    // The light layer canvas (for tests and debugging).
     layers: () => ({ dark }),
 
     // Darkness colour for this frame, or null when the map is lit by day.
