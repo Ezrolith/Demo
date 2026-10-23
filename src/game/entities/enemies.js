@@ -592,12 +592,22 @@
         const next = this.pod % 2 === i;
         if (this.aim > 0) {
           // Blinks faster as the launch nears; the pod that will fire burns brighter.
+          // Solid colour with a dark rim, so it reads on bright sand as well as at night.
           const k = 1 - this.aim / this.aimTime;
           const on = Math.sin(t * (14 + k * 26)) > -0.2;
-          if (on) Gfx.glow(ctx, p.x, p.y, (next ? 16 : 10) + k * 8, '#ff3a2a', next ? 1 : 0.6);
-          ctx.fillStyle = on ? '#ff6a4a' : '#5a1a14';
-          Gfx.circle(ctx, p.x, p.y, 3);
+          if (on) Gfx.glow(ctx, p.x, p.y, (next ? 22 : 12) + k * 10, '#ff3a2a', next ? 1 : 0.6);
+          if (next) {
+            ctx.strokeStyle = `rgba(255,40,20,${on ? 0.85 : 0.35})`;
+            ctx.lineWidth = 2;
+            Gfx.circle(ctx, p.x, p.y, 9 + k * 8);
+            ctx.stroke();
+          }
+          ctx.fillStyle = on ? '#ff2a1a' : '#6a1610';
+          ctx.strokeStyle = '#1a0806';
+          ctx.lineWidth = 1.5;
+          Gfx.circle(ctx, p.x, p.y, next ? 5.5 : 4);
           ctx.fill();
+          ctx.stroke();
         } else {
           ctx.fillStyle = '#7a2a1e';
           Gfx.circle(ctx, p.x, p.y, 2.5);

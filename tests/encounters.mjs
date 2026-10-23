@@ -705,7 +705,7 @@ await ev(() => {
 });
 // Walk straight across at three heights (field restored in between).
 const crossings = [];
-for (const y of [480, 760, 1240]) {
+for (const y of [330, 650, 1000, 1180, 1240]) {
   await ev((y) => {
     const play = window.DM.dev.play(), p = play.player;
     p.x = 895;
@@ -734,7 +734,7 @@ for (let li = 0; li < lanes; li++) {
     const play = DM.dev.play(), p = play.player;
     const mf = DM.Chapters.get('deterrent').minefield;
     const pts = mf.lanes[li].map(([c, r]) => mf.centre(c, r));
-    const path = [...pts, { x: pts[pts.length - 1].x + 35, y: pts[pts.length - 1].y }];
+    const path = [...pts, { x: pts[pts.length - 1].x + 20, y: pts[pts.length - 1].y }];
     p.x = pts[0].x - 60;
     p.y = pts[0].y;
     p.vx = p.vy = 0;

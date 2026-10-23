@@ -52,7 +52,7 @@
         cells.add(c + ',' + r);
         pts.push([c, r]);
         if (c === FIELD.cols - 1) break;
-        let step = (rnd() < 0.5 ? 1 : 2) * (rnd() < 0.5 ? -1 : 1);
+        let step = rnd() < 0.5 ? -1 : 1;
         if (r + step < 1 || r + step > FIELD.rows - 2) step = -step;
         for (let k = 1; k <= Math.abs(step); k++) {
           const rr = r + Math.sign(step) * k;
@@ -157,6 +157,7 @@
         else if (inLane(c - 1, r)) u = 50;
         if (inLane(c, r + 1)) v = 0;
         else if (inLane(c, r - 1)) v = 40;
+        if (c === 0) u = Math.max(u, 40); // the canyon edge stays walkable, to pick a lane from
         ctx.add(new Mine(FIELD.x + c * FIELD.cw + u, FIELD.y + r * FIELD.ch + v));
       }
     }

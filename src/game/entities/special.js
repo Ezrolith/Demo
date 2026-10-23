@@ -672,7 +672,7 @@
   // (a beep and a red ring that grows to the blast radius), so a walker can back
   // off. Anything heavy or thrown sets it off too: a tank rolling over it, a
   // crate flung across the field.
-  const MINE = { trigger: 36, fuse: 0.6, r: 80, dmg: 18, heavy: 4 };
+  const MINE = { trigger: 30, fuse: 0.6, r: 80, dmg: 18, heavy: 4 };
 
   class Mine extends Entity {
     constructor(x, y) {
