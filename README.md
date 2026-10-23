@@ -35,7 +35,7 @@ Power presses made just before a cooldown ends are buffered, so they fire as soo
 
 Settings has four tabs, and every option describes itself:
 
-- **Audio:** music, sound effects and ambience volumes.
+- **Audio:** music, sound effects and ambience volumes. Every place has its own ambient bed (the AMBIENCE slider).
 - **Display & accessibility:** FLASHING LIGHTS (REDUCED caps full-screen flashes and removes strobes, and is the default when your system asks for reduced motion), SCREEN SHAKE (OFF also removes hit-freeze), film grain, quality, ambient effects, fullscreen.
 - **Gameplay:** CHALLENGE (STORY, NORMAL, HARD; also changeable from Pause), INVULNERABILITY, HINTS (ALL or ESSENTIAL), TEXT SPEED, PAUSE WHEN UNFOCUSED.
 - **Controls:** telekinesis HOLD or TOGGLE, and the full controls list.
@@ -48,6 +48,14 @@ After three decoherences at one checkpoint the game offers to switch to STORY ch
 - Red chevrons at the screen edge point to off-screen enemies taking aim and to incoming missiles; orange rings show where shells will land.
 - Red arcs around Jon show where a hit came from. Hits freeze the action for an instant and shake the camera (both follow the SCREEN SHAKE setting).
 - Jon can't be hurt during dialogue or cutscenes.
+
+### Listening to the fight
+
+- The music reacts to the fight around you, quiets under dialogue, and changes for aftermaths and for the ending you earned.
+- A knockout and an unmaking each have their own sound.
+- A heartbeat warns of low coherence, tachyon emitters hum as you get close, and static means you're jammed.
+- Temporal Sight slows and darkens the sound and adds a ticking pocket watch.
+- Footsteps change with the surface, and Mute (M) silences echo tails too.
 
 ## The journey
 
@@ -75,7 +83,7 @@ src/
     util.js                math, easing, colour, geometry, seeded RNG
     events.js              pub/sub bus
     input.js               keyboard/mouse/touch -> named actions
-    audio.js               synthesised SFX + step-sequencer music (no audio files)
+    audio.js               synthesised SFX recipes, ambient beds, hums + step-sequencer music (no audio files)
     settings.js            settings schema: defaults, ranges, labels, descriptions
     save.js                versioned localStorage saves with migrations
     gfx.js                 procedural drawing: characters, portraits, icons, clock, glow
@@ -86,11 +94,13 @@ src/
     entities/              player, NPCs, props, projectiles, enemies, chapter specials, fx (knockout, unbinding)
     powers.js              the power registry (one definition per power)
     chapters.js            chapter registry + power progression
+    audiodirector.js       picks ambience, music intensity and danger hums from game state
     script.js              ChapterContext: the scripting API chapters use
     ui/                    menu widget, dialogue box, HUD, hit feedback
     scenes/                title, chapter select, interlude, play, overlays, minigames, ending
   data/
-    music.js               music tracks as data
+    music.js               music tracks as data (layers can fade with fight intensity)
+    ambience.js            per-map ambient beds, zones and stage music cues
     chapters/*.js          the six chapters: maps + stage scripts + narration
 tests/                   Playwright checks (see Tests below)
 tools/build.mjs          single-file bundler (no dependencies)
@@ -164,6 +174,9 @@ Add an entry to `DM.LOOKS` in `src/game/entities/npc.js`. The same look drives t
 ### Add music
 Add a track to `src/data/music.js` (chord progression + arp/pad/bass/tick/kick layers) and reference it from a chapter's `music` field.
 
+### Add sounds and ambience
+Sound effects are recipes in `src/core/audio.js`; another file can add one with `DM.Audio.define('name', { fn(audio, opts) { ... } })`. A place's ambient bed, footstep surface and zones, and the music cue for each story beat, live in `src/data/ambience.js`. `npm run test:audio` fails if any `Audio.play('name')` in `src/` has no recipe.
+
 ## Developer mode
 
 Add `?dev` (or `#dev`) to the URL:
@@ -186,6 +199,7 @@ npm run test:saves         # save migrations, checkpoints, Continue/Retry, boot 
 npm run test:settings      # settings schema, challenge levels, reduced flashing, hints, text speed
 npm run test:ledger        # spared/gone accounting, hit feedback, hitstop and slow motion, decoherence
 npm run test:encounters    # enemy telegraphs, threat chevrons, Behemoth and Veidt fairness, mines
+npm run test:audio         # every sound name has a recipe, ambience, reactive music, Sight's pitch bend
 npm run build              # rebuild dist/dr-manhattan.html after changing src/
 ```
 
