@@ -1,7 +1,9 @@
 /*
- * Ending: the clock reaches midnight. The closing narration changes with how
- * Jon treated people along the way (lives spared vs. disintegrated) — the
- * first hook for branching endings.
+ * Ending: the clock reaches midnight. The pages come from src/data/ending.js
+ * (DM.EndingData): a tone earned from how Jon treated people (unknown, gentle,
+ * mixed, detached), and payoff pages for the story flags chapters persisted.
+ * this.tone and this.run are public, so the music (or anything else) can
+ * follow the same verdict as the text.
  */
 (function () {
   'use strict';
@@ -13,38 +15,20 @@
   const F = DM.FONTS;
   const Scenes = (DM.Scenes = DM.Scenes || {});
 
-  function tally() {
-    let killed = 0, spared = 0, memories = 0, time = 0;
-    for (const id in DM.Save.data.completed) {
-      const c = DM.Save.data.completed[id];
-      killed += c.disintegrated || 0;
-      spared += c.spared || 0;
-      memories += c.memories || 0;
-      time += c.time || 0;
-    }
-    return { killed, spared, memories, time };
-  }
-
   class Ending {
     constructor() {
       this.t = 0;
       this.cursor = 'pointer';
       this.page = 0;
       this.pageT = 0;
-      const s = (this.stats = tally());
-      const detached = s.killed > Math.max(4, s.spared * 1.5);
-      this.pages = [
-        'Midnight. The clock in my mind stops, and does not start again.',
-        'Adrian asks me whether he did the right thing. Whether it all worked out, in the end.',
-        'I tell him there is no end. There is only the next moment, and the one after it, and all of them at once.',
-        detached
-          ? `${s.killed} people came apart at my touch. I remember each of them; I remember them still being alive. I am leaving this galaxy for one less complicated.`
-          : `I chose to set ${s.spared} people down gently, when it would have been easier not to. Perhaps I am not finished with human beings. Perhaps I will make some of my own.`,
-        'Somewhere, a watch is ticking. I can see every moment it will ever measure.',
-      ];
+      const E = DM.EndingData;
+      this.run = E.run(DM.Save.data);
+      this.tone = this.run.tone;
+      this.stats = this.run;
+      this.pages = E.build(this.run);
     }
     enter() {
-      DM.Audio.music.play(this.stats.killed > Math.max(4, this.stats.spared * 1.5) ? 'ending_cold' : 'ending'); // the same rule as the text
+      DM.Audio.music.play(this.tone === 'detached' ? 'ending_cold' : 'ending'); // the same verdict as the text
     }
     get onCredits() {
       return this.page >= this.pages.length;
@@ -93,8 +77,8 @@
         ['TOTAL TIME', U.fmtTime(s.time)],
         ['DISINTEGRATED', String(s.killed)],
         ['SPARED', String(s.spared)],
-        ['MEMORIES RECOVERED', `${s.memories} / 6`],
       ];
+      if (s.memoryTotal > 0) rows.push(['MEMORIES RECOVERED', `${s.memories} / ${s.memoryTotal}`]);
       rows.forEach(([l, v], i) => {
         Gfx.text(ctx, l, DM.W / 2 - 14, 506 + i * 28, { size: 14, color: 'rgba(200,225,240,0.6)', align: 'right', spacing: 3 });
         Gfx.text(ctx, v, DM.W / 2 + 14, 506 + i * 28, { size: 16, color: '#ffffff' });
