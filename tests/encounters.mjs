@@ -300,16 +300,16 @@ const clouded = await ev(() => {
 await step(0.5);
 const cl = await ev(() => {
   const play = window.DM.dev.play(), p = play.player;
-  return { sightJamT: p.sightJamT, jamT: p.jamT, timesight: play.world.timesight, scale: play.world.slowmoScale };
+  return { sightJamT: p.sightJamT, jamT: p.jamT, timesight: play.world.timesight, scale: play.world.sightFloor };
 });
 assert('tachyon clouds are 60 px and last 3 s', clouded.r === 60 && clouded.life === 3, JSON.stringify(clouded));
-assert('inside a cloud Temporal Sight still works, at a weaker slow-down (slowmoScale 0.6)', cl.sightJamT > 0 && cl.jamT === 0 && cl.timesight && cl.scale === 0.6, JSON.stringify(cl));
+assert('inside a cloud Temporal Sight still works, at a weaker slow-down (sightFloor 0.6)', cl.sightJamT > 0 && cl.jamT === 0 && cl.timesight && cl.scale === 0.6, JSON.stringify(cl));
 await ev(() => { window.DM.dev.play().player.jamT = 1; });
 await step(0.1);
 const jammed = await ev(() => window.DM.dev.play().world.timesight);
 await ev(() => { window.DM.Input.simulate('KeyF', false); window.DM.dev.play().player.jamT = 0; });
 await step(0.3);
-const restored = await ev(() => window.DM.dev.play().world.slowmoScale);
+const restored = await ev(() => window.DM.dev.play().world.sightFloor);
 assert("an emitter's jamming (jamT) still blinds Sight", jammed === false);
 assert('leaving Sight restores the default slow-down', restored !== 0.6, String(restored));
 

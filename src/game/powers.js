@@ -732,7 +732,7 @@
   });
 
   // ---- Temporal Sight -------------------------------------------------------
-  const CLOUDED_SLOWMO = 0.6; // world.slowmoScale inside a tachyon cloud (default 0.28)
+  const CLOUDED_SLOWMO = 0.6; // the slowest Sight can run inside a tachyon cloud (world.sightFloor)
 
   Powers.register({
     id: 'timesight',
@@ -755,8 +755,7 @@
       }
       world.slowmo = s.active;
       world.timesight = s.active;
-      if (!('sightBaseScale' in world)) world.sightBaseScale = world.slowmoScale;
-      world.slowmoScale = s.active && p.sightJamT > 0 ? CLOUDED_SLOWMO : world.sightBaseScale;
+      world.sightFloor = s.active && p.sightJamT > 0 ? CLOUDED_SLOWMO : 0;
       if (s.active) {
         p.drain = true;
         p.energy -= 12 * dt;

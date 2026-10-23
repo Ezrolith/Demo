@@ -209,11 +209,12 @@
         return;
       }
       // Scripted slow motion (slowmoT seconds at slowmoTarget, real time) and
-      // Temporal Sight (slowmoScale, default 0.28): the slower one wins.
+      // Temporal Sight (slowmoScale, default 0.28, never below sightFloor,
+      // which a tachyon cloud raises): the slower one wins.
       // sightScale tracks Sight's share alone, for its screen overlay. Scripted
       // slow motion usually follows a hitstop, so it bites faster than Sight.
       if (this.slowmoT > 0) this.slowmoT -= dt;
-      const sight = this.slowmo ? (this.slowmoScale == null ? 0.28 : this.slowmoScale) : 1;
+      const sight = this.slowmo ? Math.max(this.slowmoScale == null ? 0.28 : this.slowmoScale, this.sightFloor || 0) : 1;
       const scripted = this.slowmoT > 0 ? (this.slowmoTarget == null ? 0.3 : this.slowmoTarget) : 1;
       const ts = Math.min(sight, scripted);
       this.timeScale = U.damp(this.timeScale, ts, scripted < sight && ts < this.timeScale ? 18 : 9, dt);
