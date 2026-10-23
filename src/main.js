@@ -38,17 +38,74 @@
     if (loading) loading.remove();
     if (canvas.focus) canvas.focus({ preventScroll: true });
 
-    // Hooks for debugging and automated tests (see tests/smoke.mjs).
+    // Sound is not part of the simulation: whether a recipe plays depends on the
+    // audio clock, so it must not draw from the seeded gameplay stream.
+    DM.rng.exempt(DM.Audio);
+    DM.rng.exempt(DM.Audio.music);
+
+    // Hooks for debugging and automated tests (see tests/smoke.mjs, tests/playtest.mjs).
+    const E = DM.Engine;
     DM.dev = {
+      // Starting a stage builds its map and spawns, so it draws from the gameplay stream too.
       start(chapter, stage = 0) {
-        DM.Engine.set(new DM.Scenes.Play(), { chapter, stage });
+        DM.rng.sim(() => E.set(new DM.Scenes.Play(), { chapter, stage }));
+      },
+      // Step the simulation synchronously by `seconds` of game time (fixed 60 Hz
+      // steps, no rendering in between). From the first call the test owns the
+      // clock: animation frames stop stepping and only draw the latest state, so
+      // nothing moves between calls. Returns the seconds actually advanced (an
+      // engine error stops it early).
+      advance(seconds) {
+        E.manual = true;
+        const n = Math.max(0, Math.round(seconds / E.STEP));
+        let i = 0;
+        for (; i < n && !E.error; i++) E.step();
+        E.dirty = true;
+        return i * E.STEP;
+      },
+      // Advance until fn() is truthy (checked before every step), for at most
+      // `max` seconds. Returns the seconds it took, or null if it never was.
+      until(fn, max = 60) {
+        E.manual = true;
+        const n = Math.round(max / E.STEP);
+        let i = 0;
+        try {
+          for (; i <= n && !E.error; i++) {
+            if (fn()) return i * E.STEP;
+            if (i < n) E.step();
+          }
+          return null;
+        } finally {
+          E.dirty = true;
+        }
+      },
+      // Hand the clock back to the display.
+      realtime() {
+        E.manual = false;
+        E.acc = 0;
+        E.last = performance.now();
+      },
+      // Seed the gameplay random stream (AI decisions, spawns, scatter). Same
+      // seed + same inputs = the same run.
+      seed(n) {
+        DM.rng.seed(n);
+        return DM.rng.seedValue;
+      },
+      // fn(dt) runs before every simulation step's update, in game time (the
+      // place to drive DM.Input for a bot). Returns a function that removes it.
+      onFrame(fn) {
+        E.hooks.push(fn);
+        return () => {
+          const i = E.hooks.indexOf(fn);
+          if (i >= 0) E.hooks.splice(i, 1);
+        };
       },
       play() {
         return DM.Engine.stack.find((s) => s instanceof DM.Scenes.Play) || null;
       },
       skip() {
         const p = this.play();
-        if (p) p.ctx.skipStage();
+        if (p) DM.rng.sim(() => p.ctx.skipStage());
       },
       state() {
         const p = this.play();

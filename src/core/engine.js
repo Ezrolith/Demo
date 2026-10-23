@@ -147,15 +147,30 @@
     },
 
     // ---- loop -------------------------------------------------------------
+    // The simulation runs on a fixed 60 Hz step whatever the display does. Each
+    // animation frame adds its real duration to an accumulator, runs as many
+    // whole steps as fit, then renders once: a 144 Hz display steps on about
+    // every second or third frame and a 30 fps one twice a frame, so AI, physics
+    // and impact damage play out the same everywhere. A frame within SNAP of a
+    // whole step counts as one, so vsync jitter at 60 Hz never makes a frame
+    // with no step followed by one with two. Past MAX_STEPS in one frame the
+    // backlog is dropped and the game slows down instead of spiralling.
+    // Input edges (pressed/released) latch until a step has seen them.
+    STEP: 1 / 60,
+    MAX_STEPS: 5,
+    SNAP: 0.002,
+    acc: 0,
+    steps: 0, // simulation steps since boot
+    hooks: [], // DM.dev.onFrame: fn(dt) before each step's update
+    // Tests drive the clock themselves (DM.dev.advance): frames then only
+    // render, once after each advance.
+    manual: false,
+    dirty: false,
+
     frame(t) {
       requestAnimationFrame((tt) => this.frame(tt));
-      this.measure(t - this.last);
-      let dt = (t - this.last) / 1000;
+      const gap = t - this.last;
       this.last = t;
-      if (!(dt > 0)) dt = 1 / 60;
-      if (dt > 0.05) dt = 0.05; // clamp after tab switches / hitches
-      this.time += dt;
-      this.fps = U.lerp(this.fps, 1 / dt, 0.05);
 
       if (this.error) {
         this.renderError();
@@ -163,30 +178,59 @@
         DM.Input.endFrame();
         return;
       }
-
-      const f = this.fade;
-      if (f.dir === 1) {
-        DM.Input.clearAll();
-        f.a = Math.min(1, f.a + dt * f.speed);
-        if (f.a >= 1) {
-          f.dir = -1;
-          const cb = f.cb;
-          f.cb = null;
-          if (cb) this.guard(cb);
+      if (this.manual) {
+        if (this.dirty) {
+          this.dirty = false;
+          this.guard(() => this.render());
         }
-      } else if (f.dir === -1) {
-        f.a = Math.max(0, f.a - dt * f.inSpeed);
-        if (f.a <= 0) f.dir = 0;
+        return;
       }
 
-      const top = this.top();
+      this.measure(gap);
+      const dt = gap > 0 ? gap / 1000 : this.STEP;
+      this.fps = U.lerp(this.fps, 1 / Math.min(dt, 0.05), 0.05);
+      this.acc += Math.min(dt, 0.25);
       const t0 = performance.now();
-      if (top && top.update) this.guard(() => top.update(dt));
+      let n = 0;
+      while (this.acc >= this.STEP - this.SNAP && n < this.MAX_STEPS && !this.error) {
+        this.step();
+        this.acc -= this.STEP;
+        n++;
+      }
+      if (this.acc >= this.STEP) this.acc = 0;
       const t1 = performance.now();
       this.guard(() => this.render());
       const st = this.stats;
       st.updMs = U.lerp(st.updMs, t1 - t0, 0.1);
       st.renderMs = U.lerp(st.renderMs, performance.now() - t1, 0.1);
+    },
+
+    // One fixed simulation step: frame hooks, the fade, the top scene's update,
+    // then the input edges it has now seen are cleared. Gameplay randomness
+    // inside it comes from the seeded DM.rng stream (see util.js).
+    step() {
+      const dt = this.STEP;
+      DM.rng.sim(() => {
+        for (const h of this.hooks.slice()) this.guard(() => h(dt));
+        this.time += dt;
+        this.steps++;
+        const f = this.fade;
+        if (f.dir === 1) {
+          DM.Input.clearAll();
+          f.a = Math.min(1, f.a + dt * f.speed);
+          if (f.a >= 1) {
+            f.dir = -1;
+            const cb = f.cb;
+            f.cb = null;
+            if (cb) this.guard(cb);
+          }
+        } else if (f.dir === -1) {
+          f.a = Math.max(0, f.a - dt * f.inSpeed);
+          if (f.a <= 0) f.dir = 0;
+        }
+        const top = this.top();
+        if (top && top.update) this.guard(() => top.update(dt));
+      });
       DM.Input.endFrame();
     },
 

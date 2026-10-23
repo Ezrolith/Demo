@@ -3,6 +3,11 @@
  * skipping). Movement is shortcut by placing Jon next to things; everything
  * else — dialogue, interactions, the watch minigame — goes through real input.
  *
+ * Time is game time: the test steps the simulation itself with DM.dev.advance
+ * (fixed 60 Hz steps, nothing moves between calls), so it runs as fast as the
+ * machine allows and a busy machine cannot make it flaky. Key presses are real
+ * keyboard events; they latch until the next simulation step reads them.
+ *
  *   node tests/flows.mjs
  */
 import { createRequire } from 'node:module';
@@ -20,14 +25,19 @@ const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const target = process.argv[2] || path.join(root, 'index.html');
 
 const errors = [];
+const started = Date.now();
 const browser = await playwright.chromium.launch();
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 page.on('pageerror', (e) => errors.push(e.message));
 await page.goto(pathToFileURL(target).href + '?dev');
 await page.waitForFunction(() => window.DM && window.DM.dev);
-const wait = (ms) => page.waitForTimeout(ms);
 const ev = (fn, arg) => page.evaluate(fn, arg);
 const state = () => ev(() => window.DM.dev.state());
+// Advance the game by `s` seconds.
+const advance = async (s) => {
+  const err = await ev((s) => (window.DM.dev.advance(s), window.DM.dev.state().error), s);
+  if (err) throw new Error(err);
+};
 
 let failures = 0;
 function assert(name, ok, detail = '') {
@@ -35,15 +45,21 @@ function assert(name, ok, detail = '') {
   if (!ok) failures++;
 }
 
-// Wait until fn() (evaluated in page) is truthy, pressing E through any dialogue.
-async function until(label, fn, { timeout = 30000, talk = true } = {}) {
-  const t0 = Date.now();
-  while (Date.now() - t0 < timeout) {
-    const s = await state();
-    if (s.error) throw new Error(`${label}: ${s.error}`);
-    if (await ev(fn)) return true;
-    if (talk && (s.dialog || s.scene === 'PowerUnlock')) await page.keyboard.press('e');
-    await wait(180);
+// Advance until fn() (evaluated in page before every step) is truthy, pressing E
+// through any dialogue every 0.18 s. timeout: seconds of game time.
+async function until(label, fn, { timeout = 30, talk = true } = {}) {
+  const src = fn.toString();
+  for (let t = 0; t < timeout; t += 0.18) {
+    const r = await ev((src) => {
+      const DM = window.DM;
+      const f = (0, eval)('(' + src + ')');
+      const done = DM.dev.until(() => !!DM.Engine.error || f(), 0.18) != null;
+      const s = DM.dev.state();
+      return { done: done && !s.error, s, talking: s.dialog || s.scene === 'PowerUnlock' };
+    }, src);
+    if (r.s.error) throw new Error(`${label}: ${r.s.error}`);
+    if (r.done) return true;
+    if (talk && r.talking) await page.keyboard.press('e');
   }
   const s = await state();
   throw new Error(`timed out waiting for: ${label}  (${JSON.stringify(s)})`);
@@ -57,6 +73,7 @@ const moveTo = (x, y) => ev(([x, y]) => {
 const flags = () => ev(() => window.DM.dev.play().ctx.flags);
 
 await page.mouse.click(640, 360);
+await page.waitForTimeout(100); // the title gate takes the click in real time
 
 // ---- Prologue ------------------------------------------------------------------
 await ev(() => window.DM.dev.start('prologue'));
@@ -67,7 +84,7 @@ await until('narration done, Janey objective', () => {
 assert('prologue opens on "Find Janey"', true);
 
 await moveTo(330, 815);
-await wait(150);
+await advance(0.15);
 const prompt = await ev(() => {
   const t = window.DM.dev.play().player.interactTarget;
   return t && t.interact.label;
@@ -79,51 +96,51 @@ assert('talking to Janey gives Jon her watch', (await flags()).hasWatch);
 
 await until('repair objective', () => /Repair/.test((window.DM.dev.play().hud.objective || {}).text || ''));
 await moveTo(165, 150);
-await wait(150);
+await advance(0.15);
 await page.keyboard.press('e');
 await until('watch minigame open', () => window.DM.Engine.top().constructor.name === 'WatchRepair', { talk: false });
-// Play the minigame for real: press when the pivot is inside the gold zone.
-// Time-bounded (not iteration-bounded) so a slow, loaded machine still gets enough attempts.
-for (const t0 = Date.now(); Date.now() - t0 < 60000; ) {
+// Play the minigame for real, at its real speed: one step at a time, press when
+// the pivot is inside the gold zone (the press lands on the next step).
+for (let i = 0; i < 60 * 60; i++) {
   const st = await ev(() => {
-    const m = window.DM.Engine.top();
+    const DM = window.DM;
+    DM.dev.advance(1 / 60);
+    const m = DM.Engine.top();
     if (m.constructor.name !== 'WatchRepair') return { gone: true };
-    // Cap the needle speed so page round-trips on a loaded machine can't overshoot the zone.
-    m.speed = Math.min(m.speed, 1.2);
-    const d = Math.abs(window.DM.U.wrapAngle(m.angle - m.zone.a));
+    const d = Math.abs(DM.U.wrapAngle(m.angle - m.zone.a));
     return { gone: false, inZone: d < m.zone.w * 0.3 && !m.finished && m.t > 0.45, finished: m.finished };
   });
   if (st.gone || st.finished) break;
   if (st.inZone) {
     await page.keyboard.press('Space');
-    await wait(60);
-  } else await wait(8);
+    await advance(0.06);
+  }
 }
 await until('watch repaired', () => window.DM.dev.play().ctx.flags.repaired, { talk: false });
 assert('watch repair minigame completes with real timing input', true);
 
 await until('calibrate objective', () => /Calibrate/.test((window.DM.dev.play().hud.objective || {}).text || ''));
 await moveTo(1185, 300);
-await wait(150);
+await advance(0.15);
 await page.keyboard.press('e');
 await until('calibrated', () => window.DM.dev.play().ctx.flags.calibrated);
 assert('calibrating hangs the coat in the chamber', (await flags()).coatHung);
 
 await until('bring watch objective', () => /Bring Janey/.test((window.DM.dev.play().hud.objective || {}).text || ''));
 await moveTo(330, 815);
-await wait(150);
+await advance(0.15);
 await page.keyboard.press('e');
 await until('Jon remembers the coat', () => window.DM.dev.play().ctx.flags.needCoat && !window.DM.dev.play().dialog.active);
 await until('coat objective', () => /coat/.test((window.DM.dev.play().hud.objective || {}).text || ''));
 await moveTo(1680, 520);
-await wait(150);
+await advance(0.15);
 await page.keyboard.press('e');
 await until('lockdown', () => window.DM.dev.play().ctx.flags.lockdown);
 const doorShut = await ev(() => !window.DM.dev.play().ctx.refs.door.open);
 assert('taking the coat seals the chamber door', doorShut);
-await until('accident', () => window.DM.dev.play().ctx.flags.flashed, { timeout: 40000 });
+await until('accident', () => window.DM.dev.play().ctx.flags.flashed, { timeout: 40 });
 assert('the countdown ends in the accident', true);
-await until('prologue complete', () => window.DM.Engine.top().constructor.name === 'ChapterComplete', { timeout: 20000 });
+await until('prologue complete', () => window.DM.Engine.top().constructor.name === 'ChapterComplete', { timeout: 20 });
 assert('prologue completes', true);
 
 // ---- Chapter I: deposits fill layers and Jon becomes Dr. Manhattan ---------------------
@@ -141,11 +158,11 @@ for (let i = 0; i < 40; i++) {
     return p.form;
   });
   if (form !== 'awareness') break;
-  await wait(1600);
+  await advance(1.6);
 }
-await until('becomes Dr. Manhattan', () => window.DM.dev.play().player.form === 'manhattan', { timeout: 30000 });
+await until('becomes Dr. Manhattan', () => window.DM.dev.play().player.form === 'manhattan', { timeout: 30 });
 assert('rebuilding all four layers turns Jon into Dr. Manhattan', true);
-await until('chapter I complete', () => window.DM.Engine.top().constructor.name === 'ChapterComplete', { timeout: 30000 });
+await until('chapter I complete', () => window.DM.Engine.top().constructor.name === 'ChapterComplete', { timeout: 30 });
 assert('chapter I completes', true);
 
 // ---- Chapter II: range objectives chain correctly ------------------------------------------
@@ -171,7 +188,7 @@ await ev(() => {
 await until('targets objective', () => /targets/.test((window.DM.dev.play().hud.objective || {}).text || ''));
 assert('jeep in the zone unlocks Disintegrate', (await state()).powers.includes('disintegrate'));
 await ev(() => window.DM.dev.play().ctx.refs.dummies.forEach((d) => d.disintegrate(window.DM.dev.play().world)));
-await until('pier', () => window.DM.dev.play().ctx.mapName === 'pier', { timeout: 30000 });
+await until('pier', () => window.DM.dev.play().ctx.mapName === 'pier', { timeout: 30 });
 assert('clearing the targets moves the story to New York', true);
 
 await browser.close();
@@ -179,5 +196,6 @@ if (errors.length) {
   console.error('Page errors:\n' + errors.join('\n'));
   failures++;
 }
+console.log(`(${((Date.now() - started) / 1000).toFixed(1)} s wall clock)`);
 console.log(failures ? `\n${failures} check(s) failed.` : '\nAll story flow checks passed.');
 process.exit(failures ? 1 : 0);

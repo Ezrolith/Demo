@@ -11,6 +11,8 @@
  *   - Releasing Cmd clears all keys (macOS swallows keyup while Cmd is held).
  * Losing focus (window blur, hidden tab) releases everything and emits the
  * DM.Events 'app:blur' event, which the Play scene turns into a pause.
+ * Edges (pressed/released) last until the end of the next simulation step,
+ * whatever the display's refresh rate (see Engine.step).
  */
 (function () {
   'use strict';
@@ -220,6 +222,9 @@
       }
       return { x, y };
     },
+    // Called by the engine after each simulation step (not each displayed
+    // frame), so a press or release made on a frame that runs no step (a 144 Hz
+    // display) stays latched until a step has seen it.
     endFrame() {
       for (const k in state) {
         state[k].pressed = false;

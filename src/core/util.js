@@ -145,5 +145,78 @@
     };
   };
 
+  // ---- gameplay randomness ----------------------------------------------------
+  // DM.rng is the simulation's own random stream (mulberry32, seeded at boot or
+  // by DM.dev.seed). Engine.step runs every update inside DM.rng.sim(), which
+  // points Math.random (and so U.rand, U.pick, U.chance...) at this stream, so a
+  // run is reproducible from its seed and its inputs without gameplay code doing
+  // anything special. Rendering keeps the browser's Math.random, and so does
+  // anything wrapped in DM.rng.cosmetic() (sound: whether a recipe plays depends
+  // on the audio clock). New gameplay code may also call DM.rng directly:
+  // random(), range(a, b), int(a, b), chance(p), pick(arr).
+  const nativeRandom = Math.random;
+  let state = 0;
+  const next = () => {
+    state = (state + 0x6d2b79f5) | 0;
+    let t = Math.imul(state ^ (state >>> 15), 1 | state);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+  const rng = {
+    seedValue: 0,
+    seed(n) {
+      state = n >>> 0;
+      this.seedValue = state;
+      return this;
+    },
+    random: next,
+    range: (a = 0, b = 1) => a + next() * (b - a),
+    int: (a, b) => Math.floor(a + next() * (b - a + 1)),
+    chance: (p) => next() < p,
+    pick: (arr) => arr[(next() * arr.length) | 0],
+    // Run fn with Math.random drawing from the simulation stream.
+    sim(fn) {
+      const prev = Math.random;
+      Math.random = next;
+      try {
+        return fn();
+      } finally {
+        Math.random = prev;
+      }
+    },
+    // Run fn with the browser's Math.random, even from inside sim().
+    cosmetic(fn) {
+      const prev = Math.random;
+      Math.random = nativeRandom;
+      try {
+        return fn();
+      } finally {
+        Math.random = prev;
+      }
+    },
+    // Wrap each method of obj in cosmetic(), for a module whose randomness must
+    // stay out of the stream.
+    exempt(obj) {
+      for (const k of Object.keys(obj || {})) {
+        const f = obj[k];
+        if (typeof f !== 'function' || f.cosmetic) continue;
+        const g = function () {
+          const prev = Math.random;
+          Math.random = nativeRandom;
+          try {
+            return f.apply(this, arguments);
+          } finally {
+            Math.random = prev;
+          }
+        };
+        g.cosmetic = true;
+        obj[k] = g;
+      }
+      return obj;
+    },
+  };
+  rng.seed((nativeRandom() * 4294967296) >>> 0);
+
   DM.U = U;
+  DM.rng = rng;
 })();
