@@ -1,0 +1,54 @@
+name: Bonus adventure validation
+on:
+  pull_request:
+    branches: ['claude/dr-manhattan-game']
+permissions:
+  contents: read
+concurrency:
+  group: bonus-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+jobs:
+  bonus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Source snapshot
+        run: git archive --format=zip HEAD -o source-snapshot.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bonus-source-${{ github.event.pull_request.head.sha }}
+          path: source-snapshot.zip
+          retention-days: 7
+      - name: Syntax and build
+        run: |
+          find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+          node tools/build.mjs
+      - name: Install browser tests
+        if: ${{ hashFiles('tests/bonus.mjs') != '' }}
+        run: |
+          npm install --ignore-scripts
+          npx playwright install --with-deps chromium
+      - name: Bonus acceptance source
+        if: ${{ hashFiles('tests/bonus.mjs') != '' }}
+        run: node tests/bonus.mjs
+      - name: Bonus acceptance standalone
+        if: ${{ hashFiles('tests/bonus.mjs') != '' }}
+        run: node tests/bonus.mjs dist/dr-manhattan.html
+      - name: Original regression suites
+        if: ${{ hashFiles('tests/bonus.mjs') != '' }}
+        run: npm test
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bonus-candidate-${{ github.event.pull_request.head.sha }}
+          path: |
+            dist/dr-manhattan.html
+            tests/out/
+          retention-days: 7
