@@ -1060,6 +1060,10 @@
   // after the light layer while world.lit is set, and render() calls it directly
   // on unlit maps.
   const POWER_DOWN_T = 0.55; // seconds of sparks and flicker before a machine goes dark
+  // Damage shows: after a hit, a bar of pips (one per 70 hp, a Disintegrate's
+  // worth) for 1.8 s; below half health, a puff of dark smoke every 0.25 s.
+  const PIPS = { hp: 70, show: 1.8, fade: 0.3 };
+  const SMOKE = { below: 0.5, every: 0.25 };
 
   function onScreen(world, x, y, m = 0) {
     const v = world.camera.view();
@@ -1117,7 +1121,52 @@
         }
         return;
       }
+      if (this.maxHp && this.hp < this.maxHp * SMOKE.below && !this.noSmoke) this.smoke(dt, world);
       super.update(dt, world);
+    }
+    smoke(dt, world) {
+      if ((this.smokeT = (this.smokeT || 0) - dt) > 0) return;
+      this.smokeT = SMOKE.every;
+      const r = this.r * 0.5;
+      world.particles.emit(this.x + U.rand(-r, r), this.y + U.rand(-r, r), { vx: U.rand(-12, 12), vy: U.rand(-38, -16), life: U.rand(0.8, 1.3), size: 5 + this.r * 0.15, size1: 12 + this.r * 0.4, color: U.pick(['#2a2622', '#3a342e', '#1e1b18']), add: false, shape: 'smoke', alpha: 0.55, drag: 0.5 });
+      this.smokes = (this.smokes || 0) + 1;
+    }
+    damage(amount, source, kind) {
+      const hit = super.damage(amount, source, kind);
+      if (hit && !this.dead && this.world) this.pipAt = this.world.realTime || 0;
+      return hit;
+    }
+    // { n, filled }: one pip per 70 hp, filled for what is left (rounded up, so
+    // filled is the number of Disintegrates still needed).
+    pips() {
+      if (!(this.maxHp > PIPS.hp)) return null;
+      return { n: Math.ceil(this.maxHp / PIPS.hp), filled: Math.ceil(Math.max(0, this.hp) / PIPS.hp) };
+    }
+    pipsShown(world) {
+      return !this.noPips && this.pipAt != null && !this.dead && !(this.downT > 0) && (world.realTime || 0) - this.pipAt < PIPS.show && !!this.pips();
+    }
+    renderPips(ctx, world) {
+      if (!this.pipsShown(world)) return;
+      const n = Math.ceil(this.maxHp / PIPS.hp);
+      const left = Math.max(0, this.hp) / PIPS.hp;
+      const since = (world.realTime || 0) - this.pipAt;
+      const w = 9, gap = 2, W = n * w + (n - 1) * gap;
+      const x0 = this.x - W / 2, y0 = this.y - this.r - 16;
+      ctx.save();
+      ctx.globalAlpha *= Math.min(1, (PIPS.show - since) / PIPS.fade);
+      ctx.fillStyle = 'rgba(8,10,14,0.78)';
+      ctx.fillRect(x0 - 2, y0 - 2, W + 4, 9);
+      for (let i = 0; i < n; i++) {
+        const f = U.clamp(left - i, 0, 1);
+        const x = x0 + i * (w + gap);
+        ctx.fillStyle = 'rgba(255,255,255,0.14)';
+        ctx.fillRect(x, y0, w, 5);
+        if (f <= 0) continue;
+        // The pip the last hit took a bite from flashes white for a moment.
+        ctx.fillStyle = since < 0.15 && i === Math.ceil(left) - 1 ? '#ffffff' : f >= 1 ? '#ffd27a' : '#ff9a3c';
+        ctx.fillRect(x, y0, w * f, 5);
+      }
+      ctx.restore();
     }
     // Its power source is gone: it sparks, flickers and goes dark. Not a kill
     // (no 'enemy:down'), and no explosion.
@@ -1152,8 +1201,9 @@
     }
     draw() {}
     renderEmissive(ctx, world) {
-      if (this.dead || this.downT > 0 || !this.emissive) return;
-      this.emissive(ctx, world);
+      if (this.dead || this.downT > 0) return;
+      if (this.emissive) this.emissive(ctx, world);
+      this.renderPips(ctx, world);
     }
   }
 
@@ -1250,11 +1300,22 @@
     }
   }
 
-  const TANK = { aimTime: 0.9, cooldown: [3, 4], recoilDecay: 10, flashT: 0.09, shake: 0.15 };
+  // Soot marks for a damaged hull, the same for a given tank every frame.
+  function scorchMarks(seed) {
+    const rnd = U.seeded(seed * 7919 + 13);
+    const out = [];
+    for (let i = 0; i < 3; i++) out.push({ x: rnd() * 1.6 - 0.8, y: rnd() * 1.4 - 0.7, r: 5 + rnd() * 5, a: rnd() * Math.PI });
+    return out;
+  }
+
+  // A tank has a crew of two. Wrecked (by anything but Disintegrate) they bail
+  // out and run for cover; unmade with it, they are gone (two lethal downs).
+  const TANK = { aimTime: 0.9, cooldown: [3, 4], recoilDecay: 10, flashT: 0.09, shake: 0.15, crew: 2 };
 
   class Tank extends Machine {
     constructor(o = {}) {
       super(Object.assign({ hp: 240, r: 28, mass: 8, friction: 4, boomR: 95, boomDmg: 25, colors: ['#5d6b4a', '#3a4430', '#2b2b2b'] }, o));
+      this.crew = o.crew == null ? TANK.crew : o.crew;
       this.turret = this.facing;
       this.hullA = this.facing;
       this.speedBase = 55;
@@ -1305,7 +1366,37 @@
       if (onScreen(world, this.x, this.y)) world.camera.shake(TANK.shake);
       this.recoil = 1;
       this.flashT = TANK.flashT;
-      this.fireCd = U.rand(TANK.cooldown[0], TANK.cooldown[1]);
+      this.fireCd = R.range(TANK.cooldown[0], TANK.cooldown[1]);
+    }
+    onDeath(kind, source) {
+      super.onDeath(kind, source);
+      const w = this.world;
+      if (!w || !(this.crew > 0)) return;
+      const n = this.crew;
+      this.crew = 0;
+      if (kind === 'disintegrate') {
+        for (let i = 0; i < n; i++) Events.emit('enemy:down', { enemy: this, lethal: true, kind, human: true, crew: true });
+        return;
+      }
+      w.defer(() => this.bail(w, n)); // after its own blast
+    }
+    // The crew climb out of the back and run.
+    bail(world, n) {
+      const bx = -Math.cos(this.hullA), by = -Math.sin(this.hullA);
+      const out = [];
+      for (let i = 0; i < n; i++) {
+        const side = i % 2 ? 1 : -1;
+        let x = this.x + bx * 20 - by * side * 16, y = this.y + by * 20 + bx * side * 16;
+        if (!world.isFree(x, y, 11)) {
+          x = this.x;
+          y = this.y;
+        }
+        out.push(world.add(new Crewman({ x, y, facing: Math.atan2(by, bx), vx: (bx - by * side) * 150, vy: (by + bx * side) * 150 })));
+      }
+      world.particles.burst(this.x + bx * 20, this.y + by * 20, 8, { color: ['#4a4640', '#6a645a'], speed: [20, 90], life: [0.4, 0.9], size: [5, 9], size1: 14, shape: 'smoke', add: false, alpha: 0.5 });
+      Audio.play('hatch');
+      Events.emit('crew:bail', { tank: this, crew: out });
+      return out;
     }
     draw(ctx) {
       const L = this.r * 2.3, W = this.r * 1.7;
@@ -1326,6 +1417,18 @@
       }
       ctx.fillStyle = this.hitFlash > 0 ? '#c8d0b8' : '#5d6b4a';
       ctx.fillRect(-L / 2 + 4, -W / 2 + 7, L - 8, W - 14);
+      // Below half health: scorched, blistered paint on the hull.
+      if (this.hp < this.maxHp * SMOKE.below) {
+        const marks = this.scorch || (this.scorch = scorchMarks(this.id));
+        for (const m of marks) {
+          ctx.fillStyle = 'rgba(28,22,16,0.62)';
+          Gfx.ellipse(ctx, m.x * (L / 2 - 8), m.y * (W / 2 - 9), m.r, m.r * 0.7, m.a);
+          ctx.fill();
+          ctx.fillStyle = 'rgba(120,70,30,0.45)';
+          Gfx.ellipse(ctx, m.x * (L / 2 - 8) + 1.5, m.y * (W / 2 - 9) - 1, m.r * 0.35, m.r * 0.25, m.a);
+          ctx.fill();
+        }
+      }
       ctx.restore();
       ctx.save();
       ctx.translate(this.x, this.y);
@@ -1357,12 +1460,18 @@
   class Battery extends Machine {
     constructor(o = {}) {
       super(Object.assign({ hp: 150, r: 26, mass: 30, static: true, boomR: 90, boomDmg: 20, colors: ['#5d6b4a', '#3a4430', '#c4302b'] }, o));
-      this.fireCd = U.rand(2, 4);
+      this.fireCd = R.range(2, 4);
       this.aimTime = BATTERY.aimTime;
       this.pod = 0;
       this.aimA = 0;
       this.sight = 900;
       this.needLos = false;
+      this.fixedTarget = o.target || null; // e.g. the command post: it fires at nothing else
+    }
+    acquire(world) {
+      const f = this.fixedTarget;
+      if (f && !f.dead) return f;
+      return super.acquire(world);
     }
     podPos(i) {
       const off = (i % 2 ? 1 : -1) * 10;
@@ -1386,9 +1495,10 @@
       }
     }
     launch(world) {
-      this.fireCd = U.rand(BATTERY.cooldown[0], BATTERY.cooldown[1]);
+      this.fireCd = R.range(BATTERY.cooldown[0], BATTERY.cooldown[1]);
       const p = this.podPos(this.pod++);
-      world.add(new Missile({ x: p.x, y: p.y, angle: this.aimA, speed: BATTERY.speed }));
+      const f = this.fixedTarget && !this.fixedTarget.dead ? this.fixedTarget : null;
+      world.add(new Missile({ x: p.x, y: p.y, angle: this.aimA, speed: BATTERY.speed, target: f }));
       world.particles.burst(p.x, p.y, 8, { color: ['#fff2c4', '#ffd27a', '#9a948a'], speed: [40, 140], life: [0.1, 0.3], size: [2, 4], angle: this.aimA + Math.PI, spread: 0.8 });
       Audio.play('whoosh');
     }
@@ -1477,6 +1587,7 @@
       this.aimTime = 1;
       this.spawned = []; // its mines and escorts, stood down when it dies
       this.ventT = 0;
+      this.noPips = true; // the boss bar shows its health
     }
     // Is Jon within the rear arc?
     rearExposed() {
