@@ -23,7 +23,8 @@
       this.left = false;
     }
     enter() {
-      DM.Audio.music.play(this.ch.introMusic || 'title');
+      // The chapter's own opening track, calm, so the music carries on into play.
+      DM.Audio.music.play(DM.AudioDirector ? DM.AudioDirector.trackFor(this.ch.id) : this.ch.introMusic || 'title', { intensity: 0 });
     }
     get finished() {
       return this.line >= this.lines.length;
