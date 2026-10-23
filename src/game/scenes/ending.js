@@ -44,7 +44,7 @@
       ];
     }
     enter() {
-      DM.Audio.music.play('ending');
+      DM.Audio.music.play(this.stats.killed > Math.max(4, this.stats.spared * 1.5) ? 'ending_cold' : 'ending'); // the same rule as the text
     }
     get onCredits() {
       return this.page >= this.pages.length;
