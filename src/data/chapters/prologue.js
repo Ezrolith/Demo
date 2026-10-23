@@ -20,6 +20,18 @@
   };
   const GEN = { x: 1426, y: 520 };
   const SHIRT = { body: '#9fb7c9', sleeve: '#9fb7c9' };
+  // Janey's run from the canteen to the control-room window (about 8 s).
+  const JANEY_PATH = [[285, 650], [285, 510], [845, 505], [845, 395], [1000, 112], [1082, 112]];
+
+  // An override lever, pulled all the way down: a heavy clunk and a relay's click.
+  DM.Audio.define('lever', {
+    gap: 0.2,
+    fn: (a) => {
+      a.noise({ dur: 0.12, gain: 0.22, ftype: 'lowpass', freq: 700, attack: 0.004 });
+      a.tone({ freq: 120, freqEnd: 70, dur: 0.16, gain: 0.12, type: 'square', filter: { freq: 600 } });
+      a.noise({ dur: 0.02, gain: 0.08, ftype: 'bandpass', freq: 3200, q: 4, delay: 0.32 });
+    },
+  });
 
   function checker(g, x, y, w, h, s, a, b) {
     for (let yy = y; yy < y + h; yy += s) for (let xx = x; xx < x + w; xx += s) {
@@ -171,9 +183,10 @@
       },
     });
 
-    // Control room.
+    // Control room. (During the lockdown they are on the far side of the glass.)
+    const notLocked = () => !ctx.flags.lockdown;
     R.wally = ctx.add(new NPC({
-      x: 960, y: 250, look: 'wally', facing: 0,
+      x: 960, y: 250, look: 'wally', facing: 0, enabled: notLocked,
       talk: () => ctx.fork(function* () {
         if (ctx.flags.lockdown) return;
         yield ctx.dialog(ctx.flags.calibrated
@@ -182,7 +195,7 @@
       }),
     }));
     R.glass = ctx.add(new NPC({
-      x: 870, y: 330, look: 'glass', facing: 0,
+      x: 870, y: 330, look: 'glass', facing: 0, enabled: notLocked,
       talk: () => ctx.fork(function* () {
         if (ctx.flags.lockdown) return;
         yield ctx.dialog([['glass', 'Intrinsic fields, Jon. Take away what holds a thing together and what is left? Nothing. Or everything. We are close to knowing which.']]);
@@ -190,7 +203,7 @@
     }));
 
     // Canteen.
-    R.janey = ctx.add(new NPC({ x: 330, y: 770, look: 'janey', facing: -Math.PI / 2, talk: () => ctx.fork(janeyTalk) }));
+    R.janey = ctx.add(new NPC({ x: 330, y: 770, look: 'janey', facing: -Math.PI / 2, enabled: notLocked, talk: () => ctx.fork(janeyTalk) }));
     flavor(ctx, 505, 700, 'Pour a coffee', [['jon', 'The coffee at Gila Flats is famous. Not for good reasons.']]);
     flavor(ctx, 145, 708, 'Listen to the radio', [['jon', '"...the Soviet Premier said today that his country\'s rockets..." I turn it down.']], {
       draw: (g) => {
@@ -211,6 +224,27 @@
       },
     });
     flavor(ctx, 840, 950, 'Check the files', [['jon', 'Thirty years of intrinsic field research, alphabetised by Wally. Under W, he has filed his lunch.']]);
+    flavor(ctx, 656, 622, 'Read the duty roster', [['jon', "Tonight's duty roster. Test Chamber 3: Osterman, J. Someone has doodled a little clock face beside my name. Its hands point at nothing in particular."]], {
+      draw: (g) => {
+        g.fillStyle = '#7a5a34';
+        g.fillRect(640, 598, 32, 6);
+        g.fillStyle = '#efe9d6';
+        g.fillRect(643, 602, 26, 32);
+        g.fillStyle = 'rgba(40,40,40,0.55)';
+        for (let i = 0; i < 6; i++) g.fillRect(646, 607 + i * 4.4, 14 + ((i * 7) % 6), 1.4);
+      },
+    });
+    flavor(ctx, 1062, 704, 'Look at the badge board', [['jon', 'Radiation badges, one for each of us, in neat rows. Mine is clipped on crooked again. Janey always straightens it when she walks past.']], {
+      draw: (g) => {
+        g.fillStyle = '#5a5f63';
+        g.fillRect(1076, 676, 20, 56);
+        const cols = ['#e8d27a', '#f0efe6', '#9fc7d8', '#e8d27a', '#f0efe6', '#d88a7a'];
+        for (let i = 0; i < 12; i++) {
+          g.fillStyle = cols[i % cols.length];
+          g.fillRect(1079 + (i % 2) * 8, 680 + Math.floor(i / 2) * 8.6, 6, 6);
+        }
+      },
+    });
 
     // Test chamber: generator, calibration panel, coat hook, and lockdown flavour.
     R.gen = ctx.add(new Prop({
@@ -294,10 +328,139 @@
         },
       },
     }));
-    flavor(ctx, 1132, 510, 'Try the door', [['jon', 'It does not move. It was designed not to.']], { enabled: () => ctx.flags.lockdown, range: 60 });
-    flavor(ctx, 1136, 180, 'Look through the window', [['jon', 'Wally is shouting something. The glass is three inches thick.']], { enabled: () => ctx.flags.lockdown, range: 60 });
-
+    buildLockdown(ctx, R);
     return W;
+  }
+
+  // ---- The last sixteen seconds ------------------------------------------------
+  // Every way out the chamber offers, and none of them work. Each is enabled only
+  // during the lockdown; one more prompt follows Jon himself (Janey's watch, in
+  // the coat he just put on) and gives way whenever another is in reach.
+  function buildLockdown(ctx, R) {
+    const f = ctx.flags;
+    const locked = () => f.lockdown && !f.flashed;
+    const say = (lines) => ctx.fork(function* () {
+      yield ctx.dialog(typeof lines === 'function' ? lines() : lines);
+    });
+    const spot = (x, y, label, lines, o = {}) => ctx.add(new Prop({
+      x, y, r: 4, draw: o.draw, data: o.data,
+      interact: { label, range: o.range || 58, enabled: locked, onInteract: o.onInteract || (() => say(lines)) },
+    }));
+    R.lockdown = [
+      spot(1132, 510, 'Try the door', [['jon', 'It does not move. It was designed not to.']], { range: 60 }),
+      spot(1136, 180, 'Look through the window', () => (f.janeyAtWindow
+        ? [['jon', 'Janey is at the glass with both hands flat against it. I put mine against it too. Three inches apart.']]
+        : [['jon', 'Wally is shouting something. The glass is three inches thick.']]), { range: 60 }),
+      spot(1131, 408, 'Press the intercom', null, {
+        draw: (g) => {
+          g.fillStyle = '#8a9298';
+          g.fillRect(1117, 396, 12, 24);
+          g.fillStyle = '#2a3034';
+          for (let i = 0; i < 4; i++) g.fillRect(1119, 399 + i * 4, 8, 1.6);
+          g.fillStyle = f.intercom ? '#7bd88f' : '#c4302b';
+          g.fillRect(1120, 414, 6, 3);
+        },
+        onInteract: () => {
+          const first = !f.intercom;
+          f.intercom = true;
+          DM.Audio.play('ui_move');
+          say(first
+            ? [['wally', "Jon? Jon, we're working on it, okay? Glass is on the phone to the— just hang on, buddy, we'll have you out of there in no ti—", { name: 'Wally Weaver — Intercom' }], ['jon', 'The line clicks off. I think he could not bear to hear me answer.']]
+            : [['jon', 'Only the hiss of an open line. Nobody is holding the button at the other end.']]);
+        },
+      }),
+      spot(1134, 760, 'Pull the override lever', null, {
+        draw: (g) => {
+          g.fillStyle = '#3a3a3a';
+          g.fillRect(1117, 742, 14, 36);
+          for (let i = 0; i < 4; i++) {
+            g.fillStyle = i % 2 ? '#1d1d1d' : '#d8b02a';
+            g.fillRect(1117, 742 + i * 9, 3, 9);
+          }
+          g.strokeStyle = '#9aa2a8';
+          g.lineWidth = 3;
+          const down = f.overridePulled;
+          Gfx.line(g, 1126, 760, 1142, down ? 772 : 748);
+          g.fillStyle = '#c4302b';
+          Gfx.circle(g, 1142, down ? 772 : 748, 4);
+          g.fill();
+        },
+        onInteract: () => {
+          f.overridePulled = true;
+          DM.Audio.play('lever');
+          say([['jon', 'The manual override. I pull it all the way down. A relay clicks somewhere, politely, and nothing changes.']]);
+        },
+      }),
+      spot(1426, 652, 'Touch the generator housing', [['jon', 'The housing is warm under my hand, and getting warmer. I helped design it. I know exactly how little I can do from in here.']], {
+        draw: (g) => {
+          g.fillStyle = '#5c6870';
+          g.fillRect(1408, 640, 36, 20);
+          g.strokeStyle = '#2a3235';
+          g.lineWidth = 1.5;
+          g.strokeRect(1408, 640, 36, 20);
+          g.fillStyle = '#f2c418';
+          g.fillRect(1412, 644, 8, 3);
+        },
+      }),
+    ];
+    const P = () => ctx.player;
+    const otherNear = () => {
+      const p = P();
+      return R.lockdown.some((e) => U.dist(p.x, p.y, e.x, e.y) < (e.interact.range || 58));
+    };
+    R.watch = ctx.add(new Prop({
+      x: 0, y: 0, r: 2, layer: 3,
+      // Held: a gold glint at his hand.
+      draw: (g) => {
+        const p = P();
+        if (!f.heldWatch || f.flashed || !p || p.hidden) return;
+        const a = p.facing + 0.5;
+        const x = p.x + Math.cos(a) * 15, y = p.y + Math.sin(a) * 15;
+        g.fillStyle = '#d8b860';
+        Gfx.circle(g, x, y, 3.4);
+        g.fill();
+        g.fillStyle = '#fff6d8';
+        Gfx.circle(g, x, y, 1.6);
+        g.fill();
+      },
+      interact: {
+        label: "Take out Janey's watch", range: 30,
+        enabled: () => locked() && !f.heldWatch && !otherNear(),
+        onInteract: () => {
+          f.heldWatch = true;
+          DM.Audio.play('tick');
+          say([['jon', "I take Janey's watch out of my pocket and hold it. The second hand moves exactly as I set it this morning."]]);
+        },
+      },
+    }));
+    R.watch.update = () => {
+      const p = P();
+      if (p) {
+        R.watch.x = p.x;
+        R.watch.y = p.y;
+      }
+    };
+  }
+
+  // Janey hears the alarm and runs from the canteen to the control-room window.
+  function* janeyRuns(ctx) {
+    const J = ctx.refs.janey;
+    J.speedBase = 175;
+    J.lookAtPlayer = false;
+    for (const [x, y] of JANEY_PATH) {
+      J.walkTo(x, y);
+      const t0 = ctx.world.realTime || 0;
+      while (J.moveTarget && (ctx.world.realTime || 0) - t0 < 3.2 && !ctx.flags.flashed) yield;
+      if (J.moveTarget) {
+        // Something in the way: she gets past it.
+        J.x = x;
+        J.y = y;
+        J.moveTarget = null;
+      }
+    }
+    J.baseFacing = 0;
+    J.facing = 0;
+    ctx.flags.janeyAtWindow = true;
   }
 
   function* janeyTalk(ctx) {
@@ -340,6 +503,8 @@
     music: 'prologue',
     form: 'human',
     epigraph: { text: 'If only I had known, I should have become a watchmaker.', by: 'Albert Einstein' },
+    // Saved with the chapter's completion: the ending remembers the watch.
+    persistFlags: ['heldWatch'],
     intro: [
       '1945. My father repairs watches. When the news comes from Hiroshima, he sweeps his gears into a box and tells me the future belongs to physics. I believe him.',
       '1959. I am thirty years old. I study intrinsic fields at Gila Flats, Arizona: the force that holds a thing in its shape.',
@@ -443,9 +608,10 @@
             ['jon', 'Yes. I see.'],
           ]);
           ctx.objective('Find a way out');
+          ctx.fork(janeyRuns);
           ctx.fork(function* () {
             yield ctx.wait(7);
-            ctx.narrate("Janey's watch is ticking in my coat pocket. I fixed it this morning. It keeps perfect time.", { dur: 5.5 });
+            ctx.narrate(`Janey's watch is ticking ${ctx.flags.heldWatch ? 'in my hand' : 'in my coat pocket'}. I fixed it this morning. It keeps perfect time.`, { dur: 5.5 });
           });
           ctx.fork(function* () {
             const t0 = W.realTime;
@@ -467,10 +633,13 @@
           }
           ctx.flash('#ffffff', 3.5);
           P.hidden = true;
-          W.particles.burst(P.x, P.y, 260, { color: ['#7fe3ff', '#ffffff', '#ecc8a6', '#ebe7dc'], speed: [60, 620], life: [0.8, 2.6], size: [1.5, 4], drag: 1.2 });
+          const held = !!ctx.flags.heldWatch;
+          W.particles.burst(P.x, P.y, 260, { color: ['#7fe3ff', '#ffffff', '#ecc8a6', '#ebe7dc'].concat(held ? ['#d8b860', '#f2d684'] : []), speed: [60, 620], life: [0.8, 2.6], size: [1.5, 4], drag: 1.2 });
           ctx.flags.flashed = true;
           yield ctx.wait(2.8);
           ctx.music('void');
+          // Holding the watch, Jon's last thought as a man is about it.
+          if (held) yield ctx.narrate('The watch is in my hand when the light comes. I do not let go of it. Then there is no hand to let go with.', { dur: 5 });
           yield ctx.narrate('August 1959. I am taken apart.', { dur: 4 });
         },
       },
