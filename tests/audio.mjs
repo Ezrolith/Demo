@@ -418,6 +418,21 @@ assert('audio unlocks on the first click', (await ev(() => window.DM.Audio.ctx &
   await wait(1500);
   const studio = await ev(() => window.DM.Audio.music.trackId);
   assert("stage cues: the test range plays 'range', the TV studio 'tension'", range === 'range' && studio === 'tension', `${range}, ${studio}`);
+
+  // The ending's music follows the same rule as its text.
+  const endings = await ev(async () => {
+    const DM = window.DM, saved = DM.Save.data.completed, out = [];
+    for (const c of [{ disintegrated: 20, spared: 0 }, { disintegrated: 1, spared: 12 }]) {
+      DM.Save.data.completed = { karnak: c };
+      DM.Engine.set(new DM.Scenes.Ending());
+      await new Promise((r) => setTimeout(r, 300));
+      out.push(DM.Audio.music.wanted);
+    }
+    DM.Save.data.completed = saved;
+    DM.Engine.set(new DM.Scenes.Title());
+    return out;
+  });
+  assert("the ending plays 'ending_cold' for a detached Jon and 'ending' otherwise", endings[0] === 'ending_cold' && endings[1] === 'ending', endings.join(', '));
 }
 
 // ---- 6. The spare/kill moment ---------------------------------------------------------------
