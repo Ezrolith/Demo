@@ -49,6 +49,13 @@ After three decoherences at one checkpoint the game offers to switch to STORY ch
 - Red arcs around Jon show where a hit came from. Hits freeze the action for an instant and shake the camera (both follow the SCREEN SHAKE setting).
 - Jon can't be hurt during dialogue or cutscenes.
 
+### Light and weather
+
+- Every place is lit: Jon glows, gunmen carry flashlights, alarm beacons sweep the Gila chamber, studio spots and flashbulbs light the TV set, and walls cast shadows.
+- Weather moves with world time, so Temporal Sight slows it too: snow at Karnak, dust and dust devils on Mars, drizzle on the pier.
+- Under Temporal Sight the world fades to an old photograph while Jon, danger and memories stay in colour, with amber ghosts of where enemies just were.
+- If frames get slow the game drops one QUALITY tier for the session and tells you. QUALITY and AMBIENT EFFECTS are in **Settings → Display & accessibility**.
+
 ### Listening to the fight
 
 - The music reacts to the fight around you, quiets under dialogue, and changes for aftermaths and for the ending you earned.
@@ -87,6 +94,8 @@ src/
     settings.js            settings schema: defaults, ranges, labels, descriptions
     save.js                versioned localStorage saves with migrations
     gfx.js                 procedural drawing: characters, portraits, icons, clock, glow
+    lighting.js            darkness layer with radial/cone lights and a colour wash
+    weather.js             snow, dust, drizzle, stars and haze
     particles.js, camera.js
     engine.js              loop, letterboxing, scene stack, fades, crash screen
   game/
@@ -101,6 +110,7 @@ src/
   data/
     music.js               music tracks as data (layers can fade with fight intensity)
     ambience.js            per-map ambient beds, zones and stage music cues
+    atmosphere.js          per-map lighting profiles, weather and wall surfaces
     chapters/*.js          the six chapters: maps + stage scripts + narration
 tests/                   Playwright checks (see Tests below)
 tools/build.mjs          single-file bundler (no dependencies)
@@ -200,6 +210,7 @@ npm run test:settings      # settings schema, challenge levels, reduced flashing
 npm run test:ledger        # spared/gone accounting, hit feedback, hitstop and slow motion, decoherence
 npm run test:encounters    # enemy telegraphs, threat chevrons, Behemoth and Veidt fairness, mines
 npm run test:audio         # every sound name has a recipe, ambience, reactive music, Sight's pitch bend
+npm run test:visual        # lighting, weather, Sight's colour pass, quality tiers and frame cost
 npm run build              # rebuild dist/dr-manhattan.html after changing src/
 ```
 

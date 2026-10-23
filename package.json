@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node tools/build.mjs",
     "serve": "npx --yes http-server -c-1 -p 8080 .",
-    "test": "node tests/powers.mjs && node tests/flows.mjs && node tests/smoke.mjs && node tests/saves.mjs && node tests/settings.mjs && node tests/ledger.mjs && node tests/encounters.mjs && node tests/audio.mjs",
+    "test": "node tests/powers.mjs && node tests/flows.mjs && node tests/smoke.mjs && node tests/saves.mjs && node tests/settings.mjs && node tests/ledger.mjs && node tests/encounters.mjs && node tests/audio.mjs && node tests/visual.mjs",
     "test:powers": "node tests/powers.mjs",
     "test:flows": "node tests/flows.mjs",
     "test:smoke": "node tests/smoke.mjs",
@@ -14,7 +14,8 @@
     "test:settings": "node tests/settings.mjs",
     "test:ledger": "node tests/ledger.mjs",
     "test:encounters": "node tests/encounters.mjs",
-    "test:audio": "node tests/audio.mjs"
+    "test:audio": "node tests/audio.mjs",
+    "test:visual": "node tests/visual.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"
