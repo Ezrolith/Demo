@@ -202,7 +202,7 @@
   }
 
   // What letting go right now would do: { vx, vy, target } for a throw, or null
-  // for a drop (the object keeps its own drift).
+  // for a drop (the object keeps its own slow drift and stops with normal friction).
   function throwPlan(p, s, world, e) {
     const sq = Math.sqrt(Math.max(0.5, e.mass));
     const big = Math.max(1, p.scale * 0.8);
@@ -515,7 +515,7 @@
       Audio.play('dis_charge');
     },
     resolve(p, b, world) {
-      let hits = 0;
+      let hits = 0, shoved = 0;
       for (const e of world.entities) {
         if (e.dead || e === p || e.team === 'player') continue;
         if (!e.disintegratable) continue;
@@ -533,6 +533,7 @@
           if (n.l < 4) n = U.norm(e.x - p.x, e.y - p.y);
           const j = 220 * Math.sqrt(e.mass);
           e.impulse(n.x * j, n.y * j);
+          shoved++;
         }
       }
       const P = world.particles;
@@ -544,6 +545,8 @@
         const n = U.norm(b.x - p.x, b.y - p.y);
         world.camera.kick(n.x, n.y, 3);
       }
+      // A beat of weight when something takes the blast and stays standing (kills get theirs from Enemy.die).
+      if (shoved && world.hitstop) world.hitstop(0.04);
       DM.Events.emit('power:disintegrate', { x: b.x, y: b.y, hits });
     },
     render(ctx, p, s, world) {
