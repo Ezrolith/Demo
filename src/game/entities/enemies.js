@@ -1083,14 +1083,15 @@
   // copy, recovering after any dash, winded after three dodges in a row, and most
   // of the time while Jon watches through Temporal Sight.
   const VEIDT = {
-    hp: 900,
+    hp: 1050,
     speed: 230,
     orbitR: [200, 300],
     dashSpeed: 760,
     dashT: 0.35,
     dodgeReach: 70, // casts landing within c.r + this of him are dodged
     dodgeDist: 150,
-    evadeT: 0.25, // i-frames against disintegrate once he commits to a dodge
+    evadeT: 0.25, // i-frames against disintegrate once he commits to a dodge (real time:
+    // under Temporal Sight even his dodge is too slow)
     recoverT: 0.8, // guard down after a dash of his own (breaking free, escaping a slam)...
     dodgeRecover: 0, // ...but not after a dodge
     skateK: 5, // steering response while recovering
@@ -1099,22 +1100,26 @@
     fatigueT: 2, // ...for this long, orbiting slower
     fatigueSpeed: 0.55,
     fatigueCooldown: 8, // before he can be winded again (he also starts the duel rested)
-    windupOpen: true, // committed (guard down) while winding up a disc
-    sightPeriod: 1, // under Temporal Sight his guard is down for the first
-    sightGuard: 0.2, // 80% of each (world-time) period and up for the last 20%
+    windupOpen: 0.3, // committed (guard down) while winding up a disc...
+    windupSpeed: 1.8, // ...but stepping fast into the throw: lead him
+    sightRead: 0, // seconds Temporal Sight needs to read him; then his guard is
+    sightPeriod: 1, // down for 80% of each (real-time) period
+    sightGuard: 0.2,
+    reposition: [4.5, 6], // phase 2: he dashes to a new spot this often (and recovers after)
     pinR: 110, // a Duplicate this close pins him
     impactMul: 1,
     boltMul: 0.6,
     breakFree: 0.7, // seconds he can be held (longer if Jon is expanded)
     breakFreeBig: 1.5,
     slamStun: 1.1,
-    slamRecover: 1.2, // cannot be grabbed again this soon after a slam
+    slamRecover: 1.8, // cannot be grabbed again this soon after a slam (nor mid-dash)
     discCd: [3.2, 2.4], // phase 1 / phase 2
     discWindup: 0.3,
     discRange: 520,
     meleeDmg: 20,
     meleeCd: 0.7,
     phase2: 0.5,
+    summon: 18, // phase 2: two drones, and two more this often once they are gone
   };
   const VEIDT_DODGE = ['Too slow, Jon.', 'I have studied you.', 'Predictable.', 'You telegraph everything.'];
   const VEIDT_FREE = ['Not like that.', 'I caught a bullet once, Jon.', 'Unhand me.'];
@@ -1148,7 +1153,9 @@
       this.discCd = 2.5;
       this.strikeCd = 0;
       this.heldT = 0;
-      this.summonT = 8;
+      this.summonT = 0;
+      this.repositionT = VEIDT.reposition[1];
+      this.seenSince = null;
       this.orbitR = 240;
       this.orbitDir = 1;
       this.phi = null;
@@ -1157,7 +1164,7 @@
       this.dashT = 0;
       this.dashTarget = null;
       this.aimTime = VEIDT.discWindup;
-      this.evadeT = 0;
+      this.evadeUntil = -1;
       this.recoverT = 0;
       this.fatigueT = 0;
       this.dodges = []; // times of the dodges in the current streak
@@ -1167,6 +1174,13 @@
       this.disHits = 0;
       this.pendingEvade = null;
     }
+    // Out of reach of telekinesis mid-dash, and for a while after a slam.
+    get grabbable() {
+      return !!this._grab && this.state !== 'dash' && !(this.slamT > 0);
+    }
+    set grabbable(v) {
+      this._grab = v;
+    }
     // Why his guard is down right now (null: it is up and he will dodge).
     guardDown(world) {
       if (this.heldBy || this.stun > 0) return 'stunned';
@@ -1174,8 +1188,9 @@
       if (this.state === 'dash') return 'dashing';
       if (this.recoverT > 0) return 'recovering';
       if (this.fatigueT > 0) return 'winded';
-      if (VEIDT.windupOpen && this.aim > 0) return 'throwing';
-      if (world.timesight && this.age % VEIDT.sightPeriod < VEIDT.sightPeriod - VEIDT.sightGuard) return 'seen';
+      if (this.aim > 0 && this.aim <= VEIDT.windupOpen) return 'throwing';
+      const now = world.realTime || 0;
+      if (this.seenSince != null && now - this.seenSince >= VEIDT.sightRead && now % VEIDT.sightPeriod < VEIDT.sightPeriod - VEIDT.sightGuard) return 'seen';
       return null;
     }
     disintegrate(world, source) {
@@ -1183,7 +1198,7 @@
     }
     damage(amount, source, kind) {
       if (this.yielded || this.dead) return false;
-      if (kind === 'disintegrate' && this.evadeT > 0) return false;
+      if (kind === 'disintegrate' && this.world && (this.world.realTime || 0) < this.evadeUntil) return false;
       if (kind === 'impact') amount *= VEIDT.impactMul;
       if (kind === 'bolt') amount *= VEIDT.boltMul;
       this.hp -= amount;
@@ -1203,12 +1218,13 @@
     onImpact(speed, other, world) {
       const dmg = (speed - 200) * 0.12 * (other ? U.clamp(other.mass, 0.6, 6) : 1.4);
       if (dmg <= 1) return;
+      if (this.slamT > VEIDT.slamRecover - 0.5) return; // one slam per throw, no pinball off the walls
       this.damage(dmg, other, 'impact');
+      this.thrown = 0;
       this.stun = Math.max(this.stun, VEIDT.slamStun);
       // No slam-to-slam stun-lock: he cannot be caught again straight away, and
       // he gets clear the moment he is back on his feet.
       this.slamT = VEIDT.slamRecover;
-      this.grabbable = false;
       this.escapePending = true;
       world.particles.burst(this.x, this.y, 10, { color: ['#d4ad3a', '#ffffff'], speed: [60, 200], life: [0.2, 0.5], size: [2, 3.5] });
       Audio.play('impact');
@@ -1237,8 +1253,28 @@
         this.thrown = 0;
         world.bark(this, U.pick(VEIDT_FREE), 1.6);
         const n = U.norm(this.x - p.x, this.y - p.y);
-        this.dash(this.x + n.x * 200, this.y + n.y * 200);
+        const o = this.openSpot(n.x || 1, n.y, 200);
+        this.dash(o.x, o.y);
       }
+    }
+    // A spot `dist` away, as close to direction (nx, ny) as walls allow.
+    openSpot(nx, ny, dist) {
+      const w = this.world;
+      let best = null;
+      for (const da of [0, 0.5, -0.5, 1, -1, 1.6, -1.6, 2.4, -2.4]) {
+        const a = Math.atan2(ny, nx) + da;
+        // How far along this line he can get before a wall (in quarters).
+        let clear = 0;
+        for (let k = 1; k <= 4; k++) {
+          const x = this.x + (Math.cos(a) * dist * k) / 4, y = this.y + (Math.sin(a) * dist * k) / 4;
+          if (!w.isFree(x, y, this.r) || w.shotHit(this.x, this.y, x, y) >= 0) break;
+          clear = k;
+        }
+        const score = clear * 10 - Math.abs(da);
+        if (!best || score > best.score) best = { x: this.x + (Math.cos(a) * dist * Math.max(clear, 0.5)) / 4, y: this.y + (Math.sin(a) * dist * Math.max(clear, 0.5)) / 4, score };
+        if (clear === 4) break;
+      }
+      return best;
     }
     // Dashes start at full speed; afterwards he needs a moment (recoverT).
     dash(x, y, dodge) {
@@ -1259,16 +1295,12 @@
       if (this.guardDown(world)) return;
       let n = U.norm(this.x - c.x, this.y - c.y);
       if (!n.l) n = { x: Math.cos(this.facing + Math.PI / 2), y: Math.sin(this.facing + Math.PI / 2) };
-      // Of the two sidesteps, take the one that keeps him furthest inside the arena.
-      let best = null;
-      for (const side of [1, -1]) {
-        const x = this.x + (n.x - n.y * side) * VEIDT.dodgeDist, y = this.y + (n.y + n.x * side) * VEIDT.dodgeDist;
-        const room = Math.min(x - 60, world.w - 60 - x, y - 60, world.h - 60 - y) + (world.isFree(x, y, this.r) ? 400 : 0);
-        if (!best || room > best.room) best = { x, y, room };
-      }
+      // A diagonal sidestep, to whichever side has room.
+      const side = U.chance(0.5) ? 1 : -1;
+      const best = this.openSpot(n.x - n.y * side, n.y + n.x * side, VEIDT.dodgeDist * 1.41);
       world.add(new Echo(this));
       this.dash(best.x, best.y, true);
-      this.evadeT = VEIDT.evadeT;
+      this.evadeUntil = (world.realTime || 0) + VEIDT.evadeT;
       this.pendingEvade = { c, hits: this.disHits, t: 0 };
       const ds = this.dodges;
       ds.push(this.age);
@@ -1282,12 +1314,11 @@
         this.vy = U.damp(this.vy, 0, 8, dt);
         return;
       }
-      if (!this.heldBy) this.heldT = 0;
-      this.evadeT = Math.max(0, this.evadeT - dt);
-      if (this.slamT > 0) {
-        this.slamT -= dt;
-        if (this.slamT <= 0) this.grabbable = true;
-      }
+      // Letting go and grabbing again does not reset his struggle.
+      if (!this.heldBy) this.heldT = Math.max(0, this.heldT - dt * 0.5);
+      this.slamT = Math.max(0, this.slamT - dt);
+      if (!world.timesight) this.seenSince = null;
+      else if (this.seenSince == null) this.seenSince = world.realTime || 0;
       // 'Too slow' only when the dodge really took him out of harm's way.
       const pe = this.pendingEvade;
       if (pe) {
@@ -1316,7 +1347,8 @@
         this.escapePending = false;
         const n = U.norm(this.x - p.x, this.y - p.y);
         const side = U.chance(0.5) ? 1 : -1;
-        this.dash(this.x + (n.x - n.y * side * 0.6) * 200, this.y + (n.y + n.x * side * 0.6) * 200);
+        const o = this.openSpot((n.x || 1) - n.y * side * 0.6, n.y + n.x * side * 0.6, 220);
+        this.dash(o.x, o.y);
       }
       if (this.state === 'dash') {
         this.dashT -= dt;
@@ -1359,11 +1391,11 @@
       }
       if (this.state === 'melee') this.state = 'strafe';
 
-      const slow = this.fatigueT > 0 ? VEIDT.fatigueSpeed : 1;
+      const slow = (this.fatigueT > 0 ? VEIDT.fatigueSpeed : 1) * (this.aim > 0 ? VEIDT.windupSpeed : 1);
       if (this.phi == null) this.phi = U.angleTo(p.x, p.y, this.x, this.y);
       this.phi += this.orbitDir * dt * (0.7 + phase * 0.3) * slow;
       const sp = this.speedBase * (phase === 2 ? 1.2 : 1) * slow;
-      this.steer(p.x + Math.cos(this.phi) * this.orbitR, p.y + Math.sin(this.phi) * this.orbitR, sp, dt, this.recoverT > 0 ? VEIDT.skateK : 5);
+      this.steer(p.x + Math.cos(this.phi) * this.orbitR, p.y + Math.sin(this.phi) * this.orbitR, sp, dt, this.aim > 0 ? 10 : this.recoverT > 0 ? VEIDT.skateK : 5);
       this.facing = U.dampAngle(this.facing, U.angleTo(this.x, this.y, p.x, p.y), 10, dt);
 
       // Tachyon disc: a short wind-up (arm raised, a glint at his hand), then the throw.
@@ -1381,12 +1413,20 @@
         this.aim = this.aimTime;
       }
       if (phase === 2 && this.summonT <= 0) {
-        this.summonT = 14;
-        const drones = world.entities.filter((e) => e instanceof Drone && !e.dead).length;
-        if (drones < 4) {
+        this.summonT = VEIDT.summon;
+        const drones = world.entities.filter((e) => e instanceof Drone && e.active).length;
+        if (!drones) {
           for (const s of [-1, 1]) world.add(new Drone({ x: U.clamp(this.x + s * 300, 80, world.w - 80), y: U.clamp(this.y - 200, 80, world.h - 80), style: 'karnak', alerted: true }));
           world.bark(this, 'You are not the only one with help.', 2);
         }
+      }
+      // Phase 2: faster, and he takes a new position with a dash every few
+      // seconds, each one followed by a moment's recovery.
+      if (phase === 2 && (this.repositionT -= dt) <= 0 && !(this.aim > 0)) {
+        this.repositionT = U.rand(VEIDT.reposition[0], VEIDT.reposition[1]);
+        this.phi += this.orbitDir * U.rand(0.9, 1.4);
+        const r = U.rand(VEIDT.orbitR[0], VEIDT.orbitR[1]);
+        this.dash(p.x + Math.cos(this.phi) * r, p.y + Math.sin(this.phi) * r);
       }
       this.stateT -= dt;
       if (this.stateT <= 0) {
