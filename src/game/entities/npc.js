@@ -27,7 +27,8 @@
 
   const GANG = {
     hats: ['#2d2620', '#3a2f28', '#262a30', '#4a3b2a', '#1f1f24'],
-    suits: ['#3b3a3f', '#4b3f36', '#2f3a45', '#5a4a3a', '#43363b'],
+    // A step lighter than the asphalt so they read at night (contrast >= 1.7 on #2b2d33).
+    suits: ['#55535c', '#665443', '#46596b', '#705c46', '#5f4b54'],
     skins: ['#e6bf9b', '#d9a77f', '#c98f66', '#f0c9ab', '#a8714c'],
   };
   LOOKS.randomGangster = () => {

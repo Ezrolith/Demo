@@ -178,14 +178,40 @@
       }
     }
 
+    // Cutscenes and dialogue are safe (locked), and a brief invulnerability
+    // after each hit stops one volley from landing all at once. damageMul and
+    // regenDelayBase are challenge-level hooks; lastHit and hurtDirs feed the
+    // Game Over tips and the directional hit arcs (DM.Feedback).
     damage(amount, source, kind) {
-      if (this.invuln > 0 || this.down || this.godMode || this.form === 'human') return false;
+      if (this.locked || this.invuln > 0 || this.down || this.godMode || this.form === 'human') return false;
       if (this.scale > 1.4 && (kind === 'bullet' || kind === 'pulse')) amount *= 0.15;
+      amount *= this.damageMul == null ? 1 : this.damageMul;
       this.coherence -= amount;
-      this.regenDelay = 2.6;
+      this.regenDelay = this.regenDelayBase == null ? 2.6 : this.regenDelayBase;
       this.hurtT = 0.25;
+      this.invuln = Math.max(this.invuln, 0.08);
+      const w = this.world;
+      const now = w ? w.realTime || 0 : 0;
+      this.lastHit = { kind, by: source ? source.label || source.name || source.constructor.name : null, t: now };
       DM.Audio.play('hit');
-      if (this.world) this.world.camera.shake(Math.min(0.5, 0.12 + amount / 80));
+      // Where it came from: against the incoming velocity, else from its position.
+      let ang = null;
+      if (source) {
+        const sp = Math.hypot(source.vx || 0, source.vy || 0);
+        if (sp > 60) ang = Math.atan2(-source.vy, -source.vx);
+        else if (source.x != null && (source.x !== this.x || source.y !== this.y)) ang = Math.atan2(source.y - this.y, source.x - this.x);
+      }
+      this.hurtDirs = (this.hurtDirs || []).filter((h) => now - h.at < h.t);
+      if (ang != null) {
+        this.hurtDirs.push({ angle: ang, t: 0.7, amt: amount, at: now });
+        if (this.hurtDirs.length > 6) this.hurtDirs.shift();
+      }
+      this.hurtFlash = { amt: amount, at: now };
+      if (w) {
+        w.camera.shake(Math.min(0.42, 0.18 + amount / 60));
+        if (ang != null) w.camera.kick(-Math.cos(ang), -Math.sin(ang), 3);
+        if (amount >= 10 && w.hitstop) w.hitstop(0.04);
+      }
       if (this.coherence <= 0) {
         this.coherence = 0;
         this.down = true;

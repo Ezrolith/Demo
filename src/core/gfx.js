@@ -325,17 +325,65 @@
     ctx.restore();
   };
 
+  // A body lying on its back, seen from above, in the figure's rotated frame:
+  // head toward +x, legs out toward -x, arms splayed, hat (if any) knocked off
+  // and lying beside it.
+  function figureDown(ctx, o, paint) {
+    const sleeve = o.sleeve || o.body || '#777';
+    const skin = o.skin || '#e0b896';
+    Gfx.ellipse(ctx, -18, -5, 10.5, 3.8, 0.12);
+    paint(o.legs || '#333');
+    Gfx.ellipse(ctx, -18, 5.5, 10.5, 3.8, -0.06);
+    paint(o.legs || '#333');
+    // arms: one flung up past the head, one out to the side
+    Gfx.ellipse(ctx, 6, -14.5, 7.5, 3.6, -1.9);
+    paint(sleeve);
+    Gfx.ellipse(ctx, 8.5, 15, 7.5, 3.6, 1.5);
+    paint(sleeve);
+    Gfx.ellipse(ctx, 1.5, 0, 12.5, 8.5);
+    paint(o.body || '#777');
+    if (o.trim) {
+      ctx.fillStyle = o.trim;
+      ctx.fillRect(-9, -1.5, 18, 3);
+    }
+    ctx.fillStyle = skin;
+    Gfx.circle(ctx, 3.6, -21.4, 2.6);
+    ctx.fill();
+    Gfx.circle(ctx, 9, 22, 2.6);
+    ctx.fill();
+    Gfx.circle(ctx, 18.5, 0, 6.8);
+    paint(skin);
+    const hair = o.hair || (o.hat ? '#2b221c' : null);
+    if (hair && o.hairStyle !== 'bald') {
+      ctx.beginPath();
+      ctx.arc(18.5, 0, 6.9, -Math.PI * 0.42, Math.PI * 0.42);
+      ctx.closePath();
+      ctx.fillStyle = hair;
+      ctx.fill();
+    }
+    if (o.hat) {
+      Gfx.circle(ctx, 30, 14, 8.2);
+      paint(o.hatBrim || o.hat);
+      Gfx.circle(ctx, 30.5, 13.5, 5.2);
+      paint(o.hat);
+    }
+  }
+
   // ---- characters (top-down) ----------------------------------------------
   // `o` = a look (see DM.LOOKS) plus x, y, angle, walk, moving, scale, alpha,
-  // aim (arms forward), gun ('pistol' | 'tommy'), flash (0..1 white hit flash).
+  // aim (arms forward), gun ('pistol' | 'tommy'), flash (0..1 white hit flash),
+  // kick (0..1 recoil: upper body and arms jolt back), pose ('down' = lying
+  // knocked out; angle then points from feet to head).
   Gfx.figure = (ctx, o) => {
     const s = (o.scale || 1) * (o.size || 1);
+    const down = o.pose === 'down';
     ctx.save();
     ctx.translate(o.x, o.y);
     if (o.alpha != null) ctx.globalAlpha *= o.alpha;
     if (!o.noShadow) {
       ctx.fillStyle = 'rgba(0,0,0,0.26)';
-      Gfx.ellipse(ctx, 3 * s, 4 * s, 14 * s, 11 * s);
+      if (down) Gfx.ellipse(ctx, 3 * s, 4 * s, 26 * s, 13 * s, o.angle || 0);
+      else Gfx.ellipse(ctx, 3 * s, 4 * s, 14 * s, 11 * s);
       ctx.fill();
     }
     ctx.rotate(o.angle || 0);
@@ -352,6 +400,11 @@
       ctx.fill();
       if (ink) ctx.stroke();
     };
+    if (down) {
+      figureDown(ctx, o, paint);
+      ctx.restore();
+      return;
+    }
 
     if (o.cape) {
       ctx.beginPath();
@@ -364,6 +417,7 @@
     paint(o.legs || '#333');
     Gfx.ellipse(ctx, -sw * 7, 5, 6.5, 4);
     paint(o.legs || '#333');
+    if (o.kick) ctx.translate(-o.kick * 2.6, 0); // recoil: everything above the legs jolts back
 
     const sleeve = o.sleeve || o.body || '#777';
     if (armsFwd) {
@@ -385,10 +439,11 @@
     }
     const skin = o.skin || '#e0b896';
     ctx.fillStyle = skin;
+    const ka = armsFwd && o.kick ? o.kick * 1.6 : 0; // hands and gun kick back further
     if (armsFwd) {
-      Gfx.circle(ctx, 12.5, -5, 2.7);
+      Gfx.circle(ctx, 12.5 - ka, -5, 2.7);
       ctx.fill();
-      Gfx.circle(ctx, 12.5, 5, 2.7);
+      Gfx.circle(ctx, 12.5 - ka, 5, 2.7);
       ctx.fill();
     } else {
       Gfx.circle(ctx, -sw * 6 + 4.5, -12.5, 2.6);
@@ -398,9 +453,9 @@
     }
     if (o.gun) {
       ctx.fillStyle = '#17171a';
-      ctx.fillRect(12, -1.8, o.gun === 'tommy' ? 17 : 10, 3.6);
+      ctx.fillRect(12 - ka, -1.8, o.gun === 'tommy' ? 17 : 10, 3.6);
       if (o.gun === 'tommy') {
-        Gfx.circle(ctx, 18, 0, 3.6);
+        Gfx.circle(ctx, 18 - ka, 0, 3.6);
         ctx.fill();
       }
     }

@@ -132,7 +132,7 @@
       p.locked = this.ctx.locked || this.dialog.active;
       const w = this.world;
       w.mouse = w.camera.toWorld(Input.mouse.x, Input.mouse.y);
-      w.ceasefire = p.locked; // cutscenes and dialogue are safe
+      w.ceasefire = p.locked || this.failed; // cutscenes, dialogue and decoherence are safe
       if (p.locked || p.form === 'human') {
         w.slowmo = false;
         w.timesight = false;
@@ -155,7 +155,13 @@
         this.failT = 1.8;
         Save.data.totals.decoherences++;
         Save.write();
-        w.particles.burst(p.x, p.y, 120, { color: ['#7fe3ff', '#5fd4ff', '#ffffff'], speed: [40, 360], life: [0.6, 1.6], size: [1.5, 3.5], drag: 1.5 });
+        // Coming apart: a beat of freeze, then the world crawls while Jon's
+        // atoms hang in the air (DM.Feedback drains the colour meanwhile).
+        w.ceasefire = true;
+        if (w.hitstop) w.hitstop(0.15);
+        w.slowmoT = 1.2;
+        w.slowmoTarget = 0.15;
+        w.particles.burst(p.x, p.y, 120, { color: ['#7fe3ff', '#5fd4ff', '#ffffff'], speed: [40, 360], life: [0.9, 2.2], size: [1.5, 3.5], drag: 0.3 });
         p.hidden = true;
         DM.Audio.play('disintegrate');
       }
@@ -199,6 +205,7 @@
         ctx.fillRect(0, 0, DM.W, DM.H);
       }
       this.renderTimesight(ctx);
+      if (DM.Feedback) DM.Feedback.render(ctx, this);
       const p = this.player;
       if (p.form === 'manhattan' && p.coherence < 35 && !p.down) {
         ctx.save();
@@ -216,7 +223,8 @@
 
     renderTimesight(ctx) {
       const w = this.world;
-      const k = U.clamp((1 - w.timeScale) / 0.72, 0, 1);
+      // Sight's own share of the slowdown (scripted slow motion is not Sight).
+      const k = U.clamp((1 - (w.sightScale == null ? w.timeScale : w.sightScale)) / 0.72, 0, 1);
       if (k < 0.02) return;
       const p = this.player;
       ctx.save();
