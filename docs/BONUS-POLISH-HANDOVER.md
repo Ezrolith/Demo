@@ -1,42 +1,47 @@
-# Part A polish — review and handover
+# Bonus polish — review and successor handover
 
-## 1. Branch, implementation checkpoint and PR
+## 1. GitHub state
 
-- Branch: `codex/bonus-polish`, based on `chatgpt/bonus-adventures` at `5f64f6dd98bb649d15f435e136a816deb96157c3`.
-- Draft PR: https://github.com/Ezrolith/Demo/pull/3 (base is the bonus branch, NOT the original game).
+- Repository: `Ezrolith/Demo`; branch: `codex/bonus-polish`.
+- Draft PR: https://github.com/Ezrolith/Demo/pull/3 (base `chatgpt/bonus-adventures`, NOT the original game).
 - Gameplay/build tested commit: `9a03c688738462e1133a824940924d4239d99097`.
 - Documentation/evidence cleanup checkpoint: `0f2b88450f05bc680e0e70b97528efe94a751d12`.
-- The later screenshot, documentation and CI cleanup commits do not alter the tested game scripts or standalone build.
+- Later screenshot/documentation/CI cleanup commits do not change the tested game scripts or standalone build. Read the current PR head before continuing; do not reset it to the tested commit.
 - No merge, deployment, force-push or changes to PR #1 / any `claude/*` branch.
+
+**Part A is implemented and its final gameplay build is green. Part B is NOT STARTED.**
+This handover stops at the requested Part A reporting checkpoint (step 7.4).
 
 ## 2. Requested steps
 
 | Step | Status | Delivered |
 | --- | --- | --- |
-| 1 | DONE | `bonus_noir` level 3 to -1; `ninth_platform` 3 to 0.5; browser title restored; hash verification machinery removed; bonus docs consolidated; test-only CI retained. |
-| 2 | DONE | Shared labels/rings/bursts/terminal/sign/companion helpers; configurable follower behaviour; character-local portrait masks; no global portrait/HUD/follower replacement; no Ninth Minute dependency on Last Broadcast; hints <=95 characters with an assertion. |
-| 3 | DONE | Tiled subway/station details; visible three-car train, seven passenger ghosts, headlamp/doors; shared nine-second clock for arrivals/departure/rewind/hazards and cues; dedicated bed and original synth recipes; reduced scenery labels; pipe/gear/steam/light engine-room detail. |
-| 4 | DONE | Physical 330px weighted pendulum arm; swept capsule contact and warning arc; fractured two-arm phase; actual brass shutters; deeper phase track; camera framing tested at all four arena corners and released on death. |
-| 5 | DONE | Rooftop/relay/transmitter procedural art and dedicated ambience; proximity static and filtered Switchman cadence; Carrier tracking dishes/sweeps/casing/phase change/camera; Rorschach's spared-guard interrogation; Nite Owl's interruptible four-second booth hack; moral summaries and companion line; focused tests. |
-| 6 | DONE | Four human transit guards on repeating patrols until engaged; normal human ledger; exactly-once Laurie reaction; three distinct completion paragraphs plus spared/gone counts; real-input lethal and nonlethal checks. |
-| 7 | DONE for Part A | All eleven sequential suites and both standalone checks passed; rebuilt HTML; 41 committed before/after screenshots captured via normal file navigation and visually inspected; draft PR and this handover; temporary transfer/publishing workflows removed. |
+| 1 | DONE | `bonus_noir` level 3 to -1; `ninth_platform` 3 to 0.5; title restored; publication hashes/tooling removed; bonus documentation consolidated; read-only test CI retained. |
+| 2 | DONE | Shared helpers and configurable companions; character-local masks; no global portrait/HUD/follower replacement; no Ninth Minute dependency on Last Broadcast; hints <=95 characters with an assertion. |
+| 3 | DONE | Subway architecture/props, three-car train and seven ghosts; shared nine-second cycle for movement/hazards/sounds; dedicated tunnel ambience and synth recipes; fewer labels; clock-room gears/pipes/steam/lights. |
+| 4 | DONE | Physical weighted arm, swept contact and warning arc; fractured two-arm phase, brass shutters, deeper music and encounter camera. |
+| 5 | DONE | Rooftop/relay/transmitter art and ambience; Carrier tracking dishes/sweeps/casing/phase change/camera; Rorschach's spared-guard interrogation; Nite Owl's interruptible four-second hack; moral summaries and companion reactions. |
+| 6 | DONE | Four human transit guards on looping patrols until engaged; normal human ledger; once-only Laurie reaction; three distinct moral conclusions and spared/gone display. |
+| 7 | DONE for Part A | All eleven sequential suites and both standalone checks passed; rebuilt HTML; 41 committed screenshots captured via normal file navigation and inspected; draft PR, docs and handover; temporary transfer/publishing workflows removed. |
+| Part B | NOT DONE | The Long Summer has no implementation, branch or tests yet. Its exact specification is preserved below. |
 
-### Implementation deviations and caveats
+### Deviations and caveats
 
-1. The bonus branch lacks the proposed generic `e.light` hook in the lighting engine. Rather than alter the protected core, map `lights(world, add)` callbacks forward bonus entities' `light()` profiles. The visual result is tested; original lighting code is unchanged.
-2. Extra atmospheric drawing/recipes live in `src/data/bonus-broadcast-atmosphere.js` and `src/data/bonus-ninth-atmosphere.js`. These are ordinary classic scripts in the existing load list, not assets, libraries or a new build step.
-3. Full CI ran on isolated committed snapshots while the next step was prepared locally; it was not used as a reason to skip any step's eleven-suite run. Each step's successful run is recorded below.
-4. Existing bonus tests were minimally adjusted where the new content intentionally changes progression: evidence now needs interrogation/hacking, and the rescue test must acknowledge Laurie's new dialogue after a kill. No original test assertion, tolerance or suite was weakened.
-5. Temporary source/capture transport workflows were needed because the local runtime cannot push/download through ordinary network tools. They are deleted at the review head. Failed setup/transfer attempts remain in GitHub history; they are not current gameplay test failures.
-6. Matching screenshots use fixed overview framing. Boss screenshots deliberately use the actual encounter camera, from matching player positions, to demonstrate the camera fix. Normal-versus-Sight images have different world-time progress because Sight genuinely slows time.
+1. The base branch lacks the proposed generic entity-light hook. Map `lights(world, add)` callbacks forward bonus entities' `light()` profiles instead, leaving the original lighting engine unchanged.
+2. Atmospheric drawings/recipes live in two ordinary classic scripts: `src/data/bonus-broadcast-atmosphere.js` and `src/data/bonus-ninth-atmosphere.js`. No gameplay assets, project dependencies or new build system were added.
+3. The only new core rendering hook is optional `look.mask(ctx, t)` (two lines in gfx.js). The original six chapters, original music, ending, engine, physics and powers are unchanged.
+4. Full CI validated isolated per-step snapshots while subsequent work was prepared locally. Every step received an eleven-suite run; the final game also received both standalone runs.
+5. Bonus tests were minimally adjusted for intentionally changed behaviour: evidence now requires interrogation/hacking, and the rescue test must acknowledge Laurie's new dialogue after a kill. No original test assertion, tolerance or suite was weakened.
+6. Temporary transfer/publishing workflows were removed. Failed setup/transfer attempts remain in history; they are not current gameplay failures. Only read-only test CI remains.
+7. Map overviews use identical framing. Boss shots use matching player positions and the actual encounter camera. Normal and Sight shots have different world-time progress because Sight really slows time.
 
 ## 3. Test results
 
 Authoritative normal-file Chromium run: https://github.com/Ezrolith/Demo/actions/runs/40055755526
 
-Every source suite passed on its first attempt. Exact final output and retained exit code:
+Every source suite passed on its first attempt. These are retained actual exit codes, not piped output.
 
-| Suite | Final output line | Exit |
+| Suite | Exact final output line | Exit |
 | --- | --- | --- |
 | smoke | `Smoke test passed.` | 0 |
 | visual | `All atmosphere checks passed.` | 0 |
@@ -49,10 +54,10 @@ Every source suite passed on its first attempt. Exact final output and retained 
 | flows | `All story flow checks passed.` | 0 |
 | bonus | `BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).` | 0 |
 | ninth-minute | `NINTH MINUTE PASSED: 75 checks (normal file loading).` | 0 |
-| bonus, standalone HTML | `BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).` | 0 |
-| ninth-minute, standalone HTML | `NINTH MINUTE PASSED: 75 checks (normal file loading).` | 0 |
+| bonus, standalone | `BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).` | 0 |
+| ninth-minute, standalone | `NINTH MINUTE PASSED: 75 checks (normal file loading).` | 0 |
 
-Per-step full regression runs, all successful:
+Per-step eleven-suite runs, all successful:
 
 | Step | Run |
 | --- | --- |
@@ -63,16 +68,14 @@ Per-step full regression runs, all successful:
 | 5 | https://github.com/Ezrolith/Demo/actions/runs/40055080154 |
 | 6 / final gameplay | https://github.com/Ezrolith/Demo/actions/runs/40055755526 |
 
-The draft PR also reruns the read-only regression workflow against its own head. Check that
-status separately; the table above describes the verified gameplay commit, not a claim
-that a still-running duplicate job has finished. `npm test` is still the original nine;
-run `node tests/bonus.mjs` and `node tests/ninth-minute.mjs` as well.
+The PR also reruns read-only regression checks for its own head. Check that status separately;
+the table describes the verified gameplay commit, not an unfinished duplicate job.
+`npm test` is still the original nine; run both bonus suites separately as well.
 
 ## 4. Before/after evidence
 
-All files below are in this branch, at 1280x720. Capture run:
-https://github.com/Ezrolith/Demo/actions/runs/40056176431
-The capture completed successfully with 41 images and no page errors.
+Capture run: https://github.com/Ezrolith/Demo/actions/runs/40056176431
+41 images at 1280x720 through normal file navigation, no page errors. All were visually inspected.
 
 | Area | Before | After | Sight before | Sight after |
 | --- | --- | --- | --- | --- |
@@ -87,54 +90,79 @@ The capture completed successfully with 41 images and no page errors.
 | Carrier phase 1 | [before](screenshots/bonus-polish/lb-carrier-phase1-before.png) | [after](screenshots/bonus-polish/lb-carrier-phase1-after.png) | [before](screenshots/bonus-polish/lb-carrier-phase1-before-sight.png) | [after](screenshots/bonus-polish/lb-carrier-phase1-after-sight.png) |
 | Carrier phase 2 | [before](screenshots/bonus-polish/lb-carrier-phase2-before.png) | [after](screenshots/bonus-polish/lb-carrier-phase2-after.png) | [before](screenshots/bonus-polish/lb-carrier-phase2-before-sight.png) | [after](screenshots/bonus-polish/lb-carrier-phase2-after-sight.png) |
 
-[Original night pier reference](screenshots/bonus-polish/pier-reference.png) ·
-[Exact capture settings](screenshots/bonus-polish/capture-settings.json).
+[Original night pier](screenshots/bonus-polish/pier-reference.png) ·
+[Capture settings](screenshots/bonus-polish/capture-settings.json).
 
 ## 5. Uncertainties
 
-- No unassisted end-to-end human playthrough or subjective listening assessment was completed.
-- Safari, Firefox, mobile controls and low-end-device performance remain unverified.
-- The focused tests use setup positioning and occasional invulnerability. They verify mechanics,
-  routes and regressions, not fun, difficulty or artistic parity with the original.
-- The original performance test passes on the GitHub runner; that is not a general device benchmark.
-- Map images were inspected, including Sight and boss phases. That does not establish that every
-  transient animation is attractive or every puzzle is intuitive to a first-time player.
+No unassisted end-to-end human playthrough or subjective music-listening assessment was done.
+Music balance is supported by the original loudness check; taste and atmosphere still need listening.
+Safari, Firefox and low-end performance remain unverified. Mobile controls are not implemented.
+Tests use setup positioning and some invulnerability: they verify mechanics/routes/regressions,
+not fun, difficulty or artistic parity. Screenshots do not prove every animation or puzzle is intuitive.
 
-## 6. Known issues and next handover
+## 6. Known issues and successor boundary
 
-No reproducible failing gameplay assertion remains in the verified Part A build. Do not
-translate that into a claim that no bugs exist. Browser persistence depends on storage being
-available; keyboard/mouse remain required. Human review should specifically assess the
-protected hack's pressure, transit-guard difficulty, boss sweep readability and sound balance.
+No reproducible failing gameplay assertion remains in the tested Part A build. That is not a claim
+that no bugs exist. Review hack pressure, transit-guard difficulty, boss sweeps, audio and persistence.
+Keep PR #3 draft. Do not merge/deploy, overwrite `claude/*` or alter PR #1.
 
-**Part B status at this checkpoint: NOT STARTED.** There is no third-adventure implementation
-or test file in this branch. It must be a separate branch `codex/bonus-three`, based on the
-finished Part A head, with its draft PR targeting `codex/bonus-polish`.
+**Part B has not been started.** Use a NEW `codex/bonus-three` branch from the finished Part A
+head, draft PR targeting `codex/bonus-polish`. No additional numerical Heat/balance values have
+been established. Earlier proposed values and ending names are not requirements. The requested
+truck components are cannon/wheels versus the lethal CAB; the endings are calm/uneasy/burning.
 
-The requested third adventure is **The Long Summer**, 1977: Manhattan, the Comedian and Nite
-Owl during the police strike. Its required work is not optional:
+### User's Part B specification (preserved verbatim)
 
-1. A 0–100 city Heat system responding to kills, nonlethal restraint, rescues, fires and the
-   Comedian; high Heat brings reinforcements, low Heat allows crowds to leave.
-2. A deliberately dangerous Comedian using live fire/tear gas and potentially finishing a
-   knocked-out rioter. He is grabbable: holding him disarms him for ten seconds after release.
-   Track his casualties separately. Nite Owl has an explicit E-operated balcony grapple.
-3. Blackout Avenue: procedural summer streets, fires, human rioters and grabbable Molotovs;
-   rip hydrants with telekinesis, water extinguishes nearby fires; clear the route with Heat <40.
-4. Five-storey burning tenement: six residents, spreading fire/smoke grid, Sight's three-second
-   fire prediction, a liftable stair beam, Expand roof ventilation and Duplicate distraction.
-5. Riot-line climax: a mobile black truck, telegraphed water cannon/tear gas and a half-health ram;
-   disable pump/engine nonlethally or unmake the frightened driver; stop the Comedian if necessary.
-6. Three distinct endings (Mercy, Order, Silence) using Heat and casualties, not just a last-button
-   choice. Keep all writing original and introduce each mechanic through a companion exchange.
-7. Third bonus card with its own checkpoint/completion record, old saves intact; two properly
-   normalised music tracks and summer/crowd/fire/siren ambience in the original synth.
-8. `tests/long-summer.mjs`: complete all maps through real inputs, both truck resolutions, Heat,
-   Comedian restraint/casualties, fire/prediction/ventilation, rescues, retries and save isolation.
-   Run all eleven existing suites plus the new suite sequentially, then test the standalone.
-9. Screenshot every map normally and under Sight plus the truck mid-sweep and mid-ram; inspect
-   actual renders. Push source/tests/docs/rebuilt HTML; draft PR only, never merge/deploy.
+Build on a new branch `codex/bonus-three` created from the finished `codex/bonus-polish`. Draft PR into
+`codex/bonus-polish`. Same ground rules, code standard, testing and screenshot rules as Part A, written to the Part A
+standard FROM THE START (atmosphere, sound, labels, framing - not as a later polish pass).
 
-Read the user's full specification before implementing: this handover is a checklist, not a
-replacement for its numerical thresholds and acceptance criteria. Keep the original six
-chapters, core combat/physics/lighting/weather, original music and all `claude/*` branches intact.
+Premise (original writing only; Watchmen is the inspiration, not the source text):
+New York, August 1977. The police are on strike, the city is in a heatwave, and the streets are boiling over. Jon is sent
+in with the Comedian and Nite Owl to "restore order". The Comedian's idea of order is the problem. This adventure is the
+one built around the game's central question: who do you spare, and what does your power cost the people in front of you?
+
+Companions:
+- The Comedian (new LOOKS entry with a `mask` per step 2.2: black leather, a small smiley badge, a cigar): fights hard and
+  ESCALATES - if not restrained he fires tear gas and live rounds, and his shots can turn knocked-out rioters into
+  casualties. Jon can stop him: Telekinesis can lift him (a quick hold disarms him for 10 s) and he remembers it in dialogue.
+- Nite Owl: non-lethal support, opens routes (grapple point he can use on E to reach a balcony), and protests the Comedian.
+
+Core mechanic - THE HEAT meter (one new HUD element, drawn in the style of the existing coherence bar):
+- City heat 0-100 rises when people are unmade, when the Comedian fires, when fires spread; it falls when Jon spares
+  rioters, rescues civilians and stops the Comedian. High heat spawns more rioters and molotov throwers; low heat calms
+  crowds so some rioters simply leave.
+- Every human counts in the spared/gone ledger as in the campaign.
+
+Areas (three, each one checkpointed stage, like the other adventures):
+1. "Blackout Avenue": a dark street lit only by burning cars, a looted storefront and Jon's own light (the light layer is
+   the mood). Rioters, two molotov throwers (molotovs are grabbable and can be caught and thrown into a hydrant puddle to
+   snuff them). Objective: calm the avenue (heat below 40) and reach the tenement. The Comedian escalates here first.
+2. "The Tenement": a burning five-storey tenement shown top-down as rooms. Fire spreads cell-by-cell on a timer (hazard,
+   in colour under Sight). Rescue 6 residents trapped in rooms: Teleport in, carry/escort out; Telekinesis lifts a burning
+   beam; Duplicate lets Jon be in two rooms; Expand lets him tear the roof open to vent smoke. Temporal Sight shows where
+   the fire will be in 3 seconds. No combat here except one looter who started the fire (spare or unmake).
+3. "The Armoury Truck" (boss): rioters have taken a National Guard riot-control truck with a water cannon (knockback,
+   telegraphed sweep) and tear-gas mortars (clouds that dim vision and slow Jon). The driver is a frightened kid. Disable
+   it without killing him: destroy the cannon and wheels with Disintegrate/thrown objects; disintegrating the CAB is
+   lethal and counts as unmade. Phase 2 at 50%: the truck rams; the Comedian wants to shoot the driver - Jon can stop him.
+   Same camera framing rule as step 4.2.
+
+Endings (three tiers from the ledger AND final heat): calm (spared everyone, heat low), uneasy (mixed), and burning (people
+unmade or heat high). The Comedian's last line differs in each. Show PEOPLE SPARED / UNMADE, RESIDENTS RESCUED (x/6),
+CITY HEAT.
+
+Sound and music:
+- New beds: `summer_street` (heat-haze drone, distant crowd, sirens, glass breaking events), `summer_fire` (fire roar that
+  rises near burning cells via a positional hum).
+- Two new tracks in the original synth style: a slow, humid one for the streets and a driving one for the truck - each
+  `level` tuned so tests/audio.mjs passes.
+
+Registration and saves: register it with DM.Bonus.register exactly like the other two (own id `long_summer`, own
+checkpoints in the bonus slot, never touching campaign saves). It appears as the third card in BONUS LEVELS.
+
+Tests: add tests/long-summer.mjs covering: menu -> intro -> each stage reachable; heat rises/falls by the stated rules;
+the Comedian can be disarmed; residents count only when they reach safety; fire spreads and is visible under Sight;
+truck cab disintegration counts as unmade while cannon/wheel destruction does not; all three ending tiers; checkpoint
+resume per stage; campaign save untouched. Plus all 11 existing suites.
