@@ -15,7 +15,7 @@
 
   // Additive arrangements: the original tracks and synthesizer remain untouched.
   DM.MusicTracks.ninth_platform = {
-    bpm:66,level:3,barsPerChord:2,echo:.48,
+    bpm:66,level:0.5,barsPerChord:2,echo:.48,
     prog:[[52,59,62,66],[48,55,59,62],[50,57,60,64],[47,54,59,62]],
     layers:[{kind:'pad',wave:'sine',gain:.027,attack:2.2},
       {kind:'arp',wave:'triangle',gain:.024,every:3,pattern:[0,-1,2,3,-1,1,2,-1],oct:12,cutoff:1650,len:3.5},

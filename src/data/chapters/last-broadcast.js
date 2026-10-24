@@ -41,7 +41,7 @@
   };
 
   DM.MusicTracks.bonus_noir = {
-    bpm: 74, level: 3, barsPerChord: 2, echo: 0.43,
+    bpm: 74, level: -1, barsPerChord: 2, echo: 0.43,
     prog: [[50, 57, 60, 64], [46, 53, 57, 60], [48, 55, 58, 62], [45, 52, 57, 61]],
     layers: [
       { kind: 'pad', wave: 'sine', gain: 0.026, attack: 1.8 },

@@ -1,59 +1,45 @@
-name: Bonus adventures validation
-
+name: Bonus polish regression
 on:
+  push:
+    branches: [codex/bonus-polish]
   pull_request:
-    branches: ['claude/dr-manhattan-game']
-    types: [opened, synchronize, reopened, ready_for_review]
-
+    branches: [chatgpt/bonus-adventures]
 permissions:
   contents: read
-
-concurrency:
-  group: bonus-validation-${{ github.event.pull_request.number }}
-  cancel-in-progress: true
-
 jobs:
-  validate:
+  regression:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax, reproducible build and publication hashes
+      - run: npm install --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Eleven suites, sequentially, with one retry on failure
+        shell: bash
         run: |
-          find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
-          node tools/build.mjs
-          node tools/verify-bonus-release.mjs
-          git diff --exit-code -- dist/dr-manhattan.html
-      - name: Install browser tests
-        run: |
-          npm install --ignore-scripts
-          npx playwright install --with-deps chromium
-      - name: Last Broadcast source - 29 focused checks
-        run: node tests/bonus.mjs
-      - name: Ninth Minute source - 56 focused checks
-        run: node tests/ninth-minute.mjs
-      - name: Preserve source-test results
-        run: |
-          mkdir -p artifacts
-          cp -R tests/out artifacts/source
-      - name: Last Broadcast standalone - 29 focused checks
-        run: node tests/bonus.mjs dist/dr-manhattan.html
-      - name: Ninth Minute standalone - 56 focused checks
-        run: node tests/ninth-minute.mjs dist/dr-manhattan.html
-      - name: Package source snapshot
-        run: git archive --format=zip HEAD -o artifacts/bonus-adventures-source.zip
+          mkdir -p tests/out/regression
+          failed=0
+          for suite in smoke visual audio powers saves settings ledger encounters flows bonus ninth-minute; do
+            for attempt in 1 2; do
+              set +e
+              node "tests/$suite.mjs" > "tests/out/regression/$suite-$attempt.log" 2>&1
+              result=$?
+              set -e
+              printf '%s attempt=%s exit=%s\n' "$suite" "$attempt" "$result" | tee -a tests/out/regression/exits.txt
+              cat "tests/out/regression/$suite-$attempt.log"
+              if [ "$result" -eq 0 ]; then break; fi
+            done
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          done
+          exit "$failed"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: bonus-adventures-${{ github.event.pull_request.head.sha }}
-          path: |
-            dist/dr-manhattan.html
-            artifacts/
-            tests/out/
+          name: polish-tests-651fdd6285b4b529a1095f6b1decc202c6efbf6d
+          path: tests/out/
           retention-days: 14

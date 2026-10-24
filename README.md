@@ -1,6 +1,6 @@
 # Dr. Manhattan: The Watchmaker's Son
 
-> **Bonus adventures update — 24 October 2026:** This branch includes The Last Broadcast and The Ninth Minute. Open `dist/dr-manhattan.html` and choose BONUS LEVELS. See [BONUS-README.md](BONUS-README.md), [THE-NINTH-MINUTE.md](THE-NINTH-MINUTE.md) and [CHANGELOG.md](CHANGELOG.md). The original campaign remains unchanged; earlier Story H work is on its separate branch. Older roadmap/status notes below are retained as history.
+Bonus adventures: see [docs/BONUS.md](docs/BONUS.md).
 
 A browser game inspired by *Watchmen*. You play Jon Osterman's journey: a physicist in 1959, an accident in an intrinsic field chamber, a body rebuilt atom by atom, and then Dr. Manhattan, gaining powers chapter by chapter until the Doomsday Clock reaches midnight.
 
