@@ -812,6 +812,11 @@
       [1300, 920],
       [1850, 1040]
     ]);
+    ctx.flags.transitGuards = [
+      [690, 1120], [1090, 1030], [1550, 1080], [1880, 880],
+    ].map(([x, y], index) => ctx.add(new TransitGuard(x, y, index * 1.7)));
+    ctx.flags.rescueFoes.push(...ctx.flags.transitGuards);
+    ctx.flags.transitWitness = ctx.add(new TransitWitness(ctx));
     ctx.add(new Sign(240, 1250, '← EXIT TO THE STREET', TEAL, 16));
     ctx.add(new LostMoment(ctx, 2070, 365, 2, 'A girl counts the lamps outside the window. Eight. Nine. Eight. Nine. She has not ' +
       'reached ten for forty-three minutes.'));
@@ -819,11 +824,84 @@
       if (ctx.flags.passengers !== 6)
         return ctx.toast('SIX PASSENGERS MUST REACH THE STAIRS FIRST', GOLD);
       if (ctx.flags.rescueFoes.some(alive))
-        return ctx.toast('CLEAR THE REMAINING SECURITY DRONES', GOLD);
+        return ctx.toast('CLEAR THE REMAINING SECURITY', GOLD);
       ctx.flags.enterEngine = true;
     }));
     return w;
   }
+  // Human staff repeat their route until a nearby intruder or a hit breaks the loop.
+  // Combat and the spared/gone ledger remain the campaign's normal Enemy behaviour.
+  class TransitGuard extends DM.Enemies.Gangster {
+    constructor(x, y, offset = 0) {
+      super({ x, y, gun: 'pistol', sight: 360 });
+      this.home = { x, y };
+      this.loopOffset = offset;
+      this.engaged = false;
+      this.look = {
+        name: 'Transit security', skin: '#c39b79', hair: '#3d3933', hairStyle: 'short',
+        hat: '#31424b', hatBrim: '#212c32', body: '#405961', sleeve: '#405961',
+        legs: '#273a40', collar: '#b0b6a4', trim: '#a3a87c',
+      };
+    }
+    damage(amount, source, kind) {
+      this.engaged = true;
+      return super.damage(amount, source, kind);
+    }
+    update(dt, world) {
+      if (this.dead || this.ko) return;
+      if (this.heldBy || this.thrown || this.hp < this.maxHp) this.engaged = true;
+      const player = world.player;
+      if (player && U.dist(this.x, this.y, player.x, player.y) < 310 &&
+          world.los(this.x, this.y, player.x, player.y)) this.engaged = true;
+      if (this.engaged || this.stun > 0 || world.ceasefire) {
+        super.update(dt, world);
+        return;
+      }
+      const angle = ((world.cycleT || 0) + this.loopOffset) / 9 * Math.PI * 2;
+      const nx = this.home.x + Math.sin(angle) * 65;
+      const ny = this.home.y + Math.cos(angle) * 22;
+      this.facing = Math.atan2(ny - this.y, nx - this.x);
+      this.x = nx;
+      this.y = ny;
+      this.vx = 0;
+      this.vy = 0;
+      this.walk += dt * 5;
+    }
+    onAlert(world) {
+      world.bark(this, 'Step away from the train!');
+    }
+    onHeld(dt, world) {
+      this.facing += dt * 4;
+      if (!this.heldBarked) {
+        this.heldBarked = true;
+        world.bark(this, 'Put me down. Please.');
+      }
+    }
+  }
+
+  class TransitWitness extends DM.Entity {
+    constructor(ctx) {
+      super({ body: false, solid: false, static: true, disintegratable: false });
+      this.ctx = ctx;
+      this.pending = false;
+      this.reactions = 0;
+      ctx.on('enemy:down', event => {
+        if (event.lethal && event.enemy instanceof TransitGuard && event.enemy.world === ctx.world &&
+            !ctx.flags.laurieReacted) this.pending = true;
+      });
+    }
+    update() {
+      const ctx = this.ctx;
+      if (!this.pending || ctx.scene.dialog.active || ctx.flags.laurieReacted) return;
+      this.pending = false;
+      this.reactions++;
+      ctx.flags.laurieReacted = true;
+      ctx.scene.dialog.open([
+        ['silkspectre', 'He was trapped here too, Jon. He only had nine seconds to understand us.'],
+      ]);
+    }
+  }
+
   class Pendulum extends DM.Entity {
     constructor(ctx, x, y) {
       super({
@@ -1361,17 +1439,22 @@
       G.paragraph(g, text, 244, 224, 792, 28, {
         size: 21, font: DM.FONTS.type, color: '#deddd0'
       });
+      this.ledgerText = DM.BonusKit.ledgerSentence(this.record.stats, 'ninth_minute');
+      G.paragraph(g, this.ledgerText, 244, 326, 792, 22, {
+        size: 16, font: DM.FONTS.type, color: '#bdc9c0',
+      });
       const rows = [
+        ['PEOPLE SPARED / UNMADE', `${this.record.stats.spared || 0} / ${this.record.stats.disintegrated || 0}`],
         ['PASSENGERS HOME', `${f.passengers ||
           0} / 6`],
         ['LOST MOMENTS HEARD', `${bits(f.moments)} / 3`],
         ['YOUR CHOICE', f.choice === 'preserve' ? 'THE RECORD PRESERVED' : 'THE LOOP RELEASED']
       ];
       rows.forEach(([label, value], i) => {
-        G.text(g, label, 610, 386 + i * 42, {
+        G.text(g, label, 610, 390 + i * 30, {
           size: 15, align: 'right', spacing: 2, color: '#a7bbb9'
         });
-        G.text(g, value, 645, 386 + i * 42, {
+        G.text(g, value, 645, 390 + i * 30, {
           size: i === 2 ? 15 : 21, color: i === 1 ? GOLD : TEAL
         });
       });
@@ -1397,7 +1480,8 @@
       'opened',
       'pendulumDown',
       'choice',
-      'stable'
+      'stable',
+      'laurieReacted'
     ],
     intro: [
       'It is February 1977. A train is arriving at Harrow Street. In nine seconds, it will arrive again.',
@@ -1678,6 +1762,6 @@
   });
   DM.NinthMinute = {
     chapter, Pendulum, CarriageDoor, Evacuee, SilkSpectre, RouteSwitch, RailArc, LostMoment, Anchor,
-    TimeRing
+    TimeRing, TransitGuard, TransitWitness, NinthComplete
   };
 })();
