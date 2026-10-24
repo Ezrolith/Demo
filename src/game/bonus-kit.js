@@ -212,7 +212,8 @@
       const d = U.dist(this.x, this.y, tx, ty);
       if (d > 650 && this.grapple <= 0) {
         // A visible grapple catches companions up across rooftops; never blocks progression.
-        const nx = p.x + (this.who === 'niteowl' ? -85 : 85), ny = p.y + 65;
+        const nx = this.taskTarget ? tx - 30 : p.x + (this.who === 'niteowl' ? -85 : 85);
+        const ny = this.taskTarget ? ty + 25 : p.y + 65;
         if (w.isFree(nx, ny, 14)) {
           burst(w, this.x, this.y, GOLD);
           this.x = nx;
@@ -220,7 +221,7 @@
           this.grapple = 4;
         }
       }
-      else if (d > 85 || (foe && this.who === 'rorschach' && bd > 42)) {
+      else if (d > (this.taskTarget ? 18 : 85) || (foe && this.who === 'rorschach' && bd > 42)) {
         const angle = U.angleTo(this.x, this.y, tx, ty);
         let best = angle, score = Infinity;
         for (const off of [
@@ -401,7 +402,26 @@
       this.active = false;
     }
   }
+  function ledgerTone(stats = {}) {
+    const gone = stats.disintegrated || 0;
+    const spared = stats.spared || 0;
+    if (!gone)
+      return 'spared';
+    return gone > spared ? 'unmade' : 'mixed';
+  }
+  function ledgerSentence(stats, adventure) {
+    const lines = adventure === 'ninth_minute' ? {
+      spared: 'The passengers leave with the guards. For once, nobody is missing from the next moment.',
+      mixed: 'The passengers reach morning. Some guards do not. Laurie remembers both numbers.',
+      unmade: 'The clock starts again. There are uniforms on the platform that nobody will come to collect.',
+    } : {
+      spared: 'The guards will face questions in daylight. Every one of them is still able to answer.',
+      mixed: 'The city receives an answer. Some of the people who could explain it are no longer here.',
+      unmade: 'The broadcast ends. More guards are gone than spared. The silence belongs to their families now.',
+    };
+    return lines[ledgerTone(stats)];
+  }
   DM.BonusKit = {
-    label, ring, burst, withinRange, Sign, Terminal, Companion, Lamp, segmentDistance, sweptArmHit, BossFraming
+    label, ring, burst, withinRange, Sign, Terminal, Companion, Lamp, segmentDistance, sweptArmHit, BossFraming, ledgerTone, ledgerSentence
   };
 })();

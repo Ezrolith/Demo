@@ -78,7 +78,21 @@ try {
   check('stairs cannot skip the opening encounter',await page.evaluate(()=>!T.play().ctx.flags.enterRelay));
   await page.evaluate(()=>{T.place(650,650);T.step(4);});
   check('companions actually attack, rather than being decorative NPCs',await page.evaluate(()=>T.play().ctx.flags.owl.strikes+T.play().ctx.flags.rorschach.strikes>0));
-  await page.evaluate(()=>{T.clear(T.play().ctx.flags.roofGuards);T.interact(T.evidence(1));T.dialog();});
+  await page.evaluate(()=>{
+    const p=T.play(), guard=p.ctx.flags.roofGuards[0];
+    guard.damage(999,p.player,'impact');
+    p.ctx.flags.testGuard=guard;
+    const gone=p.ctx.flags.roofGuards[1];T.shoot(gone);p.ctx.flags.testGone=gone;
+    T.clear(p.ctx.flags.roofGuards);
+  });
+  check('disintegrated guards cannot be interrogated; a KO guard remains available', await page.evaluate(()=>{
+    const f=T.play().ctx.flags;return f.testGone.dead&&!f.testGone.interact&&!!f.testGuard.interact;
+  }));
+  check('roof evidence cannot be collected before the interrogation', await page.evaluate(()=>!T.evidence(1).interact.enabled()));
+  await page.evaluate(()=>{T.interact(T.play().ctx.flags.testGuard);T.step(7);T.dialog();});
+  check('E sends Rorschach to the spared guard and reveals the dispatch evidence', await page.evaluate(()=>
+    T.play().ctx.flags.interrogated&&T.evidence(1).interact.enabled()&&T.play().ctx.stats.spared>=1));
+  await page.evaluate(()=>{T.interact(T.evidence(1));T.dialog();});
   check('first evidence record is recovered through interact input',await page.evaluate(()=>T.play().ctx.flags.evidence===1));
   await page.screenshot({path:path.join(out,'02-rooftops.png')});
   await page.evaluate(()=>{T.interact(T.console('ENTER THE RELAY'));T.transition();});
@@ -98,6 +112,11 @@ try {
     });
   });
   check('both coils can be grabbed, carried and gently docked with the existing telekinesis controls',docks.every(d=>d.grabbed&&d.docked));
+  check('supervisor evidence is locked until Nite Owl opens the booth', await page.evaluate(()=>!T.evidence(2).interact.enabled()));
+  await page.evaluate(()=>{T.place(1260,650);T.key('KeyE');T.dialog();T.step(10);});
+  check('Nite Owl reaches the lock and spends four uninterrupted seconds opening the real gate', await page.evaluate(()=>{
+    const d=T.play().ctx.flags.boothDoor;return d.opened&&d.progress>=4&&!T.play().world.walls.includes(d.gate);
+  }));
   await page.evaluate(()=>{T.interact(T.evidence(2));T.dialog();T.place(850,650);});
   await page.screenshot({path:path.join(out,'03-relay.png')});
   await page.evaluate(()=>{T.interact(T.console('ROOFTOP LIFT'));T.transition();});
@@ -132,6 +151,52 @@ try {
   await page.evaluate(()=>{DM.Engine.set(new DM.Scenes.Title());T.step(.5);});
   check('returning to the main game preserves its completed state',await page.evaluate(()=>DM.Save.finished&&DM.Save.continueTarget()===null));
   await page.screenshot({path:path.join(out,'07-main-title.png')});
+  check('three ledger tiers produce different Last Broadcast endings',await page.evaluate(()=>{
+    const K=DM.BonusKit;
+    const lines=[{spared:6,disintegrated:0},{spared:4,disintegrated:2},{spared:1,disintegrated:5}]
+      .map(stats=>{
+        const scene=new DM.Scenes.BonusComplete(T.play(),{flags:{choice:'broadcast',evidence:7},stats});
+        scene.enter();scene.render(DM.Engine.ctx);return scene.ledgerText;
+      });
+    return new Set(lines).size===3;
+  }));
+  await page.evaluate(()=>{T.start(1);T.dialog();T.play().player.godMode=true;T.clear(T.play().ctx.flags.relayGuards);
+    const d=T.play().ctx.flags.boothDoor,owl=T.play().ctx.flags.owl;
+    T.place(1260,650);T.key('KeyE');T.dialog();owl.x=1275;owl.y=650;d.progress=3;
+    const e=T.play().world.add(new DM.Enemies.Gangster({x:1210,y:650,alerted:true}));
+    T.step(.2);window.__interrupted=d.progress===0;e.die('impact');T.step(4.2);
+  });
+  check('enemy fire threat resets the four-second hack; clearing it allows completion',await page.evaluate(()=>
+    window.__interrupted&&T.play().ctx.flags.boothDoor.opened));
+  await page.evaluate(()=>{T.start(2);T.dialog();T.play().player.godMode=true;T.clear(T.play().ctx.flags.towerGuards);});
+  check('Carrier beam telegraph is harmless, then its hit test follows the visible beam',await page.evaluate(()=>{
+    const b=T.play().ctx.flags.carrier,d=b.dishes()[0];b.beamAim=1.5;b.beamT=.5;
+    const a=b.beamAngle(d,2),point={x:d.x+Math.cos(a)*350,y:d.y+Math.sin(a)*350,r:14};
+    const outside={x:point.x+Math.cos(a+Math.PI/2)*80,y:point.y+Math.sin(a+Math.PI/2)*80,r:14};
+    return !b.beamHit(point,.4,.5)&&b.beamHit(point,1.99,2)&&!b.beamHit(outside,1.99,2);
+  }));
+  check('shield collapse opens the casing; half health detaches two sweeping dishes',await page.evaluate(()=>{
+    const p=T.play(),b=p.ctx.flags.carrier;for(const e of b.pylons)e.die('disintegrate',p.player);
+    T.step(.8);const open=b.shutter>.7&&!b.shieldWasUp;b.damage(360,p.player,'impact');T.step(.4);
+    return open&&b.phase===2&&b.dishes().every(d=>Math.abs(d.x-b.x)>=150);
+  }));
+  check('Carrier framing keeps its body and detached dishes below the HUD at arena corners',await page.evaluate(()=>{
+    const p=T.play(),b=p.ctx.flags.carrier;
+    return [[130,280],[1630,280],[130,1050],[1630,1050]].every(([x,y])=>{
+      p.player.x=x;p.player.y=y;b.cameraFrame.update();T.step(1.5);
+      return b.cameraFrame.projectionSafe(p.world.camera.zoom,p.world.camera.x,p.world.camera.y);
+    });
+  }));
+  check('Carrier death restores ordinary camera follow and stops its positional static',await page.evaluate(()=>{
+    const p=T.play(),b=p.ctx.flags.carrier;b.die('disintegrate',p.player);T.step(.3);
+    return !b.cameraFrame.active&&p.ctx.camTarget!==b.cameraFrame.point&&!DM.Audio.hums['broadcast-carrier'];
+  }));
+  check('broadcast map labels stay sparse and each map uses its dedicated sound bed',await page.evaluate(()=>{
+    return [0,1,2].every(stage=>{T.start(stage);T.dialog();const w=T.play().world;
+      return w.entities.filter(e=>e.sceneryLabel).length<=3&&
+        DM.Ambience.maps[w.mapId].bed===(stage===1?'broadcast_hum':'broadcast_rain');
+    });
+  }));
   check('no browser or game-engine errors during both routes',errors.length===0&&await page.evaluate(()=>!DM.Engine.error));
   writeFileSync(path.join(out,'results.json'),JSON.stringify({target,mode:offline?'offline-content harness; in-memory storage':'normal file navigation and browser storage',checks,errors},null,2));
   console.log(`BONUS ACCEPTANCE PASSED: ${checks.length} checks (${offline?'offline harness':'normal file loading'}).`);

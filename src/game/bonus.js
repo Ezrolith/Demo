@@ -308,6 +308,7 @@
       ctx.fillStyle = 'rgba(4,8,16,0.9)';
       ctx.fillRect(100, 55, 1080, 610);
       const f = this.record.flags, s = this.record.stats;
+      this.ledgerText = DM.BonusKit.ledgerSentence(s, 'last_broadcast');
       G.text(ctx, 'BONUS ADVENTURE COMPLETE', 640, 119, {
         size: 16, spacing: 6, align: 'center', color: '#e2bc70'
       });
@@ -321,6 +322,7 @@
       G.paragraph(ctx, line, 250, 238, 780, 29, {
         size: 22, font: DM.FONTS.type, color: '#dedacf'
       });
+      G.paragraph(ctx, this.ledgerText, 250, 313, 780, 22, { size: 17, font: DM.FONTS.type, color: '#b8d0cf' });
       G.text(ctx, 'ENGINEERS RESCUED', 620, 369, {
         size: 17, align: 'right', spacing: 2, color: '#afbdcb'
       });
