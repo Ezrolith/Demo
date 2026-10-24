@@ -1,0 +1,32 @@
+name: Recover staged summer source
+on:
+  push:
+    branches: [codex/bonus-three]
+    paths: [.github/workflows/summer-source-recovery.yml]
+permissions:
+  contents: read
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Decode available source prefix without executing it
+        run: |
+          python3 - <<'PY'
+          import base64,lzma,json
+          from pathlib import Path
+          b=base64.b64decode(Path('.github/summer-source-1.b64').read_text())
+          d=lzma.LZMADecompressor().decompress(b).decode('utf-8',errors='strict')
+          Path('recovered-prefix.txt').write_text(d)
+          Path('staged-source.b64').write_text(Path('.github/summer-source-1.b64').read_text())
+          print('Decoded prefix characters:',len(d))
+          PY
+      - uses: actions/upload-artifact@v4
+        with:
+          name: recovered-summer-source
+          path: |
+            recovered-prefix.txt
+            staged-source.b64
+          retention-days: 7
