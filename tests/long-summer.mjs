@@ -298,8 +298,26 @@ try {
     T.interact(T.p().ctx.flags.grapple);
     T.step(1.6);
   });
-  check('the avenue can be calmed with restraint and water, without editing Heat', await page.evaluate(() =>
-    T.p().ctx.flags.heat < 40 && T.p().ctx.flags.grappleOpen && T.p().ctx.stats.disintegrated === 0));
+  check('hydrants alone cannot bypass the still-active riot', await page.evaluate(() => {
+    const p = T.p();
+    if (!(p.ctx.flags.heat < 40 && p.ctx.flags.grappleOpen)) return false;
+    // Keep the initial crowd active: opening water cannot count as calming people.
+    const unresolved = p.ctx.flags.rioters.filter(e => !e.ko && !e.dead).length;
+    if (unresolved < 5) return false;
+    T.interact(p.ctx.flags.exit);
+    return !p.ctx.flags.avenueExit;
+  }));
+  await page.evaluate(() => {
+    const p = T.p();
+    T.place(820, 535);
+    T.key('KeyR');
+    T.step(5.5);
+  });
+  check('settling two rioters nonlethally unlocks the avenue without editing Heat', await page.evaluate(() => {
+    const p = T.p();
+    const n = p.ctx.flags.crowdSettled();
+    return n >= 2 && p.ctx.stats.disintegrated === 0 && p.ctx.flags.heat < 40;
+  }));
   await page.evaluate(() => { T.interact(T.p().ctx.flags.exit); T.transition(); });
   check('E advances from the avenue into the checkpointed tenement', await page.evaluate(() =>
     DM.dev.state().stageId === 'tenement' && T.p().ctx.checkpoint === 1));
@@ -358,9 +376,13 @@ try {
     T.step(0.4);
     return e.escort && p.world.entities.some(x => x.isDuplicate);
   }));
-  check('the rescue exit cannot be bypassed while residents remain inside', await page.evaluate(() => {
-    T.interact(T.p().ctx.flags.exit);
-    return !T.p().ctx.flags.tenementExit;
+  check('the next-stage console stays disabled and clear of the rescue exit', await page.evaluate(() => {
+    const p = T.p();
+    const e = p.ctx.flags.exit;
+    const safe = p.ctx.flags.summer.safePoint;
+    if (e.interact.enabled() || Math.hypot(e.x - safe.x, e.y - safe.y) < 130) return false;
+    T.interact(e);
+    return !p.ctx.flags.tenementExit;
   }));
   await page.evaluate(() => {
     const p = T.p();
@@ -380,6 +402,8 @@ try {
   });
   check('six residents count only after physically arriving at safety', await page.evaluate(() =>
     T.p().ctx.flags.rescued === 6 && T.p().ctx.flags.residents.every(e => e.safe)));
+  check('the onward-route console activates after all six reach the street', await page.evaluate(() =>
+    T.p().ctx.flags.exit.interact.enabled()));
   check('waiting at the exit cannot double-count residents', await page.evaluate(() => {
     const n = T.p().ctx.stats.spared;
     T.step(2);
