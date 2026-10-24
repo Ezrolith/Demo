@@ -48,7 +48,8 @@
   }
 
   function init(ctx, width, height, spawn) {
-    const w = ctx.newWorld({ w: width, h: height, zoom: 1, bg: '#13212a' });
+    const w = ctx.newWorld({ w: width, h: height + 340, zoom: 1, bg: '#13212a' });
+    w.playableHeight = height;
     w.spawn = spawn;
     w.room(40, 40, width - 80, height - 80);
     const state = ctx.add(new S.CityState(ctx));
@@ -64,15 +65,16 @@
     ctx.lock(false);
     ctx.player.energy = 100;
     ctx.player.coherence = 100;
+    S.startReadableCamera(ctx);
   }
 
   function avenue(ctx) {
-    const w = init(ctx, 2050, 1320, { x: 245, y: 900 });
+    const w = init(ctx, 2050, 1320, { x: 290, y: 640 });
     const state = ctx.flags.summer;
     S.installArt(ctx, 'avenue');
     S.addStreetFrontages(w);
     const balconyWall = w.wall(1535, 390, 160, 20, 'low');
-    const seeds = [[510, 510], [545, 560], [1520, 920], [1580, 940]];
+    const seeds = [[510, 510], [545, 560], [1620, 970], [375, 655], [1190, 550], [1770, 820]];
     ctx.add(new S.FireGrid(state, { x: 80, y: 400, w: 1880, h: 660 }, seeds));
     ctx.flags.hydrants = [ctx.add(new S.Hydrant(state, 570, 570)), ctx.add(new S.Hydrant(state, 1560, 910))];
     ctx.flags.rioters = [];
@@ -100,9 +102,9 @@
   }
 
   function tenement(ctx) {
-    const w = init(ctx, 1640, 1640, { x: 820, y: 1450 });
+    const w = init(ctx, 1640, 1640, { x: 820, y: 1380 });
     const state = ctx.flags.summer;
-    state.safePoint = { x: 820, y: 1465 };
+    state.safePoint = { x: 820, y: 1400 };
     S.installArt(ctx, 'tenement');
     ctx.flags.comedian.silent = true;
     ctx.flags.comedian.x = 1080;
@@ -136,7 +138,7 @@
       if ((ctx.flags.rescuedMask || 0) & (1 << id)) {
         e.safe = true;
         e.x = 720 + id * 32;
-        e.y = 1470;
+        e.y = 1405;
         e.grabbable = false;
         e.interact = null;
       }
@@ -144,7 +146,7 @@
     }
     ctx.flags.looter = ctx.add(new S.Rioter(state, 1170, 960));
     ctx.flags.looter.exitPoint = state.safePoint;
-    ctx.flags.exit = ctx.add(new K.Terminal(820, 1550, 'Leave for the armoury', () => {
+    ctx.flags.exit = ctx.add(new K.Terminal(820, 1460, 'Leave for the armoury', () => {
       if (ctx.flags.rescued < 6) ctx.toast('SIX RESIDENTS MUST REACH THE STREET', S.AMBER);
       else ctx.flags.tenementExit = true;
     }));
@@ -152,12 +154,12 @@
   }
 
   function truckMap(ctx) {
-    const w = init(ctx, 2050, 1480, { x: 530, y: 1110 });
+    const w = init(ctx, 2050, 1480, { x: 530, y: 1040 });
     const state = ctx.flags.summer;
-    state.safePoint = { x: 540, y: 1175 };
+    state.safePoint = { x: 540, y: 1120 };
     S.installArt(ctx, 'truck');
     S.addStreetFrontages(w, true);
-    ctx.add(new S.FireGrid(state, { x: 80, y: 350, w: 1880, h: 940 }, [[510, 510], [1620, 1140]]));
+    ctx.add(new S.FireGrid(state, { x: 80, y: 350, w: 1880, h: 940 }, [[330, 610], [1810, 580], [1630, 1135]]));
     ctx.flags.hydrants = [ctx.add(new S.Hydrant(state, 475, 555)), ctx.add(new S.Hydrant(state, 1570, 1130))];
     ctx.flags.comedian.silent = true;
     ctx.flags.truck = ctx.add(new S.RiotTruck(state, 1110, 650));
@@ -169,7 +171,7 @@
       g.fill();
       K.ring(g, state.safePoint.x, state.safePoint.y, 70, '#729c85', 2);
     });
-    ctx.add(new K.Sign(540, 1255, 'SAFE PASSAGE', S.TEAL, 15));
+    ctx.add(new K.Sign(540, 1170, 'SAFE PASSAGE', S.TEAL, 15));
     return w;
   }
 
@@ -286,7 +288,7 @@
           yield ctx.dialog([
             ['niteowl', 'The tenement is burning. But we cannot move anyone through a street like this.'],
             ['comedian', 'Then give them a reason to get out of it.'],
-            ['niteowl', 'Jon, those are live rounds. Lift him with telekinesis if he starts shooting. ' +
+            ['niteowl', 'Jon, those are live rounds. He raises his gun before firing. Lift him while he aims. ' +
               'A quick hold takes his gun away for ten seconds.'],
             ['manhattan', 'I was told to help the people here. I do not see an exception for the angry ones.'],
             ['niteowl', 'Spare them and the street calms down. Rip the red hydrants free to put out fires. ' +
@@ -314,13 +316,13 @@
             ['comedian', 'A room full of people who cannot shoot back. I think you can manage.'],
             ['niteowl', 'E asks them to follow; telekinesis can carry them. They are safe only at the green exit. ' +
               'Lift the beam off the stairs.'],
-            ['manhattan', 'In three seconds the fire reaches the next room. With Temporal Sight, I can show you where.'],
+            ['manhattan', 'The fire is gathering itself. Temporal Sight shows where it will be in three seconds.'],
             ['niteowl', 'Your duplicate can reassure another resident while you work. At the top landing, ' +
               'grow with G, then use the roof latch with E to let the smoke out.'],
           ]);
           ready(ctx);
           ctx.objective('Bring six residents to the street', () => `${ctx.flags.rescued} / 6 safely outside`);
-          ctx.marker(820, 1465, 'SAFE EXIT');
+          ctx.marker(820, 1400, 'SAFE EXIT');
           ctx.tutorial('E guides residents; C carries them. F predicts fire. R helps another room. G + E vents.', 16);
           yield ctx.until(() => ctx.flags.tenementExit);
           ctx.objectiveDone();
@@ -348,7 +350,7 @@
           yield ctx.until(() => ctx.flags.truck.disabled);
           if (!ctx.flags.driverOutcome) {
             ctx.objective('Bring the driver to safe passage · Stop the Comedian');
-            ctx.marker(540, 1175, 'SAFE PASSAGE');
+            ctx.marker(540, 1120, 'SAFE PASSAGE');
             ctx.tutorial('Hold C on the Comedian to disarm him. E guides the driver; C can carry him to safety.', 16);
           }
           yield ctx.until(() => !!ctx.flags.driverOutcome);

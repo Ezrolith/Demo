@@ -7,42 +7,116 @@
   const K = DM.BonusKit;
   const U = DM.U;
 
-  function leatherMask(g) {
-    g.fillStyle = '#252a2b';
-    g.beginPath();
-    g.moveTo(30, 40);
-    g.lineTo(70, 40);
-    g.lineTo(67, 51);
-    g.lineTo(52, 48);
-    g.lineTo(48, 48);
-    g.lineTo(33, 51);
+  function leatherMask(g, t) {
+    // The existing local mask hook can also add a broader jaw and jacket.
+    // It changes this portrait only; Dan keeps his slimmer original silhouette.
+    g.fillStyle = '#171d20';
+    G.ellipse(g, 50, 108, 57, 35);
     g.fill();
-    g.fillStyle = '#cfb899';
-    for (const x of [40, 60]) {
-      G.ellipse(g, x, 45, 6, 2.4);
+    g.fillStyle = '#ae8061';
+    G.rr(g, 38, 62, 24, 28, 5);
+    g.fill();
+    g.fillStyle = '#c9a17d';
+    g.beginPath();
+    g.moveTo(28, 40);
+    g.quadraticCurveTo(29, 22, 50, 23);
+    g.quadraticCurveTo(75, 25, 74, 46);
+    g.lineTo(72, 67);
+    g.quadraticCurveTo(62, 81, 42, 78);
+    g.lineTo(29, 68);
+    g.closePath();
+    g.fill();
+    g.fillStyle = 'rgba(87,64,50,0.24)';
+    G.ellipse(g, 52, 67, 22, 12);
+    g.fill();
+    g.fillStyle = '#353335';
+    g.beginPath();
+    g.moveTo(27, 41);
+    g.quadraticCurveTo(27, 16, 51, 20);
+    g.quadraticCurveTo(74, 18, 75, 44);
+    g.lineTo(67, 35);
+    g.quadraticCurveTo(48, 28, 34, 36);
+    g.fill();
+    g.fillStyle = '#898278';
+    g.fillRect(29, 36, 5, 17);
+    g.fillRect(68, 36, 5, 17);
+    g.fillStyle = '#151b1e';
+    g.beginPath();
+    g.moveTo(28, 40);
+    g.lineTo(73, 40);
+    g.lineTo(71, 54);
+    g.lineTo(54, 50);
+    g.lineTo(49, 53);
+    g.lineTo(32, 54);
+    g.closePath();
+    g.fill();
+    g.fillStyle = '#d8c19b';
+    for (const x of [40, 62]) {
+      G.ellipse(g, x, 46, 6, 2);
+      g.fill();
+      g.fillStyle = '#292523';
+      G.circle(g, x, 46, 1.5);
+      g.fill();
+      g.fillStyle = '#d8c19b';
+    }
+    g.strokeStyle = '#85634e';
+    g.lineWidth = 1;
+    for (const x of [33, 64]) {
+      G.line(g, x, 55, x + 6, 58);
+      G.line(g, x + 1, 59, x + 5, 64);
+    }
+    G.line(g, 48, 53, 45, 61);
+    G.line(g, 45, 61, 52, 62);
+    G.line(g, 41, 68, 62, 66);
+    G.line(g, 40, 73, 58, 74);
+    // Worn leather lapels, shoulder seams, zipper and the yellow badge.
+    g.fillStyle = '#333c3f';
+    for (const side of [-1, 1]) {
+      g.beginPath();
+      g.moveTo(50 + side * 16, 77);
+      g.lineTo(50 + side * 37, 85);
+      g.lineTo(50 + side * 23, 99);
+      g.lineTo(50 + side * 6, 90);
       g.fill();
     }
-    g.fillStyle = '#79533b';
-    g.fillRect(55, 67, 24, 4);
-    g.fillStyle = '#d68846';
-    g.fillRect(77, 67, 3, 4);
-    g.fillStyle = '#e0bd53';
-    G.circle(g, 68, 88, 6);
+    g.strokeStyle = '#6e7777';
+    g.lineWidth = 1.1;
+    G.line(g, 20, 86, 5, 96);
+    G.line(g, 80, 86, 95, 96);
+    G.line(g, 58, 87, 48, 100);
+    g.fillStyle = '#624230';
+    G.rr(g, 56, 64, 33, 6, 2);
     g.fill();
-    g.fillStyle = '#272b2d';
-    G.circle(g, 66, 86, 0.7);
+    g.fillStyle = '#b6a092';
+    g.fillRect(83, 64, 5, 6);
+    g.fillStyle = '#dc9856';
+    g.fillRect(88, 65, 2, 4);
+    if (DM.Save.settings.fx !== 'off') {
+      const time = DM.SettingsSchema.reducedFlashing() ? 0 : t;
+      g.strokeStyle = 'rgba(202,198,176,0.4)';
+      g.lineWidth = 1.4;
+      g.beginPath();
+      g.moveTo(88, 63);
+      g.bezierCurveTo(94, 56, 82 + Math.sin(time) * 3, 51, 90, 43);
+      g.stroke();
+    }
+    g.fillStyle = '#d6b644';
+    G.circle(g, 75, 90, 7);
     g.fill();
-    G.circle(g, 70, 86, 0.7);
+    g.fillStyle = '#232726';
+    G.circle(g, 73, 88, 1);
     g.fill();
-    g.strokeStyle = '#272b2d';
-    g.lineWidth = 0.8;
+    G.circle(g, 77, 88, 1);
+    g.fill();
+    g.strokeStyle = '#232726';
+    g.lineWidth = 1;
     g.beginPath();
-    g.arc(68, 87, 3, 0, Math.PI);
+    g.arc(75, 90, 3.5, 0.15, Math.PI - 0.15);
     g.stroke();
   }
   Object.assign(DM.LOOKS, {
     comedian: { name: 'The Comedian', skin: '#d4aa83', hair: '#363333', hairStyle: 'short',
-      body: '#252b2e', sleeve: '#353b3d', legs: '#21282a', collar: '#4c5050', trim: '#ae965e',
+      body: '#252b2e', sleeve: '#353b3d', size: 1.15, legs: '#21282a', collar: '#4c5050', trim: '#ae965e',
       moustache: true, bg: '#7f5944', color: S.AMBER, mask: leatherMask },
     summer_rioter: { name: 'A man from the avenue', skin: '#c49b79', hair: '#312d2b', hairStyle: 'short',
       body: '#a18b6e', sleeve: '#c49b79', legs: '#3b4e59', bg: '#6a6252', color: '#dbbd91' },
@@ -80,6 +154,11 @@
   DM.Audio.define('summer_vent', { gap: 0.5, fn(a) {
     a.noise({ dur: 1.8, gain: 0.027, ftype: 'lowpass', freq: 1200, freqEnd: 300, attack: 0.3 });
     a.tone({ freq: 85, freqEnd: 42, dur: 0.6, gain: 0.025, type: 'triangle' });
+  } });
+  DM.Audio.define('summer_aim', { gap: 0.4, fn(a) {
+    a.tone({ freq: 330, freqEnd: 440, dur: 0.22, gain: 0.025, type: 'triangle', attack: 0.02 });
+    a.tone({ freq: 440, dur: 0.3, gain: 0.018, type: 'triangle', delay: 0.24, attack: 0.02 });
+    a.noise({ dur: 0.08, gain: 0.012, ftype: 'highpass', freq: 2100, delay: 0.05 });
   } });
   DM.Audio.define('summer_shot', { gap: 0.15, fn(a) {
     a.noise({ dur: 0.12, gain: 0.045, ftype: 'bandpass', freq: 1200, q: 0.6, echo: 0.12 });
@@ -190,6 +269,43 @@
     g.lineWidth = 1;
     G.line(g, x + 25, y + 173, x + w - 24, y + 206);
   }
+  function shopDetail(g, wall) {
+    const x = wall.x;
+    const y = wall.y;
+    const width = wall.w;
+    const shutter = x > 400 && x < 870;
+    if (shutter) {
+      g.fillStyle = '#5f665e';
+      g.fillRect(x + 22, y + 165, width - 44, 56);
+      g.strokeStyle = '#29332e';
+      g.lineWidth = 2;
+      for (let yy = y + 168; yy < y + 220; yy += 6) G.line(g, x + 23, yy, x + width - 23, yy);
+      g.strokeStyle = '#b3ac8c';
+      G.line(g, x + 30, y + 175, x + width - 39, y + 190);
+    } else {
+      g.strokeStyle = '#b0bda6';
+      g.lineWidth = 1.4;
+      for (let xx = x + 45; xx < x + width - 30; xx += 87) {
+        G.line(g, xx, y + 168, xx + 19, y + 192);
+        G.line(g, xx + 19, y + 192, xx + 4, y + 217);
+        G.line(g, xx + 19, y + 192, xx + 38, y + 200);
+      }
+      g.fillStyle = '#8d6d49';
+      for (let xx = x + 36; xx < x + width - 28; xx += 55) g.fillRect(xx, y + 207, 29, 8);
+    }
+    if (x < 400 || x > 1200) {
+      g.fillStyle = '#68513e';
+      g.fillRect(x + 12, y + 148, width - 24, 22);
+      for (let xx = x + 16; xx < x + width - 20; xx += 30) {
+        g.fillStyle = '#ad956a';
+        g.fillRect(xx, y + 149, 14, 20);
+      }
+      g.strokeStyle = '#3e352b';
+      g.lineWidth = 3;
+      G.line(g, x + 12, y + 170, x + width - 12, y + 170);
+    }
+    escape(g, x + 40, y + 10, Math.min(130, width - 85));
+  }
   function escape(g, x, y, w) {
     g.strokeStyle = '#8b8980';
     g.lineWidth = 3;
@@ -222,6 +338,191 @@
     G.line(g, 30, -30, 30, 24);
     g.restore();
   }
+  const STREET_PROPS = [
+    { kind: 'car', x: 510, y: 510, angle: 0.22, burnt: true },
+    { kind: 'car', x: 1620, y: 970, angle: -0.15, burnt: true },
+    { kind: 'car', x: 240, y: 1080, angle: 0.04 },
+    { kind: 'overturned', x: 1060, y: 750, angle: -0.25 },
+    { kind: 'car', x: 1810, y: 480, angle: 0.18 },
+    { kind: 'car', x: 1320, y: 415, angle: -0.05 },
+    { kind: 'shelter', x: 765, y: 1100 },
+    { kind: 'news', x: 390, y: 945 },
+    { kind: 'news', x: 965, y: 450 },
+    { kind: 'news', x: 1430, y: 1135 },
+    { kind: 'bin', x: 375, y: 655, burning: true },
+    { kind: 'bin', x: 1190, y: 550, burning: true },
+    { kind: 'bin', x: 1770, y: 820, burning: true },
+    { kind: 'lamp', x: 315, y: 390 },
+    { kind: 'lamp', x: 910, y: 1070 },
+    { kind: 'lamp', x: 1810, y: 1110 },
+  ];
+  const TRUCK_PROPS = [
+    { kind: 'barricade', x: 290, y: 430 },
+    { kind: 'barricade', x: 640, y: 365 },
+    { kind: 'barricade', x: 1550, y: 375 },
+    { kind: 'barricade', x: 1750, y: 1240 },
+    { kind: 'car', x: 330, y: 610, angle: 1.3, burnt: true },
+    { kind: 'car', x: 1810, y: 580, angle: -0.4, burnt: true },
+    { kind: 'overturned', x: 1120, y: 1240, angle: -0.05 },
+    { kind: 'sandbags', x: 265, y: 915 },
+    { kind: 'sandbags', x: 1800, y: 975 },
+    { kind: 'sandbags', x: 1450, y: 1230 },
+    { kind: 'bin', x: 1630, y: 1135, burning: true },
+    { kind: 'lamp', x: 1750, y: 405 },
+  ];
+  function prop(g, item) {
+    const { x, y, kind } = item;
+    if (kind === 'car') {
+      car(g, x, y, item.angle || 0, item.burnt);
+      return;
+    }
+    g.save();
+    g.translate(x, y);
+    if (kind === 'overturned') {
+      g.rotate(item.angle || 0);
+      g.fillStyle = '#172022';
+      G.rr(g, -88, -40, 176, 83, 13);
+      g.fill();
+      g.fillStyle = '#59554a';
+      g.fillRect(-75, -34, 150, 68);
+      g.strokeStyle = '#978771';
+      g.lineWidth = 3;
+      G.line(g, -70, 0, 70, 0);
+      for (const xx of [-53, 53]) {
+        G.line(g, xx, -40, xx, 40);
+        for (const yy of [-37, 37]) {
+          g.fillStyle = '#171c1c';
+          G.rr(g, xx - 16, yy - 11, 32, 22, 5);
+          g.fill();
+          g.fillStyle = '#726e62';
+          g.fillRect(xx - 8, yy - 3, 16, 6);
+        }
+      }
+    } else if (kind === 'shelter') {
+      g.fillStyle = '#293435';
+      g.fillRect(-88, -40, 176, 75);
+      g.fillStyle = 'rgba(121,155,151,0.22)';
+      g.fillRect(-79, -34, 158, 55);
+      g.strokeStyle = '#a0a391';
+      g.lineWidth = 4;
+      g.strokeRect(-88, -40, 176, 75);
+      G.line(g, -26, -40, -26, 35);
+      G.line(g, 35, -40, 35, 35);
+      g.fillStyle = '#75634f';
+      g.fillRect(-65, 9, 115, 16);
+      g.strokeStyle = '#c0b5a0';
+      g.lineWidth = 1;
+      G.line(g, 55, -32, 39, -7);
+      G.line(g, 39, -7, 65, 12);
+      G.line(g, 39, -7, 23, 2);
+    } else if (kind === 'news') {
+      g.fillStyle = '#7e5144';
+      G.rr(g, -19, -30, 38, 61, 4);
+      g.fill();
+      g.fillStyle = '#cdc1a5';
+      g.fillRect(-13, -21, 26, 29);
+      g.fillStyle = '#514e43';
+      for (let yy = -17; yy < 7; yy += 5) g.fillRect(-9, yy, yy === -17 ? 19 : 14, 2);
+      g.fillStyle = '#292d2a';
+      g.fillRect(-13, 17, 26, 6);
+    } else if (kind === 'bin') {
+      g.fillStyle = '#3d5146';
+      G.ellipse(g, 0, 6, 25, 29);
+      g.fill();
+      g.strokeStyle = '#8a957a';
+      g.lineWidth = 2;
+      for (let xx = -17; xx <= 17; xx += 7) G.line(g, xx, -15, xx, 27);
+      g.fillStyle = '#141b1b';
+      G.ellipse(g, 0, -17, 25, 11);
+      g.fill();
+    } else if (kind === 'lamp') {
+      g.fillStyle = '#525b52';
+      G.ellipse(g, 0, 0, 14, 9);
+      g.fill();
+      g.strokeStyle = '#929684';
+      g.lineWidth = 5;
+      G.line(g, 0, 0, 0, -92);
+      G.line(g, 0, -92, 35, -92);
+      g.fillStyle = '#383f3a';
+      G.rr(g, 27, -98, 26, 14, 4);
+      g.fill();
+    } else if (kind === 'barricade') {
+      g.strokeStyle = '#796548';
+      g.lineWidth = 7;
+      for (const xx of [-55, 55]) {
+        G.line(g, xx - 13, 28, xx + 8, -18);
+        G.line(g, xx + 17, 28, xx - 8, -18);
+      }
+      g.fillStyle = '#b4a380';
+      g.fillRect(-80, -18, 160, 23);
+      g.save();
+      g.beginPath();
+      g.rect(-80, -18, 160, 23);
+      g.clip();
+      g.strokeStyle = '#433f32';
+      g.lineWidth = 15;
+      for (let xx = -85; xx < 100; xx += 34) G.line(g, xx, 8, xx + 26, -21);
+      g.restore();
+    } else if (kind === 'sandbags') {
+      for (let row = 0; row < 2; row++) {
+        for (let col = 0; col < 4; col++) {
+          g.fillStyle = row ? '#8a8060' : '#a0946f';
+          G.rr(g, -72 + col * 35 + row * 7, -14 + row * 22, 34, 23, 9);
+          g.fill();
+          g.strokeStyle = '#615d48';
+          g.lineWidth = 1;
+          g.stroke();
+        }
+      }
+    }
+    g.restore();
+  }
+  function streetDressing(g, arena) {
+    const items = arena ? TRUCK_PROPS : STREET_PROPS;
+    for (const item of items) prop(g, item);
+    const anchors = items.map(item => ({ x: item.x, y: item.y, r: item.kind === 'car' ? 85 : 55 }));
+    const random = U.seeded(arena ? 77113 : 77112);
+    // Deliberate broken-glass/newspaper clusters fill street-sized dead zones,
+    // not a uniform noise texture. They are flat so no rescue route is blocked.
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 8; col++) {
+        const x = 145 + col * 245 + (row % 2) * 35 + (random() - 0.5) * 90;
+        const y = 470 + row * 205 + (col % 3) * 21 + (random() - 0.5) * 80;
+        anchors.push({ x, y, r: 44 });
+        g.strokeStyle = 'rgba(12,17,18,0.6)';
+        g.lineWidth = 4;
+        G.line(g, x - 34, y + 13, x + 37, y - 9);
+        for (let n = 0; n < 6 + (col + row) % 8; n++) {
+          const xx = x + (random() - 0.5) * 85;
+          const yy = y + (random() - 0.5) * 55;
+          g.fillStyle = n % 3 ? '#727f77' : '#b3aa8b';
+          g.beginPath();
+          g.moveTo(xx, yy);
+          g.lineTo(xx + 4 + random() * 7, yy - 3);
+          g.lineTo(xx + 3, yy + 5 + random() * 4);
+          g.fill();
+        }
+        if ((row + col) % 3 === 0) {
+          g.fillStyle = '#424b44';
+          G.ellipse(g, x + 20, y + 7, 34, 18);
+          g.fill();
+          g.strokeStyle = '#92927b';
+          g.lineWidth = 1;
+          for (let yy = -10; yy <= 10; yy += 5) G.line(g, x - 5, y + 7 + yy, x + 44, y + 7 + yy);
+        }
+        g.fillStyle = '#a2987d';
+        g.save();
+        g.translate(x + 23, y + 4);
+        g.rotate(random());
+        g.fillRect(-13, -7, 20 + (row % 2) * 6, 10 + (col % 2) * 4);
+        g.fillStyle = '#4d5148';
+        for (let line = -4; line < 6; line += 4) g.fillRect(-9, line, 16, 1);
+        g.restore();
+      }
+    }
+    return anchors;
+  }
+  S.streetProps = { avenue: STREET_PROPS, truck: TRUCK_PROPS };
   function street(g, width, height, arena = false) {
     const random = U.seeded(arena ? 7719 : 7708);
     g.fillStyle = '#232c2c';
@@ -275,9 +576,7 @@
       g.lineWidth = 2;
       for (let dy = -14; dy <= 14; dy += 7) G.line(g, x - 24, y + dy, x + 24, y + dy);
     }
-    car(g, 510, 510, 0.22, true);
-    car(g, width - 430, height - 350, -0.15, true);
-    car(g, 240, height - 230, 0.05);
+    return streetDressing(g, arena);
   }
   function tenement(g, width, height) {
     const random = U.seeded(776);
@@ -337,11 +636,11 @@
       g.fillRect(931, y - 7, 8, 220);
     }
     g.fillStyle = '#5e7160';
-    g.fillRect(675, 1390, 290, 155);
+    g.fillRect(675, 1335, 290, 155);
     g.strokeStyle = '#a6c5ab';
     g.lineWidth = 3;
-    g.strokeRect(680, 1395, 280, 145);
-    G.text(g, 'TO THE STREET', 820, 1534, { size: 19, align: 'center', spacing: 3, color: '#cbd8ba' });
+    g.strokeRect(680, 1340, 280, 145);
+    G.text(g, 'TO THE STREET', 820, 1450, { size: 19, align: 'center', spacing: 3, color: '#cbd8ba' });
     for (const x of [570, 1065]) {
       g.fillStyle = '#917b59';
       G.rr(g, x, 1440, 110, 42, 8);
@@ -380,7 +679,10 @@
         }).slice(0, 16);
         for (const key of keys) {
           const p = e.point(key);
-          add(p.x, p.y, 155, { i: 0.63, color: '#ebaa63', k: 0.17 });
+          const steady = DM.SettingsSchema.reducedFlashing() || DM.Save.settings.fx === 'off';
+          const flicker = steady ? 1 : 0.94 + Math.sin(world.time * 3.7 + key * 1.6) * 0.045 +
+            Math.sin(world.time * 6.1 + key) * 0.015;
+          add(p.x, p.y, 270, { i: 0.88 * flicker, color: '#f5ad60', k: 0.36 });
         }
       }
       if (e.light) {
@@ -406,6 +708,7 @@
     world.wallStyles.summerBuilding = {
       draw(g, wall) {
         facade(g, wall.x, wall.y, wall.w, wall.buildingName, wall.warm);
+        shopDetail(g, wall);
       },
     };
     const names = arena ? ['EAST RIVER ARMOURY', '', '', 'NATIONAL GUARD'] : ['MERCER • GROCERY', '', 'ALVAREZ • ROOMS', ''];
@@ -416,8 +719,10 @@
   };
   S.installArt = function (ctx, type) {
     const w = ctx.world;
-    if (type === 'tenement') w.bake((g, width, height) => tenement(g, width, height));
-    else w.bake((g, width, height) => street(g, width, height, type === 'truck'));
+    if (type === 'tenement') w.bake((g, width, height) => tenement(g, width, w.playableHeight || height));
+    else w.bake((g, width, height) => {
+      w.summerDressing = street(g, width, w.playableHeight || height, type === 'truck');
+    });
     ctx.add(new Haze(ctx.flags.summer));
   };
   S.backdrop = function (g) {

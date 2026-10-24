@@ -176,7 +176,7 @@
         ['cannon', -40, 0, 140], ['wheel', -96, -83, 70], ['wheel', 65, -83, 70],
         ['wheel', -96, 83, 70], ['wheel', 65, 83, 70], ['cab', 153, 0, 30]
       ]) this.parts.push(world.add(new TruckPart(this, role, x, y, hp)));
-      this.cameraFrame = new K.BossFraming(this.ctx, this, { left: 235, right: 235, top: 235, bottom: 235 });
+      this.cameraFrame = new S.SummerBossFraming(this.ctx, this, { left: 235, right: 235, top: 235, bottom: 235 });
     }
     componentChanged() {
       const mechanics = this.parts.filter(p => p.role !== 'cab');
@@ -272,7 +272,7 @@
         const ax = this.x;
         const ay = this.y;
         this.x = U.clamp(this.x + Math.cos(this.lockAngle) * 270 * dt, 360, world.w - 360);
-        this.y = U.clamp(this.y + Math.sin(this.lockAngle) * 270 * dt, 360, world.h - 330);
+        this.y = U.clamp(this.y + Math.sin(this.lockAngle) * 270 * dt, 360, (world.playableHeight || world.h) - 330);
         if (this.hitT <= 0 && K.segmentDistance(p.x, p.y, ax, ay, this.x, this.y) < 125 + p.r) {
           p.damage(17, this, 'impact');
           p.impulse(Math.cos(this.lockAngle) * 950, Math.sin(this.lockAngle) * 950);

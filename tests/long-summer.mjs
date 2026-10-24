@@ -83,11 +83,12 @@ try {
             }
             E.frame(E.last + 1000 / 60);
             if (E.error) throw E.error;
+            if (this.observe) this.observe();
           }
         } finally {
           E.render = render;
         }
-        E.render();
+        if (!this.fast) E.render();
         if (E.error) throw E.error;
       },
       key(code, seconds = 0.05) {
@@ -100,7 +101,7 @@ try {
         for (let k = 0; k < 50 && this.p()?.dialog.active; k++) this.p().dialog.advance();
         this.step(0.1);
       },
-      start(stage = 0, carry = null) {
+      start(stage = 0, carry = null, vulnerable = false) {
         DM.Input.clearAll();
         this.aimPoint = null;
         DM.Engine.fade.dir = 0;
@@ -108,7 +109,7 @@ try {
         DM.Engine.set(new DM.Scenes.Play(), { chapter: 'long_summer', stage, carry });
         this.step(0.1);
         this.dialog();
-        this.p().player.godMode = true;
+        this.p().player.godMode = !vulnerable;
       },
       place(x, y) {
         this.p().ctx.place(x, y);
@@ -235,7 +236,7 @@ try {
     e.y = f.comedian.y;
     e.damage(100, p.player, 'impact');
     const spared = p.ctx.stats.spared;
-    T.step(8.5);
+    T.step(34);
     return e.casualty && f.comedianCasualties === 1 && p.ctx.stats.spared === spared - 1 && p.ctx.stats.disintegrated === 0;
   }));
   await page.evaluate(() => T.start());
@@ -370,7 +371,7 @@ try {
       e.vx = 0;
       e.vy = 0;
       T.grab(e);
-      T.aim(820, 1450);
+      T.aim(p.ctx.flags.summer.safePoint.x, p.ctx.flags.summer.safePoint.y);
       T.step(1.25);
       T.release();
       T.step(1.3);
@@ -456,8 +457,8 @@ try {
     const driver = T.p().ctx.flags.truck.driver;
     T.interact(driver);
     driver.x = 540;
-    driver.y = 1260;
-    T.place(540, 1200);
+    driver.y = T.p().ctx.flags.summer.safePoint.y + 60;
+    T.place(540, T.p().ctx.flags.summer.safePoint.y + 30);
     T.step(1.5);
   });
   check('guiding the driver to safe passage counts him as spared', await page.evaluate(() =>
@@ -555,6 +556,231 @@ try {
       JSON.stringify(DM.Bonus.data.completed[id]) === JSON.stringify(before.completed[id]) &&
       JSON.stringify(DM.Bonus.data.checkpoints[id]) === JSON.stringify(before.checkpoints[id]));
   }));
+  await page.evaluate(() => T.fast = true);
+  // Fairness reproductions use the real simulation, original spawns and normal damage.
+  const idleAvenue = await page.evaluate(() => {
+    T.start(0, null, true);
+    const p = T.p();
+    const f = p.ctx.flags;
+    let maximumHeat = f.heat;
+    let minimumHealth = p.player.coherence;
+    for (let i = 0; i < 300; i++) {
+      T.step(0.1);
+      maximumHeat = Math.max(maximumHeat, f.heat);
+      minimumHealth = Math.min(minimumHealth, p.player.coherence);
+      if (p.player.godMode || DM.Save.settings.invulnerable) throw new Error('Idle run invulnerable');
+    }
+    return { maximumHeat, minimumHealth, casualties: f.comedianCasualties, shots: f.comedian.shots,
+      elapsed: f.summer.elapsed, alive: !p.player.down };
+  });
+  console.log('Idle avenue, 30 seconds: ' + JSON.stringify(idleAvenue));
+  check('idle opening: 30 playable seconds, no Comedian casualty, Heat <=60, Jon alive without invulnerability',
+    idleAvenue.elapsed >= 30 && idleAvenue.casualties === 0 && idleAvenue.maximumHeat <= 60 && idleAvenue.alive);
+  check('no live fire during the protected opening', idleAvenue.shots === 0);
+
+  check('a real C lift during the >=2-second warning cancels the shot; distinct cue and bark exist', await page.evaluate(() => {
+    T.start();
+    const p = T.p();
+    const f = p.ctx.flags;
+    const e = f.rioters[0];
+    f.rioters.slice(1).forEach(r => { r.x = 1900; r.y = 450; });
+    e.x = f.comedian.x + 170;
+    e.y = f.comedian.y;
+    e.damage(100, p.player, 'impact');
+    T.step(30);
+    const warning = f.comedian.aimT;
+    const bark = p.world.barks.some(b => b.text === 'Comedian takes aim');
+    T.grab(f.comedian);
+    const cancelled = f.comedian.aimT === 0 && f.comedian.heldBy === p.player;
+    T.step(2.3);
+    T.release();
+    return warning >= 2 && bark && cancelled && f.comedian.shots === 0 && f.comedianCasualties === 0 &&
+      DM.Audio.has('summer_aim');
+  }));
+  check('the casualty limiter rejects a second Comedian victim within thirty seconds', await page.evaluate(() => {
+    T.start();
+    const f = T.p().ctx.flags;
+    const first = f.summer.casualty(f.rioters[0]);
+    const second = f.summer.casualty(f.rioters[1]);
+    return first && !second && !f.rioters[1].dead && f.comedianCasualties === 1;
+  }));
+  check('passive Heat is bounded at 1.5/s overall and fire at 0.5/s regardless of cell count', await page.evaluate(() => {
+    T.start(1);
+    const state = T.p().ctx.flags.summer;
+    state.shotHeat = 200;
+    let previous = state.passiveAdded;
+    let previousFire = state.fireHeatAdded;
+    for (let i = 0; i < 40; i++) {
+      T.step(1);
+      if (state.passiveAdded - previous > 1.50001 || state.fireHeatAdded - previousFire > 0.50001) return false;
+      previous = state.passiveAdded;
+      previousFire = state.fireHeatAdded;
+    }
+    return true;
+  }));
+  const idleTenement = await page.evaluate(() => {
+    T.start(1, null, true);
+    const p = T.p();
+    const grid = p.ctx.flags.summer.grid;
+    const initial = grid.active.size;
+    T.step(14.8);
+    const beforeFifteen = grid.active.size;
+    T.step(5.2);
+    return { initial, beforeFifteen, atTwenty: grid.active.size, time: grid.timer,
+      heat: p.ctx.flags.heat, alive: !p.player.down, invulnerable: p.player.godMode };
+  });
+  console.log('Idle tenement, 20 seconds: ' + JSON.stringify(idleTenement));
+  check('tenement: no spread before fifteen seconds, at most six burning cells at twenty',
+    idleTenement.beforeFifteen === idleTenement.initial && idleTenement.atTwenty <= 6 && idleTenement.time >= 20 &&
+    idleTenement.alive && !idleTenement.invulnerable);
+  check('cells mature for six seconds and spread beats are five seconds apart', await page.evaluate(() => {
+    const grid = T.p().ctx.flags.summer.grid;
+    const key = [...grid.active][0];
+    const now = grid.timer;
+    const early = grid.advance(new Set([key]), 0, now + 5.9, new Map([[key, now]]));
+    const mature = grid.advance(new Set([key]), 0, now + 6.1, new Map([[key, now]]));
+    const next = grid.nextSpread;
+    T.step(5);
+    return early.size === 1 && mature.size === 2 && Math.abs(grid.nextSpread - next - 5) < 0.01;
+  }));
+  check('extinguished cells retain scorch marks', await page.evaluate(() => {
+    const grid = T.p().ctx.flags.summer.grid;
+    const key = [...grid.active][0];
+    const q = grid.point(key);
+    grid.douse(q.x, q.y, 20);
+    return !grid.active.has(key) && grid.scorched.has(key);
+  }));
+
+  // The rescue route never places actors or changes health/energy. All escorts
+  // start at real room positions; WASD, C, G, E and R are the only interventions.
+  const rescue = await page.evaluate(() => {
+    T.start(1, null, true);
+    const p = T.p();
+    const f = p.ctx.flags;
+    let minHealth = p.player.coherence;
+    let frames = 0;
+    let hintClearance = Infinity;
+    T.observe = () => {
+      frames++;
+      if (p.player.godMode || DM.Save.settings.invulnerable) throw new Error('Rescue uses invulnerability');
+      if (p.player.down) throw new Error('Rescue lost Jon');
+      minHealth = Math.min(minHealth, p.player.coherence);
+      if (p.hud.hintMsg && p.hud.gameHudVisible()) {
+        const q = p.world.camera.toScreen(p.player.x, p.player.y);
+        hintClearance = Math.min(hintClearance, DM.H - 170 - q.y - (p.player.r + 20) * p.world.camera.zoom);
+      }
+    };
+    const walk = (x, y) => {
+      for (let i = 0; i < 350; i++) {
+        const dx = x - p.player.x;
+        const dy = y - p.player.y;
+        if (Math.hypot(dx, dy) < 12) break;
+        DM.Input.simulate('KeyA', dx < -7);
+        DM.Input.simulate('KeyD', dx > 7);
+        DM.Input.simulate('KeyW', dy < -7);
+        DM.Input.simulate('KeyS', dy > 7);
+        T.step(0.06);
+      }
+      for (const key of ['KeyA', 'KeyD', 'KeyW', 'KeyS']) DM.Input.simulate(key, false);
+      T.step(0.1);
+      if (Math.hypot(x - p.player.x, y - p.player.y) > 22) {
+        throw new Error('Rescue blocked: ' + JSON.stringify({ x, y, px: p.player.x, py: p.player.y }));
+      }
+    };
+    try {
+      walk(820, 1035);
+      T.aim(f.beam.x, f.beam.y);
+      DM.Input.simulate('KeyC', true);
+      T.step(0.25);
+      if (f.beam.heldBy !== p.player) throw new Error('Beam not grabbed');
+      T.aim(685, 1010);
+      T.step(0.7);
+      T.release();
+      walk(875, 1035);
+      walk(875, 220);
+      walk(820, 220);
+      T.key('KeyG');
+      T.step(0.7);
+      T.key('KeyE');
+      if (!f.summer.grid.vented) throw new Error('Vent not opened');
+      T.step(7.4);
+      for (const e of f.residents) {
+        const y = e.y;
+        walk(820, y);
+        walk(e.x < 820 ? e.x + 35 : e.x - 35, y);
+        T.key('KeyE');
+        if (!e.escort && !e.safe) throw new Error('Resident did not respond');
+        walk(820, y);
+        if (e.residentId === 3) T.key('KeyR');
+      }
+      walk(820, f.summer.safePoint.y);
+      for (let i = 0; i < 450 && f.rescued < 6; i++) T.step(0.1);
+      return { rescued: f.rescued, allSafe: f.residents.every(e => e.safe), minHealth, hintClearance,
+        inputFrames: frames, time: f.summer.elapsed, alive: !p.player.down };
+    } finally {
+      T.observe = null;
+      DM.Input.clearAll();
+    }
+  });
+  console.log('Vulnerable real-input rescue: ' + JSON.stringify(rescue));
+  check('six real-room escorts can succeed with normal damage, no relocation or health/energy cheats',
+    rescue.rescued === 6 && rescue.allSafe && rescue.alive && rescue.minHealth > 0 && rescue.inputFrames > 600);
+  check('Jon remains above the hint exclusion zone throughout the normal-damage rescue', rescue.hintClearance > 0);
+  check('all Summer maps reserve bottom margin, including live boss framing and H hint recall', await page.evaluate(() => {
+    for (let stage = 0; stage < 3; stage++) {
+      T.start(stage);
+      const p = T.p();
+      const h = p.world.playableHeight;
+      if (p.world.h - h < 300) return false;
+      for (const [x, y] of [[260, 420], [p.world.w - 280, 460], [280, h - 100], [p.world.w - 280, h - 100]]) {
+        // Geometry probes, not the live screenshot capture.
+        T.place(x, y);
+        T.key('KeyH');
+        T.step(0.15);
+        const q = p.world.camera.toScreen(p.player.x, p.player.y);
+        if (q.y + (p.player.r + 20) * p.world.camera.zoom >= DM.H - 170) return false;
+      }
+    }
+    return true;
+  }));
+  check('no 400px square of playable avenue lacks deliberate scenery/debris', await page.evaluate(() => {
+    T.start();
+    const anchors = T.p().world.summerDressing;
+    if (!anchors || anchors.length < 30) return false;
+    for (let y = 400; y <= 920; y += 25) {
+      for (let x = 60; x <= 1590; x += 25) {
+        if (!anchors.some(a => a.x + a.r >= x && a.x - a.r <= x + 400 &&
+          a.y + a.r >= y && a.y - a.r <= y + 400)) return false;
+      }
+    }
+    return true;
+  }));
+  check('hostile rioters have independent steady spill light', await page.evaluate(() => {
+    const light = T.p().ctx.flags.rioters[0].light();
+    return light.i >= 0.5 && light.r >= 70;
+  }));
+  check('warm fire lights remain strong and perfectly steady with reduced flashing', await page.evaluate(() => {
+    const w = T.p().world;
+    const profile = DM.Atmosphere.get(w.mapId);
+    const old = DM.Save.settings.flashing;
+    const time = w.time;
+    DM.Save.settings.flashing = 'reduced';
+    const collect = () => {
+      const result = [];
+      profile.light.lights(w, (x, y, r, o) => {
+        if (o.color === '#f5ad60') result.push({ x, y, r, i: o.i });
+      });
+      return result;
+    };
+    const first = collect();
+    w.time += 1.9;
+    const second = collect();
+    w.time = time;
+    DM.Save.settings.flashing = old;
+    return first.length === T.p().ctx.flags.summer.grid.active.size && first.every(l => l.r >= 260 && l.i >= 0.85) &&
+      JSON.stringify(first) === JSON.stringify(second);
+  }));
+  await page.evaluate(() => { T.fast = false; DM.Engine.render(); });
   check('all new sounds and dedicated ambience are registered', await page.evaluate(() =>
     ['summer_water', 'summer_gas', 'summer_ram', 'summer_safe', 'summer_crowd', 'summer_siren'].every(n => DM.Audio.has(n)) &&
     ['summer_avenue', 'summer_tenement', 'summer_truck'].every(id => DM.Ambience.maps[id].bed.startsWith('summer_'))));
