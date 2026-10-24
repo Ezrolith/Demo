@@ -1,8 +1,9 @@
 # Virtual gameplay audit — 24 October 2026
 
 ## Scope and safeguards
-Branch `codex/bonus-three`, draft PR #4. Only the truck component targeting logic,
-its regression suite and rebuilt standalone game were changed. No merge or deployment;
+Branch `codex/bonus-three`, draft PR #4. Changed the truck targeting logic,
+avenue crowd-resolution gate, rescue exit wording, their regression coverage and
+rebuilt standalone game. No merge or deployment;
 all original campaign and other bonus chapters are unchanged.
 
 This is an **independent gameplay check**, not a claim of a complete human playthrough.
@@ -16,8 +17,10 @@ damage immunity or level-skipping commands were used during those journeys.
 - Long Summer (Story and Normal): from the original avenue spawn, aim and hold C
   on the Comedian, cross the avenue by walking along the frontage, call Nite Owl
   using E, wait for his grapple, enter the tenement, walk through a room doorway
-  and ask a resident to follow with E. The Normal route entered the tenement
-  and activated a genuine escort without a developer shortcut.
+  and ask a resident to follow with E. The Normal route entered the tenement and activated a genuine escort without
+  a developer shortcut *before* the separate crowd-resolution requirement was
+  added. The later gate has automated coverage; a full human re-play of it is
+  still recommended.
 - Long Summer truck (Normal): walk from the original spawn toward the moving
   vehicle; aim and press Q repeatedly at individual teal parts while the
   machine attacks, turns and enters phase two.
@@ -40,6 +43,22 @@ The same manual Q sequence after the fix left the driver alive.
 New automated regression in `tests/long-summer.mjs` checks a wheel-centred
 cast when the cab enters the explosion radius, and separately confirms that
 deliberately aiming at the cab still causes exactly one fatality.
+
+## Second issue: bypassing the riot without resolving it
+During initial movement and interaction tests, Jon could use a hydrant and
+restrain the Comedian to lower Heat, then leave the avenue while its rioters
+were still fighting. The exit now requires **Heat below 40 and at least two
+rioters stopped** (knocked out or otherwise resolved) as well as Nite Owl's
+grapple. The in-game objective displays "Rioters settled / 2" and explains
+what is missing. Additional source tests cover the no-bypass requirement.
+The tenement street exit and its SAFE PASSAGE caption were also clarified
+so approaching the marker does not imply all residents are already rescued.
+
+## Feedback readability
+A first attempt used a long global HUD toast when a wheel-centred blast hit the
+cab. Real-input visual replay revealed it covering the Heat display. The
+final version instead gives a short local speech bubble from the cab:
+"Someone is inside." A focused assertion checks this.
 
 ## Verification boundary
 The offline local harness passed **42 Last Broadcast**, **75 Ninth Minute**
