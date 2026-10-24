@@ -79,7 +79,7 @@
     }]
   };
   for (const id of ['ninth_platform', 'ninth_train', 'ninth_engine']) DM.Ambience.maps[id] = {
-    bed:'sanctum', surface:'concrete'
+    bed:'ninth_tunnel', surface:'concrete'
   };
   Object.assign(DM.Ambience.cues, {
     'ninth_minute.platform':'ninth_platform', 'ninth_minute.rescue':'ninth_pendulum',
@@ -151,7 +151,7 @@
   function lights(w, add) {
     for(const e of w.entities) if(!e.dead&&e.light){
       const l=e.light(w);
-      if(l)add(e.x, e.y, l.r||180, l);
+      if(l)add(l.x == null ? e.x : l.x, l.y == null ? e.y : l.y, l.r||180, l);
     }
     const stations=w.mapId==='ninth_platform'?[[290, 300], [650, 950], [1070, 300], [1490, 950], [1680,
     300]]:
@@ -207,7 +207,7 @@
     renderEmissive(g, w){
       if((this.ctx.flags.moments||0)&this.bit)return;
       circle(g, this.x, this.y, 22, GOLD, 1);
-      if(U.dist(this.x, this.y, w.player.x, w.player.y)<280)plate(g, w.timesight?'E · LISTEN':'HOLD F · A LOST MOMENT',
+      if(U.dist(this.x, this.y, w.player.x, w.player.y)<85)plate(g, w.timesight?'E · LISTEN':'HOLD F · A LOST MOMENT',
       this.x, this.y-38, GOLD, 12);
     }
   }
@@ -287,14 +287,13 @@
       if(!w.lit)this.renderEmissive(g, w);
     }
     renderEmissive(g, w){
-      if(!w.boss&&U.dist(this.x, this.y, w.player.x, w.player.y)<240)plate(g, this.ctx.flags.activeDoor?'LAURIE · OPENING THE DOOR':'SILK SPECTRE',
-      this.x, this.y-34, GOLD, 11);
+
     }
   }
   function cast(ctx, x, y){
     const owl = ctx.add(new Companion(x - 65,  y + 40,  'niteowl',  {
       holdPosition: () => !!ctx.flags.operators,
-      showName: world => !world.boss,
+      showName: () => false,
     }));
     ctx.flags.owl=owl;
     ctx.flags.laurie=ctx.add(new SilkSpectre(ctx, x+65, y+45));
@@ -415,19 +414,25 @@
       this.offset=offset;
       this.r=Math.hypot(width, height)/2;
       this.hazard=true;
-      this.phase=0;
+      this._phase=0;
       this.hit=-1;
       this.enabled=true;
     }
+    get phase() {
+      return this.world ? this.world.cycleT : this._phase;
+    }
+    set phase(value) {
+      if (this.world) this.world.cycleT = value;
+      else this._phase = value;
+    }
     update(dt, w){
       if(w.ceasefire||!this.enabled)return;
-      this.phase+=dt;
       const t=(this.phase+this.offset)%9;
-      if(t>=6.9&&t<7.9&&this.hit!==Math.floor((this.phase+this.offset)/9)){
+      if(t>=6.9&&t<7.9&&this.hit!==w.cycleNumber){
         const p=w.player;
         if(Math.abs(p.x-this.x)<this.width/2+p.r&&Math.abs(p.y-this.y)<this.height/2+p.r){
           p.damage(12, this, 'time arc');
-          this.hit=Math.floor((this.phase+this.offset)/9);
+          this.hit=w.cycleNumber;
         }
       }
     }
@@ -445,8 +450,7 @@
       g.setLineDash(t<6.9?[8, 7]:[]);
       g.strokeRect(this.x-this.width/2, this.y-this.height/2, this.width, this.height);
       g.setLineDash([]);
-      if(U.dist(this.x, this.y, w.player.x, w.player.y)<420)plate(g, t<6.9?'RAIL ARC · MOVE CLEAR':'LIVE FIELD',
-      this.x, this.y-this.height/2-10, t<6.9?GOLD:BLUE, 12);
+
     }
   }
   class RouteSwitch extends Terminal {
@@ -462,7 +466,7 @@
     renderEmissive(g, w){
       super.renderEmissive(g, w);
       const n=this.ctx.flags.route||0;
-      plate(g, ['LOOP ↻', 'SERVICE →', 'EXPRESS ↑'][n], this.x, this.y+47, n===1?TEAL:GOLD, 15);
+
       for(let i=0;
       i<3;
       i++){
@@ -480,10 +484,11 @@
       x:250, y:1020
     };
     floor(w, 1977);
+    ctx.flags.stationCycle = DM.NinthAtmosphere.decorate(ctx, 'platform');
     w.decals.push(g=>{
       track(g, 99, 500, 1762);
-      clock(g, 970, 335, 68, w.time, false);
-      G.text(g, 'HARROW STREET', 980, 209, {
+      clock(g, 970, 335, 68, w.cycleT, false);
+      G.text(g, '', 980, 209, {
         size:31, align:'center', spacing:7, color:'#263a36', weight:700
       });
       for(const [x, y]of[[320, 870], [1370, 870], [510, 350]]){
@@ -520,8 +525,8 @@
     196, 4))];
     cast(ctx, 270, 1000);
     ctx.flags.platformFoes=drones(ctx, [[660, 1000], [1050, 810], [1470, 750], [1580, 360], [1200, 330]]);
-    ctx.add(new Sign(290, 1140, '↑ FROM THE STREET', GOLD, 14));
-    ctx.add(new Sign(1690, 850, 'SIGNAL BOX', TEAL, 16));
+
+
     ctx.flags.switch=ctx.add(new RouteSwitch(ctx, 1690, 955));
     ctx.add(new LostMoment(ctx, 455, 350, 1, 'A man on this bench is remembering the number of his first apartment. He has forgotten that he remembers it. In a moment, he will stand up. Again.'));
     const e=ctx.add(new Terminal(1730, 330, 'E · ENTER THE SERVICE TUNNEL', ()=>{
@@ -531,21 +536,7 @@
       ctx.flags.enterTrain=true;
     }));
     ctx.flags.exit=e;
-    // A station clock and three walking ghosts visibly repeat on nine-second cycles.
-    w.overlays.push(g=>{
-      clock(g, 970, 335, 68, Math.min(w.time%9, 8), false);
-      for(let i=0;
-      i<3;
-      i++){
-        g.save();
-        g.globalAlpha=w.timesight?.55:.12;
-        G.figure(g, Object.assign({
-        }, DM.LOOKS.commuter, {
-          x:740+i*130+(w.time%9)*13, y:790, angle:0, moving:true, walk:w.time*6
-        }));
-        g.restore();
-      }
-    });
+    ctx.add(new Sign(1730, 270, 'SERVICE →', TEAL, 14));
     return w;
   }
   class Evacuee extends DM.NPC {
@@ -632,8 +623,6 @@
     }
     renderEmissive(g, w){
       const col=this.open?TEAL:this.blocked?RED:GOLD;
-      plate(g, this.open?'OPEN · EVACUATING':this.working?(this.blocked?'CLEAR NEARBY DRONES':'LAURIE · OPENING'):`E · CARRIAGE ${this.index+1}`,
-      this.x, this.y+55, col, 12);
       if(this.working){
         g.fillStyle='#14252b';
         g.fillRect(this.x-48, this.y+67, 96, 6);
@@ -703,13 +692,14 @@
       x:240, y:1135
     };
     floor(w, 907);
+    ctx.flags.stationCycle = DM.NinthAtmosphere.decorate(ctx, 'train');
     ctx.flags.passengers=0;
     ctx.flags.opened=0;
     ctx.flags.activeDoor=null;
     cast(ctx, 275, 1110);
     w.decals.push(g=>{
       track(g, 100, 516, 2140);
-      G.text(g, 'HARROW / SERVICE LINE', 1170, 211, {
+      G.text(g, '', 1170, 211, {
         size:27, align:'center', spacing:6, color:'#263c37', weight:700
       });
       g.strokeStyle='#a49d71';
@@ -750,7 +740,7 @@
     for(const x of [570, 1140, 1730])column(ctx, x, 350);
     ctx.flags.rescueFoes=drones(ctx, [[740, 1060], [1300, 920], [1850, 1040]]);
     ctx.add(new Sign(240, 1250, '← EXIT TO THE STREET', TEAL, 16));
-    ctx.add(new Sign(1160, 310, 'THE SAME TRAIN. THE SAME NINE SECONDS.', GOLD, 18));
+
     ctx.add(new LostMoment(ctx, 2070, 365, 2, 'A girl counts the lamps outside the window. Eight. Nine. Eight. Nine. She has not reached ten for forty-three minutes.'));
     ctx.add(new Terminal(2120, 1140, 'E · ENTER THE CLOCK CHAMBER', ()=>{
       if(ctx.flags.passengers!==6)return ctx.toast('SIX PASSENGERS MUST REACH THE STAIRS FIRST', GOLD);
@@ -986,7 +976,9 @@
       g.arc(this.x, this.y, 132, -Math.PI/2, -Math.PI/2+Math.PI*2*this.charge/4);
       g.stroke();
       g.restore();
-      plate(g, `HOLD F HERE · ${Math.round(this.charge/4*100)}%`, this.x, this.y+161, TEAL, 15);
+      if (DM.BonusKit.withinRange(w, this, 150)) {
+        plate(g, `HOLD F · ${Math.round(this.charge / 4 * 100)}%`, this.x, this.y + 161, TEAL, 15);
+      }
     }
   }
   function engine(ctx){
@@ -997,6 +989,7 @@
       x:370, y:1170
     };
     floor(w, 9009, false);
+    ctx.flags.stationCycle = DM.NinthAtmosphere.decorate(ctx, 'engine');
     w.decals.push(g=>{
       g.fillStyle='#273e3f';
       G.circle(g, 950, 700, 490);

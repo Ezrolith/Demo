@@ -171,6 +171,88 @@ try {
   check('every new direct sound call has an existing audio recipe',recipeCheck);
   await page.evaluate(async()=>{await DM.Audio.unlock();DM.Audio.music.play('ninth_platform');T.step(.2);DM.Audio.music.play('ninth_pendulum');T.step(.2);DM.Audio.music.play('ninth_dawn');T.step(.2);});
   check('all three additive music arrangements start without errors',errors.length===0&&await page.evaluate(()=>!DM.Engine.error&&!DM.AudioDirector.lastError));
+  // The visual train, hazard clock and sounds share a single nine-second source.
+  const cycleEvidence = await page.evaluate(() => {
+    T.start(0);
+    T.dialog();
+    const play = T.play();
+    play.player.godMode = true;
+    const world = play.world;
+    const cycle = world.stationCycle;
+    DM.Input.clearAll();
+    world.cycleT = 0;
+    world.cycleNumber = 0;
+    world.timeScale = 1;
+    cycle.started = false;
+    cycle.crossings = { arrive: 0, chime: 0, depart: 0, rewind: 0 };
+    const calls = [];
+    const original = DM.Audio.play;
+    DM.Audio.play = function (name, options) {
+      if (name.startsWith('ninth_')) calls.push({ name, cycle: world.cycleNumber });
+      return original.call(this, name, options);
+    };
+    const poses = [];
+    try {
+      T.step(0.1);
+      poses.push({ x: cycle.trainX, doors: cycle.doorOpen });
+      T.step(3);
+      poses.push({ x: cycle.trainX, doors: cycle.doorOpen });
+      T.step(4.2);
+      poses.push({ x: cycle.trainX, doors: cycle.doorOpen });
+      T.step(19.9);
+    } finally {
+      DM.Audio.play = original;
+    }
+    const cycleCounts = [0, 1, 2].map(number => {
+      const events = calls.filter(call => call.cycle === number);
+      return ['arrive', 'chime', 'depart', 'rewind'].map(name =>
+        events.filter(event => event.name === 'ninth_' + name).length);
+    });
+    const light = cycle.light(world);
+    return {
+      cycleCounts, poses, announcements: calls.filter(call => call.name === 'ninth_announcement').length,
+      cycleT: world.cycleT, phase: play.ctx.flags.arcs[0].phase,
+      movingLight: Number.isFinite(light.x) && light.cone === 0,
+      ambience: DM.Ambience.maps[world.mapId].bed,
+    };
+  });
+  check('train sounds arrive, chime, depart and rewind exactly once in each complete cycle',
+    cycleEvidence.cycleCounts.every(counts => counts.every(count => count === 1)));
+  check('train enters, opens its doors at the stop, closes and leaves again',
+    cycleEvidence.poses[0].x < 0 && cycleEvidence.poses[1].x === 390 &&
+    cycleEvidence.poses[1].doors === 1 && cycleEvidence.poses[2].x > 390 && cycleEvidence.poses[2].doors === 0);
+  check('station clock, train and rail hazards use the same cycleT',
+    Math.abs(cycleEvidence.cycleT - cycleEvidence.phase) < 0.001);
+  check('train has a moving cone headlight and its own tunnel ambience',
+    cycleEvidence.movingLight && cycleEvidence.ambience === 'ninth_tunnel');
+  check('muffled announcement is sparse rather than playing every cycle', cycleEvidence.announcements === 1);
+  const maps = await page.evaluate(() => [0, 1, 2].map(stage => {
+    T.start(stage);
+    T.dialog();
+    const world = T.play().world;
+    return {
+      labels: world.entities.filter(entity => entity.sceneryLabel && entity.text).length,
+      hasClock: !!world.stationCycle,
+      bed: DM.Ambience.maps[world.mapId].bed,
+    };
+  }));
+  check('each Ninth Minute map uses the tunnel bed, shared clock and fewer than four scenery labels',
+    maps.every(map => map.labels < 4 && map.hasClock && map.bed === 'ninth_tunnel'));
+  const slowed = await page.evaluate(() => {
+    T.start(0);
+    T.dialog();
+    T.play().player.godMode = true;
+    const world = T.play().world;
+    world.cycleT = 0;
+    T.play().player.energy = 100;
+    DM.Input.simulate('KeyF', true);
+    T.step(1);
+    const value = { cycle: world.cycleT, sight: world.timesight, pitch: DM.Audio.timeScale };
+    DM.Input.clearAll();
+    return value;
+  });
+  check('Temporal Sight slows the train clock and the existing SFX pitch bus together',
+    slowed.sight && slowed.cycle < 0.6 && slowed.pitch < 0.8);
   // Every original campaign checkpoint still constructs cleanly. This is a smoke
   // check, not an unassisted campaign playthrough or all nine legacy test suites.
   const cps=await page.evaluate(()=>DM.Chapters.list.flatMap(ch=>ch.stages.map((s,i)=>s.checkpoint?[ch.id,i]:null).filter(Boolean)));
