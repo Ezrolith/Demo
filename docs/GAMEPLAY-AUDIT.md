@@ -98,3 +98,26 @@ The earlier cab-centred disintegration correction is preserved separately.
 
 Unverified: full first-time end-to-end playthrough, subjective sound quality,
 Safari/Firefox and any gameplay balance effects beyond these reproducible routes.
+
+
+### Menu, failure and retry (real physical inputs)
+
+The title's **BONUS LEVELS** entry was activated with a mouse click, the first
+bonus card was selected by clicking its visible rectangle, and Enter opened the
+correct interlude. A separate Long Summer run used Escape to pause, Escape to
+resume, and ordinary teleports into a hostile cluster to test actual damage.
+Jon ran out of coherence, the REASSEMBLE screen appeared, and pressing Enter
+restored the avenue at its initial checkpoint with full coherence and Heat 46,
+without an engine/page error. This is a deliberately failed combat encounter,
+not an endorsement of standing idle in the middle of a riot.
+
+The truck was approached from its original stage spawn using held WASD keys;
+mouse-targeted Q attacks struck mechanical parts without modifying actors or
+player invulnerability. The cab-splash regression identified above comes from
+a more aggressive sequence as the vehicle turns. The source and standalone
+acceptance checks verify intentional and incidental cab targeting separately.
+
+The targeted local builds were tested with Chromium scripts inlined only
+because local browser navigation is blocked. The authoritative combined build
+has also been validated via the GitHub normal-file publisher, with the full
+read-only regression workflow providing the complete original-suite result.
