@@ -18315,7 +18315,11 @@
     disintegrate(world, source) {
       if (this.role === 'cab' && (!this.cabTargeted ||
         (world.realTime || 0) - this.cabCastTime > 0.35)) {
-        this.truck.ctx.toast('THE CAB CONTAINS A PERSON · AIM DIRECTLY TO UNMAKE', S.AMBER);
+        const now = world.realTime || 0;
+        if (this.lastCabWarning == null || now - this.lastCabWarning > 1.8) {
+          world.bark(this, 'Someone is inside.');
+          this.lastCabWarning = now;
+        }
         return;
       }
       super.disintegrate(world, source);
@@ -23672,8 +23676,13 @@
         DM.Audio.play('summer_metal');
       });
     }, () => !ctx.flags.grappleOpen));
+    // Heat alone can be reduced with one hydrant. Require a real change in
+    // the crowd before Jon can declare the avenue safe and leave it behind.
+    const crowdSettled = () => ctx.flags.rioters.filter(e => e.ko || e.dead).length;
+    ctx.flags.crowdSettled = crowdSettled;
     ctx.flags.exit = ctx.add(new K.Terminal(1765, 360, 'Enter the tenement', () => {
       if (state.heat >= 40) ctx.toast('THE STREET IS STILL ON EDGE · LOWER CITY HEAT', S.AMBER);
+      else if (crowdSettled() < 2) ctx.toast('HELP TWO RIOTERS STOP FIGHTING OR LEAVE', S.AMBER);
       else if (!ctx.flags.grappleOpen) ctx.toast('DAN CAN OPEN THE BALCONY ROUTE', S.AMBER);
       else ctx.flags.avenueExit = true;
     }));
@@ -23726,10 +23735,11 @@
     }
     ctx.flags.looter = ctx.add(new S.Rioter(state, 1170, 960));
     ctx.flags.looter.exitPoint = state.safePoint;
-    ctx.flags.exit = ctx.add(new K.Terminal(820, 1460, 'Leave for the armoury', () => {
+    // Keep the next-mission prompt outside the residents' glowing safe zone.
+    ctx.flags.exit = ctx.add(new K.Terminal(994, 1410, 'Leave for the armoury', () => {
       if (ctx.flags.rescued < 6) ctx.toast('SIX RESIDENTS MUST REACH THE STREET', S.AMBER);
       else ctx.flags.tenementExit = true;
-    }));
+    }, () => ctx.flags.rescued >= 6));
     return w;
   }
 
@@ -23871,12 +23881,13 @@
             ['niteowl', 'Jon, those are live rounds. He raises his gun before firing. Lift him while he aims. ' +
               'A quick hold takes his gun away for ten seconds.'],
             ['manhattan', 'I was told to help the people here. I do not see an exception for the angry ones.'],
-            ['niteowl', 'Spare them and the street calms down. Rip the red hydrants free to put out fires. ' +
-              'Catch the bottles and drop them in the water. I can grapple to the balcony when you call me.'],
+            ['niteowl', 'Make sure at least two rioters have stopped fighting or gone home. Spare them if you can. ' +
+              'Rip the red hydrants free; catch the bottles and drop them in the water. ' +
+              'I can grapple to the balcony when you call me.'],
           ]);
           ready(ctx);
           ctx.objective('Calm the avenue · Reach the tenement', () =>
-            `Heat ${Math.round(ctx.flags.heat)} / 100 · must be below 40`);
+            `Heat ${Math.round(ctx.flags.heat)} / 100 (below 40) · Rioters settled ${Math.min(2, ctx.flags.crowdSettled())} / 2`);
           ctx.marker(1510, 420, 'BALCONY ROUTE');
           ctx.tutorial('Hold C on the Comedian to disarm him. Spare rioters. Lift red hydrants. E calls Dan.', 16);
           yield ctx.until(() => ctx.flags.avenueExit);
