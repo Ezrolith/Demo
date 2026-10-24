@@ -1,9 +1,16 @@
-name: Bonus polish regression
+name: Bonus adventures regression
 on:
+  push:
+    branches: [codex/bonus-three]
+    paths: ['src/**', 'tests/**', 'index.html', 'package.json', 'tools/build.mjs', 'dist/**']
   pull_request:
-    branches: [chatgpt/bonus-adventures]
+    branches: [codex/bonus-polish]
+    types: [opened, reopened, ready_for_review]
 permissions:
   contents: read
+concurrency:
+  group: long-summer-tests-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   regression:
     runs-on: ubuntu-latest
@@ -11,24 +18,25 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Syntax and standalone build
+      - name: Syntax and checked-in build consistency
         run: |
           find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
           node tools/build.mjs
+          git diff --exit-code -- dist/dr-manhattan.html
       - run: npm install --ignore-scripts
       - run: npx playwright install --with-deps chromium
-      - name: Eleven suites, sequentially, with one retry on failure
+      - name: Twelve source suites sequentially; preserve exits and any retry
         shell: bash
         run: |
           mkdir -p tests/out/regression
           git rev-parse HEAD > tests/out/regression/commit.txt
           failed=0
-          for suite in smoke visual audio powers saves settings ledger encounters flows bonus ninth-minute; do
+          for suite in smoke visual audio powers saves settings ledger encounters flows bonus ninth-minute long-summer; do
             for attempt in 1 2; do
               set +e
               node "tests/$suite.mjs" > "tests/out/regression/$suite-$attempt.log" 2>&1
@@ -41,13 +49,13 @@ jobs:
             if [ "$result" -ne 0 ]; then failed=1; fi
           done
           exit "$failed"
-      - name: Standalone adventures
+      - name: All three standalone adventures
         if: always()
         shell: bash
         run: |
-          failed=0
           mkdir -p tests/out/regression
-          for suite in bonus ninth-minute; do
+          failed=0
+          for suite in bonus ninth-minute long-summer; do
             set +e
             node "tests/$suite.mjs" dist/dr-manhattan.html > "tests/out/regression/dist-$suite.log" 2>&1
             result=$?
@@ -60,6 +68,6 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: polish-tests-${{ github.event.pull_request.head.sha }}
+          name: bonus-tests-${{ github.sha }}
           path: tests/out/
           retention-days: 14
