@@ -253,6 +253,76 @@ try {
   });
   check('Temporal Sight slows the train clock and the existing SFX pitch bus together',
     slowed.sight && slowed.cycle < 0.6 && slowed.pitch < 0.8);
+  const armEvidence = await page.evaluate(() => {
+    T.start(2);
+    T.dialog();
+    const play = T.play();
+    const world = play.world;
+    const boss = play.ctx.flags.pendulum;
+    for (const enemy of play.ctx.flags.engineFoes) enemy.dead = true;
+    const p = play.player;
+    p.godMode = false;
+    p.invuln = 0;
+    p.coherence = 100;
+    p.locked = false;
+    boss.cycle = 2.2;
+    boss.previousCycle = 2.2;
+    boss.fired = true;
+    boss.pulsed = true;
+    const a = boss.armAngle(2.2);
+    const target = { x: boss.x + Math.cos(a) * 235, y: boss.y + Math.sin(a) * 235, r: p.r };
+    const outside = { x: boss.x - Math.sin(a) * 235, y: boss.y + Math.cos(a) * 235, r: p.r };
+    const geometry = boss.armTouches(target, 2.18, 2.2) && !boss.armTouches(outside, 2.18, 2.2);
+    p.x = target.x;
+    p.y = target.y;
+    T.step(0.05);
+    const hit = p.coherence < 100 && boss.armHits > 0;
+    p.x = outside.x;
+    p.y = outside.y;
+    p.coherence = 100;
+    p.invuln = 0;
+    T.step(0.05);
+    return { geometry, hit, missed: p.coherence === 100 };
+  });
+  check('the swept pendulum capsule includes the shaft, not the whole warning arc', armEvidence.geometry);
+  check('physical arm damages Jon on contact and not outside the metal', armEvidence.hit && armEvidence.missed);
+  const frameEvidence = await page.evaluate(() => {
+    const play = T.play();
+    const boss = play.ctx.flags.pendulum;
+    play.player.godMode = true;
+    const samples = [];
+    for (const [x, y] of [[160, 240], [1730, 240], [160, 1300], [1730, 1300], [950, 1100], [950, 400]]) {
+      T.place(x, y);
+      T.step(0.3);
+      const camera = play.world.camera;
+      samples.push(boss.cameraFrame.projectionSafe(camera.zoom, camera.x, camera.y));
+    }
+    return samples;
+  });
+  check('boss and complete swinging arms remain below the HUD at every tested arena corner', frameEvidence.every(Boolean));
+  const phaseEvidence = await page.evaluate(() => {
+    const play = T.play();
+    const boss = play.ctx.flags.pendulum;
+    boss.exposed = 3;
+    boss.damage(430, play.player, 'test');
+    T.step(0.05);
+    const split = boss.phase === 2 && boss.armAngle(2.1, 0) !== boss.armAngle(2.1, 1);
+    const music = DM.Audio.music.wanted === 'ninth_fracture' || DM.Audio.music.queued === 'ninth_fracture';
+    T.step(0.4);
+    boss.exposed = 3;
+    T.step(0.3);
+    const shutterOpen = boss.shutter > 0.8;
+    boss.damage(1000, play.player, 'test');
+    T.step(0.05);
+    return {
+      split, music, shutterOpen,
+      restored: !boss.cameraFrame.active && play.ctx.camTarget === null &&
+        play.world.camera.targetZoom === play.world.baseZoom,
+    };
+  });
+  check('half-health transition splits the arm and switches to the deeper arrangement', phaseEvidence.split && phaseEvidence.music);
+  check('the core visibly opens its brass shutters rather than relying on a text plate', phaseEvidence.shutterOpen);
+  check('defeating the Pendulum releases its camera framing and restores normal zoom', phaseEvidence.restored);
   // Every original campaign checkpoint still constructs cleanly. This is a smoke
   // check, not an unassisted campaign playthrough or all nine legacy test suites.
   const cps=await page.evaluate(()=>DM.Chapters.list.flatMap(ch=>ch.stages.map((s,i)=>s.checkpoint?[ch.id,i]:null).filter(Boolean)));
