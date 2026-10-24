@@ -10,7 +10,7 @@ Desktop keyboard and mouse/trackpad are required. WASD/arrows move; mouse aims; 
 
 ## Blackout Avenue
 
-Bring CITY HEAT below 40, use E at the balcony to call Nite Owl, then enter the building. At Heat 70 or above, bounded reinforcements arrive; below 30, unengaged rioters can leave peacefully. Sparing people, water, rescues and restraint lower Heat.
+Bring CITY HEAT below 40 **and** settle at least two of the original rioters (nonlethal knockouts or peaceful departures). Opening a hydrant alone will not clear the mission. Then use E at the balcony to call Nite Owl and enter the building. At Heat 70 or above, bounded reinforcements arrive; below 30, unengaged rioters can leave peacefully. Sparing people, water, rescues and restraint lower Heat.
 
 The Comedian cannot start aiming during the first thirty playable world seconds of a stage. After that, a raised gun, emissive aim line, “Comedian takes aim” bark and two-tone cue give 2.2 seconds of warning. Lift him with C to cancel the shot. Releasing him leaves him disarmed for ten seconds. He can cause at most one casualty per thirty seconds. Repeated grabs while already disarmed do not farm Heat reductions. Temporal Sight slows these world-time timers.
 
