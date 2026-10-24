@@ -1,0 +1,119 @@
+name: Long Summer independent-review fixes
+on:
+  push:
+    branches: [codex/bonus-three]
+    paths: [.github/workflows/apply-summer-review.yml]
+permissions:
+  contents: write
+concurrency:
+  group: summer-review-publisher
+  cancel-in-progress: false
+jobs:
+  review:
+    if: github.repository == 'Ezrolith/Demo' && github.ref == 'refs/heads/codex/bonus-three'
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/bonus-three
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify and apply the reviewed source patch
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64, lzma, hashlib, subprocess
+          parts = [Path('.github/summer-review-1.b64'), Path('.github/summer-review-2.b64')]
+          raw = lzma.decompress(base64.b64decode(''.join(p.read_text().strip() for p in parts)))
+          assert hashlib.sha256(raw).hexdigest() == 'dff089d5b987a23e71995b0e150c2b7561a637f8540ca32986fca5a550151342'
+          patch = Path('/tmp/summer-review.patch')
+          patch.write_bytes(raw)
+          subprocess.run(['git', 'apply', '--check', str(patch)], check=True)
+          subprocess.run(['git', 'apply', '--index', str(patch)], check=True)
+          for p in parts:
+              p.unlink()
+          PY
+          find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+          git diff 90a9595eb063b58d9eb8bf6ae6f43cc372a94459 --exit-code -- src/core src/game/world.js src/game/powers.js src/game/entities src/data/music.js src/data/ambience.js src/data/chapters/prologue.js src/data/chapters/reassembly.js src/data/chapters/superman.js src/data/chapters/deterrent.js src/data/chapters/mars.js src/data/chapters/karnak.js src/data/chapters/last-broadcast.js src/data/chapters/ninth-minute.js src/data/bonus-ninth-atmosphere.js
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add -A src tests .github/summer-review-1.b64 .github/summer-review-2.b64
+          git commit -m 'Fix Summer opening fairness, vulnerable rescue, HUD clearance and live visual detail'
+          git push origin HEAD:refs/heads/codex/bonus-three
+          mkdir -p tests/out/review-validation
+          git rev-parse HEAD > tests/out/review-validation/source-commit.txt
+      - run: npm install --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Twelve source suites in sequence with actual exit codes
+        shell: bash
+        run: |
+          mkdir -p tests/out/review-validation
+          failed=0
+          for suite in smoke visual audio powers saves settings ledger encounters flows bonus ninth-minute long-summer; do
+            for attempt in 1 2; do
+              set +e
+              node "tests/$suite.mjs" > "tests/out/review-validation/$suite-$attempt.log" 2>&1
+              result=$?
+              set -e
+              printf '%s attempt=%s exit=%s\n' "$suite" "$attempt" "$result" | tee -a tests/out/review-validation/exits.txt
+              cat "tests/out/review-validation/$suite-$attempt.log"
+              if [ "$result" -eq 0 ]; then break; fi
+            done
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          done
+          exit "$failed"
+      - name: Rebuild after source tests
+        if: always()
+        run: node tools/build.mjs
+      - name: All three standalone adventure suites
+        if: always()
+        shell: bash
+        run: |
+          mkdir -p tests/out/review-validation
+          failed=0
+          for suite in bonus ninth-minute long-summer; do
+            for attempt in 1 2; do
+              set +e
+              node "tests/$suite.mjs" dist/dr-manhattan.html > "tests/out/review-validation/dist-$suite-$attempt.log" 2>&1
+              result=$?
+              set -e
+              printf 'dist-%s attempt=%s exit=%s\n' "$suite" "$attempt" "$result" | tee -a tests/out/review-validation/exits.txt
+              cat "tests/out/review-validation/dist-$suite-$attempt.log"
+              if [ "$result" -eq 0 ]; then break; fi
+            done
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          done
+          exit "$failed"
+      - name: Before and after live ten-second capture, without actor cheats
+        if: success()
+        shell: bash
+        run: |
+          git worktree add --detach /tmp/summer-review-before 90a9595eb063b58d9eb8bf6ae6f43cc372a94459
+          CAPTURE_ROOT=/tmp/summer-review-before CAPTURE_OUT="$PWD/docs/screenshots/summer-review" CAPTURE_LABEL=before node tests/capture-summer-review.mjs
+          CAPTURE_LABEL=after node tests/capture-summer-review.mjs
+      - name: Save rebuilt game and live evidence on this branch only
+        if: success()
+        shell: bash
+        run: |
+          git add dist/dr-manhattan.html docs/screenshots/summer-review
+          git commit -m 'Record validated build and ten-second live before-after evidence'
+          git push origin HEAD:refs/heads/codex/bonus-three
+      - name: Preserve source and results
+        if: always()
+        run: |
+          git rev-parse HEAD > tests/out/review-validation/final-commit.txt
+          git archive --format=zip HEAD -o review-source.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: summer-review-${{ github.run_id }}
+          path: |
+            review-source.zip
+            dist/dr-manhattan.html
+            tests/out/review-validation/
+            docs/screenshots/summer-review/
+          retention-days: 14
