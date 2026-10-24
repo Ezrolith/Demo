@@ -21,32 +21,41 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Close the autonomous-casualty Heat edge case
+      - name: Correct safe-passage caption found by live inspection
         shell: bash
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p = Path('src/game/long-summer-kit.js')
+          p = Path('src/data/chapters/long-summer.js')
           s = p.read_text()
-          a = "      this.change(20, 'The Comedian killed someone');"
-          b = "      // Autonomous fatalities use the same rate limit as live fire; the ledger updates immediately.\n      this.shotHeat += 20;"
-          assert s.count(a) == 1
-          s = s.replace(a, b)
-          s = s.replace('  Object.assign(S, { SummerBossFraming, CityState, FireGrid, Hydrant, Puddle, Gas, Molotov, Rioter, LiveRound, Comedian, Resident, StairBeam });', '  Object.assign(S, {\n    SummerBossFraming, CityState, FireGrid, Hydrant, Puddle, Gas, Molotov, Rioter, LiveRound, Comedian, Resident, StairBeam,\n  });')
-          p.write_text(s)
-          p = Path('tests/long-summer.mjs')
-          s = p.read_text()
-          a = "    state.shotHeat = 200;\n    let previous = state.passiveAdded;\n    let previousFire = state.fireHeatAdded;\n    for (let i = 0; i < 40; i++) {\n      T.step(1);\n      if (state.passiveAdded - previous > 1.50001 || state.fireHeatAdded - previousFire > 0.50001) return false;\n      previous = state.passiveAdded;\n      previousFire = state.fireHeatAdded;\n    }"
-          b = "    const initialHeat = state.heat;\n    state.casualty(T.p().ctx.flags.looter);\n    if (state.heat !== initialHeat || T.p().ctx.flags.comedianCasualties !== 1) return false;\n    state.shotHeat += 200;\n    let previous = state.passiveAdded;\n    let previousFire = state.fireHeatAdded;\n    let previousHeat = state.heat;\n    for (let i = 0; i < 40; i++) {\n      T.step(1);\n      if (state.passiveAdded - previous > 1.50001 || state.fireHeatAdded - previousFire > 0.50001 ||\n        state.heat - previousHeat > 1.50001) return false;\n      previous = state.passiveAdded;\n      previousFire = state.fireHeatAdded;\n      previousHeat = state.heat;\n    }"
+          a = "new K.Sign(540, 1170, 'SAFE PASSAGE'"
+          b = "new K.Sign(420, 1060, 'SAFE PASSAGE'"
           assert s.count(a) == 1
           p.write_text(s.replace(a, b))
+          p = Path('tests/long-summer.mjs')
+          s = p.read_text()
+          anchor = "  check('no 400px square of playable avenue lacks deliberate scenery/debris',"
+          addition = """  check('truck safe-passage caption stays above the hint after ten live simulation seconds', await page.evaluate(() => {
+              T.start(2, null, true);
+              T.step(10);
+              const p = T.p();
+              const sign = p.world.entities.find(e => e.text === 'SAFE PASSAGE');
+              if (!sign || !p.hud.hintMsg) return false;
+              const q = p.world.camera.toScreen(sign.x, sign.y);
+              return q.y + 10 * p.world.camera.zoom < DM.H - 170;
+            }));
+          """
+          # Keep the same two-space source indentation used by the local test.
+          addition = '\n'.join(line[10:] if line.startswith('          ') else line for line in addition.split('\n'))
+          assert s.count(anchor) == 1
+          p.write_text(s.replace(anchor, addition + anchor))
           PY
           find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
           git diff 90a9595eb063b58d9eb8bf6ae6f43cc372a94459 --exit-code -- src/core src/game/world.js src/game/powers.js src/game/entities src/data/music.js src/data/ambience.js src/data/chapters/prologue.js src/data/chapters/reassembly.js src/data/chapters/superman.js src/data/chapters/deterrent.js src/data/chapters/mars.js src/data/chapters/karnak.js src/data/chapters/last-broadcast.js src/data/chapters/ninth-minute.js src/data/bonus-ninth-atmosphere.js
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/game/long-summer-kit.js tests/long-summer.mjs
-          git commit -m 'Rate-limit all autonomous Heat including Comedian casualties; assert actual meter changes'
+          git add src/data/chapters/long-summer.js tests/long-summer.mjs
+          git commit -m 'Keep safe-passage caption above the tutorial strip; add regression check'
           git push origin HEAD:refs/heads/codex/bonus-three
           mkdir -p tests/out/review-validation
           git rev-parse HEAD > tests/out/review-validation/source-commit.txt
