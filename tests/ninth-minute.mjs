@@ -102,7 +102,7 @@ try {
   check('normal gate interaction advances into the train rescue',await page.evaluate(()=>DM.dev.state().stageId==='rescue'&&T.play().ctx.flags.moments===1));
   await page.evaluate(()=>{T.interact(T.console('CLOCK CHAMBER'));});
   check('clock chamber stays locked until every passenger is safe',await page.evaluate(()=>!T.play().ctx.flags.enterEngine));
-  await page.evaluate(()=>{T.clear(T.play().ctx.flags.rescueFoes);T.interact(T.play().ctx.flags.doors[0]);});
+  await page.evaluate(()=>{T.clear(T.play().ctx.flags.rescueFoes);T.dialog();T.clear(T.play().ctx.flags.rescueFoes);T.interact(T.play().ctx.flags.doors[0]);});
   check('carriage interaction assigns Laurie an actual rescue task',await page.evaluate(()=>T.play().ctx.flags.activeDoor===T.play().ctx.flags.doors[0]&&T.play().ctx.flags.doors[0].working));
   await page.evaluate(()=>{T.interact(T.play().ctx.flags.doors[1]);});
   check('one companion cannot be assigned two carriage doors simultaneously',await page.evaluate(()=>!T.play().ctx.flags.doors[1].working));
@@ -171,6 +171,223 @@ try {
   check('every new direct sound call has an existing audio recipe',recipeCheck);
   await page.evaluate(async()=>{await DM.Audio.unlock();DM.Audio.music.play('ninth_platform');T.step(.2);DM.Audio.music.play('ninth_pendulum');T.step(.2);DM.Audio.music.play('ninth_dawn');T.step(.2);});
   check('all three additive music arrangements start without errors',errors.length===0&&await page.evaluate(()=>!DM.Engine.error&&!DM.AudioDirector.lastError));
+  // The visual train, hazard clock and sounds share a single nine-second source.
+  const cycleEvidence = await page.evaluate(() => {
+    T.start(0);
+    T.dialog();
+    const play = T.play();
+    play.player.godMode = true;
+    const world = play.world;
+    const cycle = world.stationCycle;
+    DM.Input.clearAll();
+    world.cycleT = 0;
+    world.cycleNumber = 0;
+    world.timeScale = 1;
+    cycle.started = false;
+    cycle.crossings = { arrive: 0, chime: 0, depart: 0, rewind: 0 };
+    const calls = [];
+    const original = DM.Audio.play;
+    DM.Audio.play = function (name, options) {
+      if (name.startsWith('ninth_')) calls.push({ name, cycle: world.cycleNumber });
+      return original.call(this, name, options);
+    };
+    const poses = [];
+    try {
+      T.step(0.1);
+      poses.push({ x: cycle.trainX, doors: cycle.doorOpen });
+      T.step(3);
+      poses.push({ x: cycle.trainX, doors: cycle.doorOpen });
+      T.step(4.2);
+      poses.push({ x: cycle.trainX, doors: cycle.doorOpen });
+      T.step(19.9);
+    } finally {
+      DM.Audio.play = original;
+    }
+    const cycleCounts = [0, 1, 2].map(number => {
+      const events = calls.filter(call => call.cycle === number);
+      return ['arrive', 'chime', 'depart', 'rewind'].map(name =>
+        events.filter(event => event.name === 'ninth_' + name).length);
+    });
+    const light = cycle.light(world);
+    return {
+      cycleCounts, poses, announcements: calls.filter(call => call.name === 'ninth_announcement').length,
+      cycleT: world.cycleT, phase: play.ctx.flags.arcs[0].phase,
+      movingLight: Number.isFinite(light.x) && light.cone === 0,
+      ambience: DM.Ambience.maps[world.mapId].bed,
+    };
+  });
+  check('train sounds arrive, chime, depart and rewind exactly once in each complete cycle',
+    cycleEvidence.cycleCounts.every(counts => counts.every(count => count === 1)));
+  check('train enters, opens its doors at the stop, closes and leaves again',
+    cycleEvidence.poses[0].x < 0 && cycleEvidence.poses[1].x === 390 &&
+    cycleEvidence.poses[1].doors === 1 && cycleEvidence.poses[2].x > 390 && cycleEvidence.poses[2].doors === 0);
+  check('station clock, train and rail hazards use the same cycleT',
+    Math.abs(cycleEvidence.cycleT - cycleEvidence.phase) < 0.001);
+  check('train has a moving cone headlight and its own tunnel ambience',
+    cycleEvidence.movingLight && cycleEvidence.ambience === 'ninth_tunnel');
+  check('muffled announcement is sparse rather than playing every cycle', cycleEvidence.announcements === 1);
+  const maps = await page.evaluate(() => [0, 1, 2].map(stage => {
+    T.start(stage);
+    T.dialog();
+    const world = T.play().world;
+    return {
+      labels: world.entities.filter(entity => entity.sceneryLabel && entity.text).length,
+      hasClock: !!world.stationCycle,
+      bed: DM.Ambience.maps[world.mapId].bed,
+    };
+  }));
+  check('each Ninth Minute map uses the tunnel bed, shared clock and fewer than four scenery labels',
+    maps.every(map => map.labels < 4 && map.hasClock && map.bed === 'ninth_tunnel'));
+  const slowed = await page.evaluate(() => {
+    T.start(0);
+    T.dialog();
+    T.play().player.godMode = true;
+    const world = T.play().world;
+    world.cycleT = 0;
+    T.play().player.energy = 100;
+    DM.Input.simulate('KeyF', true);
+    T.step(1);
+    const value = { cycle: world.cycleT, sight: world.timesight, pitch: DM.Audio.timeScale };
+    DM.Input.clearAll();
+    return value;
+  });
+  check('Temporal Sight slows the train clock and the existing SFX pitch bus together',
+    slowed.sight && slowed.cycle < 0.6 && slowed.pitch < 0.8);
+  const armEvidence = await page.evaluate(() => {
+    T.start(2);
+    T.dialog();
+    const play = T.play();
+    const world = play.world;
+    const boss = play.ctx.flags.pendulum;
+    for (const enemy of play.ctx.flags.engineFoes) enemy.dead = true;
+    const p = play.player;
+    p.godMode = false;
+    p.invuln = 0;
+    p.coherence = 100;
+    p.locked = false;
+    boss.cycle = 2.2;
+    boss.previousCycle = 2.2;
+    boss.fired = true;
+    boss.pulsed = true;
+    const a = boss.armAngle(2.2);
+    const target = { x: boss.x + Math.cos(a) * 235, y: boss.y + Math.sin(a) * 235, r: p.r };
+    const outside = { x: boss.x - Math.sin(a) * 235, y: boss.y + Math.cos(a) * 235, r: p.r };
+    const geometry = boss.armTouches(target, 2.18, 2.2) && !boss.armTouches(outside, 2.18, 2.2);
+    p.x = target.x;
+    p.y = target.y;
+    T.step(0.05);
+    const hit = p.coherence < 100 && boss.armHits > 0;
+    p.x = outside.x;
+    p.y = outside.y;
+    p.coherence = 100;
+    p.invuln = 0;
+    T.step(0.05);
+    return { geometry, hit, missed: p.coherence === 100 };
+  });
+  check('the swept pendulum capsule includes the shaft, not the whole warning arc', armEvidence.geometry);
+  check('physical arm damages Jon on contact and not outside the metal', armEvidence.hit && armEvidence.missed);
+  const frameEvidence = await page.evaluate(() => {
+    const play = T.play();
+    const boss = play.ctx.flags.pendulum;
+    play.player.godMode = true;
+    const samples = [];
+    for (const [x, y] of [[160, 240], [1730, 240], [160, 1300], [1730, 1300], [950, 1100], [950, 400]]) {
+      T.place(x, y);
+      T.step(0.3);
+      const camera = play.world.camera;
+      samples.push(boss.cameraFrame.projectionSafe(camera.zoom, camera.x, camera.y));
+    }
+    return samples;
+  });
+  check('boss and complete swinging arms remain below the HUD at every tested arena corner', frameEvidence.every(Boolean));
+  const phaseEvidence = await page.evaluate(() => {
+    const play = T.play();
+    const boss = play.ctx.flags.pendulum;
+    boss.exposed = 3;
+    boss.damage(430, play.player, 'test');
+    T.step(0.05);
+    const split = boss.phase === 2 && boss.armAngle(2.1, 0) !== boss.armAngle(2.1, 1);
+    const music = DM.Audio.music.wanted === 'ninth_fracture' || DM.Audio.music.queued === 'ninth_fracture';
+    T.step(0.4);
+    boss.exposed = 3;
+    T.step(0.3);
+    const shutterOpen = boss.shutter > 0.8;
+    boss.damage(1000, play.player, 'test');
+    T.step(0.05);
+    return {
+      split, music, shutterOpen,
+      restored: !boss.cameraFrame.active && play.ctx.camTarget === null &&
+        play.world.camera.targetZoom === play.world.baseZoom,
+    };
+  });
+  check('half-health transition splits the arm and switches to the deeper arrangement', phaseEvidence.split && phaseEvidence.music);
+  check('the core visibly opens its brass shutters rather than relying on a text plate', phaseEvidence.shutterOpen);
+  check('defeating the Pendulum releases its camera framing and restores normal zoom', phaseEvidence.restored);
+  // Staff are people, not another drone skin. Their ledger is the campaign ledger.
+  const humanEvidence = await page.evaluate(() => {
+    T.start(1);
+    T.dialog();
+    const play = T.play();
+    play.player.godMode = true;
+    const guards = play.ctx.flags.transitGuards;
+    for (const companion of [play.ctx.flags.owl, play.ctx.flags.laurie]) {
+      if (companion) {
+        companion.x = 100;
+        companion.y = 200;
+        companion.heldBy = play.player;
+      }
+    }
+    play.ctx.place(200, 200);
+    const guard = guards[3];
+    guard.engaged = false;
+    guard.target = null;
+    play.world.cycleT = 1;
+    guard.update(1 / 60, play.world);
+    const first = { x: guard.x, y: guard.y };
+    play.world.cycleT = 5;
+    guard.update(1 / 60, play.world);
+    const moved = Math.hypot(guard.x - first.x, guard.y - first.y) > 20;
+    play.world.cycleT = 1;
+    guard.update(1 / 60, play.world);
+    const repeats = Math.hypot(guard.x - first.x, guard.y - first.y) < 0.001;
+    const stats = play.ctx.stats;
+    const before = { spared: stats.spared, gone: stats.disintegrated };
+    guards[0].damage(100, play.player, 'impact');
+    const nonlethal = guards[0].ko && stats.spared === before.spared + 1 && stats.disintegrated === before.gone;
+    guards[0].damage(100, play.player, 'impact');
+    const once = stats.spared === before.spared + 1;
+    T.shoot(guards[1]);
+    T.step(0.2);
+    const firstReaction = play.ctx.flags.transitWitness.reactions;
+    const reaction = play.ctx.flags.laurieReacted && firstReaction === 1 && play.dialog.active;
+    T.dialog();
+    T.shoot(guards[2]);
+    T.step(0.2);
+    const noRepeat = play.ctx.flags.transitWitness.reactions === firstReaction;
+    return {
+      humans: guards.length === 4 && guards.every(e => e.human), moved, repeats, nonlethal, once, reaction, noRepeat,
+      lethal: stats.disintegrated === before.gone + 2 && guards[1].dead && guards[2].dead,
+    };
+  });
+  check('the rescue map contains four human transit guards', humanEvidence.humans);
+  check('undisturbed staff repeat a moving patrol on the shared nine-second clock', humanEvidence.moved && humanEvidence.repeats);
+  check('knocking out a transit guard increments spared exactly once', humanEvidence.nonlethal && humanEvidence.once);
+  check('real disintegration input counts both human guards as gone', humanEvidence.lethal);
+  check('Laurie reacts to the first unmaking and never repeats the interruption', humanEvidence.reaction && humanEvidence.noRepeat);
+  const moralEndings = await page.evaluate(() => {
+    const play = T.play();
+    return [[0, 4], [1, 3], [4, 0]].map(([disintegrated, spared]) => {
+      const scene = new DM.NinthMinute.NinthComplete(play, {
+        stats: { disintegrated, spared, time: 20, decoherences: 0 },
+        flags: { choice: 'release', passengers: 6, moments: 0 },
+      });
+      DM.Engine.set(scene);
+      DM.Engine.render();
+      return scene.ledgerText;
+    });
+  });
+  check('the real subway completion screen renders three distinct human-consequence paragraphs',
+    new Set(moralEndings).size === 3 && moralEndings.every(text => typeof text === 'string' && text.length > 30));
   // Every original campaign checkpoint still constructs cleanly. This is a smoke
   // check, not an unassisted campaign playthrough or all nine legacy test suites.
   const cps=await page.evaluate(()=>DM.Chapters.list.flatMap(ch=>ch.stages.map((s,i)=>s.checkpoint?[ch.id,i]:null).filter(Boolean)));

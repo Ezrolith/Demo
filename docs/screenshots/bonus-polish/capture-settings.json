@@ -1,0 +1,797 @@
+{
+  "viewport": [
+    1280,
+    720
+  ],
+  "records": [
+    {
+      "filename": "nm-platform-before.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 0,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 1050,
+        "y": 850
+      },
+      "camera": {
+        "x": 980,
+        "y": 635,
+        "zoom": 0.8
+      }
+    },
+    {
+      "filename": "nm-platform-before-sight.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 0,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 1050,
+        "y": 850
+      },
+      "camera": {
+        "x": 980,
+        "y": 635,
+        "zoom": 0.8
+      }
+    },
+    {
+      "filename": "nm-train-before.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 1,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 1000,
+        "y": 900
+      },
+      "camera": {
+        "x": 1170,
+        "y": 700,
+        "zoom": 0.8
+      }
+    },
+    {
+      "filename": "nm-train-before-sight.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 1,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 1000,
+        "y": 900
+      },
+      "camera": {
+        "x": 1170,
+        "y": 700,
+        "zoom": 0.8
+      }
+    },
+    {
+      "filename": "nm-engine-before.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": 1,
+      "player": {
+        "x": 939.6839839405047,
+        "y": 1021.0605620823221
+      },
+      "camera": {
+        "x": 950,
+        "y": 780,
+        "zoom": 0.9
+      }
+    },
+    {
+      "filename": "nm-engine-before-sight.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": 1,
+      "player": {
+        "x": 940,
+        "y": 1010
+      },
+      "camera": {
+        "x": 950,
+        "y": 780,
+        "zoom": 0.9
+      }
+    },
+    {
+      "filename": "lb-roofs-before.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 0,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 880,
+        "y": 620
+      },
+      "camera": {
+        "x": 1030,
+        "y": 555,
+        "zoom": 0.85
+      }
+    },
+    {
+      "filename": "lb-roofs-before-sight.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 0,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 880,
+        "y": 620
+      },
+      "camera": {
+        "x": 1030,
+        "y": 555,
+        "zoom": 0.85
+      }
+    },
+    {
+      "filename": "lb-relay-before.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 1,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 850,
+        "y": 800
+      },
+      "camera": {
+        "x": 900,
+        "y": 620,
+        "zoom": 0.85
+      }
+    },
+    {
+      "filename": "lb-relay-before-sight.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 1,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 850,
+        "y": 800
+      },
+      "camera": {
+        "x": 900,
+        "y": 620,
+        "zoom": 0.85
+      }
+    },
+    {
+      "filename": "lb-tower-before.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": 1,
+      "player": {
+        "x": 900.1526672754127,
+        "y": 861.297378380572
+      },
+      "camera": {
+        "x": 900,
+        "y": 650,
+        "zoom": 0.95
+      }
+    },
+    {
+      "filename": "lb-tower-before-sight.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": 1,
+      "player": {
+        "x": 900,
+        "y": 850
+      },
+      "camera": {
+        "x": 900,
+        "y": 650,
+        "zoom": 0.95
+      }
+    },
+    {
+      "filename": "nm-pendulum-phase1-before.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": false,
+      "bossShot": true,
+      "bossPhase": 1,
+      "player": {
+        "x": 1250,
+        "y": 1020
+      },
+      "camera": {
+        "x": 1240.2061855670104,
+        "y": 1020,
+        "zoom": 0.97
+      }
+    },
+    {
+      "filename": "nm-pendulum-phase1-before-sight.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": true,
+      "bossShot": true,
+      "bossPhase": 1,
+      "player": {
+        "x": 1250,
+        "y": 1020
+      },
+      "camera": {
+        "x": 1240.2061855670104,
+        "y": 1020,
+        "zoom": 0.97
+      }
+    },
+    {
+      "filename": "nm-pendulum-phase2-before.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": false,
+      "bossShot": true,
+      "bossPhase": 2,
+      "player": {
+        "x": 1250,
+        "y": 1020
+      },
+      "camera": {
+        "x": 1240.2061855670104,
+        "y": 1020,
+        "zoom": 0.97
+      }
+    },
+    {
+      "filename": "nm-pendulum-phase2-before-sight.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": true,
+      "bossShot": true,
+      "bossPhase": 2,
+      "player": {
+        "x": 1250,
+        "y": 1020
+      },
+      "camera": {
+        "x": 1240.2061855670104,
+        "y": 1020,
+        "zoom": 0.97
+      }
+    },
+    {
+      "filename": "lb-carrier-phase1-before.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": false,
+      "bossShot": true,
+      "bossPhase": 2,
+      "player": {
+        "x": 1155.835757623557,
+        "y": 909.6118360858584
+      },
+      "camera": {
+        "x": 1132.549019607843,
+        "y": 847.0588235294117,
+        "zoom": 1.02
+      }
+    },
+    {
+      "filename": "lb-carrier-phase1-before-sight.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": true,
+      "bossShot": true,
+      "bossPhase": 2,
+      "player": {
+        "x": 1150,
+        "y": 900
+      },
+      "camera": {
+        "x": 1132.549019607843,
+        "y": 847.0588235294117,
+        "zoom": 1.02
+      }
+    },
+    {
+      "filename": "lb-carrier-phase2-before.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": false,
+      "bossShot": true,
+      "bossPhase": 2,
+      "player": {
+        "x": 1155.8357576235592,
+        "y": 909.611836085862
+      },
+      "camera": {
+        "x": 1132.549019607843,
+        "y": 847.0588235294117,
+        "zoom": 1.02
+      }
+    },
+    {
+      "filename": "lb-carrier-phase2-before-sight.png",
+      "version": "before",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": true,
+      "bossShot": true,
+      "bossPhase": 2,
+      "player": {
+        "x": 1150,
+        "y": 900
+      },
+      "camera": {
+        "x": 1132.549019607843,
+        "y": 847.0588235294117,
+        "zoom": 1.02
+      }
+    },
+    {
+      "filename": "nm-platform-after.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 0,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 1050,
+        "y": 850
+      },
+      "camera": {
+        "x": 980,
+        "y": 635,
+        "zoom": 0.8
+      },
+      "cycle": 4.333333333333333
+    },
+    {
+      "filename": "nm-platform-after-sight.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 0,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 1050,
+        "y": 850
+      },
+      "camera": {
+        "x": 980,
+        "y": 635,
+        "zoom": 0.8
+      },
+      "cycle": 1.5394832771134686
+    },
+    {
+      "filename": "nm-train-after.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 1,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 1000,
+        "y": 900
+      },
+      "camera": {
+        "x": 1170,
+        "y": 700,
+        "zoom": 0.8
+      },
+      "cycle": 4.333333333333187
+    },
+    {
+      "filename": "nm-train-after-sight.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 1,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 1000,
+        "y": 900
+      },
+      "camera": {
+        "x": 1170,
+        "y": 700,
+        "zoom": 0.8
+      },
+      "cycle": 1.5394832771134304
+    },
+    {
+      "filename": "nm-engine-after.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": 1,
+      "player": {
+        "x": 939.7264343159104,
+        "y": 1019.5747989431284
+      },
+      "camera": {
+        "x": 950,
+        "y": 780,
+        "zoom": 0.9
+      },
+      "cycle": 4.183333333333643
+    },
+    {
+      "filename": "nm-engine-after-sight.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": 1,
+      "player": {
+        "x": 940,
+        "y": 1010
+      },
+      "camera": {
+        "x": 950,
+        "y": 780,
+        "zoom": 0.9
+      },
+      "cycle": 1.5394832771135571
+    },
+    {
+      "filename": "lb-roofs-after.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 0,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 880,
+        "y": 620
+      },
+      "camera": {
+        "x": 1030,
+        "y": 555,
+        "zoom": 0.85
+      }
+    },
+    {
+      "filename": "lb-roofs-after-sight.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 0,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 880,
+        "y": 620
+      },
+      "camera": {
+        "x": 1030,
+        "y": 555,
+        "zoom": 0.85
+      }
+    },
+    {
+      "filename": "lb-relay-after.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 1,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 850,
+        "y": 800
+      },
+      "camera": {
+        "x": 900,
+        "y": 620,
+        "zoom": 0.85
+      }
+    },
+    {
+      "filename": "lb-relay-after-sight.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 1,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 850,
+        "y": 800
+      },
+      "camera": {
+        "x": 900,
+        "y": 620,
+        "zoom": 0.85
+      }
+    },
+    {
+      "filename": "lb-tower-after.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": 1,
+      "player": {
+        "x": 900.1526672753902,
+        "y": 861.2973783788882
+      },
+      "camera": {
+        "x": 900,
+        "y": 650,
+        "zoom": 0.95
+      }
+    },
+    {
+      "filename": "lb-tower-after-sight.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": true,
+      "bossShot": false,
+      "bossPhase": 1,
+      "player": {
+        "x": 900,
+        "y": 850
+      },
+      "camera": {
+        "x": 900,
+        "y": 650,
+        "zoom": 0.95
+      }
+    },
+    {
+      "filename": "nm-pendulum-phase1-after.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": false,
+      "bossShot": true,
+      "bossPhase": 1,
+      "player": {
+        "x": 1250,
+        "y": 1020
+      },
+      "camera": {
+        "x": 1144.9995108982844,
+        "y": 794.1867124856815,
+        "zoom": 0.8729994775823264
+      },
+      "cycle": 1.7999999999999625
+    },
+    {
+      "filename": "nm-pendulum-phase1-after-sight.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": true,
+      "bossShot": true,
+      "bossPhase": 1,
+      "player": {
+        "x": 1250,
+        "y": 1020
+      },
+      "camera": {
+        "x": 1144.9995108982844,
+        "y": 794.1867124856815,
+        "zoom": 0.8729994775823264
+      },
+      "cycle": 1.619999999999989
+    },
+    {
+      "filename": "nm-pendulum-phase2-after.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": false,
+      "bossShot": true,
+      "bossPhase": 2,
+      "player": {
+        "x": 1250,
+        "y": 1020
+      },
+      "camera": {
+        "x": 1144.9995347520564,
+        "y": 794.1867124856815,
+        "zoom": 0.872999503060937
+      },
+      "cycle": 1.6000000000000145
+    },
+    {
+      "filename": "nm-pendulum-phase2-after-sight.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "ninth_minute",
+      "stage": 2,
+      "sight": true,
+      "bossShot": true,
+      "bossPhase": 2,
+      "player": {
+        "x": 1250,
+        "y": 1020
+      },
+      "camera": {
+        "x": 1144.9995347520564,
+        "y": 794.1867124856815,
+        "zoom": 0.872999503060937
+      },
+      "cycle": 1.5640000000000038
+    },
+    {
+      "filename": "lb-carrier-phase1-after.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": false,
+      "bossShot": true,
+      "bossPhase": 1,
+      "player": {
+        "x": 1155.8357575958823,
+        "y": 909.6118360402769
+      },
+      "camera": {
+        "x": 926.6666666666665,
+        "y": 630.8821183661513,
+        "zoom": 0.7679999999999999
+      }
+    },
+    {
+      "filename": "lb-carrier-phase1-after-sight.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": true,
+      "bossShot": true,
+      "bossPhase": 1,
+      "player": {
+        "x": 1150,
+        "y": 900
+      },
+      "camera": {
+        "x": 937.3778076551639,
+        "y": 627.0565552699229,
+        "zoom": 0.7779999252607191
+      }
+    },
+    {
+      "filename": "lb-carrier-phase2-after.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": false,
+      "bossShot": true,
+      "bossPhase": 2,
+      "player": {
+        "x": 1155.8357574953152,
+        "y": 909.6118358746368
+      },
+      "camera": {
+        "x": 926.6666666666665,
+        "y": 630.9015984598229,
+        "zoom": 0.7679999999999999
+      }
+    },
+    {
+      "filename": "lb-carrier-phase2-after-sight.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "last_broadcast",
+      "stage": 2,
+      "sight": true,
+      "bossShot": true,
+      "bossPhase": 2,
+      "player": {
+        "x": 1150,
+        "y": 900
+      },
+      "camera": {
+        "x": 937.3778117702146,
+        "y": 627.0565552699229,
+        "zoom": 0.7779999289057968
+      }
+    },
+    {
+      "filename": "pier-reference.png",
+      "version": "after",
+      "mode": "file",
+      "chapter": "superman",
+      "stage": 1,
+      "sight": false,
+      "bossShot": false,
+      "bossPhase": null,
+      "player": {
+        "x": 720,
+        "y": 1000
+      },
+      "camera": {
+        "x": 1000,
+        "y": 700,
+        "zoom": 1.05
+      }
+    }
+  ]
+}
