@@ -468,7 +468,26 @@ try {
     DM.Engine.top() instanceof DM.Summer.SummerComplete));
   await shot('ending-route');
   await page.evaluate(() => T.start(2));
-  check('Q at the cab produces the lethal driver outcome exactly once', await page.evaluate(() => {
+  check('a wheel-targeted blast cannot accidentally unmake the turning cab', await page.evaluate(() => {
+    T.start(2);
+    const p = T.p();
+    const t = p.ctx.flags.truck;
+    const wheel = t.parts.find(e => e.role === 'wheel');
+    const cab = t.parts.find(e => e.role === 'cab');
+    // A real cast freezes the player's aim; the mobile cab can enter its radius
+    // during the 0.16s wind-up. Test that collision without disabling gameplay.
+    p.world.emitCast({ x: wheel.x, y: wheel.y, t: 0.16, r: 50 });
+    const original = { x: cab.x, y: cab.y };
+    cab.x = wheel.x + 6;
+    cab.y = wheel.y + 6;
+    cab.disintegrate(p.world, p.player);
+    const safe = !cab.dead && !t.driver.dead && !p.ctx.flags.driverOutcome &&
+      p.ctx.stats.disintegrated === 0;
+    cab.x = original.x;
+    cab.y = original.y;
+    return safe;
+  }));
+  check('Q deliberately aimed at cab produces the lethal driver outcome exactly once', await page.evaluate(() => {
     const p = T.p();
     T.shoot(p.ctx.flags.truck.parts.find(e => e.role === 'cab'));
     const n = p.ctx.stats.disintegrated;
