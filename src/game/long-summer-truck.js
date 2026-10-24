@@ -92,6 +92,21 @@
     update() {
       this.sync();
     }
+    // The truck can turn during Disintegrate's brief cast delay. Only an
+    // explicitly aimed cab shot may kill its occupant; wheel splash cannot.
+    onDisintegrateCast(c, world) {
+      if (this.role !== 'cab') return;
+      this.cabTargeted = U.dist(c.x, c.y, this.x, this.y) <= this.r;
+      this.cabCastTime = world.realTime || 0;
+    }
+    disintegrate(world, source) {
+      if (this.role === 'cab' && (!this.cabTargeted ||
+        (world.realTime || 0) - this.cabCastTime > 0.35)) {
+        this.truck.ctx.toast('THE CAB CONTAINS A PERSON · AIM DIRECTLY TO UNMAKE', S.AMBER);
+        return;
+      }
+      super.disintegrate(world, source);
+    }
     damage(amount, source, kind) {
       if (this.dead || this.truck.disabled) return false;
       if (this.role === 'cab' && kind !== 'disintegrate') {
