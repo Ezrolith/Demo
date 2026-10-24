@@ -17345,6 +17345,58 @@
     return 'uneasy';
   };
 
+  const HUD_BOTTOM = 190;
+  class SummerBossFraming extends K.BossFraming {
+    projectionSafe(zoom, x, y, includePlayer = true) {
+      if (!super.projectionSafe(zoom, x, y, includePlayer)) return false;
+      const p = this.world.player;
+      const bottom = (p.y - y + p.r + 28) * zoom + DM.H / 2;
+      return !includePlayer || bottom < DM.H - HUD_BOTTOM;
+    }
+    target(zoom) {
+      const p = this.world.player;
+      const b = this.boss;
+      const w = this.world;
+      const e = this.extent;
+      const hw = DM.W / 2 / zoom;
+      const hh = DM.H / 2 / zoom;
+      const minX = Math.max(hw, b.x + e.right - (DM.W / 2 - 38) / zoom, p.x + p.r - (DM.W / 2 - 38) / zoom);
+      const maxX = Math.min(w.w - hw, b.x - e.left + (DM.W / 2 - 38) / zoom, p.x - p.r + (DM.W / 2 - 38) / zoom);
+      const minY = Math.max(hh, b.y + e.bottom - (DM.H / 2 - 135) / zoom,
+        p.y + p.r + 32 - (DM.H / 2 - HUD_BOTTOM) / zoom);
+      const maxY = Math.min(w.h - hh, b.y - e.top + (DM.H / 2 - 125) / zoom, p.y - p.r + (DM.H / 2 - 112) / zoom);
+      return {
+        x: U.clamp(U.lerp(p.x, b.x, 0.35), minX, maxX),
+        y: U.clamp(U.lerp(p.y, b.y, 0.35), minY, maxY),
+        feasible: minX <= maxX && minY <= maxY,
+      };
+    }
+  }
+  S.startReadableCamera = function (ctx) {
+    const world = ctx.world;
+    const point = { x: ctx.player.x, y: ctx.player.y };
+    ctx.fork(function* () {
+      while (ctx.world === world && !ctx.done) {
+        const p = ctx.player;
+        const camera = world.camera;
+        const boss = world.boss;
+        if (boss && !boss.dead && boss.cameraFrame) {
+          boss.cameraFrame.update();
+        } else {
+          const zoom = camera.zoom;
+          point.x = p.x + U.clamp((world.mouse.x - p.x) * 0.12, -70, 70);
+          point.y = p.y - 80 / zoom;
+          ctx.camTarget = point;
+          const screen = camera.toScreen(p.x, p.y);
+          if (screen.y + (p.r + 28) * zoom > DM.H - HUD_BOTTOM) {
+            camera.snap(point.x, point.y);
+          }
+        }
+        yield;
+      }
+    });
+  };
+
   class CityState extends DM.Entity {
     constructor(ctx) {
       super({ body: false, solid: false, static: true, disintegratable: false, layer: 100, r: 1 });
@@ -17355,6 +17407,11 @@
       this.gas = [];
       this.water = [];
       this.reasons = [];
+      this.elapsed = 0;
+      this.lastCasualty = -Infinity;
+      this.shotHeat = 0;
+      this.passiveAdded = 0;
+      this.fireHeatAdded = 0;
       for (const [key, value] of Object.entries({ heat: 46, rescued: 0, rescuedMask: 0, comedianCasualties: 0, restraints: 0 })) {
         if (!Number.isFinite(ctx.flags[key])) ctx.flags[key] = value;
       }
@@ -17373,14 +17430,16 @@
       if (this.reasons.length > 24) this.reasons.shift();
     }
     casualty(person) {
-      if (person.casualty || person.dead) return false;
+      if (person.casualty || person.dead || this.elapsed - this.lastCasualty < 30) return false;
+      this.lastCasualty = this.elapsed;
       // A previous knockout is reclassified, not counted twice or called Jon's unmaking.
       if (person.summerCounted === 'spared') this.ctx.stats.spared = Math.max(0, this.ctx.stats.spared - 1);
       person.summerCounted = 'casualty';
       person.casualty = true;
       person.dead = true;
       this.ctx.flags.comedianCasualties++;
-      this.change(20, 'The Comedian killed someone');
+      // Autonomous fatalities use the same rate limit as live fire; the ledger updates immediately.
+      this.shotHeat += 20;
       this.ctx.toast('A LIFE LOST TO THE COMEDIAN', S.RED);
       K.burst(this.world, person.x, person.y, '#b5a493');
       return true;
@@ -17395,6 +17454,17 @@
       p.speedMul = exposed && !world.ceasefire ? 0.58 : 1;
       this.gassed = exposed;
       if (world.ceasefire) return;
+      this.elapsed += dt;
+      // Escalation is a rate, not an exponential per-cell burst. The opening
+      // budget leaves time to read the first instruction before the street boils.
+      const fireRate = this.grid && this.elapsed >= 1 ? Math.min(0.5, this.grid.active.size * 0.045) : 0;
+      const budget = (this.elapsed <= 30 ? 0.4 : 1.5) * dt;
+      const fireHeat = Math.min(budget, fireRate * dt);
+      const shotHeat = Math.min(Math.max(0, budget - fireHeat), this.shotHeat);
+      this.shotHeat -= shotHeat;
+      this.fireHeatAdded += fireHeat;
+      this.passiveAdded += fireHeat + shotHeat;
+      if (fireHeat + shotHeat > 0) this.change(fireHeat + shotHeat, 'Ambient escalation');
       if (this.grid && this.grid.active.size < 3 && this.ctx.flags.comedian && this.ctx.flags.comedian.disarmed > 0) {
         this.change(-dt * 0.25, 'A quiet street');
       }
@@ -17451,11 +17521,21 @@
       this.wet = new Set();
       this.tick = 0;
       this.timer = 0;
+      this.nextSpread = 16;
+      this.born = new Map();
+      this.scorched = new Set();
+      this.particleT = 0;
       this.hurtT = 0;
       this.hazard = true;
       this.vented = false;
       this.predicted = new Set();
-      for (const [x, y] of seeds) this.active.add(this.key(x, y));
+      for (const [x, y] of seeds) {
+        const key = this.key(x, y);
+        if (key < 0) continue;
+        this.active.add(key);
+        this.born.set(key, 0);
+        this.scorched.add(key);
+      }
       state.grid = this;
     }
     key(x, y) {
@@ -17473,31 +17553,46 @@
       const p = this.point(key);
       return this.world && this.world.isFree(p.x, p.y, this.cell * 0.42);
     }
-    advance(active, tick) {
+    advance(active, tick, at = this.timer, born = this.born) {
       const next = new Set(active);
       if (this.vented || active.size >= 75) return next;
-      for (const key of active) {
+      // One new frontier cell per beat. Every new flame must mature before it
+      // propagates, so rescuing someone never starts an exponential fire race.
+      const keys = [...active].sort((a, b) => a - b);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[(i + tick) % keys.length];
+        if (at - (born.get(key) || 0) < 6) continue;
         const offsets = [1, this.cols, -1, -this.cols];
-        const offset = offsets[(key + tick) % 4];
-        const candidate = key + offset;
-        if (Math.abs(offset) === 1 && Math.floor(key / this.cols) !== Math.floor(candidate / this.cols)) continue;
-        const a = this.point(key);
-        const b = this.point(candidate);
-        if (this.valid(candidate) && this.world.los(a.x, a.y, b.x, b.y) && next.size < 75) next.add(candidate);
+        for (let j = 0; j < offsets.length; j++) {
+          const offset = offsets[(key + tick + j) % 4];
+          const candidate = key + offset;
+          if (next.has(candidate)) continue;
+          if (Math.abs(offset) === 1 && Math.floor(key / this.cols) !== Math.floor(candidate / this.cols)) continue;
+          const a = this.point(key);
+          const b = this.point(candidate);
+          if (!this.valid(candidate) || !this.world.los(a.x, a.y, b.x, b.y)) continue;
+          next.add(candidate);
+          born.set(candidate, at);
+          return next;
+        }
       }
       return next;
     }
     predict(seconds = 3) {
       let result = new Set(this.active);
-      const ticks = Math.floor((this.timer + seconds) / 3);
-      for (let i = 0; i < ticks; i++) result = this.advance(result, this.tick + i);
+      const born = new Map(this.born);
+      let tick = this.tick;
+      for (let at = this.nextSpread; at <= this.timer + seconds + 1e-8; at += 5) {
+        result = this.advance(result, tick++, at, born);
+      }
       return result;
     }
     ignite(x, y) {
       const key = this.key(x, y);
       if (this.valid(key) && !this.active.has(key)) {
         this.active.add(key);
-        this.state.change(1.5, 'A fire started');
+        this.born.set(key, this.timer);
+        this.scorched.add(key);
       }
     }
     douse(x, y, radius) {
@@ -17522,13 +17617,13 @@
     update(dt, world) {
       if (world.ceasefire) return;
       this.timer += dt;
-      while (this.timer >= 3) {
-        this.timer -= 3;
-        const next = this.advance(this.active, this.tick++);
-        this.state.change((next.size - this.active.size) * 0.65, 'Fire spreading');
-        this.active = next;
+      while (this.timer + 1e-8 >= this.nextSpread) {
+        this.active = this.advance(this.active, this.tick++, this.nextSpread);
+        for (const key of this.active) this.scorched.add(key);
+        this.nextSpread += 5;
       }
       this.predicted = world.timesight ? this.predict(3) : new Set();
+      this.emitEmbers(dt, world);
       const p = world.player;
       const near = this.active.has(this.key(p.x, p.y));
       this.hurtT -= dt;
@@ -17546,40 +17641,91 @@
       });
     }
     render(g, world) {
+      // Scorches remain after water removes a flame. They are floor detail, not
+      // identical flame icons left behind in the hazard pass.
+      for (const key of this.scorched) {
+        const p = this.point(key);
+        const seed = Math.sin(key * 17.37) * 0.5 + 0.5;
+        g.fillStyle = 'rgba(14,12,11,0.64)';
+        G.ellipse(g, p.x - 4 + seed * 9, p.y + 8, 27 + seed * 8, 17 + seed * 6);
+        g.fill();
+        g.strokeStyle = 'rgba(107,69,39,0.38)';
+        g.lineWidth = 2;
+        for (let i = 0; i < 4; i++) {
+          const angle = key + i * 1.71;
+          G.line(g, p.x, p.y, p.x + Math.cos(angle) * 38, p.y + Math.sin(angle) * 25);
+        }
+      }
       if (!world.lit) this.renderEmissive(g, world);
     }
     renderEmissive(g, world) {
       const view = world.camera.view();
+      const reduced = DM.SettingsSchema.reducedFlashing();
+      const time = reduced || DM.Save.settings.fx === 'off' ? 0 : world.time;
       for (const key of this.active) {
         const p = this.point(key);
-        if (p.x < view.x0 - 90 || p.x > view.x1 + 90 || p.y < view.y0 - 90 || p.y > view.y1 + 90) continue;
-        const motion = DM.SettingsSchema.reducedFlashing() || DM.Save.settings.fx === 'off' ? 0 : world.time;
-        g.fillStyle = '#38201a';
-        G.ellipse(g, p.x, p.y + 8, 30, 18);
-        g.fill();
-        G.glow(g, p.x, p.y, 75, '#e37936', 0.3);
-        for (let i = 0; i < 3; i++) {
-          const sway = Math.sin(motion * 3 + key + i * 2) * 7;
-          const x = p.x - 19 + i * 19;
-          const height = 32 + Math.sin(key + i) * 9 + i * 4;
-          g.fillStyle = ['rgba(172,62,31,0.85)', 'rgba(228,116,48,0.92)', '#edbc6d'][i];
-          g.beginPath();
-          g.moveTo(x - 13, p.y + 12);
-          g.bezierCurveTo(x - 23, p.y - 13, x + 7, p.y - 12, x + sway, p.y - height);
-          g.bezierCurveTo(x + 25, p.y - 10, x + 11, p.y - 5, x + 15, p.y + 12);
-          g.quadraticCurveTo(x, p.y + 21, x - 13, p.y + 12);
-          g.fill();
-          g.fillStyle = 'rgba(255,225,158,0.65)';
-          g.beginPath();
-          g.moveTo(x - 5, p.y + 11);
-          g.quadraticCurveTo(x - 8, p.y, x + 2, p.y - height * 0.5);
-          g.quadraticCurveTo(x + 10, p.y + 3, x + 6, p.y + 12);
-          g.fill();
+        if (p.x < view.x0 - 100 || p.x > view.x1 + 100 || p.y < view.y0 - 100 || p.y > view.y1 + 100) continue;
+        const seed = Math.sin(key * 17.37) * 0.5 + 0.5;
+        const cx = p.x + Math.sin(key * 3.7) * 12;
+        const cy = p.y + Math.cos(key * 2.3) * 8;
+        const lift = 36 + seed * 33;
+        G.glow(g, cx, cy - 7, 83 + seed * 32, '#e98135', 0.32);
+        // Nested translucent tongues share neither a height nor an animation
+        // phase. They rise from a ragged bed instead of a row of repeated icons.
+        for (let layer = 0; layer < 3; layer++) {
+          for (let i = 0; i < 4; i++) {
+            const phase = key * 1.83 + i * 2.71 + layer;
+            const x = cx + Math.sin(phase) * (24 - layer * 5);
+            const sway = Math.sin(time * (2.2 + seed) + phase) * (10 - layer * 2);
+            const h = lift * (1.1 - layer * 0.24) * (0.7 + 0.3 * Math.sin(phase + time * 1.7));
+            const wide = 16 - layer * 3;
+            const flame = g.createLinearGradient(x, cy - h, x, cy + 16);
+            const warm = key % 3 === 0 ? '246,151,57' : '248,123,39';
+            flame.addColorStop(0, `rgba(${warm},0.03)`);
+            flame.addColorStop(0.4, `rgba(${warm},${0.32 + layer * 0.12})`);
+            flame.addColorStop(0.83, `rgba(255,207,111,${0.38 + layer * 0.13})`);
+            flame.addColorStop(1, 'rgba(255,231,153,0.85)');
+            g.fillStyle = flame;
+            g.beginPath();
+            g.moveTo(x - wide, cy + 14);
+            g.bezierCurveTo(x - wide * 1.5, cy - h * 0.25, x + sway - wide, cy - h * 0.52, x + sway, cy - h);
+            g.bezierCurveTo(x + sway * 1.6, cy - h * 0.45, x + wide * 1.6, cy - h * 0.17, x + wide, cy + 10);
+            g.quadraticCurveTo(x, cy + 22, x - wide, cy + 14);
+            g.fill();
+          }
         }
         if (!this.vented && DM.Save.settings.fx !== 'off') {
-          g.fillStyle = 'rgba(56,49,40,0.24)';
-          G.ellipse(g, p.x + 9, p.y - 55, 28, 36);
-          g.fill();
+          for (let i = 0; i < 3; i++) {
+            const rise = (time * 17 + i * 24 + seed * 53) % 88;
+            g.fillStyle = `rgba(72,61,48,${0.13 * (1 - rise / 100)})`;
+            G.ellipse(g, cx + Math.sin(time * 0.7 + key + i) * 16, cy - 30 - rise,
+              15 + rise * 0.2, 17 + rise * 0.25);
+            g.fill();
+          }
+        }
+      }
+    }
+    emitEmbers(dt, world) {
+      if (DM.Save.settings.fx === 'off') return;
+      this.particleT -= dt;
+      if (this.particleT > 0) return;
+      this.particleT = 0.14;
+      const view = world.camera.view();
+      let visible = 0;
+      for (const key of this.active) {
+        const p = this.point(key);
+        if (p.x < view.x0 || p.x > view.x1 || p.y < view.y0 || p.y > view.y1) continue;
+        if (visible++ >= 10) break;
+        const phase = world.time * 2 + key;
+        world.particles.emit(p.x + Math.sin(phase) * 17, p.y - 13, {
+          vx: Math.cos(phase) * 12, vy: -35 - key % 21, life: 1.3, size: 1.8,
+          color: key % 2 ? '#ffb752' : '#ef7636', shape: 'spark', drag: 0.2, alpha: 0.65,
+        });
+        if (!this.vented && key % 2 === 0) {
+          world.particles.emit(p.x, p.y - 24, {
+            vx: 5, vy: -20, life: 2.2, size: 9, size1: 27, color: '#62584b',
+            shape: 'smoke', add: false, alpha: 0.12, drag: 0.1,
+          });
         }
       }
     }
@@ -17611,19 +17757,43 @@
       if (!world.ceasefire && this.state.grid) this.state.grid.douse(this.x, this.y, this.r);
     }
     render(g, world) {
-      g.fillStyle = 'rgba(65,116,127,0.45)';
+      g.fillStyle = 'rgba(43,98,115,0.55)';
+      G.ellipse(g, this.x, this.y, this.r, this.r * 0.57);
+      g.fill();
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g, world) {
+      const time = DM.Save.settings.fx === 'off' || DM.SettingsSchema.reducedFlashing() ? 0 : world.time;
+      const shine = g.createLinearGradient(this.x - this.r, this.y, this.x + this.r, this.y);
+      shine.addColorStop(0, 'rgba(102,171,188,0)');
+      shine.addColorStop(0.35, 'rgba(233,161,86,0.24)');
+      shine.addColorStop(0.68, 'rgba(126,202,213,0.23)');
+      shine.addColorStop(1, 'rgba(102,171,188,0)');
+      g.fillStyle = shine;
       G.ellipse(g, this.x, this.y, this.r, this.r * 0.55);
       g.fill();
-      g.strokeStyle = 'rgba(161,218,226,0.4)';
+      g.strokeStyle = 'rgba(181,221,224,0.42)';
       g.lineWidth = 1;
-      const time = DM.Save.settings.fx === 'off' || DM.SettingsSchema.reducedFlashing() ? 0 : world.time;
-      for (let i = 0; i < 4; i++) {
-        const r = ((time * 23 + i * 25) % 110) + 8;
-        G.ellipse(g, this.x, this.y, r, r * 0.55);
+      for (let i = 0; i < 5; i++) {
+        const radius = ((time * 23 + i * 23) % 110) + 8;
+        G.ellipse(g, this.x, this.y, radius, radius * 0.55);
         g.stroke();
+      }
+      // Arcing jets from the broken main land in the same actual dousing pool.
+      for (let i = 0; i < 7; i++) {
+        const spread = (i - 3) * 25;
+        g.strokeStyle = i % 2 ? 'rgba(175,220,231,0.65)' : 'rgba(96,171,198,0.48)';
+        g.lineWidth = 1.6;
+        g.beginPath();
+        g.moveTo(this.x, this.y);
+        g.quadraticCurveTo(this.x + spread * 0.4, this.y - 86 - Math.sin(time * 3 + i) * 4,
+          this.x + spread, this.y + 15 + i % 2 * 12);
+        g.stroke();
+        G.glow(g, this.x + spread, this.y + 15, 8, '#8ac7d5', 0.12);
       }
     }
   }
+
   class Hydrant extends DM.Entity {
     constructor(state, x, y) {
       super({ x, y, r: 19, grabbable: true, disintegratable: false, mass: 4, friction: 12 });
@@ -17663,7 +17833,12 @@
     update(dt, world) {
       if (world.ceasefire) return;
       this.left -= dt;
+      this.x += dt * 8;
+      this.y += Math.sin(this.age * 0.7) * dt * 3;
       if (this.left <= 0) this.dead = true;
+    }
+    light() {
+      return { r: this.r * 1.2, i: 0.16, color: '#c6c39a', k: 0.08 };
     }
     render(g, world) {
       if (!world.lit) this.renderEmissive(g, world);
@@ -17675,7 +17850,14 @@
         G.ellipse(g, this.x + Math.cos(i * 1.3) * 35, this.y + Math.sin(i * 1.3) * 30, 65, 48);
         g.fill();
       }
-      K.ring(g, this.x, this.y, this.r, 'rgba(204,204,142,0.25)', 1);
+      g.strokeStyle = `rgba(219,211,166,${0.15 * a})`;
+      g.lineWidth = 2;
+      for (let i = 0; i < 3; i++) {
+        g.beginPath();
+        g.ellipse(this.x + Math.sin(i * 2 + this.age) * 25, this.y - 8, 54 + i * 8, 27 + i * 5,
+          -0.25, Math.PI * 1.05, Math.PI * 1.83);
+        g.stroke();
+      }
     }
   }
   class Molotov extends DM.Entity {
@@ -17758,6 +17940,29 @@
         }
       }
     }
+    light() {
+      return this.dead ? null : { r: 85, i: 0.62, color: '#e7b88b', k: 0.09 };
+    }
+    renderEmissive(g, world) {
+      super.renderEmissive(g, world);
+      if (this.ko || this.dead) return;
+      g.save();
+      g.translate(this.x, this.y);
+      g.rotate(this.facing);
+      g.strokeStyle = 'rgba(237,184,128,0.7)';
+      g.lineWidth = 1.5;
+      g.beginPath();
+      g.moveTo(-10, -9);
+      g.quadraticCurveTo(-17, -4, -14, 9);
+      g.moveTo(10, -9);
+      g.quadraticCurveTo(17, -4, 14, 9);
+      g.stroke();
+      g.strokeStyle = 'rgba(245,204,155,0.55)';
+      g.beginPath();
+      g.arc(0, -8, 8, Math.PI * 1.1, Math.PI * 1.95);
+      g.stroke();
+      g.restore();
+    }
     render(g, world) {
       super.render(g, world);
       if (this.thrower && !this.ko) {
@@ -17815,7 +18020,7 @@
       this.mass = 2;
       this.grabbable = true;
       this.disarmed = 0;
-      this.cool = 6;
+      this.cool = 0;
       this.aimT = 0;
       this.shots = 0;
       this.silent = false;
@@ -17845,12 +18050,21 @@
         this.vx = U.damp(this.vx, 0, 8, dt);
         this.vy = U.damp(this.vy, 0, 8, dt);
       }
-      if (this.silent || this.disarmed > 0) return;
+      // Thirty readable seconds also satisfies the twenty-second no-live-fire
+      // minimum. The first warning then gives a further 2.2 seconds to respond.
+      if (this.silent || this.disarmed > 0 || this.state.elapsed < 30 ||
+        this.state.elapsed - this.state.lastCasualty < 30) return;
       if (this.aimT > 0) {
+        if (!this.target || this.target.dead || this.target.safe) {
+          this.aimT = 0;
+          this.target = null;
+          return;
+        }
+        this.facing = U.angleTo(this.x, this.y, this.target.x, this.target.y);
         this.aimT -= dt;
         if (this.aimT <= 0 && this.target && !this.target.dead && !this.target.safe) {
           world.add(new LiveRound(this.state, this, this.target));
-          this.state.change(3, 'The Comedian fired');
+          this.state.shotHeat += 3;
           this.shots++;
           DM.Audio.play('summer_shot');
           if (this.shots % 3 === 0) {
@@ -17867,8 +18081,9 @@
         U.dist(e.x, e.y, this.x, this.y) < 520 && world.los(this.x, this.y, e.x, e.y));
       if (this.target) {
         this.facing = U.angleTo(this.x, this.y, this.target.x, this.target.y);
-        this.aimT = this.target.isDriver ? 2.2 : 1.3;
-        world.bark(this, this.target.isDriver ? 'I can finish this.' : this.target.ko ? 'Stay down means stay down.' : 'Clear the street.');
+        this.aimT = 2.2;
+        world.bark(this, 'Comedian takes aim');
+        DM.Audio.play('summer_aim');
       }
     }
     render(g, world) {
@@ -17880,9 +18095,17 @@
     }
     renderEmissive(g, world) {
       if (this.aimT > 0 && this.target && !this.target.dead) {
+        const handX = this.x + Math.cos(this.facing) * 25;
+        const handY = this.y + Math.sin(this.facing) * 25;
+        g.strokeStyle = '#c9b197';
+        g.lineWidth = 5;
+        G.line(g, this.x, this.y, handX, handY);
+        g.strokeStyle = '#222b2e';
+        g.lineWidth = 7;
+        G.line(g, handX, handY, handX + Math.cos(this.facing) * 13, handY + Math.sin(this.facing) * 13);
         g.strokeStyle = '#d98d5d';
-        g.lineWidth = 1;
-        g.setLineDash([5, 8]);
+        g.lineWidth = 2.5;
+        g.setLineDash([10, 6]);
         G.line(g, this.x, this.y, this.target.x, this.target.y);
         g.setLineDash([]);
       }
@@ -17982,7 +18205,9 @@
       g.restore();
     }
   }
-  Object.assign(S, { CityState, FireGrid, Hydrant, Puddle, Gas, Molotov, Rioter, LiveRound, Comedian, Resident, StairBeam });
+  Object.assign(S, {
+    SummerBossFraming, CityState, FireGrid, Hydrant, Puddle, Gas, Molotov, Rioter, LiveRound, Comedian, Resident, StairBeam,
+  });
 })();
 </script>
 <script>/* src/game/long-summer-truck.js */
@@ -18164,7 +18389,7 @@
         ['cannon', -40, 0, 140], ['wheel', -96, -83, 70], ['wheel', 65, -83, 70],
         ['wheel', -96, 83, 70], ['wheel', 65, 83, 70], ['cab', 153, 0, 30]
       ]) this.parts.push(world.add(new TruckPart(this, role, x, y, hp)));
-      this.cameraFrame = new K.BossFraming(this.ctx, this, { left: 235, right: 235, top: 235, bottom: 235 });
+      this.cameraFrame = new S.SummerBossFraming(this.ctx, this, { left: 235, right: 235, top: 235, bottom: 235 });
     }
     componentChanged() {
       const mechanics = this.parts.filter(p => p.role !== 'cab');
@@ -18260,7 +18485,7 @@
         const ax = this.x;
         const ay = this.y;
         this.x = U.clamp(this.x + Math.cos(this.lockAngle) * 270 * dt, 360, world.w - 360);
-        this.y = U.clamp(this.y + Math.sin(this.lockAngle) * 270 * dt, 360, world.h - 330);
+        this.y = U.clamp(this.y + Math.sin(this.lockAngle) * 270 * dt, 360, (world.playableHeight || world.h) - 330);
         if (this.hitT <= 0 && K.segmentDistance(p.x, p.y, ax, ay, this.x, this.y) < 125 + p.r) {
           p.damage(17, this, 'impact');
           p.impulse(Math.cos(this.lockAngle) * 950, Math.sin(this.lockAngle) * 950);
@@ -18431,42 +18656,116 @@
   const K = DM.BonusKit;
   const U = DM.U;
 
-  function leatherMask(g) {
-    g.fillStyle = '#252a2b';
-    g.beginPath();
-    g.moveTo(30, 40);
-    g.lineTo(70, 40);
-    g.lineTo(67, 51);
-    g.lineTo(52, 48);
-    g.lineTo(48, 48);
-    g.lineTo(33, 51);
+  function leatherMask(g, t) {
+    // The existing local mask hook can also add a broader jaw and jacket.
+    // It changes this portrait only; Dan keeps his slimmer original silhouette.
+    g.fillStyle = '#171d20';
+    G.ellipse(g, 50, 108, 57, 35);
     g.fill();
-    g.fillStyle = '#cfb899';
-    for (const x of [40, 60]) {
-      G.ellipse(g, x, 45, 6, 2.4);
+    g.fillStyle = '#ae8061';
+    G.rr(g, 38, 62, 24, 28, 5);
+    g.fill();
+    g.fillStyle = '#c9a17d';
+    g.beginPath();
+    g.moveTo(28, 40);
+    g.quadraticCurveTo(29, 22, 50, 23);
+    g.quadraticCurveTo(75, 25, 74, 46);
+    g.lineTo(72, 67);
+    g.quadraticCurveTo(62, 81, 42, 78);
+    g.lineTo(29, 68);
+    g.closePath();
+    g.fill();
+    g.fillStyle = 'rgba(87,64,50,0.24)';
+    G.ellipse(g, 52, 67, 22, 12);
+    g.fill();
+    g.fillStyle = '#353335';
+    g.beginPath();
+    g.moveTo(27, 41);
+    g.quadraticCurveTo(27, 16, 51, 20);
+    g.quadraticCurveTo(74, 18, 75, 44);
+    g.lineTo(67, 35);
+    g.quadraticCurveTo(48, 28, 34, 36);
+    g.fill();
+    g.fillStyle = '#898278';
+    g.fillRect(29, 36, 5, 17);
+    g.fillRect(68, 36, 5, 17);
+    g.fillStyle = '#151b1e';
+    g.beginPath();
+    g.moveTo(28, 40);
+    g.lineTo(73, 40);
+    g.lineTo(71, 54);
+    g.lineTo(54, 50);
+    g.lineTo(49, 53);
+    g.lineTo(32, 54);
+    g.closePath();
+    g.fill();
+    g.fillStyle = '#d8c19b';
+    for (const x of [40, 62]) {
+      G.ellipse(g, x, 46, 6, 2);
+      g.fill();
+      g.fillStyle = '#292523';
+      G.circle(g, x, 46, 1.5);
+      g.fill();
+      g.fillStyle = '#d8c19b';
+    }
+    g.strokeStyle = '#85634e';
+    g.lineWidth = 1;
+    for (const x of [33, 64]) {
+      G.line(g, x, 55, x + 6, 58);
+      G.line(g, x + 1, 59, x + 5, 64);
+    }
+    G.line(g, 48, 53, 45, 61);
+    G.line(g, 45, 61, 52, 62);
+    G.line(g, 41, 68, 62, 66);
+    G.line(g, 40, 73, 58, 74);
+    // Worn leather lapels, shoulder seams, zipper and the yellow badge.
+    g.fillStyle = '#333c3f';
+    for (const side of [-1, 1]) {
+      g.beginPath();
+      g.moveTo(50 + side * 16, 77);
+      g.lineTo(50 + side * 37, 85);
+      g.lineTo(50 + side * 23, 99);
+      g.lineTo(50 + side * 6, 90);
       g.fill();
     }
-    g.fillStyle = '#79533b';
-    g.fillRect(55, 67, 24, 4);
-    g.fillStyle = '#d68846';
-    g.fillRect(77, 67, 3, 4);
-    g.fillStyle = '#e0bd53';
-    G.circle(g, 68, 88, 6);
+    g.strokeStyle = '#6e7777';
+    g.lineWidth = 1.1;
+    G.line(g, 20, 86, 5, 96);
+    G.line(g, 80, 86, 95, 96);
+    G.line(g, 58, 87, 48, 100);
+    g.fillStyle = '#624230';
+    G.rr(g, 56, 64, 33, 6, 2);
     g.fill();
-    g.fillStyle = '#272b2d';
-    G.circle(g, 66, 86, 0.7);
+    g.fillStyle = '#b6a092';
+    g.fillRect(83, 64, 5, 6);
+    g.fillStyle = '#dc9856';
+    g.fillRect(88, 65, 2, 4);
+    if (DM.Save.settings.fx !== 'off') {
+      const time = DM.SettingsSchema.reducedFlashing() ? 0 : t;
+      g.strokeStyle = 'rgba(202,198,176,0.4)';
+      g.lineWidth = 1.4;
+      g.beginPath();
+      g.moveTo(88, 63);
+      g.bezierCurveTo(94, 56, 82 + Math.sin(time) * 3, 51, 90, 43);
+      g.stroke();
+    }
+    g.fillStyle = '#d6b644';
+    G.circle(g, 75, 90, 7);
     g.fill();
-    G.circle(g, 70, 86, 0.7);
+    g.fillStyle = '#232726';
+    G.circle(g, 73, 88, 1);
     g.fill();
-    g.strokeStyle = '#272b2d';
-    g.lineWidth = 0.8;
+    G.circle(g, 77, 88, 1);
+    g.fill();
+    g.strokeStyle = '#232726';
+    g.lineWidth = 1;
     g.beginPath();
-    g.arc(68, 87, 3, 0, Math.PI);
+    g.arc(75, 90, 3.5, 0.15, Math.PI - 0.15);
     g.stroke();
   }
   Object.assign(DM.LOOKS, {
     comedian: { name: 'The Comedian', skin: '#d4aa83', hair: '#363333', hairStyle: 'short',
-      body: '#252b2e', sleeve: '#353b3d', legs: '#21282a', collar: '#4c5050', trim: '#ae965e',
+      body: '#252b2e', sleeve: '#353b3d', size: 1.15, legs: '#21282a', collar: '#4c5050', trim: '#ae965e',
       moustache: true, bg: '#7f5944', color: S.AMBER, mask: leatherMask },
     summer_rioter: { name: 'A man from the avenue', skin: '#c49b79', hair: '#312d2b', hairStyle: 'short',
       body: '#a18b6e', sleeve: '#c49b79', legs: '#3b4e59', bg: '#6a6252', color: '#dbbd91' },
@@ -18504,6 +18803,11 @@
   DM.Audio.define('summer_vent', { gap: 0.5, fn(a) {
     a.noise({ dur: 1.8, gain: 0.027, ftype: 'lowpass', freq: 1200, freqEnd: 300, attack: 0.3 });
     a.tone({ freq: 85, freqEnd: 42, dur: 0.6, gain: 0.025, type: 'triangle' });
+  } });
+  DM.Audio.define('summer_aim', { gap: 0.4, fn(a) {
+    a.tone({ freq: 330, freqEnd: 440, dur: 0.22, gain: 0.025, type: 'triangle', attack: 0.02 });
+    a.tone({ freq: 440, dur: 0.3, gain: 0.018, type: 'triangle', delay: 0.24, attack: 0.02 });
+    a.noise({ dur: 0.08, gain: 0.012, ftype: 'highpass', freq: 2100, delay: 0.05 });
   } });
   DM.Audio.define('summer_shot', { gap: 0.15, fn(a) {
     a.noise({ dur: 0.12, gain: 0.045, ftype: 'bandpass', freq: 1200, q: 0.6, echo: 0.12 });
@@ -18614,6 +18918,43 @@
     g.lineWidth = 1;
     G.line(g, x + 25, y + 173, x + w - 24, y + 206);
   }
+  function shopDetail(g, wall) {
+    const x = wall.x;
+    const y = wall.y;
+    const width = wall.w;
+    const shutter = x > 400 && x < 870;
+    if (shutter) {
+      g.fillStyle = '#5f665e';
+      g.fillRect(x + 22, y + 165, width - 44, 56);
+      g.strokeStyle = '#29332e';
+      g.lineWidth = 2;
+      for (let yy = y + 168; yy < y + 220; yy += 6) G.line(g, x + 23, yy, x + width - 23, yy);
+      g.strokeStyle = '#b3ac8c';
+      G.line(g, x + 30, y + 175, x + width - 39, y + 190);
+    } else {
+      g.strokeStyle = '#b0bda6';
+      g.lineWidth = 1.4;
+      for (let xx = x + 45; xx < x + width - 30; xx += 87) {
+        G.line(g, xx, y + 168, xx + 19, y + 192);
+        G.line(g, xx + 19, y + 192, xx + 4, y + 217);
+        G.line(g, xx + 19, y + 192, xx + 38, y + 200);
+      }
+      g.fillStyle = '#8d6d49';
+      for (let xx = x + 36; xx < x + width - 28; xx += 55) g.fillRect(xx, y + 207, 29, 8);
+    }
+    if (x < 400 || x > 1200) {
+      g.fillStyle = '#68513e';
+      g.fillRect(x + 12, y + 148, width - 24, 22);
+      for (let xx = x + 16; xx < x + width - 20; xx += 30) {
+        g.fillStyle = '#ad956a';
+        g.fillRect(xx, y + 149, 14, 20);
+      }
+      g.strokeStyle = '#3e352b';
+      g.lineWidth = 3;
+      G.line(g, x + 12, y + 170, x + width - 12, y + 170);
+    }
+    escape(g, x + 40, y + 10, Math.min(130, width - 85));
+  }
   function escape(g, x, y, w) {
     g.strokeStyle = '#8b8980';
     g.lineWidth = 3;
@@ -18646,6 +18987,191 @@
     G.line(g, 30, -30, 30, 24);
     g.restore();
   }
+  const STREET_PROPS = [
+    { kind: 'car', x: 510, y: 510, angle: 0.22, burnt: true },
+    { kind: 'car', x: 1620, y: 970, angle: -0.15, burnt: true },
+    { kind: 'car', x: 240, y: 1080, angle: 0.04 },
+    { kind: 'overturned', x: 1060, y: 750, angle: -0.25 },
+    { kind: 'car', x: 1810, y: 480, angle: 0.18 },
+    { kind: 'car', x: 1320, y: 415, angle: -0.05 },
+    { kind: 'shelter', x: 765, y: 1100 },
+    { kind: 'news', x: 390, y: 945 },
+    { kind: 'news', x: 965, y: 450 },
+    { kind: 'news', x: 1430, y: 1135 },
+    { kind: 'bin', x: 375, y: 655, burning: true },
+    { kind: 'bin', x: 1190, y: 550, burning: true },
+    { kind: 'bin', x: 1770, y: 820, burning: true },
+    { kind: 'lamp', x: 315, y: 390 },
+    { kind: 'lamp', x: 910, y: 1070 },
+    { kind: 'lamp', x: 1810, y: 1110 },
+  ];
+  const TRUCK_PROPS = [
+    { kind: 'barricade', x: 290, y: 430 },
+    { kind: 'barricade', x: 640, y: 365 },
+    { kind: 'barricade', x: 1550, y: 375 },
+    { kind: 'barricade', x: 1750, y: 1240 },
+    { kind: 'car', x: 330, y: 610, angle: 1.3, burnt: true },
+    { kind: 'car', x: 1810, y: 580, angle: -0.4, burnt: true },
+    { kind: 'overturned', x: 1120, y: 1240, angle: -0.05 },
+    { kind: 'sandbags', x: 265, y: 915 },
+    { kind: 'sandbags', x: 1800, y: 975 },
+    { kind: 'sandbags', x: 1450, y: 1230 },
+    { kind: 'bin', x: 1630, y: 1135, burning: true },
+    { kind: 'lamp', x: 1750, y: 405 },
+  ];
+  function prop(g, item) {
+    const { x, y, kind } = item;
+    if (kind === 'car') {
+      car(g, x, y, item.angle || 0, item.burnt);
+      return;
+    }
+    g.save();
+    g.translate(x, y);
+    if (kind === 'overturned') {
+      g.rotate(item.angle || 0);
+      g.fillStyle = '#172022';
+      G.rr(g, -88, -40, 176, 83, 13);
+      g.fill();
+      g.fillStyle = '#59554a';
+      g.fillRect(-75, -34, 150, 68);
+      g.strokeStyle = '#978771';
+      g.lineWidth = 3;
+      G.line(g, -70, 0, 70, 0);
+      for (const xx of [-53, 53]) {
+        G.line(g, xx, -40, xx, 40);
+        for (const yy of [-37, 37]) {
+          g.fillStyle = '#171c1c';
+          G.rr(g, xx - 16, yy - 11, 32, 22, 5);
+          g.fill();
+          g.fillStyle = '#726e62';
+          g.fillRect(xx - 8, yy - 3, 16, 6);
+        }
+      }
+    } else if (kind === 'shelter') {
+      g.fillStyle = '#293435';
+      g.fillRect(-88, -40, 176, 75);
+      g.fillStyle = 'rgba(121,155,151,0.22)';
+      g.fillRect(-79, -34, 158, 55);
+      g.strokeStyle = '#a0a391';
+      g.lineWidth = 4;
+      g.strokeRect(-88, -40, 176, 75);
+      G.line(g, -26, -40, -26, 35);
+      G.line(g, 35, -40, 35, 35);
+      g.fillStyle = '#75634f';
+      g.fillRect(-65, 9, 115, 16);
+      g.strokeStyle = '#c0b5a0';
+      g.lineWidth = 1;
+      G.line(g, 55, -32, 39, -7);
+      G.line(g, 39, -7, 65, 12);
+      G.line(g, 39, -7, 23, 2);
+    } else if (kind === 'news') {
+      g.fillStyle = '#7e5144';
+      G.rr(g, -19, -30, 38, 61, 4);
+      g.fill();
+      g.fillStyle = '#cdc1a5';
+      g.fillRect(-13, -21, 26, 29);
+      g.fillStyle = '#514e43';
+      for (let yy = -17; yy < 7; yy += 5) g.fillRect(-9, yy, yy === -17 ? 19 : 14, 2);
+      g.fillStyle = '#292d2a';
+      g.fillRect(-13, 17, 26, 6);
+    } else if (kind === 'bin') {
+      g.fillStyle = '#3d5146';
+      G.ellipse(g, 0, 6, 25, 29);
+      g.fill();
+      g.strokeStyle = '#8a957a';
+      g.lineWidth = 2;
+      for (let xx = -17; xx <= 17; xx += 7) G.line(g, xx, -15, xx, 27);
+      g.fillStyle = '#141b1b';
+      G.ellipse(g, 0, -17, 25, 11);
+      g.fill();
+    } else if (kind === 'lamp') {
+      g.fillStyle = '#525b52';
+      G.ellipse(g, 0, 0, 14, 9);
+      g.fill();
+      g.strokeStyle = '#929684';
+      g.lineWidth = 5;
+      G.line(g, 0, 0, 0, -92);
+      G.line(g, 0, -92, 35, -92);
+      g.fillStyle = '#383f3a';
+      G.rr(g, 27, -98, 26, 14, 4);
+      g.fill();
+    } else if (kind === 'barricade') {
+      g.strokeStyle = '#796548';
+      g.lineWidth = 7;
+      for (const xx of [-55, 55]) {
+        G.line(g, xx - 13, 28, xx + 8, -18);
+        G.line(g, xx + 17, 28, xx - 8, -18);
+      }
+      g.fillStyle = '#b4a380';
+      g.fillRect(-80, -18, 160, 23);
+      g.save();
+      g.beginPath();
+      g.rect(-80, -18, 160, 23);
+      g.clip();
+      g.strokeStyle = '#433f32';
+      g.lineWidth = 15;
+      for (let xx = -85; xx < 100; xx += 34) G.line(g, xx, 8, xx + 26, -21);
+      g.restore();
+    } else if (kind === 'sandbags') {
+      for (let row = 0; row < 2; row++) {
+        for (let col = 0; col < 4; col++) {
+          g.fillStyle = row ? '#8a8060' : '#a0946f';
+          G.rr(g, -72 + col * 35 + row * 7, -14 + row * 22, 34, 23, 9);
+          g.fill();
+          g.strokeStyle = '#615d48';
+          g.lineWidth = 1;
+          g.stroke();
+        }
+      }
+    }
+    g.restore();
+  }
+  function streetDressing(g, arena) {
+    const items = arena ? TRUCK_PROPS : STREET_PROPS;
+    for (const item of items) prop(g, item);
+    const anchors = items.map(item => ({ x: item.x, y: item.y, r: item.kind === 'car' ? 85 : 55 }));
+    const random = U.seeded(arena ? 77113 : 77112);
+    // Deliberate broken-glass/newspaper clusters fill street-sized dead zones,
+    // not a uniform noise texture. They are flat so no rescue route is blocked.
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 8; col++) {
+        const x = 145 + col * 245 + (row % 2) * 35 + (random() - 0.5) * 90;
+        const y = 470 + row * 205 + (col % 3) * 21 + (random() - 0.5) * 80;
+        anchors.push({ x, y, r: 44 });
+        g.strokeStyle = 'rgba(12,17,18,0.6)';
+        g.lineWidth = 4;
+        G.line(g, x - 34, y + 13, x + 37, y - 9);
+        for (let n = 0; n < 6 + (col + row) % 8; n++) {
+          const xx = x + (random() - 0.5) * 85;
+          const yy = y + (random() - 0.5) * 55;
+          g.fillStyle = n % 3 ? '#727f77' : '#b3aa8b';
+          g.beginPath();
+          g.moveTo(xx, yy);
+          g.lineTo(xx + 4 + random() * 7, yy - 3);
+          g.lineTo(xx + 3, yy + 5 + random() * 4);
+          g.fill();
+        }
+        if ((row + col) % 3 === 0) {
+          g.fillStyle = '#424b44';
+          G.ellipse(g, x + 20, y + 7, 34, 18);
+          g.fill();
+          g.strokeStyle = '#92927b';
+          g.lineWidth = 1;
+          for (let yy = -10; yy <= 10; yy += 5) G.line(g, x - 5, y + 7 + yy, x + 44, y + 7 + yy);
+        }
+        g.fillStyle = '#a2987d';
+        g.save();
+        g.translate(x + 23, y + 4);
+        g.rotate(random());
+        g.fillRect(-13, -7, 20 + (row % 2) * 6, 10 + (col % 2) * 4);
+        g.fillStyle = '#4d5148';
+        for (let line = -4; line < 6; line += 4) g.fillRect(-9, line, 16, 1);
+        g.restore();
+      }
+    }
+    return anchors;
+  }
+  S.streetProps = { avenue: STREET_PROPS, truck: TRUCK_PROPS };
   function street(g, width, height, arena = false) {
     const random = U.seeded(arena ? 7719 : 7708);
     g.fillStyle = '#232c2c';
@@ -18699,9 +19225,7 @@
       g.lineWidth = 2;
       for (let dy = -14; dy <= 14; dy += 7) G.line(g, x - 24, y + dy, x + 24, y + dy);
     }
-    car(g, 510, 510, 0.22, true);
-    car(g, width - 430, height - 350, -0.15, true);
-    car(g, 240, height - 230, 0.05);
+    return streetDressing(g, arena);
   }
   function tenement(g, width, height) {
     const random = U.seeded(776);
@@ -18761,11 +19285,11 @@
       g.fillRect(931, y - 7, 8, 220);
     }
     g.fillStyle = '#5e7160';
-    g.fillRect(675, 1390, 290, 155);
+    g.fillRect(675, 1335, 290, 155);
     g.strokeStyle = '#a6c5ab';
     g.lineWidth = 3;
-    g.strokeRect(680, 1395, 280, 145);
-    G.text(g, 'TO THE STREET', 820, 1534, { size: 19, align: 'center', spacing: 3, color: '#cbd8ba' });
+    g.strokeRect(680, 1340, 280, 145);
+    G.text(g, 'TO THE STREET', 820, 1450, { size: 19, align: 'center', spacing: 3, color: '#cbd8ba' });
     for (const x of [570, 1065]) {
       g.fillStyle = '#917b59';
       G.rr(g, x, 1440, 110, 42, 8);
@@ -18804,7 +19328,10 @@
         }).slice(0, 16);
         for (const key of keys) {
           const p = e.point(key);
-          add(p.x, p.y, 155, { i: 0.63, color: '#ebaa63', k: 0.17 });
+          const steady = DM.SettingsSchema.reducedFlashing() || DM.Save.settings.fx === 'off';
+          const flicker = steady ? 1 : 0.94 + Math.sin(world.time * 3.7 + key * 1.6) * 0.045 +
+            Math.sin(world.time * 6.1 + key) * 0.015;
+          add(p.x, p.y, 270, { i: 0.88 * flicker, color: '#f5ad60', k: 0.36 });
         }
       }
       if (e.light) {
@@ -18830,6 +19357,7 @@
     world.wallStyles.summerBuilding = {
       draw(g, wall) {
         facade(g, wall.x, wall.y, wall.w, wall.buildingName, wall.warm);
+        shopDetail(g, wall);
       },
     };
     const names = arena ? ['EAST RIVER ARMOURY', '', '', 'NATIONAL GUARD'] : ['MERCER • GROCERY', '', 'ALVAREZ • ROOMS', ''];
@@ -18840,8 +19368,10 @@
   };
   S.installArt = function (ctx, type) {
     const w = ctx.world;
-    if (type === 'tenement') w.bake((g, width, height) => tenement(g, width, height));
-    else w.bake((g, width, height) => street(g, width, height, type === 'truck'));
+    if (type === 'tenement') w.bake((g, width, height) => tenement(g, width, w.playableHeight || height));
+    else w.bake((g, width, height) => {
+      w.summerDressing = street(g, width, w.playableHeight || height, type === 'truck');
+    });
     ctx.add(new Haze(ctx.flags.summer));
   };
   S.backdrop = function (g) {
@@ -19882,6 +20412,43 @@
             g.fillRect(x, y, 46, 46);
           }
         }
+        const random = U.seeded(88673);
+        // Years of chairs, boots and equipment leave wear, not a pristine grid.
+        for (let i = 0; i < 430; i++) {
+          const x = 80 + random() * (width - 160);
+          const y = 220 + random() * (height - 300);
+          g.strokeStyle = i % 3 ? 'rgba(13,22,25,0.22)' : 'rgba(169,168,139,0.16)';
+          g.lineWidth = 1 + random() * 2;
+          G.line(g, x, y, x + 9 + random() * 31, y + random() * 5);
+        }
+        // Worn ribbed mat beneath the operator's chair and desk.
+        g.fillStyle = '#3e4540';
+        G.rr(g, 1310, 470, 365, 300, 10);
+        g.fill();
+        g.strokeStyle = '#626656';
+        g.lineWidth = 1;
+        for (let y = 480; y < 760; y += 7) G.line(g, 1320, y, 1665, y);
+        g.fillStyle = 'rgba(173,158,119,0.16)';
+        G.ellipse(g, 1490, 680, 110, 68);
+        g.fill();
+        // The rack ports (bottom centre) feed the actual floor trays and desk.
+        for (const [rackX, trayX] of [[472, 475], [752, 752], [1202, 1203]]) {
+          for (let cable = 0; cable < 4; cable++) {
+            const offset = cable * 4 - 6;
+            g.beginPath();
+            g.moveTo(rackX + offset, 575);
+            g.lineTo(trayX + offset, 615);
+            g.lineTo(trayX + offset, 735 + cable * 5);
+            g.lineTo(1380, 735 + cable * 5);
+            g.lineTo(1380 + cable * 4, 595);
+            g.strokeStyle = '#102024';
+            g.lineWidth = 5;
+            g.stroke();
+            g.strokeStyle = ['#827358', '#526e66', '#8d735c', '#6b7474'][cable];
+            g.lineWidth = 2;
+            g.stroke();
+          }
+        }
         for (const x of [475, 752, 1203]) {
           g.strokeStyle = '#17292f';
           g.lineWidth = 22;
@@ -19894,7 +20461,7 @@
           for (let y = 610; y < 1020; y += 23)
             G.line(g, x - 14, y, x + 14, y);
         }
-        g.fillStyle = '#273b40';
+        g.fillStyle = 'rgba(39,59,64,0.28)';
         g.fillRect(1320, 450, 350, 260);
         g.strokeStyle = 'rgba(172,210,209,0.6)';
         g.lineWidth = 4;
@@ -23046,7 +23613,8 @@
   }
 
   function init(ctx, width, height, spawn) {
-    const w = ctx.newWorld({ w: width, h: height, zoom: 1, bg: '#13212a' });
+    const w = ctx.newWorld({ w: width, h: height + 340, zoom: 1, bg: '#13212a' });
+    w.playableHeight = height;
     w.spawn = spawn;
     w.room(40, 40, width - 80, height - 80);
     const state = ctx.add(new S.CityState(ctx));
@@ -23062,15 +23630,16 @@
     ctx.lock(false);
     ctx.player.energy = 100;
     ctx.player.coherence = 100;
+    S.startReadableCamera(ctx);
   }
 
   function avenue(ctx) {
-    const w = init(ctx, 2050, 1320, { x: 245, y: 900 });
+    const w = init(ctx, 2050, 1320, { x: 290, y: 640 });
     const state = ctx.flags.summer;
     S.installArt(ctx, 'avenue');
     S.addStreetFrontages(w);
     const balconyWall = w.wall(1535, 390, 160, 20, 'low');
-    const seeds = [[510, 510], [545, 560], [1520, 920], [1580, 940]];
+    const seeds = [[510, 510], [545, 560], [1620, 970], [375, 655], [1190, 550], [1770, 820]];
     ctx.add(new S.FireGrid(state, { x: 80, y: 400, w: 1880, h: 660 }, seeds));
     ctx.flags.hydrants = [ctx.add(new S.Hydrant(state, 570, 570)), ctx.add(new S.Hydrant(state, 1560, 910))];
     ctx.flags.rioters = [];
@@ -23098,9 +23667,9 @@
   }
 
   function tenement(ctx) {
-    const w = init(ctx, 1640, 1640, { x: 820, y: 1450 });
+    const w = init(ctx, 1640, 1640, { x: 820, y: 1380 });
     const state = ctx.flags.summer;
-    state.safePoint = { x: 820, y: 1465 };
+    state.safePoint = { x: 820, y: 1400 };
     S.installArt(ctx, 'tenement');
     ctx.flags.comedian.silent = true;
     ctx.flags.comedian.x = 1080;
@@ -23134,7 +23703,7 @@
       if ((ctx.flags.rescuedMask || 0) & (1 << id)) {
         e.safe = true;
         e.x = 720 + id * 32;
-        e.y = 1470;
+        e.y = 1405;
         e.grabbable = false;
         e.interact = null;
       }
@@ -23142,7 +23711,7 @@
     }
     ctx.flags.looter = ctx.add(new S.Rioter(state, 1170, 960));
     ctx.flags.looter.exitPoint = state.safePoint;
-    ctx.flags.exit = ctx.add(new K.Terminal(820, 1550, 'Leave for the armoury', () => {
+    ctx.flags.exit = ctx.add(new K.Terminal(820, 1460, 'Leave for the armoury', () => {
       if (ctx.flags.rescued < 6) ctx.toast('SIX RESIDENTS MUST REACH THE STREET', S.AMBER);
       else ctx.flags.tenementExit = true;
     }));
@@ -23150,12 +23719,12 @@
   }
 
   function truckMap(ctx) {
-    const w = init(ctx, 2050, 1480, { x: 530, y: 1110 });
+    const w = init(ctx, 2050, 1480, { x: 530, y: 1040 });
     const state = ctx.flags.summer;
-    state.safePoint = { x: 540, y: 1175 };
+    state.safePoint = { x: 540, y: 1120 };
     S.installArt(ctx, 'truck');
     S.addStreetFrontages(w, true);
-    ctx.add(new S.FireGrid(state, { x: 80, y: 350, w: 1880, h: 940 }, [[510, 510], [1620, 1140]]));
+    ctx.add(new S.FireGrid(state, { x: 80, y: 350, w: 1880, h: 940 }, [[330, 610], [1810, 580], [1630, 1135]]));
     ctx.flags.hydrants = [ctx.add(new S.Hydrant(state, 475, 555)), ctx.add(new S.Hydrant(state, 1570, 1130))];
     ctx.flags.comedian.silent = true;
     ctx.flags.truck = ctx.add(new S.RiotTruck(state, 1110, 650));
@@ -23167,7 +23736,7 @@
       g.fill();
       K.ring(g, state.safePoint.x, state.safePoint.y, 70, '#729c85', 2);
     });
-    ctx.add(new K.Sign(540, 1255, 'SAFE PASSAGE', S.TEAL, 15));
+    ctx.add(new K.Sign(420, 1060, 'SAFE PASSAGE', S.TEAL, 15));
     return w;
   }
 
@@ -23284,7 +23853,7 @@
           yield ctx.dialog([
             ['niteowl', 'The tenement is burning. But we cannot move anyone through a street like this.'],
             ['comedian', 'Then give them a reason to get out of it.'],
-            ['niteowl', 'Jon, those are live rounds. Lift him with telekinesis if he starts shooting. ' +
+            ['niteowl', 'Jon, those are live rounds. He raises his gun before firing. Lift him while he aims. ' +
               'A quick hold takes his gun away for ten seconds.'],
             ['manhattan', 'I was told to help the people here. I do not see an exception for the angry ones.'],
             ['niteowl', 'Spare them and the street calms down. Rip the red hydrants free to put out fires. ' +
@@ -23312,13 +23881,13 @@
             ['comedian', 'A room full of people who cannot shoot back. I think you can manage.'],
             ['niteowl', 'E asks them to follow; telekinesis can carry them. They are safe only at the green exit. ' +
               'Lift the beam off the stairs.'],
-            ['manhattan', 'In three seconds the fire reaches the next room. With Temporal Sight, I can show you where.'],
+            ['manhattan', 'The fire is gathering itself. Temporal Sight shows where it will be in three seconds.'],
             ['niteowl', 'Your duplicate can reassure another resident while you work. At the top landing, ' +
               'grow with G, then use the roof latch with E to let the smoke out.'],
           ]);
           ready(ctx);
           ctx.objective('Bring six residents to the street', () => `${ctx.flags.rescued} / 6 safely outside`);
-          ctx.marker(820, 1465, 'SAFE EXIT');
+          ctx.marker(820, 1400, 'SAFE EXIT');
           ctx.tutorial('E guides residents; C carries them. F predicts fire. R helps another room. G + E vents.', 16);
           yield ctx.until(() => ctx.flags.tenementExit);
           ctx.objectiveDone();
@@ -23346,7 +23915,7 @@
           yield ctx.until(() => ctx.flags.truck.disabled);
           if (!ctx.flags.driverOutcome) {
             ctx.objective('Bring the driver to safe passage · Stop the Comedian');
-            ctx.marker(540, 1175, 'SAFE PASSAGE');
+            ctx.marker(540, 1120, 'SAFE PASSAGE');
             ctx.tutorial('Hold C on the Comedian to disarm him. E guides the driver; C can carry him to safety.', 16);
           }
           yield ctx.until(() => !!ctx.flags.driverOutcome);
