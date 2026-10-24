@@ -112,10 +112,11 @@
       }
       items.push({ label: 'NEW GAME', action: () => this.newGame() });
       if (!items.includes(chapters)) items.push(chapters);
+      if (DM.Bonus) items.push({ label: 'BONUS LEVELS', action: () => Engine.set(new Scenes.BonusMenu()) });
       items.push({ label: 'SETTINGS', action: () => Engine.push(new Scenes.Settings()) });
       items.push({ label: 'CONTROLS', action: () => Engine.push(new Scenes.Controls()) });
       const keep = this.menu ? this.menu.sel : 0;
-      this.menu = new TitleMenu(items, { x: 84, y: 340, w: 360, itemH: 50, size: 25 });
+      this.menu = new TitleMenu(items, { x: 84, y: 330, w: 400, itemH: 44, size: 24 });
       this.menu.sel = Math.min(keep, items.length - 1);
     }
     continueGame() {

@@ -74,7 +74,7 @@
       this.dialog = new DM.Dialog();
       this.player = new DM.Player(0, 0);
       this.player.setForm(ch.form || 'manhattan');
-      for (const id of DM.Chapters.powersBefore(ch.index)) this.player.unlock(id);
+      for (const id of (ch.startPowers || DM.Chapters.powersBefore(ch.index))) this.player.unlock(id);
       this.world = new DM.World({ w: DM.W, h: DM.H });
       this.failed = false;
       this.failT = 0;
@@ -156,8 +156,8 @@
       if (p.down && !this.failed) {
         this.failed = true;
         this.failT = 1.8;
-        Save.data.totals.decoherences++;
-        Save.write();
+        if (this.chapter.bonus) DM.Bonus.death();
+        else { Save.data.totals.decoherences++; Save.write(); }
         // Coming apart: a beat of freeze, then the world crawls while Jon's
         // atoms hang in the air (DM.Feedback drains the colour meanwhile).
         w.ceasefire = true;
@@ -186,6 +186,7 @@
     }
 
     completeChapter() {
+      if (this.chapter.bonus) return DM.Bonus.complete(this);
       const ch = this.chapter;
       const st = this.ctx.stats;
       const next = DM.Chapters.next(ch.id);
