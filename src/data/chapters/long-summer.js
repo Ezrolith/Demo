@@ -171,7 +171,7 @@
       g.fill();
       K.ring(g, state.safePoint.x, state.safePoint.y, 70, '#729c85', 2);
     });
-    ctx.add(new K.Sign(540, 1170, 'SAFE PASSAGE', S.TEAL, 15));
+    ctx.add(new K.Sign(420, 1060, 'SAFE PASSAGE', S.TEAL, 15));
     return w;
   }
 

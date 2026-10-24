@@ -749,6 +749,15 @@ try {
     }
     return true;
   }));
+  check('truck safe-passage caption stays above the hint after ten live simulation seconds', await page.evaluate(() => {
+    T.start(2, null, true);
+    T.step(10);
+    const p = T.p();
+    const sign = p.world.entities.find(e => e.text === 'SAFE PASSAGE');
+    if (!sign || !p.hud.hintMsg) return false;
+    const q = p.world.camera.toScreen(sign.x, sign.y);
+    return q.y + 10 * p.world.camera.zoom < DM.H - 170;
+  }));
   check('no 400px square of playable avenue lacks deliberate scenery/debris', await page.evaluate(() => {
     T.start();
     const anchors = T.p().world.summerDressing;
