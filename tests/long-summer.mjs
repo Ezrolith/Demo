@@ -607,14 +607,20 @@ try {
   check('passive Heat is bounded at 1.5/s overall and fire at 0.5/s regardless of cell count', await page.evaluate(() => {
     T.start(1);
     const state = T.p().ctx.flags.summer;
-    state.shotHeat = 200;
+    const initialHeat = state.heat;
+    state.casualty(T.p().ctx.flags.looter);
+    if (state.heat !== initialHeat || T.p().ctx.flags.comedianCasualties !== 1) return false;
+    state.shotHeat += 200;
     let previous = state.passiveAdded;
     let previousFire = state.fireHeatAdded;
+    let previousHeat = state.heat;
     for (let i = 0; i < 40; i++) {
       T.step(1);
-      if (state.passiveAdded - previous > 1.50001 || state.fireHeatAdded - previousFire > 0.50001) return false;
+      if (state.passiveAdded - previous > 1.50001 || state.fireHeatAdded - previousFire > 0.50001 ||
+        state.heat - previousHeat > 1.50001) return false;
       previous = state.passiveAdded;
       previousFire = state.fireHeatAdded;
+      previousHeat = state.heat;
     }
     return true;
   }));

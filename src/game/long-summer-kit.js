@@ -134,7 +134,8 @@
       person.casualty = true;
       person.dead = true;
       this.ctx.flags.comedianCasualties++;
-      this.change(20, 'The Comedian killed someone');
+      // Autonomous fatalities use the same rate limit as live fire; the ledger updates immediately.
+      this.shotHeat += 20;
       this.ctx.toast('A LIFE LOST TO THE COMEDIAN', S.RED);
       K.burst(this.world, person.x, person.y, '#b5a493');
       return true;
@@ -900,5 +901,7 @@
       g.restore();
     }
   }
-  Object.assign(S, { SummerBossFraming, CityState, FireGrid, Hydrant, Puddle, Gas, Molotov, Rioter, LiveRound, Comedian, Resident, StairBeam });
+  Object.assign(S, {
+    SummerBossFraming, CityState, FireGrid, Hydrant, Puddle, Gas, Molotov, Rioter, LiveRound, Comedian, Resident, StairBeam,
+  });
 })();
