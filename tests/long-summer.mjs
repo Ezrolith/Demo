@@ -1,4 +1,4 @@
-/* Gameplay audit regression: Q aimed at a wheel must not unmake the turning truck cab.
+/* Tested source+standalone: Q aimed at a wheel must not unmake the turning truck cab.
  * Normal mode uses file navigation and browser storage. --offline is an explicitly
  * limited local harness. Setup positions actors and sometimes protects Jon; inputs
  * perform objectives. These checks are not an unassisted human playthrough. */
