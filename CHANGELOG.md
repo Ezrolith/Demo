@@ -1,12 +1,14 @@
 # Changes
 
-## Bonus polish — in progress
-- Corrected two bonus-track levels without changing campaign music.
-- Restored the Dr. Manhattan browser title.
-- Consolidated play/development notes in docs/BONUS.md.
-- Removed publication hashes and verification tooling; retained test-only CI.
+## Bonus polish — review candidate
+- Normalised two loud bonus tracks and restored the original browser title.
+- Replaced runtime overrides and duplicated helpers with `DM.BonusKit`.
+- Added richer procedural locations, dedicated ambience and a synchronised ghost train.
+- Rebuilt both boss presentations, physical attacks, phase changes and camera framing.
+- Added Rorschach's interrogation, Nite Owl's protected hack and human transit guards.
+- Added moral reactions/endings and expanded focused gameplay checks.
+- Recorded 41 matched before/after screenshots; retained read-only test CI.
+- Consolidated documentation in `docs/BONUS.md`; removed temporary transfer automation.
 
-## Bonus Adventures I and II
-The Last Broadcast and The Ninth Minute add optional adventures with
-separate saves. Story H remains in PR #1. No default-branch merge or
-external live-site deployment has been performed.
+The original campaign, Story H branch and external play link are unchanged. This is a draft
+review branch, not a merge or deployment. The third adventure has not been started here.
