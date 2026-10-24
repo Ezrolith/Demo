@@ -1,0 +1,62 @@
+{
+  "target": "index.html",
+  "offline": false,
+  "viewport": [
+    1280,
+    720
+  ],
+  "views": [
+    [
+      "avenue",
+      "long_summer",
+      0,
+      870,
+      650,
+      1010,
+      560,
+      0.72
+    ],
+    [
+      "tenement",
+      "long_summer",
+      1,
+      820,
+      850,
+      820,
+      820,
+      0.46
+    ],
+    [
+      "tenement-detail",
+      "long_summer",
+      1,
+      820,
+      490,
+      820,
+      490,
+      0.85
+    ],
+    [
+      "truck",
+      "long_summer",
+      2,
+      750,
+      1100,
+      null,
+      null,
+      null
+    ],
+    [
+      "pier-reference",
+      "superman",
+      1,
+      950,
+      1050,
+      1020,
+      820,
+      0.75
+    ]
+  ],
+  "notes": "Fixed map framing. Truck shots use the actual encounter camera; scenarios are staged, not a playthrough.",
+  "errors": []
+}

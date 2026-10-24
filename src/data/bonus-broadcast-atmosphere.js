@@ -475,6 +475,43 @@
             g.fillRect(x, y, 46, 46);
           }
         }
+        const random = U.seeded(88673);
+        // Years of chairs, boots and equipment leave wear, not a pristine grid.
+        for (let i = 0; i < 430; i++) {
+          const x = 80 + random() * (width - 160);
+          const y = 220 + random() * (height - 300);
+          g.strokeStyle = i % 3 ? 'rgba(13,22,25,0.22)' : 'rgba(169,168,139,0.16)';
+          g.lineWidth = 1 + random() * 2;
+          G.line(g, x, y, x + 9 + random() * 31, y + random() * 5);
+        }
+        // Worn ribbed mat beneath the operator's chair and desk.
+        g.fillStyle = '#3e4540';
+        G.rr(g, 1310, 470, 365, 300, 10);
+        g.fill();
+        g.strokeStyle = '#626656';
+        g.lineWidth = 1;
+        for (let y = 480; y < 760; y += 7) G.line(g, 1320, y, 1665, y);
+        g.fillStyle = 'rgba(173,158,119,0.16)';
+        G.ellipse(g, 1490, 680, 110, 68);
+        g.fill();
+        // The rack ports (bottom centre) feed the actual floor trays and desk.
+        for (const [rackX, trayX] of [[472, 475], [752, 752], [1202, 1203]]) {
+          for (let cable = 0; cable < 4; cable++) {
+            const offset = cable * 4 - 6;
+            g.beginPath();
+            g.moveTo(rackX + offset, 575);
+            g.lineTo(trayX + offset, 615);
+            g.lineTo(trayX + offset, 735 + cable * 5);
+            g.lineTo(1380, 735 + cable * 5);
+            g.lineTo(1380 + cable * 4, 595);
+            g.strokeStyle = '#102024';
+            g.lineWidth = 5;
+            g.stroke();
+            g.strokeStyle = ['#827358', '#526e66', '#8d735c', '#6b7474'][cable];
+            g.lineWidth = 2;
+            g.stroke();
+          }
+        }
         for (const x of [475, 752, 1203]) {
           g.strokeStyle = '#17292f';
           g.lineWidth = 22;
@@ -487,7 +524,7 @@
           for (let y = 610; y < 1020; y += 23)
             G.line(g, x - 14, y, x + 14, y);
         }
-        g.fillStyle = '#273b40';
+        g.fillStyle = 'rgba(39,59,64,0.28)';
         g.fillRect(1320, 450, 350, 260);
         g.strokeStyle = 'rgba(172,210,209,0.6)';
         g.lineWidth = 4;

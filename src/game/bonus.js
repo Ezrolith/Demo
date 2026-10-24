@@ -174,8 +174,10 @@
       DM.Audio.music.play(ch.music || 'bonus_noir');
     }
     cardRect(i) {
+      const count = Bonus.list.length;
+      const width = (1146 - (count - 1) * 18) / count;
       return {
-        x: 67 + i * 582, y: 112, w: 564, h: 58
+        x: 67 + i * (width + 18), y: 112, w: width, h: 58
       };
     }
     update(dt) {
@@ -230,7 +232,7 @@
           size: 18, color: chosen ? accent : '#758999'
         });
         G.text(ctx, c.title.toUpperCase(), r.x + 60, r.y + 36, {
-          size: 22, spacing: 2, weight: chosen ? 600 : 400, color: chosen ? '#f0eadc' : '#97aebb'
+          size: Bonus.list.length > 2 ? 19 : 22, spacing: Bonus.list.length > 2 ? 1 : 2, weight: chosen ? 600 : 400, color: chosen ? '#f0eadc' : '#97aebb'
         });
         if (Bonus.data.completed[c.id])
           G.text(ctx, '✓', r.x + r.w - 25, r.y + 36, {
