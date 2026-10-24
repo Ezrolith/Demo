@@ -1,0 +1,72 @@
+name: Bonus adventures publication
+
+on:
+  pull_request:
+    branches: ['claude/dr-manhattan-game']
+    types: [opened]
+
+permissions:
+  contents: read
+
+jobs:
+  publish-and-check:
+    if: github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.head.ref == 'chatgpt/bonus-adventures'
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: write
+    env:
+      SOURCE_SHA: ${{ github.event.pull_request.head.sha }}
+      TARGET_BRANCH: chatgpt/bonus-adventures
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: true
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Apply exact integrations and rebuild supplied candidate
+        run: |
+          node tools/import-bonus.mjs
+          find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+          node tools/build.mjs
+          node tools/verify-bonus-release.mjs
+      - name: Commit generated game and integration only to the bonus branch
+        run: |
+          set -euo pipefail
+          remote_sha=$(git ls-remote origin "refs/heads/$TARGET_BRANCH" | cut -f1)
+          test "$remote_sha" = "$SOURCE_SHA"
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git rm tools/import-bonus.mjs
+          git add src/core/save.js src/game/scenes/play.js src/game/scenes/title.js dist/dr-manhattan.html README.md HANDOVER.md
+          git commit -m 'Publish exact bonus-adventures game, save/menu integration and handover links'
+          git push origin "HEAD:refs/heads/$TARGET_BRANCH"
+      - name: Install browser tests
+        run: |
+          npm install --ignore-scripts
+          npx playwright install --with-deps chromium
+      - name: Last Broadcast source - 29 focused checks
+        run: node tests/bonus.mjs
+      - name: Ninth Minute source - 56 focused checks
+        run: node tests/ninth-minute.mjs
+      - name: Preserve source-test results
+        run: |
+          mkdir -p artifacts
+          cp -R tests/out artifacts/source
+      - name: Last Broadcast standalone - 29 focused checks
+        run: node tests/bonus.mjs dist/dr-manhattan.html
+      - name: Ninth Minute standalone - 56 focused checks
+        run: node tests/ninth-minute.mjs dist/dr-manhattan.html
+      - name: Package published source
+        run: git archive --format=zip HEAD -o artifacts/bonus-adventures-source.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bonus-adventures-publication
+          path: |
+            dist/dr-manhattan.html
+            artifacts/
+            tests/out/
+          retention-days: 14
