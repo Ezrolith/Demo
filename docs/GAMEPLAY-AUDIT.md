@@ -66,3 +66,35 @@ then all original/bonus regression suites sequentially.
 See [PR #4](https://github.com/Ezrolith/Demo/pull/4) and
 [`docs/SUMMER-REVIEW-HANDOVER.md`](SUMMER-REVIEW-HANDOVER.md)
 for the broader artwork/fairness changes and caveats.
+
+
+## Additional user-input review: avenue and rescue exit
+
+A separate real-keyboard/mouse play route reproduced an **avenue bypass**: from Jon's
+actual spawn, hold C on the first hydrant, teleport across the map in ordinary
+380-unit steps, call Nite Owl with E and enter the tenement. Previously this
+worked in under ten seconds **with every original rioter still active**.
+The story objective ("Calm the avenue") had been satisfied by water alone.
+
+**Correction:** at least two of the initial six rioters must now be knocked out
+(nonlethally), otherwise neutralised, or depart peacefully, in addition to
+Heat below 40 and the balcony grapple. Progress appears under the mission objective.
+This is a gameplay gate, not a request to kill people. A second physical-input
+route used R duplicates, subdued three rioters nonlethally, opened the balcony,
+and advanced to the tenement at normal vulnerability. The fast bypass remained
+blocked when retried against the corrected game.
+
+A normal tenement screenshot also revealed **"Leave for the armoury"** overlapping
+the green SAFE EXIT residents use. The onward-route console is now 174 world units
+to the side and is disabled until all six residents have reached the street.
+The SAFE EXIT remains visible and distinct.
+
+Regression checks were added to tests/long-summer.mjs for the bypass,
+the two-person nonlethal resolution, exit-console separation and delayed activation.
+The three focused bonus suites were rechecked locally; Long Summer passed
+75 checks in the restricted inlined-script harness. This **does not** replace
+the normal-file GitHub CI run, which must pass on the final combined build.
+The earlier cab-centred disintegration correction is preserved separately.
+
+Unverified: full first-time end-to-end playthrough, subjective sound quality,
+Safari/Firefox and any gameplay balance effects beyond these reproducible routes.
