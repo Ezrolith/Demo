@@ -1,0 +1,59 @@
+name: Bonus adventures validation
+
+on:
+  pull_request:
+    branches: ['claude/dr-manhattan-game']
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bonus-validation-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax, reproducible build and publication hashes
+        run: |
+          find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+          node tools/build.mjs
+          node tools/verify-bonus-release.mjs
+          git diff --exit-code -- dist/dr-manhattan.html
+      - name: Install browser tests
+        run: |
+          npm install --ignore-scripts
+          npx playwright install --with-deps chromium
+      - name: Last Broadcast source - 29 focused checks
+        run: node tests/bonus.mjs
+      - name: Ninth Minute source - 56 focused checks
+        run: node tests/ninth-minute.mjs
+      - name: Preserve source-test results
+        run: |
+          mkdir -p artifacts
+          cp -R tests/out artifacts/source
+      - name: Last Broadcast standalone - 29 focused checks
+        run: node tests/bonus.mjs dist/dr-manhattan.html
+      - name: Ninth Minute standalone - 56 focused checks
+        run: node tests/ninth-minute.mjs dist/dr-manhattan.html
+      - name: Package source snapshot
+        run: git archive --format=zip HEAD -o artifacts/bonus-adventures-source.zip
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bonus-adventures-${{ github.event.pull_request.head.sha }}
+          path: |
+            dist/dr-manhattan.html
+            artifacts/
+            tests/out/
+          retention-days: 14

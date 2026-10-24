@@ -1,5 +1,7 @@
 # Handover: how to keep developing this game
 
+> **Bonus adventures update — 24 October 2026:** This branch includes The Last Broadcast and The Ninth Minute. Open `dist/dr-manhattan.html` and choose BONUS LEVELS. See [BONUS-README.md](BONUS-README.md), [THE-NINTH-MINUTE.md](THE-NINTH-MINUTE.md) and [CHANGELOG.md](CHANGELOG.md). The original campaign remains unchanged; earlier Story H work is on its separate branch. Older roadmap/status notes below are retained as history.
+
 This file is for whoever picks the project up next, whether a person or an AI coding assistant. Read it first, then `README.md`, then `docs/ROADMAP.md`.
 
 ## Where things stand
