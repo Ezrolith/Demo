@@ -1,7 +1,5 @@
 name: Bonus polish regression
 on:
-  push:
-    branches: [codex/bonus-polish]
   pull_request:
     branches: [chatgpt/bonus-adventures]
 permissions:
@@ -9,20 +7,26 @@ permissions:
 jobs:
   regression:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 100
     steps:
       - uses: actions/checkout@v4
         with:
+          ref: ${{ github.event.pull_request.head.sha }}
           persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Syntax and standalone build
+        run: |
+          find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+          node tools/build.mjs
       - run: npm install --ignore-scripts
       - run: npx playwright install --with-deps chromium
       - name: Eleven suites, sequentially, with one retry on failure
         shell: bash
         run: |
           mkdir -p tests/out/regression
+          git rev-parse HEAD > tests/out/regression/commit.txt
           failed=0
           for suite in smoke visual audio powers saves settings ledger encounters flows bonus ninth-minute; do
             for attempt in 1 2; do
@@ -37,9 +41,25 @@ jobs:
             if [ "$result" -ne 0 ]; then failed=1; fi
           done
           exit "$failed"
+      - name: Standalone adventures
+        if: always()
+        shell: bash
+        run: |
+          failed=0
+          mkdir -p tests/out/regression
+          for suite in bonus ninth-minute; do
+            set +e
+            node "tests/$suite.mjs" dist/dr-manhattan.html > "tests/out/regression/dist-$suite.log" 2>&1
+            result=$?
+            set -e
+            printf 'dist-%s exit=%s\n' "$suite" "$result" | tee -a tests/out/regression/exits.txt
+            cat "tests/out/regression/dist-$suite.log"
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          done
+          exit "$failed"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: polish-tests-651fdd6285b4b529a1095f6b1decc202c6efbf6d
+          name: polish-tests-${{ github.event.pull_request.head.sha }}
           path: tests/out/
           retention-days: 14
