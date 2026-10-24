@@ -102,7 +102,11 @@
     disintegrate(world, source) {
       if (this.role === 'cab' && (!this.cabTargeted ||
         (world.realTime || 0) - this.cabCastTime > 0.35)) {
-        this.truck.ctx.toast('THE CAB CONTAINS A PERSON · AIM DIRECTLY TO UNMAKE', S.AMBER);
+        const now = world.realTime || 0;
+        if (this.lastCabWarning == null || now - this.lastCabWarning > 1.8) {
+          world.bark(this, 'Someone is inside.');
+          this.lastCabWarning = now;
+        }
         return;
       }
       super.disintegrate(world, source);
