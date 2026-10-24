@@ -698,6 +698,8 @@
       Gfx.ellipse(ctx, 50, 60, 8, 2.4);
       ctx.fill();
     }
+    // Optional character-local mask; campaign looks have no mask callback.
+    if (typeof look.mask === 'function') look.mask(ctx, t);
     if (look.manhattan) Gfx.hydrogen(ctx, 50, 33, 6.5, '#e8fbff', t * 0.8, 1.5);
     ctx.restore();
     ctx.strokeStyle = DM.C.ink;

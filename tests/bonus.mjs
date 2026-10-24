@@ -19,6 +19,13 @@ const page=await browser.newPage({viewport:{width:1280,height:720}});
 const errors=[],checks=[];page.on('pageerror',e=>errors.push(String(e)));
 const check=(name,value)=>{assert.ok(value,name);checks.push(name);console.log('✓ '+name);};
 try {
+  const chapterFiles = ['last-broadcast.js', 'ninth-minute.js'];
+  const hintTexts = chapterFiles.flatMap(name => {
+    const source = readFileSync(path.join(root, 'src/data/chapters', name), 'utf8');
+    return [...source.matchAll(/ctx\.(?:tutorial|hint)\('([^']*)'/g)].map(match => match[1]);
+  });
+  check('all bonus tutorials fit the original one-line HUD (95 characters)',
+    hintTexts.length >= 8 && hintTexts.every(text => text.length <= 95));
   const init=()=>{
     window.requestAnimationFrame=()=>0;
     window.__campaign=JSON.stringify({version:2,reached:6,completed:{karnak:{time:123,spared:5,disintegrated:0,memories:2}},settings:{},checkpoint:null});
