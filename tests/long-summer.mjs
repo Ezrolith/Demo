@@ -483,7 +483,8 @@ try {
     cab.y = wheel.y + 6;
     cab.disintegrate(p.world, p.player);
     const safe = !cab.dead && !t.driver.dead && !p.ctx.flags.driverOutcome &&
-      p.ctx.stats.disintegrated === 0;
+      p.ctx.stats.disintegrated === 0 &&
+      p.world.barks.some(b => b.e === cab && b.text === 'Someone is inside.');
     cab.x = original.x;
     cab.y = original.y;
     return safe;
