@@ -51,7 +51,7 @@ The previous release used temporary `.github/apply-platform.py`/other mutation s
 The permanent workflows now:
 - use **the code already committed in Git**, without modifying it before running;
 - run with **`contents: read`**, including native macOS Safari;
-- support controlled re-testing (Actions → workflow → Run workflow), including synthetic Low-versus-High performance;
+- support repeat testing on review-branch commits. The files declare manual dispatch, but GitHub's **Run workflow** UI generally requires the workflow to exist on the default branch; do not merge this draft just to enable that control. Use the available **Re-run jobs** action or push a targeted workflow/QA-source change;
 - preserve test logs and screenshots as temporary GitHub Actions artifacts;
 - keep the original read-only campaign/bonus regression checks.
 
