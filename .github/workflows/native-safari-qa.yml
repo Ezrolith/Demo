@@ -30,6 +30,9 @@ jobs:
           old = "command('/url', {'url': (ROOT / target).as_uri()})"
           assert s.count(old) == 1
           s = s.replace(old, "command('/url', {'url': 'http://127.0.0.1:8765/' + target})")
+          old = "isinstance(value, dict) and 'error' in value"
+          assert s.count(old) == 1
+          s = s.replace(old, "isinstance(value, dict) and value.get('error') and 'message' in value")
           s = s.replace('native Safari, file navigation and W3C input', 'native Safari, loopback HTTP and W3C input; file sandbox unchanged')
           p.write_text(s)
           PY
