@@ -166,16 +166,21 @@
         label: 'CONTROLS', action: () => E.push(new DM.Scenes.Controls())
       });
       items.push({
+        label: 'BACK UP / RESTORE BONUS SAVES', action: () => DM.BonusBackup.open()
+      });
+      items.push({
         label: 'BACK TO THE MAIN GAME', action: () => E.set(new DM.Scenes.Title())
       });
       this.menu = new DM.UI.Menu(items, {
-        x: 85, y: 480, w: 620, itemH: 40, size: 21, accent: ch.menuAccent || '#e3ba68', onBack: () => E.set(new DM.Scenes.Title())
+        x: 85, y: 480, w: 620, itemH: 33, size: 18, accent: ch.menuAccent || '#e3ba68', onBack: () => E.set(new DM.Scenes.Title())
       });
       DM.Audio.music.play(ch.music || 'bonus_noir');
     }
     cardRect(i) {
+      const count = Bonus.list.length;
+      const width = (1146 - (count - 1) * 18) / count;
       return {
-        x: 67 + i * 582, y: 112, w: 564, h: 58
+        x: 67 + i * (width + 18), y: 112, w: width, h: 58
       };
     }
     update(dt) {
@@ -230,7 +235,7 @@
           size: 18, color: chosen ? accent : '#758999'
         });
         G.text(ctx, c.title.toUpperCase(), r.x + 60, r.y + 36, {
-          size: 22, spacing: 2, weight: chosen ? 600 : 400, color: chosen ? '#f0eadc' : '#97aebb'
+          size: Bonus.list.length > 2 ? 19 : 22, spacing: Bonus.list.length > 2 ? 1 : 2, weight: chosen ? 600 : 400, color: chosen ? '#f0eadc' : '#97aebb'
         });
         if (Bonus.data.completed[c.id])
           G.text(ctx, '✓', r.x + r.w - 25, r.y + 36, {
@@ -270,7 +275,7 @@
       G.text(ctx, ch.menuTagline || 'SOME NIGHTS NEVER MAKE THE PAPERS.', 977, 629, {
         size: 11, align: 'center', spacing: 1.4, color: '#dad4c3'
       });
-      G.text(ctx, 'ALL POWERS AVAILABLE · EACH ADVENTURE SAVES SEPARATELY', 88, 660, {
+      G.text(ctx, 'KEYBOARD + MOUSE · ALL POWERS · SEPARATE BONUS SAVES', 88, 660, {
         size: 11, spacing: 1.5, color: '#b5ad99'
       });
       G.postFx(ctx);

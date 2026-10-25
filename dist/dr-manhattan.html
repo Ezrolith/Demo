@@ -16682,16 +16682,21 @@
         label: 'CONTROLS', action: () => E.push(new DM.Scenes.Controls())
       });
       items.push({
+        label: 'BACK UP / RESTORE BONUS SAVES', action: () => DM.BonusBackup.open()
+      });
+      items.push({
         label: 'BACK TO THE MAIN GAME', action: () => E.set(new DM.Scenes.Title())
       });
       this.menu = new DM.UI.Menu(items, {
-        x: 85, y: 480, w: 620, itemH: 40, size: 21, accent: ch.menuAccent || '#e3ba68', onBack: () => E.set(new DM.Scenes.Title())
+        x: 85, y: 480, w: 620, itemH: 33, size: 18, accent: ch.menuAccent || '#e3ba68', onBack: () => E.set(new DM.Scenes.Title())
       });
       DM.Audio.music.play(ch.music || 'bonus_noir');
     }
     cardRect(i) {
+      const count = Bonus.list.length;
+      const width = (1146 - (count - 1) * 18) / count;
       return {
-        x: 67 + i * 582, y: 112, w: 564, h: 58
+        x: 67 + i * (width + 18), y: 112, w: width, h: 58
       };
     }
     update(dt) {
@@ -16746,7 +16751,7 @@
           size: 18, color: chosen ? accent : '#758999'
         });
         G.text(ctx, c.title.toUpperCase(), r.x + 60, r.y + 36, {
-          size: 22, spacing: 2, weight: chosen ? 600 : 400, color: chosen ? '#f0eadc' : '#97aebb'
+          size: Bonus.list.length > 2 ? 19 : 22, spacing: Bonus.list.length > 2 ? 1 : 2, weight: chosen ? 600 : 400, color: chosen ? '#f0eadc' : '#97aebb'
         });
         if (Bonus.data.completed[c.id])
           G.text(ctx, '✓', r.x + r.w - 25, r.y + 36, {
@@ -16786,7 +16791,7 @@
       G.text(ctx, ch.menuTagline || 'SOME NIGHTS NEVER MAKE THE PAPERS.', 977, 629, {
         size: 11, align: 'center', spacing: 1.4, color: '#dad4c3'
       });
-      G.text(ctx, 'ALL POWERS AVAILABLE · EACH ADVENTURE SAVES SEPARATELY', 88, 660, {
+      G.text(ctx, 'KEYBOARD + MOUSE · ALL POWERS · SEPARATE BONUS SAVES', 88, 660, {
         size: 11, spacing: 1.5, color: '#b5ad99'
       });
       G.postFx(ctx);
@@ -16868,6 +16873,269 @@
   DM.Bonus = Bonus;
   DM.Scenes.BonusMenu = BonusMenu;
   DM.Scenes.BonusComplete = BonusComplete;
+})();
+</script>
+<script>/* src/game/bonus-portability.js */
+/* Bonus-only backups. No campaign/settings writes and no engine/input replacements. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const KEY = 'dr-manhattan.bonus.v1';
+  const FORMAT = 'dr-manhattan-bonus-backup';
+  const LIMIT = 256 * 1024;
+  const copy = value => JSON.parse(JSON.stringify(value));
+  const object = value => value && typeof value === 'object' && !Array.isArray(value);
+  const own = (value, key) => Object.prototype.hasOwnProperty.call(value, key);
+
+  function stats(source) {
+    const out = {};
+    for (const key of ['time', 'spared', 'disintegrated', 'memories']) {
+      const value = source && own(source, key) ? source[key] : 0;
+      if (!Number.isFinite(value) || value < 0 || value > 1e9) throw new Error('Invalid progress totals.');
+      out[key] = value;
+    }
+    return out;
+  }
+
+  function flags(source, chapter) {
+    const out = {};
+    for (const key of chapter.persistFlags || []) {
+      if (!source || !own(source, key)) continue;
+      const value = source[key];
+      const valid = typeof value === 'boolean' || (typeof value === 'number' && Number.isFinite(value) && Math.abs(value) <= 1e9) ||
+        (typeof value === 'string' && value.length <= 512);
+      if (!valid) throw new Error('Invalid adventure state.');
+      out[key] = value;
+    }
+    return out;
+  }
+
+  function validate(text) {
+    if (typeof text !== 'string' || text.length > LIMIT) throw new Error('The backup is too large.');
+    let packet;
+    try {
+      packet = JSON.parse(text, (key, value) => {
+        if (['__proto__', 'constructor', 'prototype'].includes(key)) throw new Error('Unsafe backup field.');
+        return value;
+      });
+    } catch (_) {
+      throw new Error('This is not a valid bonus backup.');
+    }
+    if (!object(packet) || packet.format !== FORMAT || packet.version !== 1 || !object(packet.bonus) ||
+      packet.bonus.version !== 1) throw new Error('This backup belongs to a different game or version.');
+    const source = packet.bonus;
+    if (!object(source.checkpoints) || !object(source.completed)) throw new Error('The backup is missing its records.');
+    const out = { version: 1, checkpoints: {}, completed: {}, deaths: 0 };
+    for (const group of ['checkpoints', 'completed']) {
+      for (const id of Object.keys(source[group])) {
+        const chapter = DM.Bonus.list.find(ch => ch.id === id);
+        if (!chapter) throw new Error('This backup contains an adventure not present in this version.');
+        const record = source[group][id];
+        if (!object(record)) throw new Error('Invalid adventure record.');
+        if (group === 'checkpoints') {
+          if (!Number.isInteger(record.stage) || record.stage < 0 || record.stage >= chapter.stages.length) {
+            throw new Error('Invalid checkpoint.');
+          }
+          if (record.carry != null && !object(record.carry)) throw new Error('Invalid checkpoint data.');
+          out.checkpoints[id] = { stage: record.stage, carry: record.carry == null ? null : {
+            stats: stats(record.carry.stats), flags: flags(record.carry.flags, chapter), found: [],
+          } };
+        } else {
+          out.completed[id] = { stats: stats(record.stats), flags: flags(record.flags, chapter) };
+        }
+      }
+    }
+    if (!Number.isFinite(source.deaths) || source.deaths < 0 || source.deaths > 1e9) {
+      throw new Error('Invalid retry count.');
+    }
+    out.deaths = Math.floor(source.deaths);
+    return out;
+  }
+
+  const Backup = {
+    encode() {
+      const packet = { format: FORMAT, version: 1, savedAt: new Date().toISOString(), bonus: DM.Bonus.load() };
+      // Export the same validated shape that can be restored, not arbitrary objects.
+      packet.bonus = validate(JSON.stringify(packet));
+      return JSON.stringify(packet, null, 2);
+    },
+    validate,
+    restore(text) {
+      const incoming = validate(text);
+      const next = copy(DM.Bonus.load());
+      const ids = Object.keys({ ...incoming.checkpoints, ...incoming.completed });
+      for (const id of ids) {
+        delete next.checkpoints[id];
+        delete next.completed[id];
+      }
+      for (const group of ['checkpoints', 'completed']) {
+        for (const id of Object.keys(incoming[group])) next[group][id] = incoming[group][id];
+      }
+      next.deaths = Math.max(next.deaths || 0, incoming.deaths);
+      // Commit storage first. A blocked browser must not pretend the restore persisted.
+      try {
+        localStorage.setItem(KEY, JSON.stringify(next));
+      } catch (_) {
+        throw new Error('Your browser blocked saving. Keep the backup and enable site storage before restoring.');
+      }
+      DM.Bonus.data = next;
+      DM.Bonus.available = true;
+      return Object.keys({ ...incoming.checkpoints, ...incoming.completed }).length;
+    },
+    open() {
+      DM.Input.clearAll();
+      DM.Engine.push(new BackupScreen());
+    },
+  };
+
+  class BackupScreen {
+    constructor() {
+      this.cursor = 'pointer';
+      this.t = 0;
+    }
+    enter() {
+      const root = document.createElement('div');
+      root.id = 'bonus-backup';
+      root.setAttribute('role', 'dialog');
+      root.setAttribute('aria-modal', 'true');
+      root.setAttribute('aria-labelledby', 'bonus-backup-title');
+      root.style.cssText = 'position:fixed;inset:0;z-index:5;display:grid;place-items:center;background:#04080eea;' +
+        'font:16px/1.6 system-ui,sans-serif;color:#e5e0d2;overflow:auto;cursor:auto';
+      const card = document.createElement('section');
+      card.style.cssText = 'box-sizing:border-box;width:min(92vw,660px);padding:28px;border:1px solid #677988;' +
+        'background:#0a1420;box-shadow:0 0 60px #0008';
+      const title = document.createElement('h2');
+      title.id = 'bonus-backup-title';
+      title.textContent = 'BONUS SAVE BACKUP';
+      title.style.cssText = 'margin:0 0 14px;color:#e3ba68;font-size:24px;letter-spacing:3px';
+      const info = document.createElement('p');
+      info.textContent = 'Carry bonus progress into another downloaded copy or browser. This never changes your campaign or settings.';
+      const note = document.createElement('p');
+      note.textContent = 'Restore replaces only the bonus records listed in the backup. Export your current progress first.';
+      const status = document.createElement('p');
+      status.id = 'bonus-backup-status';
+      status.setAttribute('role', 'status');
+      status.setAttribute('aria-live', 'polite');
+      status.style.cssText = 'min-height:52px;color:#9bd5e1';
+      const button = (label, action) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = label;
+        b.style.cssText = 'display:block;box-sizing:border-box;width:100%;margin:12px 0;padding:12px;' +
+          'border:1px solid #738c9e;background:#11283a;color:#f1e8d1;font:600 15px system-ui;cursor:pointer';
+        b.addEventListener('click', action);
+        return b;
+      };
+      const exportButton = button('EXPORT BONUS BACKUP', () => {
+        try {
+          const blob = new Blob([Backup.encode()], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+          link.download = 'dr-manhattan-bonus-backup.json';
+          root.appendChild(link);
+          link.click();
+          link.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 30000);
+          status.textContent = 'Backup prepared. Keep the downloaded JSON file with your game.';
+        } catch (error) {
+          status.textContent = error.message;
+        }
+      });
+      const label = document.createElement('label');
+      label.textContent = 'Choose a bonus backup to inspect: ';
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,application/json';
+      input.id = 'bonus-backup-file';
+      input.style.cssText = 'display:block;max-width:100%;margin-top:8px;color:#b9d6e0;font:14px system-ui';
+      label.appendChild(input);
+      let pending = null;
+      let selection = 0;
+      const restoreButton = button('RESTORE THIS BACKUP', () => {
+        if (!pending) return;
+        try {
+          const count = Backup.restore(pending);
+          status.textContent = `Restored ${count} bonus adventure record(s). Campaign and settings unchanged.`;
+          pending = null;
+          restoreButton.disabled = true;
+        } catch (error) {
+          status.textContent = error.message;
+        }
+      });
+      restoreButton.disabled = true;
+      input.addEventListener('change', async () => {
+        const request = ++selection;
+        pending = null;
+        restoreButton.disabled = true;
+        const file = input.files[0];
+        if (!file) return;
+        try {
+          if (file.size > LIMIT) throw new Error('The backup is too large.');
+          const text = await file.text();
+          if (!root.isConnected || request !== selection) return;
+          const record = validate(text);
+          const ids = Object.keys({ ...record.checkpoints, ...record.completed });
+          if (!ids.length) throw new Error('This backup has no adventure progress to restore.');
+          status.textContent = 'Ready to restore: ' + ids.map(id => DM.Bonus.list.find(ch => ch.id === id).title).join(', ') + '.';
+          pending = text;
+          restoreButton.disabled = false;
+        } catch (error) {
+          if (!root.isConnected || request !== selection) return;
+          status.textContent = error.message;
+        }
+      });
+      const close = () => {
+        DM.Input.clearAll();
+        if (DM.Engine.top() === this) DM.Engine.pop();
+        const menu = DM.Engine.top();
+        if (menu instanceof DM.Scenes.BonusMenu) menu.select(menu.selected);
+        DM.Engine.canvas.focus({ preventScroll: true });
+      };
+      const back = button('BACK TO BONUS LEVELS', close);
+      card.append(title, info, exportButton, label, note, restoreButton, status, back);
+      root.appendChild(card);
+      document.body.appendChild(root);
+      this.root = root;
+      // The game listens on window; capture stops dialog navigation leaking into it.
+      this.keys = event => {
+        if (!root.isConnected) return;
+        event.stopImmediatePropagation();
+        if (event.type !== 'keydown') return;
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          close();
+        } else if (event.key === 'Tab') {
+          const controls = [...root.querySelectorAll('button:not(:disabled),input')];
+          const first = controls[0], last = controls[controls.length - 1];
+          if (event.shiftKey && document.activeElement === first) {
+            event.preventDefault();
+            last.focus();
+          } else if (!event.shiftKey && document.activeElement === last) {
+            event.preventDefault();
+            first.focus();
+          }
+        }
+      };
+      window.addEventListener('keydown', this.keys, true);
+      window.addEventListener('keyup', this.keys, true);
+      exportButton.focus();
+    }
+    exit() {
+      window.removeEventListener('keydown', this.keys, true);
+      window.removeEventListener('keyup', this.keys, true);
+      this.root.remove();
+      DM.Input.clearAll();
+    }
+    update(dt) {
+      this.t += dt;
+    }
+    render(ctx) {
+      DM.Bonus.city(ctx, this.t);
+    }
+  }
+
+  DM.BonusBackup = Backup;
 })();
 </script>
 <script>/* src/game/bonus-kit.js */
@@ -17296,6 +17564,2137 @@
   }
   DM.BonusKit = {
     label, ring, burst, withinRange, Sign, Terminal, Companion, Lamp, segmentDistance, sweptArmHit, BossFraming, ledgerTone, ledgerSentence
+  };
+})();
+</script>
+<script>/* src/game/long-summer-kit.js */
+/* The Long Summer: encounter-local rules. Nothing here replaces a campaign system. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const U = DM.U;
+  const G = DM.Gfx;
+  const K = DM.BonusKit;
+  const S = DM.Summer = {};
+  S.AMBER = '#edb66c';
+  S.TEAL = '#92d8cf';
+  S.RED = '#ef8568';
+  S.alive = e => !e.dead && !e.ko && !e.casualty;
+
+  S.move = function (e, goal, speed, dt, world) {
+    const angle = U.angleTo(e.x, e.y, goal.x, goal.y);
+    let best = null;
+    let score = Infinity;
+    for (const offset of [0, 0.45, -0.45, 0.9, -0.9, 1.5, -1.5, 2.2, -2.2]) {
+      const a = angle + offset;
+      const x = e.x + Math.cos(a) * 44;
+      const y = e.y + Math.sin(a) * 44;
+      if (!world.isFree(x, y, e.r)) continue;
+      const distance = U.dist(x, y, goal.x, goal.y);
+      if (distance < score) {
+        score = distance;
+        best = a;
+      }
+    }
+    const moving = best !== null && U.dist(e.x, e.y, goal.x, goal.y) > 9;
+    e.vx = U.damp(e.vx, moving ? Math.cos(best) * speed : 0, 14, dt);
+    e.vy = U.damp(e.vy, moving ? Math.sin(best) * speed : 0, 14, dt);
+    if (moving) e.facing = best;
+    e.moving = moving;
+    e.walk += moving ? dt * speed * 0.09 : 0;
+  };
+
+  S.tone = function (stats, flags) {
+    const killed = (stats.disintegrated || 0) + (flags.comedianCasualties || 0);
+    if (flags.heat >= 70 || killed > (stats.spared || 0)) return 'burning';
+    if (killed === 0 && flags.heat < 40 && flags.rescued === 6) return 'calm';
+    return 'uneasy';
+  };
+
+  const HUD_BOTTOM = 190;
+  class SummerBossFraming extends K.BossFraming {
+    projectionSafe(zoom, x, y, includePlayer = true) {
+      if (!super.projectionSafe(zoom, x, y, includePlayer)) return false;
+      const p = this.world.player;
+      const bottom = (p.y - y + p.r + 28) * zoom + DM.H / 2;
+      return !includePlayer || bottom < DM.H - HUD_BOTTOM;
+    }
+    target(zoom) {
+      const p = this.world.player;
+      const b = this.boss;
+      const w = this.world;
+      const e = this.extent;
+      const hw = DM.W / 2 / zoom;
+      const hh = DM.H / 2 / zoom;
+      // A view wider than the arena must be centred, not given impossible edge bounds.
+      const minX = Math.max(w.w <= 2 * hw ? w.w / 2 : hw,
+        b.x + e.right - (DM.W / 2 - 38) / zoom, p.x + p.r - (DM.W / 2 - 38) / zoom);
+      const maxX = Math.min(w.w <= 2 * hw ? w.w / 2 : w.w - hw,
+        b.x - e.left + (DM.W / 2 - 38) / zoom, p.x - p.r + (DM.W / 2 - 38) / zoom);
+      const minY = Math.max(w.h <= 2 * hh ? w.h / 2 : hh, b.y + e.bottom - (DM.H / 2 - 135) / zoom,
+        p.y + p.r + 32 - (DM.H / 2 - HUD_BOTTOM) / zoom);
+      const maxY = Math.min(w.h <= 2 * hh ? w.h / 2 : w.h - hh,
+        b.y - e.top + (DM.H / 2 - 125) / zoom, p.y - p.r + (DM.H / 2 - 112) / zoom);
+      return {
+        x: U.clamp(U.lerp(p.x, b.x, 0.35), minX, maxX),
+        y: U.clamp(U.lerp(p.y, b.y, 0.35), minY, maxY),
+        feasible: minX <= maxX && minY <= maxY,
+      };
+    }
+  }
+  S.startReadableCamera = function (ctx) {
+    const world = ctx.world;
+    const point = { x: ctx.player.x, y: ctx.player.y };
+    ctx.fork(function* () {
+      while (ctx.world === world && !ctx.done) {
+        const p = ctx.player;
+        const camera = world.camera;
+        const boss = world.boss;
+        if (boss && !boss.dead && boss.cameraFrame) {
+          boss.cameraFrame.update();
+        } else {
+          const zoom = camera.zoom;
+          point.x = p.x + U.clamp((world.mouse.x - p.x) * 0.12, -70, 70);
+          point.y = p.y - 80 / zoom;
+          ctx.camTarget = point;
+          const screen = camera.toScreen(p.x, p.y);
+          if (screen.y + (p.r + 28) * zoom > DM.H - HUD_BOTTOM) {
+            camera.snap(point.x, point.y);
+          }
+        }
+        yield;
+      }
+    });
+  };
+
+  class CityState extends DM.Entity {
+    constructor(ctx) {
+      super({ body: false, solid: false, static: true, disintegratable: false, layer: 100, r: 1 });
+      this.ctx = ctx;
+      this.hazard = true;
+      this.reinforcementT = 0;
+      this.waves = 0;
+      this.gas = [];
+      this.water = [];
+      this.reasons = [];
+      this.elapsed = 0;
+      this.lastCasualty = -Infinity;
+      this.shotHeat = 0;
+      this.passiveAdded = 0;
+      this.fireHeatAdded = 0;
+      for (const [key, value] of Object.entries({ heat: 46, rescued: 0, rescuedMask: 0, comedianCasualties: 0, restraints: 0 })) {
+        if (!Number.isFinite(ctx.flags[key])) ctx.flags[key] = value;
+      }
+      ctx.on('enemy:down', ev => {
+        if (!ev.human || ev.enemy.world !== this.world) return;
+        ev.enemy.summerCounted = ev.lethal ? 'unmade' : 'spared';
+        this.change(ev.lethal ? 18 : -7, ev.lethal ? 'A person unmade' : 'A person spared');
+      });
+    }
+    get heat() {
+      return this.ctx.flags.heat;
+    }
+    change(amount, reason) {
+      this.ctx.flags.heat = U.clamp(this.heat + amount, 0, 100);
+      this.reasons.push({ amount, reason });
+      if (this.reasons.length > 24) this.reasons.shift();
+    }
+    casualty(person) {
+      if (person.casualty || person.dead || this.elapsed - this.lastCasualty < 30) return false;
+      this.lastCasualty = this.elapsed;
+      // A previous knockout is reclassified, not counted twice or called Jon's unmaking.
+      if (person.summerCounted === 'spared') this.ctx.stats.spared = Math.max(0, this.ctx.stats.spared - 1);
+      person.summerCounted = 'casualty';
+      person.casualty = true;
+      person.dead = true;
+      this.ctx.flags.comedianCasualties++;
+      // Autonomous fatalities use the same rate limit as live fire; the ledger updates immediately.
+      this.shotHeat += 20;
+      this.ctx.toast('A LIFE LOST TO THE COMEDIAN', S.RED);
+      K.burst(this.world, person.x, person.y, '#b5a493');
+      return true;
+    }
+    update(dt, world) {
+      const p = world.player;
+      if (!p) return;
+      this.x = p.x;
+      this.y = p.y;
+      this.gas = this.gas.filter(e => !e.dead);
+      const exposed = this.gas.some(e => U.dist(p.x, p.y, e.x, e.y) < e.r);
+      p.speedMul = exposed && !world.ceasefire ? 0.58 : 1;
+      this.gassed = exposed;
+      if (world.ceasefire) return;
+      this.elapsed += dt;
+      // Escalation is a rate, not an exponential per-cell burst. The opening
+      // budget leaves time to read the first instruction before the street boils.
+      const fireRate = this.grid && this.elapsed >= 1 ? Math.min(0.5, this.grid.active.size * 0.045) : 0;
+      const budget = (this.elapsed <= 30 ? 0.4 : 1.5) * dt;
+      const fireHeat = Math.min(budget, fireRate * dt);
+      const shotHeat = Math.min(Math.max(0, budget - fireHeat), this.shotHeat);
+      this.shotHeat -= shotHeat;
+      this.fireHeatAdded += fireHeat;
+      this.passiveAdded += fireHeat + shotHeat;
+      if (fireHeat + shotHeat > 0) this.change(fireHeat + shotHeat, 'Ambient escalation');
+      if (this.grid && this.grid.active.size < 3 && this.ctx.flags.comedian && this.ctx.flags.comedian.disarmed > 0) {
+        this.change(-dt * 0.25, 'A quiet street');
+      }
+      if (world.mapId === 'summer_avenue' && this.heat >= 70 && this.waves < 3) {
+        this.reinforcementT += dt;
+        if (this.reinforcementT >= 14) {
+          this.reinforcementT = 0;
+          this.waves++;
+          world.add(new Rioter(this, 180, 790 + this.waves * 70, true));
+          world.add(new Rioter(this, 1900, 780 + this.waves * 70));
+          this.ctx.toast('MORE PEOPLE JOIN THE RIOT', S.AMBER);
+        }
+      }
+    }
+    render(g, world) {
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g) {
+      if (!this.ctx.hud.gameHudVisible()) return;
+      const E = DM.Engine;
+      g.save();
+      g.setTransform(E.dpr * E.scale, 0, 0, E.dpr * E.scale, E.dpr * E.offX, E.dpr * E.offY);
+      if (this.gassed) {
+        g.fillStyle = 'rgba(67,70,45,0.19)';
+        g.fillRect(0, 0, DM.W, DM.H);
+      }
+      g.fillStyle = 'rgba(9,12,16,0.88)';
+      G.rr(g, 1022, 66, 232, 57, 5);
+      g.fill();
+      const color = this.heat >= 70 ? S.RED : this.heat < 40 ? S.TEAL : S.AMBER;
+      G.text(g, 'CITY HEAT', 1034, 85, { size: 12, color, spacing: 2 });
+      G.text(g, Math.round(this.heat).toString(), 1241, 85, { size: 15, color, align: 'right' });
+      g.fillStyle = '#34332e';
+      g.fillRect(1034, 95, 207, 7);
+      g.fillStyle = color;
+      g.fillRect(1034, 95, 207 * this.heat / 100, 7);
+      g.fillStyle = '#f6e6c7';
+      g.fillRect(1034 + 207 * 0.4, 93, 1, 11);
+      G.text(g, this.heat < 40 ? 'CALM' : this.heat >= 70 ? 'ESCALATING' : 'ON EDGE', 1034, 116,
+        { size: 10, color: '#c4baaa', spacing: 1.2 });
+      g.restore();
+    }
+  }
+
+  class FireGrid extends DM.Entity {
+    constructor(state, bounds, seeds) {
+      super({ x: bounds.x, y: bounds.y, r: 3000, body: false, solid: false, static: true, disintegratable: false, layer: 0 });
+      this.state = state;
+      this.bounds = bounds;
+      this.cell = 66;
+      this.cols = Math.floor(bounds.w / this.cell);
+      this.rows = Math.floor(bounds.h / this.cell);
+      this.active = new Set();
+      this.wet = new Set();
+      this.tick = 0;
+      this.timer = 0;
+      this.nextSpread = 16;
+      this.born = new Map();
+      this.scorched = new Set();
+      this.particleT = 0;
+      this.hurtT = 0;
+      this.hazard = true;
+      this.vented = false;
+      this.predicted = new Set();
+      for (const [x, y] of seeds) {
+        const key = this.key(x, y);
+        if (key < 0) continue;
+        this.active.add(key);
+        this.born.set(key, 0);
+        this.scorched.add(key);
+      }
+      state.grid = this;
+    }
+    key(x, y) {
+      const col = Math.floor((x - this.bounds.x) / this.cell);
+      const row = Math.floor((y - this.bounds.y) / this.cell);
+      if (col < 0 || col >= this.cols || row < 0 || row >= this.rows) return -1;
+      return col + row * this.cols;
+    }
+    point(key) {
+      return { x: this.bounds.x + (key % this.cols + 0.5) * this.cell,
+        y: this.bounds.y + (Math.floor(key / this.cols) + 0.5) * this.cell };
+    }
+    valid(key) {
+      if (key < 0 || key >= this.cols * this.rows || this.wet.has(key)) return false;
+      const p = this.point(key);
+      return this.world && this.world.isFree(p.x, p.y, this.cell * 0.42);
+    }
+    advance(active, tick, at = this.timer, born = this.born) {
+      const next = new Set(active);
+      if (this.vented || active.size >= 75) return next;
+      // One new frontier cell per beat. Every new flame must mature before it
+      // propagates, so rescuing someone never starts an exponential fire race.
+      const keys = [...active].sort((a, b) => a - b);
+      for (let i = 0; i < keys.length; i++) {
+        const key = keys[(i + tick) % keys.length];
+        if (at - (born.get(key) || 0) < 6) continue;
+        const offsets = [1, this.cols, -1, -this.cols];
+        for (let j = 0; j < offsets.length; j++) {
+          const offset = offsets[(key + tick + j) % 4];
+          const candidate = key + offset;
+          if (next.has(candidate)) continue;
+          if (Math.abs(offset) === 1 && Math.floor(key / this.cols) !== Math.floor(candidate / this.cols)) continue;
+          const a = this.point(key);
+          const b = this.point(candidate);
+          if (!this.valid(candidate) || !this.world.los(a.x, a.y, b.x, b.y)) continue;
+          next.add(candidate);
+          born.set(candidate, at);
+          return next;
+        }
+      }
+      return next;
+    }
+    predict(seconds = 3) {
+      let result = new Set(this.active);
+      const born = new Map(this.born);
+      let tick = this.tick;
+      for (let at = this.nextSpread; at <= this.timer + seconds + 1e-8; at += 5) {
+        result = this.advance(result, tick++, at, born);
+      }
+      return result;
+    }
+    ignite(x, y) {
+      const key = this.key(x, y);
+      if (this.valid(key) && !this.active.has(key)) {
+        this.active.add(key);
+        this.born.set(key, this.timer);
+        this.scorched.add(key);
+      }
+    }
+    douse(x, y, radius) {
+      let count = 0;
+      for (let key = 0; key < this.cols * this.rows; key++) {
+        const p = this.point(key);
+        if (U.dist(p.x, p.y, x, y) > radius) continue;
+        this.wet.add(key);
+        if (this.active.delete(key)) count++;
+      }
+      if (count) this.state.change(-Math.min(10, count * 2), 'Fire extinguished');
+      return count;
+    }
+    vent() {
+      if (this.vented) return;
+      this.vented = true;
+      this.state.ctx.flags.vented = true;
+      // Ventilation removes smoke and ends propagation; flames still need to be avoided.
+      this.state.change(-8, 'Smoke vented');
+      DM.Audio.play('summer_vent');
+    }
+    update(dt, world) {
+      if (world.ceasefire) return;
+      this.timer += dt;
+      while (this.timer + 1e-8 >= this.nextSpread) {
+        this.active = this.advance(this.active, this.tick++, this.nextSpread);
+        for (const key of this.active) this.scorched.add(key);
+        this.nextSpread += 5;
+      }
+      this.predicted = world.timesight ? this.predict(3) : new Set();
+      this.emitEmbers(dt, world);
+      const p = world.player;
+      const near = this.active.has(this.key(p.x, p.y));
+      this.hurtT -= dt;
+      if (near && this.hurtT <= 0) {
+        p.damage(this.vented ? 4 : 7, this, 'fire');
+        this.hurtT = 0.65;
+      }
+      let distance = 1000;
+      for (const key of this.active) {
+        const q = this.point(key);
+        distance = Math.min(distance, U.dist(p.x, p.y, q.x, q.y));
+      }
+      DM.Audio.hum('summer-local-fire', distance < 500, {
+        kind: 'noise', freq: 210, q: 0.4, gain: 0.014 * U.clamp(1 - distance / 500, 0, 1)
+      });
+    }
+    render(g, world) {
+      // Scorches remain after water removes a flame. They are floor detail, not
+      // identical flame icons left behind in the hazard pass.
+      for (const key of this.scorched) {
+        const p = this.point(key);
+        const seed = Math.sin(key * 17.37) * 0.5 + 0.5;
+        g.fillStyle = 'rgba(14,12,11,0.64)';
+        G.ellipse(g, p.x - 4 + seed * 9, p.y + 8, 27 + seed * 8, 17 + seed * 6);
+        g.fill();
+        g.strokeStyle = 'rgba(107,69,39,0.38)';
+        g.lineWidth = 2;
+        for (let i = 0; i < 4; i++) {
+          const angle = key + i * 1.71;
+          G.line(g, p.x, p.y, p.x + Math.cos(angle) * 38, p.y + Math.sin(angle) * 25);
+        }
+      }
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g, world) {
+      const view = world.camera.view();
+      const reduced = DM.SettingsSchema.reducedFlashing();
+      const time = reduced || DM.Save.settings.fx === 'off' ? 0 : world.time;
+      for (const key of this.active) {
+        const p = this.point(key);
+        if (p.x < view.x0 - 100 || p.x > view.x1 + 100 || p.y < view.y0 - 100 || p.y > view.y1 + 100) continue;
+        const seed = Math.sin(key * 17.37) * 0.5 + 0.5;
+        const cx = p.x + Math.sin(key * 3.7) * 12;
+        const cy = p.y + Math.cos(key * 2.3) * 8;
+        const lift = 36 + seed * 33;
+        G.glow(g, cx, cy - 7, 83 + seed * 32, '#e98135', 0.32);
+        // Nested translucent tongues share neither a height nor an animation
+        // phase. They rise from a ragged bed instead of a row of repeated icons.
+        for (let layer = 0; layer < 3; layer++) {
+          for (let i = 0; i < 4; i++) {
+            const phase = key * 1.83 + i * 2.71 + layer;
+            const x = cx + Math.sin(phase) * (24 - layer * 5);
+            const sway = Math.sin(time * (2.2 + seed) + phase) * (10 - layer * 2);
+            const h = lift * (1.1 - layer * 0.24) * (0.7 + 0.3 * Math.sin(phase + time * 1.7));
+            const wide = 16 - layer * 3;
+            const flame = g.createLinearGradient(x, cy - h, x, cy + 16);
+            const warm = key % 3 === 0 ? '246,151,57' : '248,123,39';
+            flame.addColorStop(0, `rgba(${warm},0.03)`);
+            flame.addColorStop(0.4, `rgba(${warm},${0.32 + layer * 0.12})`);
+            flame.addColorStop(0.83, `rgba(255,207,111,${0.38 + layer * 0.13})`);
+            flame.addColorStop(1, 'rgba(255,231,153,0.85)');
+            g.fillStyle = flame;
+            g.beginPath();
+            g.moveTo(x - wide, cy + 14);
+            g.bezierCurveTo(x - wide * 1.5, cy - h * 0.25, x + sway - wide, cy - h * 0.52, x + sway, cy - h);
+            g.bezierCurveTo(x + sway * 1.6, cy - h * 0.45, x + wide * 1.6, cy - h * 0.17, x + wide, cy + 10);
+            g.quadraticCurveTo(x, cy + 22, x - wide, cy + 14);
+            g.fill();
+          }
+        }
+        if (!this.vented && DM.Save.settings.fx !== 'off') {
+          for (let i = 0; i < 3; i++) {
+            const rise = (time * 17 + i * 24 + seed * 53) % 88;
+            g.fillStyle = `rgba(72,61,48,${0.13 * (1 - rise / 100)})`;
+            G.ellipse(g, cx + Math.sin(time * 0.7 + key + i) * 16, cy - 30 - rise,
+              15 + rise * 0.2, 17 + rise * 0.25);
+            g.fill();
+          }
+        }
+      }
+    }
+    emitEmbers(dt, world) {
+      if (DM.Save.settings.fx === 'off') return;
+      this.particleT -= dt;
+      if (this.particleT > 0) return;
+      this.particleT = 0.14;
+      const view = world.camera.view();
+      let visible = 0;
+      for (const key of this.active) {
+        const p = this.point(key);
+        if (p.x < view.x0 || p.x > view.x1 || p.y < view.y0 || p.y > view.y1) continue;
+        if (visible++ >= 10) break;
+        const phase = world.time * 2 + key;
+        world.particles.emit(p.x + Math.sin(phase) * 17, p.y - 13, {
+          vx: Math.cos(phase) * 12, vy: -35 - key % 21, life: 1.3, size: 1.8,
+          color: key % 2 ? '#ffb752' : '#ef7636', shape: 'spark', drag: 0.2, alpha: 0.65,
+        });
+        if (!this.vented && key % 2 === 0) {
+          world.particles.emit(p.x, p.y - 24, {
+            vx: 5, vy: -20, life: 2.2, size: 9, size1: 27, color: '#62584b',
+            shape: 'smoke', add: false, alpha: 0.12, drag: 0.1,
+          });
+        }
+      }
+    }
+    renderFuture(g) {
+      for (const key of this.predicted) {
+        if (this.active.has(key)) continue;
+        const p = this.point(key);
+        g.fillStyle = 'rgba(243,184,106,0.16)';
+        g.fillRect(p.x - 30, p.y - 30, 60, 60);
+        g.strokeStyle = '#e4b979';
+        g.lineWidth = 2;
+        g.setLineDash([5, 5]);
+        g.strokeRect(p.x - 30, p.y - 30, 60, 60);
+        g.setLineDash([]);
+      }
+    }
+    light() {
+      return null;
+    }
+  }
+
+  class Puddle extends DM.Entity {
+    constructor(state, x, y) {
+      super({ x, y, r: 120, body: false, solid: false, static: true, disintegratable: false, layer: -1 });
+      this.state = state;
+      state.water.push(this);
+    }
+    update(dt, world) {
+      if (!world.ceasefire && this.state.grid) this.state.grid.douse(this.x, this.y, this.r);
+    }
+    render(g, world) {
+      g.fillStyle = 'rgba(43,98,115,0.55)';
+      G.ellipse(g, this.x, this.y, this.r, this.r * 0.57);
+      g.fill();
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g, world) {
+      const time = DM.Save.settings.fx === 'off' || DM.SettingsSchema.reducedFlashing() ? 0 : world.time;
+      const shine = g.createLinearGradient(this.x - this.r, this.y, this.x + this.r, this.y);
+      shine.addColorStop(0, 'rgba(102,171,188,0)');
+      shine.addColorStop(0.35, 'rgba(233,161,86,0.24)');
+      shine.addColorStop(0.68, 'rgba(126,202,213,0.23)');
+      shine.addColorStop(1, 'rgba(102,171,188,0)');
+      g.fillStyle = shine;
+      G.ellipse(g, this.x, this.y, this.r, this.r * 0.55);
+      g.fill();
+      g.strokeStyle = 'rgba(181,221,224,0.42)';
+      g.lineWidth = 1;
+      for (let i = 0; i < 5; i++) {
+        const radius = ((time * 23 + i * 23) % 110) + 8;
+        G.ellipse(g, this.x, this.y, radius, radius * 0.55);
+        g.stroke();
+      }
+      // Arcing jets from the broken main land in the same actual dousing pool.
+      for (let i = 0; i < 7; i++) {
+        const spread = (i - 3) * 25;
+        g.strokeStyle = i % 2 ? 'rgba(175,220,231,0.65)' : 'rgba(96,171,198,0.48)';
+        g.lineWidth = 1.6;
+        g.beginPath();
+        g.moveTo(this.x, this.y);
+        g.quadraticCurveTo(this.x + spread * 0.4, this.y - 86 - Math.sin(time * 3 + i) * 4,
+          this.x + spread, this.y + 15 + i % 2 * 12);
+        g.stroke();
+        G.glow(g, this.x + spread, this.y + 15, 8, '#8ac7d5', 0.12);
+      }
+    }
+  }
+
+  class Hydrant extends DM.Entity {
+    constructor(state, x, y) {
+      super({ x, y, r: 19, grabbable: true, disintegratable: false, mass: 4, friction: 12 });
+      this.state = state;
+      this.origin = { x, y };
+      this.ripped = false;
+    }
+    onGrab() {
+      if (this.ripped) return;
+      this.ripped = true;
+      this.world.add(new Puddle(this.state, this.origin.x, this.origin.y));
+      this.state.change(-4, 'A hydrant opened');
+      K.burst(this.world, this.origin.x, this.origin.y, S.TEAL);
+      DM.Audio.play('summer_water');
+    }
+    render(g) {
+      g.fillStyle = '#973d31';
+      G.rr(g, this.x - 13, this.y - 27, 26, 48, 5);
+      g.fill();
+      g.fillStyle = '#c98452';
+      G.ellipse(g, this.x, this.y - 25, 15, 7);
+      g.fill();
+      g.fillRect(this.x - 21, this.y - 8, 42, 9);
+      g.strokeStyle = '#edba82';
+      g.lineWidth = 2;
+      G.line(g, this.x - 4, this.y - 18, this.x - 4, this.y + 15);
+    }
+  }
+  class Gas extends DM.Entity {
+    constructor(state, x, y) {
+      super({ x, y, r: 95, body: false, solid: false, static: true, disintegratable: false, layer: 3 });
+      this.state = state;
+      this.left = 5;
+      this.hazard = true;
+      state.gas.push(this);
+    }
+    update(dt, world) {
+      if (world.ceasefire) return;
+      this.left -= dt;
+      this.x += dt * 8;
+      this.y += Math.sin(this.age * 0.7) * dt * 3;
+      if (this.left <= 0) this.dead = true;
+    }
+    light() {
+      return { r: this.r * 1.2, i: 0.16, color: '#c6c39a', k: 0.08 };
+    }
+    render(g, world) {
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g) {
+      const a = Math.min(1, this.left);
+      g.fillStyle = `rgba(165,170,105,${0.13 * a})`;
+      for (let i = 0; i < 5; i++) {
+        G.ellipse(g, this.x + Math.cos(i * 1.3) * 35, this.y + Math.sin(i * 1.3) * 30, 65, 48);
+        g.fill();
+      }
+      g.strokeStyle = `rgba(219,211,166,${0.15 * a})`;
+      g.lineWidth = 2;
+      for (let i = 0; i < 3; i++) {
+        g.beginPath();
+        g.ellipse(this.x + Math.sin(i * 2 + this.age) * 25, this.y - 8, 54 + i * 8, 27 + i * 5,
+          -0.25, Math.PI * 1.05, Math.PI * 1.83);
+        g.stroke();
+      }
+    }
+  }
+  class Molotov extends DM.Entity {
+    constructor(state, x, y, target) {
+      const a = U.angleTo(x, y, target.x, target.y);
+      super({ x, y, r: 7, vx: Math.cos(a) * 235, vy: Math.sin(a) * 235, friction: 0.2,
+        mass: 0.4, grabbable: true, team: 'enemy', body: false });
+      this.state = state;
+      this.fuse = 2.6;
+      this.isProjectile = true;
+      this.hazard = true;
+      this.snuffed = false;
+    }
+    onGrab() {
+      this.team = 'player';
+      this.fuse = Math.max(1.4, this.fuse);
+    }
+    update(dt, world) {
+      if (world.ceasefire) return;
+      if (this.state.water.some(p => U.dist(p.x, p.y, this.x, this.y) < p.r)) {
+        this.snuffed = true;
+        this.dead = true;
+        DM.Audio.play('summer_hiss');
+        return;
+      }
+      if (this.heldBy) return;
+      this.fuse -= dt;
+      if (this.fuse > 0) return;
+      this.dead = true;
+      if (this.state.grid) this.state.grid.ignite(this.x, this.y);
+      world.explode(this.x, this.y, 78, 18, { source: this, team: this.team });
+      DM.Audio.play('summer_glass');
+    }
+    render(g, world) {
+      g.fillStyle = '#80975c';
+      g.fillRect(this.x - 4, this.y - 10, 8, 19);
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g) {
+      G.glow(g, this.x, this.y - 8, 30, '#f3b361', 0.6);
+      K.ring(g, this.x, this.y, 12, '#f4be6a', 1.5);
+    }
+  }
+
+  class Rioter extends DM.Enemies.Gangster {
+    constructor(state, x, y, thrower = false) {
+      super({ x, y, hp: thrower ? 45 : 35, look: DM.LOOKS.summer_rioter, sight: 470 });
+      this.state = state;
+      this.thrower = thrower;
+      this.isSummerHuman = true;
+      this.cool = thrower ? 3 : 1;
+      this.leaving = false;
+      this.exitPoint = { x: x < 1000 ? 80 : 1920, y: 1030 };
+    }
+    think(dt, world) {
+      if (this.leaving || (this.state.heat < 30 && !this.alerted && !this.target)) {
+        this.leaving = true;
+        S.move(this, this.exitPoint, 125, dt, world);
+        if (U.dist(this.x, this.y, this.exitPoint.x, this.exitPoint.y) < 35) {
+          this.die('leave');
+          this.dead = true;
+        }
+        return;
+      }
+      this.cool -= dt;
+      const target = this.target;
+      if (!target) return;
+      const distance = this.distTo(target);
+      this.facing = U.angleTo(this.x, this.y, target.x, target.y);
+      if (distance > (this.thrower ? 280 : 48)) S.move(this, target, this.thrower ? 75 : 110, dt, world);
+      if (this.cool <= 0 && distance < (this.thrower ? 460 : 65)) {
+        if (this.thrower) {
+          world.add(new Molotov(this.state, this.x, this.y, target));
+          this.cool = 5;
+          DM.Audio.play('summer_throw');
+        } else {
+          target.damage(8, this, 'impact');
+          this.cool = 1.6;
+          DM.Audio.play('impact');
+        }
+      }
+    }
+    light() {
+      return this.dead ? null : { r: 85, i: 0.62, color: '#e7b88b', k: 0.09 };
+    }
+    renderEmissive(g, world) {
+      super.renderEmissive(g, world);
+      if (this.ko || this.dead) return;
+      g.save();
+      g.translate(this.x, this.y);
+      g.rotate(this.facing);
+      g.strokeStyle = 'rgba(237,184,128,0.7)';
+      g.lineWidth = 1.5;
+      g.beginPath();
+      g.moveTo(-10, -9);
+      g.quadraticCurveTo(-17, -4, -14, 9);
+      g.moveTo(10, -9);
+      g.quadraticCurveTo(17, -4, 14, 9);
+      g.stroke();
+      g.strokeStyle = 'rgba(245,204,155,0.55)';
+      g.beginPath();
+      g.arc(0, -8, 8, Math.PI * 1.1, Math.PI * 1.95);
+      g.stroke();
+      g.restore();
+    }
+    render(g, world) {
+      super.render(g, world);
+      if (this.thrower && !this.ko) {
+        g.fillStyle = '#b4ba71';
+        g.fillRect(this.x + 12, this.y - 5, 5, 13);
+      }
+    }
+  }
+
+  class LiveRound extends DM.Entity {
+    constructor(state, from, target) {
+      const a = U.angleTo(from.x, from.y, target.x, target.y);
+      super({ x: from.x, y: from.y, r: 3, body: false, solid: false, team: 'hostile_ally' });
+      this.state = state;
+      this.selfMove = true;
+      this.vx = Math.cos(a) * 430;
+      this.vy = Math.sin(a) * 430;
+      this.left = 1.8;
+      this.isProjectile = true;
+      this.hazard = true;
+    }
+    update(dt, world) {
+      if (world.ceasefire) return;
+      const nx = this.x + this.vx * dt;
+      const ny = this.y + this.vy * dt;
+      if (world.shotHit(this.x, this.y, nx, ny) >= 0) this.dead = true;
+      for (const e of world.entities) {
+        if (this.dead || !e.isSummerHuman || e.dead || e.inCab || e.safe) continue;
+        if (K.segmentDistance(e.x, e.y, this.x, this.y, nx, ny) < e.r + 4) {
+          this.dead = true;
+          if (this.state.casualty(e) && e.isDriver) this.state.ctx.flags.driverOutcome = 'shot';
+        }
+      }
+      this.x = nx;
+      this.y = ny;
+      this.left -= dt;
+      if (this.left <= 0) this.dead = true;
+    }
+    render(g, world) {
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g) {
+      g.strokeStyle = '#f3c17c';
+      g.lineWidth = 2;
+      G.line(g, this.x, this.y, this.x - this.vx * 0.035, this.y - this.vy * 0.035);
+    }
+  }
+
+  class Comedian extends DM.NPC {
+    constructor(state, x, y) {
+      super({ x, y, look: 'comedian', lookAtPlayer: false });
+      this.state = state;
+      this.team = 'player';
+      this.body = false;
+      this.mass = 2;
+      this.grabbable = true;
+      this.disarmed = 0;
+      this.cool = 0;
+      this.aimT = 0;
+      this.shots = 0;
+      this.silent = false;
+      this.target = null;
+      this.restrainedThisHold = false;
+    }
+    onGrab() {
+      this.aimT = 0;
+      this.target = null;
+      if (this.disarmed <= 0) {
+        this.state.change(-10, 'The Comedian restrained');
+        this.state.ctx.flags.restraints++;
+        this.world.bark(this, this.state.ctx.flags.restraints === 1 ? 'Put me down, Jon.' : 'I remember the first time.');
+      }
+      this.disarmed = 10;
+    }
+    onRelease() {
+      this.disarmed = 10;
+      this.cool = 2;
+    }
+    update(dt, world) {
+      if (world.ceasefire || this.heldBy) return;
+      this.disarmed = Math.max(0, this.disarmed - dt);
+      const p = world.player;
+      if (U.dist(this.x, this.y, p.x, p.y) > 210) S.move(this, { x: p.x + 85, y: p.y + 70 }, 145, dt, world);
+      else {
+        this.vx = U.damp(this.vx, 0, 8, dt);
+        this.vy = U.damp(this.vy, 0, 8, dt);
+      }
+      // Thirty readable seconds also satisfies the twenty-second no-live-fire
+      // minimum. The first warning then gives a further 2.2 seconds to respond.
+      if (this.silent || this.disarmed > 0 || this.state.elapsed < 30 ||
+        this.state.elapsed - this.state.lastCasualty < 30) return;
+      if (this.aimT > 0) {
+        if (!this.target || this.target.dead || this.target.safe) {
+          this.aimT = 0;
+          this.target = null;
+          return;
+        }
+        this.facing = U.angleTo(this.x, this.y, this.target.x, this.target.y);
+        this.aimT -= dt;
+        if (this.aimT <= 0 && this.target && !this.target.dead && !this.target.safe) {
+          world.add(new LiveRound(this.state, this, this.target));
+          this.state.shotHeat += 3;
+          this.shots++;
+          DM.Audio.play('summer_shot');
+          if (this.shots % 3 === 0) {
+            world.add(new Gas(this.state, this.target.x, this.target.y));
+            DM.Audio.play('summer_gas');
+          }
+          this.cool = 4.2;
+        }
+        return;
+      }
+      this.cool -= dt;
+      if (this.cool > 0) return;
+      this.target = world.entities.find(e => e.isSummerHuman && !e.dead && !e.safe && !e.inCab &&
+        U.dist(e.x, e.y, this.x, this.y) < 520 && world.los(this.x, this.y, e.x, e.y));
+      if (this.target) {
+        this.facing = U.angleTo(this.x, this.y, this.target.x, this.target.y);
+        this.aimT = 2.2;
+        world.bark(this, 'Comedian takes aim');
+        DM.Audio.play('summer_aim');
+      }
+    }
+    render(g, world) {
+      super.render(g, world);
+      g.fillStyle = '#e4c25b';
+      G.circle(g, this.x - 5, this.y + 4, 3);
+      g.fill();
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g, world) {
+      if (this.aimT > 0 && this.target && !this.target.dead) {
+        const handX = this.x + Math.cos(this.facing) * 25;
+        const handY = this.y + Math.sin(this.facing) * 25;
+        g.strokeStyle = '#c9b197';
+        g.lineWidth = 5;
+        G.line(g, this.x, this.y, handX, handY);
+        g.strokeStyle = '#222b2e';
+        g.lineWidth = 7;
+        G.line(g, handX, handY, handX + Math.cos(this.facing) * 13, handY + Math.sin(this.facing) * 13);
+        g.strokeStyle = '#d98d5d';
+        g.lineWidth = 2.5;
+        g.setLineDash([10, 6]);
+        G.line(g, this.x, this.y, this.target.x, this.target.y);
+        g.setLineDash([]);
+      }
+      if (K.withinRange(world, this, 135) && this.disarmed > 0) {
+        K.label(g, `DISARMED · ${Math.ceil(this.disarmed)}s`, this.x, this.y - 34, S.TEAL, 11);
+      }
+    }
+  }
+
+  class Resident extends DM.NPC {
+    constructor(state, x, y, id, waypoints) {
+      super({ x, y, look: id % 2 ? 'summer_resident_b' : 'summer_resident', lookAtPlayer: true });
+      this.state = state;
+      this.residentId = id;
+      this.grabbable = true;
+      this.body = false;
+      this.mass = 1;
+      this.escort = false;
+      this.safe = false;
+      this.waypoints = waypoints;
+      this.interact = { label: 'Guide resident to the stairs', range: 65, enabled: () => !this.safe,
+        onInteract: () => {
+          this.escort = true;
+          this.world.bark(this, 'I can see the stairs now.');
+        } };
+    }
+    onGrab() {
+      this.escort = true;
+    }
+    update(dt, world) {
+      if (world.ceasefire || this.safe) return;
+      if (!this.escort && world.entities.some(e => e.isDuplicate && !e.dead && U.dist(this.x, this.y, e.x, e.y) < 145)) {
+        this.escort = true;
+        world.bark(this, 'There are two of you. One is enough.');
+      }
+      const exit = this.state.safePoint;
+      if (!this.heldBy && U.dist(this.x, this.y, exit.x, exit.y) < 70) {
+        this.safe = true;
+        this.grabbable = false;
+        this.escort = false;
+        this.interact = null;
+        this.vx = 0;
+        this.vy = 0;
+        this.state.ctx.flags.rescued++;
+        this.state.ctx.flags.rescuedMask |= 1 << this.residentId;
+        DM.Events.emit('enemy:down', { enemy: this, human: true, lethal: false, kind: 'rescue' });
+        DM.Audio.play('summer_safe');
+        return;
+      }
+      if (this.heldBy || !this.escort) return;
+      // Being carried to the stairwell bypasses the room-door waypoints legitimately.
+      if (this.x > 700 && this.x < 925) this.waypoints = [exit];
+      while (this.waypoints.length > 1 && U.dist(this.x, this.y, this.waypoints[0].x, this.waypoints[0].y) < 32) {
+        this.waypoints.shift();
+      }
+      S.move(this, this.waypoints[0] || exit, this.state.grid.vented ? 122 : 95, dt, world);
+    }
+    render(g, world) {
+      super.render(g, world);
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g, world) {
+      if (this.safe) return;
+      K.ring(g, this.x, this.y, 19, this.escort ? S.TEAL : S.AMBER, 1.5);
+      if (world.timesight) G.glow(g, this.x, this.y, 36, S.TEAL, 0.16);
+    }
+  }
+
+  class StairBeam extends DM.Entity {
+    constructor(state, x, y, wall) {
+      super({ x, y, r: 33, mass: 7, grabbable: true, disintegratable: false, body: false });
+      this.state = state;
+      this.barrier = wall;
+    }
+    onGrab() {
+      if (this.state.ctx.flags.beamCleared) return;
+      this.barrier.noCollide = true;
+      this.state.ctx.flags.beamCleared = true;
+      this.state.change(-3, 'The stairwell opened');
+    }
+    render(g) {
+      g.save();
+      g.translate(this.x, this.y);
+      g.rotate(-0.18);
+      g.fillStyle = '#40302a';
+      g.fillRect(-100, -16, 200, 32);
+      g.fillStyle = '#906242';
+      g.fillRect(-100, -15, 200, 5);
+      g.strokeStyle = '#d88b56';
+      g.lineWidth = 1;
+      for (const y of [-8, 2, 9]) G.line(g, -85, y, 90, y - 3);
+      for (const x of [-80, -50, 50, 80]) {
+        g.fillStyle = '#171c20';
+        G.circle(g, x, 0, 3);
+        g.fill();
+      }
+      g.restore();
+    }
+  }
+  Object.assign(S, {
+    SummerBossFraming, CityState, FireGrid, Hydrant, Puddle, Gas, Molotov, Rioter, LiveRound, Comedian, Resident, StairBeam,
+  });
+})();
+</script>
+<script>/* src/game/long-summer-truck.js */
+/* A moving machine with a human inside. Components and driver have separate outcomes. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const S = DM.Summer;
+  const K = DM.BonusKit;
+  const G = DM.Gfx;
+  const U = DM.U;
+
+  class Driver extends DM.NPC {
+    constructor(state, x, y) {
+      super({ x, y, look: 'summer_driver', lookAtPlayer: true });
+      this.state = state;
+      this.isSummerHuman = true;
+      this.isDriver = true;
+      this.inCab = true;
+      this.safe = false;
+      this.body = false;
+      this.hp = 30;
+      this.maxHp = 30;
+      this.disintegratable = false;
+      this.grabbable = false;
+      this.mass = 1;
+      this.following = false;
+      this.interact = { label: 'Help the driver out', range: 90, enabled: () => !this.inCab && !this.safe,
+        onInteract: () => {
+          this.following = true;
+          this.world.bark(this, 'I only wanted them to stop pushing us.');
+        } };
+    }
+    emerge(x, y) {
+      this.x = x;
+      this.y = y;
+      this.inCab = false;
+      this.disintegratable = true;
+      this.grabbable = true;
+    }
+    onGrab() {
+      this.following = true;
+    }
+    damage(amount, source, kind) {
+      if (this.dead || this.safe || this.inCab) return false;
+      if (kind === 'disintegrate') this.disintegrate(this.world, source);
+      else this.following = true;
+      return true;
+    }
+    disintegrate(world, source) {
+      if (this.dead || this.safe) return;
+      this.state.ctx.flags.driverOutcome = 'unmade';
+      DM.Events.emit('enemy:down', { enemy: this, human: true, lethal: true, kind: 'disintegrate' });
+      DM.Entity.prototype.disintegrate.call(this, world, source);
+    }
+    update(dt, world) {
+      if (this.inCab || this.safe || world.ceasefire) return;
+      const exit = this.state.safePoint;
+      if (!this.heldBy && U.dist(this.x, this.y, exit.x, exit.y) < 75) {
+        this.safe = true;
+        this.grabbable = false;
+        this.disintegratable = false;
+        this.interact = null;
+        this.vx = 0;
+        this.vy = 0;
+        this.state.ctx.flags.driverOutcome = 'spared';
+        DM.Events.emit('enemy:down', { enemy: this, human: true, lethal: false, kind: 'rescue' });
+        DM.Audio.play('summer_safe');
+      } else if (!this.heldBy && this.following) S.move(this, exit, 135, dt, world);
+    }
+    render(g) {
+      if (!this.inCab) super.render(g);
+    }
+    renderEmissive(g) {
+      if (!this.inCab && !this.safe) K.ring(g, this.x, this.y, 20, S.TEAL, 2);
+    }
+  }
+
+  class TruckPart extends DM.Entity {
+    constructor(truck, role, dx, dy, hp) {
+      super({ x: truck.x + dx, y: truck.y + dy, r: role === 'cab' ? 30 : 23,
+        hp, static: true, body: true, solid: false, team: 'enemy', grabbable: false });
+      this.truck = truck;
+      this.role = role;
+      this.offset = { x: dx, y: dy };
+      this.hazard = true;
+      this.colors = ['#748170', '#36483e', '#b8b69a'];
+    }
+    sync() {
+      const a = this.truck.facing;
+      const o = this.offset;
+      this.x = this.truck.x + Math.cos(a) * o.x - Math.sin(a) * o.y;
+      this.y = this.truck.y + Math.sin(a) * o.x + Math.cos(a) * o.y;
+    }
+    update() {
+      this.sync();
+    }
+    // The truck can turn during Disintegrate's brief cast delay. Only an
+    // explicitly aimed cab shot may kill its occupant; wheel splash cannot.
+    onDisintegrateCast(c) {
+      if (this.role !== 'cab') return;
+      this.cabTargeted = U.dist(c.x, c.y, this.x, this.y) <= this.r;
+      this.cabCast = c;
+    }
+    disintegrate(world, source) {
+      if (this.role === 'cab') {
+        // Tie intent to the actual resolving pulse, not elapsed wall time.
+        // Hitstop pauses that pulse but continues advancing world.realTime.
+        const pending = source?.powers?.disintegrate?.pending;
+        const resolving = this.cabCast && this.cabCast.t <= 0 && pending?.includes(this.cabCast);
+        if (!this.cabTargeted || !resolving) {
+          const now = world.realTime || 0;
+          if (this.lastCabWarning == null || now - this.lastCabWarning > 1.8) {
+            world.bark(this, 'Someone is inside.');
+            this.lastCabWarning = now;
+          }
+          return;
+        }
+        this.cabCast = null;
+        this.cabTargeted = false;
+      }
+      super.disintegrate(world, source);
+    }
+    damage(amount, source, kind) {
+      if (this.dead || this.truck.disabled) return false;
+      if (this.role === 'cab' && kind !== 'disintegrate') {
+        this.truck.world.bark(this, 'There is someone inside.');
+        return false;
+      }
+      return super.damage(amount, source, kind);
+    }
+    die(kind, source) {
+      if (this.dead) return;
+      if (this.role === 'cab' && kind !== 'disintegrate') return;
+      this.dead = true;
+      if (this.role === 'cab') this.truck.driver.disintegrate(this.world, source);
+      this.truck.componentChanged();
+      K.burst(this.world, this.x, this.y, S.AMBER);
+      DM.Audio.play('summer_metal');
+    }
+    render(g, world) {
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g) {
+      if (this.truck.disabled || this.dead) return;
+      K.ring(g, this.x, this.y, this.role === 'cab' ? 29 : 20, this.role === 'cab' ? '#ebac80' : S.TEAL, 1.5);
+      if (this.hitFlash > 0) G.glow(g, this.x, this.y, 43, '#bce9e3', 0.4);
+    }
+  }
+
+  class GasMortar extends DM.Entity {
+    constructor(state, x, y) {
+      super({ x, y, r: 70, body: false, solid: false, static: true, disintegratable: false });
+      this.state = state;
+      this.left = 1.5;
+      this.hazard = true;
+    }
+    update(dt, world) {
+      if (world.ceasefire) return;
+      this.left -= dt;
+      if (this.left <= 0) {
+        this.dead = true;
+        world.add(new S.Gas(this.state, this.x, this.y));
+        DM.Audio.play('summer_gas');
+      }
+    }
+    render(g, world) {
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g) {
+      K.ring(g, this.x, this.y, 60, '#d9c680', 2);
+      g.strokeStyle = '#d9c680';
+      G.line(g, this.x - 12, this.y, this.x + 12, this.y);
+      G.line(g, this.x, this.y - 12, this.x, this.y + 12);
+    }
+  }
+
+  class RiotTruck extends DM.Entity {
+    constructor(state, x, y) {
+      super({ x, y, r: 165, hp: 420, mass: 100, static: true, body: false, disintegratable: false, team: 'enemy' });
+      this.state = state;
+      this.ctx = state.ctx;
+      this.facing = 0;
+      this.phase = 1;
+      this.bonusBoss = true;
+      this.name = 'THE ARMOURY TRUCK';
+      this.title = this.name;
+      this.barColor = S.AMBER;
+      this.hazard = true;
+      this.disabled = false;
+      this.timer = 0;
+      this.mode = 'move';
+      this.modeT = 3;
+      this.waterAngle = Math.PI / 2;
+      this.lockAngle = 0;
+      this.hitT = 0;
+      this.mortarT = 8;
+      this.ramCount = 0;
+      this.driver = new Driver(state, x + 147, y);
+      this.parts = [];
+    }
+    onAdd(world) {
+      world.add(this.driver);
+      for (const [role, x, y, hp] of [
+        ['cannon', -40, 0, 140], ['wheel', -96, -83, 70], ['wheel', 65, -83, 70],
+        ['wheel', -96, 83, 70], ['wheel', 65, 83, 70], ['cab', 153, 0, 30]
+      ]) this.parts.push(world.add(new TruckPart(this, role, x, y, hp)));
+      this.cameraFrame = new S.SummerBossFraming(this.ctx, this, { left: 235, right: 235, top: 235, bottom: 235 });
+    }
+    componentChanged() {
+      const mechanics = this.parts.filter(p => p.role !== 'cab');
+      this.hp = mechanics.reduce((sum, p) => sum + (p.dead ? 0 : p.hp), 0);
+      if (!this.driver.dead && this.hp > 0) {
+        if (this.hp <= this.maxHp / 2 && this.phase === 1) {
+          this.phase = 2;
+          this.world.hitstop(0.2);
+          this.world.camera.shake(0.3);
+          DM.Audio.play('summer_ram');
+          this.ctx.toast('THE DRIVER IS PANICKING', S.AMBER);
+          this.mode = 'ramWarn';
+          this.modeT = 1.5;
+          this.lockAngle = U.angleTo(this.x, this.y, this.world.player.x, this.world.player.y);
+        }
+        return;
+      }
+      this.disable();
+    }
+    disable() {
+      if (this.disabled) return;
+      this.disabled = true;
+      this.hp = 0;
+      this.world.boss = null;
+      this.cameraFrame.release();
+      this.state.change(-10, 'The truck stopped');
+      for (const p of this.parts) p.disintegratable = false;
+      if (!this.driver.dead) {
+        this.driver.emerge(this.x + 210, this.y + 85);
+        this.ctx.flags.comedian.cool = 2;
+        this.ctx.flags.comedian.silent = false;
+        this.world.bark(this.driver, 'I am getting out. Please.');
+      }
+      DM.Audio.play('summer_metal');
+    }
+    update(dt, world) {
+      if (this.disabled) return;
+      this.componentChanged();
+      if (this.disabled) return;
+      this.cameraFrame.update();
+      if (world.ceasefire) return;
+      this.timer += dt;
+      this.modeT -= dt;
+      this.hitT -= dt;
+      this.mortarT -= dt;
+      const p = world.player;
+      const cannon = this.parts.find(part => part.role === 'cannon');
+      if (this.mortarT <= 0) {
+        this.mortarT = 9;
+        world.add(new GasMortar(this.state, p.x, p.y));
+      }
+      if (this.mode === 'move') {
+        const tx = 1000 + Math.cos(this.timer * 0.27) * 310;
+        const ty = 650 + Math.sin(this.timer * 0.27) * 145;
+        this.x = U.damp(this.x, tx, 0.4, dt);
+        this.y = U.damp(this.y, ty, 0.4, dt);
+        if (this.modeT <= 0) {
+          this.lockAngle = U.angleTo(this.x, this.y, p.x, p.y);
+          this.mode = this.phase === 2 ? 'ramWarn' : 'waterWarn';
+          this.modeT = 1.3;
+        }
+      } else if (this.mode === 'waterWarn') {
+        this.waterAngle = this.lockAngle - 0.55;
+        if (this.modeT <= 0) {
+          this.mode = cannon.dead ? 'move' : 'water';
+          this.modeT = 2;
+          if (!cannon.dead) DM.Audio.play('summer_water');
+        }
+      } else if (this.mode === 'water') {
+        this.waterAngle = this.lockAngle - 0.55 + (2 - this.modeT) * 0.55;
+        if (!cannon.dead && this.hitT <= 0) {
+          const ex = this.x + Math.cos(this.waterAngle) * 640;
+          const ey = this.y + Math.sin(this.waterAngle) * 640;
+          if (K.segmentDistance(p.x, p.y, this.x, this.y, ex, ey) < 26 + p.r) {
+            p.damage(5, this, 'water');
+            p.impulse(Math.cos(this.waterAngle) * 750, Math.sin(this.waterAngle) * 750);
+            this.hitT = 0.3;
+          }
+        }
+        if (this.modeT <= 0) {
+          this.mode = this.phase === 2 ? 'ramWarn' : 'move';
+          this.modeT = this.phase === 2 ? 1.5 : 2.4;
+          this.lockAngle = U.angleTo(this.x, this.y, p.x, p.y);
+        }
+      } else if (this.mode === 'ramWarn') {
+        if (this.modeT <= 0) {
+          this.mode = 'ram';
+          this.modeT = 1.4;
+          this.ramCount++;
+          DM.Audio.play('summer_ram');
+        }
+      } else if (this.mode === 'ram') {
+        const ax = this.x;
+        const ay = this.y;
+        this.x = U.clamp(this.x + Math.cos(this.lockAngle) * 270 * dt, 360, world.w - 360);
+        this.y = U.clamp(this.y + Math.sin(this.lockAngle) * 270 * dt, 360, (world.playableHeight || world.h) - 330);
+        if (this.hitT <= 0 && K.segmentDistance(p.x, p.y, ax, ay, this.x, this.y) < 125 + p.r) {
+          p.damage(17, this, 'impact');
+          p.impulse(Math.cos(this.lockAngle) * 950, Math.sin(this.lockAngle) * 950);
+          this.hitT = 0.75;
+        }
+        if (this.modeT <= 0) {
+          this.mode = 'waterWarn';
+          this.lockAngle = U.angleTo(this.x, this.y, p.x, p.y);
+          this.modeT = 1.3;
+        }
+      }
+      this.facing = U.dampAngle(this.facing, this.mode === 'ram' ? this.lockAngle : 0, 2, dt);
+      for (const part of this.parts) part.sync();
+      if (this.driver.inCab) {
+        this.driver.x = this.parts[5].x;
+        this.driver.y = this.parts[5].y;
+      }
+      // Framing must use the moved chassis, not the previous frame's position.
+      this.cameraFrame.update();
+    }
+    render(g, world) {
+      g.save();
+      g.translate(this.x, this.y);
+      g.rotate(this.facing);
+      g.fillStyle = 'rgba(0,0,0,0.4)';
+      G.rr(g, -174, -90, 360, 200, 20);
+      g.fill();
+      const steel = g.createLinearGradient(0, -80, 0, 80);
+      steel.addColorStop(0, '#65705e');
+      steel.addColorStop(0.5, '#3c4b43');
+      steel.addColorStop(1, '#222e2a');
+      g.fillStyle = steel;
+      G.rr(g, -163, -72, 319, 144, 9);
+      g.fill();
+      g.fillStyle = '#6f7567';
+      g.fillRect(-154, -65, 191, 128);
+      g.strokeStyle = '#303d34';
+      g.lineWidth = 3;
+      for (let x = -142; x < 35; x += 17) G.line(g, x, -60, x, 57);
+      for (const part of this.parts) {
+        if (part.role !== 'wheel') continue;
+        const o = part.offset;
+        g.fillStyle = part.dead ? '#242727' : '#11191a';
+        G.rr(g, o.x - 25, o.y - 15, 50, 30, 7);
+        g.fill();
+        g.fillStyle = '#767b6d';
+        g.fillRect(o.x - 16, o.y - 4, 32, 8);
+        if (part.dead) {
+          g.strokeStyle = '#aa8156';
+          G.line(g, o.x - 24, o.y - 13, o.x + 22, o.y + 13);
+        }
+      }
+      g.fillStyle = '#4d6057';
+      G.rr(g, 65, -69, 105, 138, 7);
+      g.fill();
+      g.fillStyle = this.driver.dead ? '#171e1b' : '#8fbaa5';
+      g.fillRect(119, -49, 32, 98);
+      g.fillStyle = '#d5b589';
+      if (!this.driver.dead && this.driver.inCab) {
+        G.circle(g, 136, 20, 8);
+        g.fill();
+      }
+      g.strokeStyle = '#273b34';
+      g.lineWidth = 5;
+      G.line(g, 134, -50, 134, 48);
+      g.fillStyle = '#ced2b0';
+      for (let x = -150; x < 160; x += 36) {
+        G.circle(g, x, -62, 2);
+        g.fill();
+        G.circle(g, x, 60, 2);
+        g.fill();
+      }
+      g.fillStyle = '#171c1c';
+      g.fillRect(166, -64, 12, 128);
+      if (this.phase === 2 || this.disabled) {
+        g.strokeStyle = '#1a2420';
+        g.lineWidth = 4;
+        g.beginPath();
+        g.moveTo(-124, -60);
+        g.lineTo(-65, -23);
+        g.lineTo(-84, 22);
+        g.lineTo(12, 57);
+        g.stroke();
+      }
+      g.restore();
+      if (!this.parts[0].dead) {
+        g.save();
+        g.translate(this.x - Math.cos(this.facing) * 40, this.y - Math.sin(this.facing) * 40);
+        g.rotate(this.waterAngle);
+        g.fillStyle = '#b6baa0';
+        G.circle(g, 0, 0, 26);
+        g.fill();
+        g.fillStyle = '#788d82';
+        g.fillRect(-8, -10, 73, 20);
+        g.fillStyle = '#192c2b';
+        g.fillRect(56, -7, 10, 14);
+        g.restore();
+      }
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g, world) {
+      if (this.disabled) return;
+      if (this.mode === 'ramWarn' || this.mode === 'ram') {
+        const a = this.lockAngle;
+        g.save();
+        g.translate(this.x, this.y);
+        g.rotate(a);
+        g.fillStyle = this.mode === 'ramWarn' ? 'rgba(238,168,91,0.12)' : 'rgba(238,168,91,0.06)';
+        g.fillRect(125, -95, 430, 190);
+        g.strokeStyle = '#d9a366';
+        g.lineWidth = 2;
+        g.setLineDash([13, 10]);
+        g.strokeRect(125, -95, 430, 190);
+        g.setLineDash([]);
+        g.restore();
+      }
+      if ((this.mode === 'waterWarn' || this.mode === 'water') && !this.parts[0].dead) {
+        g.save();
+        g.translate(this.x, this.y);
+        g.rotate(this.waterAngle);
+        if (this.mode === 'waterWarn') {
+          g.strokeStyle = '#e4bc79';
+          g.lineWidth = 2;
+          g.setLineDash([8, 11]);
+          G.line(g, 0, 0, 640, 0);
+          g.setLineDash([]);
+        } else {
+          const spray = g.createLinearGradient(20, 0, 640, 0);
+          spray.addColorStop(0, 'rgba(185,232,230,0.8)');
+          spray.addColorStop(0.6, 'rgba(158,211,220,0.45)');
+          spray.addColorStop(1, 'rgba(176,219,217,0.05)');
+          g.fillStyle = spray;
+          g.beginPath();
+          g.moveTo(12, -5);
+          g.lineTo(640, -42);
+          g.quadraticCurveTo(692, 0, 640, 42);
+          g.lineTo(12, 5);
+          g.fill();
+          if (DM.Save.settings.fx !== 'off') {
+            g.strokeStyle = 'rgba(218,240,230,0.7)';
+            g.lineWidth = 1.3;
+            for (let i = 0; i < 32; i++) {
+              const x = (i * 63 + world.time * 570) % 620 + 18;
+              const y = Math.sin(i * 4.7) * (4 + x * 0.048);
+              G.line(g, x, y, x + 11 + x * 0.025, y);
+            }
+          }
+        }
+        g.restore();
+      }
+      G.glow(g, this.x + 170, this.y - 44, 70, '#eed5a5', 0.22);
+      G.glow(g, this.x + 170, this.y + 44, 70, '#eed5a5', 0.22);
+    }
+    light() {
+      return { r: 200, i: 0.45, color: '#e8cf9e', k: 0.09 };
+    }
+  }
+  Object.assign(S, { Driver, TruckPart, GasMortar, RiotTruck });
+})();
+</script>
+<script>/* src/data/bonus-summer-atmosphere.js */
+/* August streets: baked masonry, smoke, firelight and an original synthetic soundscape. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const S = DM.Summer;
+  const G = DM.Gfx;
+  const K = DM.BonusKit;
+  const U = DM.U;
+
+  function leatherMask(g, t) {
+    // The existing local mask hook can also add a broader jaw and jacket.
+    // It changes this portrait only; Dan keeps his slimmer original silhouette.
+    g.fillStyle = '#171d20';
+    G.ellipse(g, 50, 108, 57, 35);
+    g.fill();
+    g.fillStyle = '#ae8061';
+    G.rr(g, 38, 62, 24, 28, 5);
+    g.fill();
+    g.fillStyle = '#c9a17d';
+    g.beginPath();
+    g.moveTo(28, 40);
+    g.quadraticCurveTo(29, 22, 50, 23);
+    g.quadraticCurveTo(75, 25, 74, 46);
+    g.lineTo(72, 67);
+    g.quadraticCurveTo(62, 81, 42, 78);
+    g.lineTo(29, 68);
+    g.closePath();
+    g.fill();
+    g.fillStyle = 'rgba(87,64,50,0.24)';
+    G.ellipse(g, 52, 67, 22, 12);
+    g.fill();
+    g.fillStyle = '#353335';
+    g.beginPath();
+    g.moveTo(27, 41);
+    g.quadraticCurveTo(27, 16, 51, 20);
+    g.quadraticCurveTo(74, 18, 75, 44);
+    g.lineTo(67, 35);
+    g.quadraticCurveTo(48, 28, 34, 36);
+    g.fill();
+    g.fillStyle = '#898278';
+    g.fillRect(29, 36, 5, 17);
+    g.fillRect(68, 36, 5, 17);
+    g.fillStyle = '#151b1e';
+    g.beginPath();
+    g.moveTo(28, 40);
+    g.lineTo(73, 40);
+    g.lineTo(71, 54);
+    g.lineTo(54, 50);
+    g.lineTo(49, 53);
+    g.lineTo(32, 54);
+    g.closePath();
+    g.fill();
+    g.fillStyle = '#d8c19b';
+    for (const x of [40, 62]) {
+      G.ellipse(g, x, 46, 6, 2);
+      g.fill();
+      g.fillStyle = '#292523';
+      G.circle(g, x, 46, 1.5);
+      g.fill();
+      g.fillStyle = '#d8c19b';
+    }
+    g.strokeStyle = '#85634e';
+    g.lineWidth = 1;
+    for (const x of [33, 64]) {
+      G.line(g, x, 55, x + 6, 58);
+      G.line(g, x + 1, 59, x + 5, 64);
+    }
+    G.line(g, 48, 53, 45, 61);
+    G.line(g, 45, 61, 52, 62);
+    G.line(g, 41, 68, 62, 66);
+    G.line(g, 40, 73, 58, 74);
+    // Worn leather lapels, shoulder seams, zipper and the yellow badge.
+    g.fillStyle = '#333c3f';
+    for (const side of [-1, 1]) {
+      g.beginPath();
+      g.moveTo(50 + side * 16, 77);
+      g.lineTo(50 + side * 37, 85);
+      g.lineTo(50 + side * 23, 99);
+      g.lineTo(50 + side * 6, 90);
+      g.fill();
+    }
+    g.strokeStyle = '#6e7777';
+    g.lineWidth = 1.1;
+    G.line(g, 20, 86, 5, 96);
+    G.line(g, 80, 86, 95, 96);
+    G.line(g, 58, 87, 48, 100);
+    g.fillStyle = '#624230';
+    G.rr(g, 56, 64, 33, 6, 2);
+    g.fill();
+    g.fillStyle = '#b6a092';
+    g.fillRect(83, 64, 5, 6);
+    g.fillStyle = '#dc9856';
+    g.fillRect(88, 65, 2, 4);
+    if (DM.Save.settings.fx !== 'off') {
+      const time = DM.SettingsSchema.reducedFlashing() ? 0 : t;
+      g.strokeStyle = 'rgba(202,198,176,0.4)';
+      g.lineWidth = 1.4;
+      g.beginPath();
+      g.moveTo(88, 63);
+      g.bezierCurveTo(94, 56, 82 + Math.sin(time) * 3, 51, 90, 43);
+      g.stroke();
+    }
+    g.fillStyle = '#d6b644';
+    G.circle(g, 75, 90, 7);
+    g.fill();
+    g.fillStyle = '#232726';
+    G.circle(g, 73, 88, 1);
+    g.fill();
+    G.circle(g, 77, 88, 1);
+    g.fill();
+    g.strokeStyle = '#232726';
+    g.lineWidth = 1;
+    g.beginPath();
+    g.arc(75, 90, 3.5, 0.15, Math.PI - 0.15);
+    g.stroke();
+  }
+  Object.assign(DM.LOOKS, {
+    comedian: { name: 'The Comedian', skin: '#d4aa83', hair: '#363333', hairStyle: 'short',
+      body: '#252b2e', sleeve: '#353b3d', size: 1.15, legs: '#21282a', collar: '#4c5050', trim: '#ae965e',
+      moustache: true, bg: '#7f5944', color: S.AMBER, mask: leatherMask },
+    summer_rioter: { name: 'A man from the avenue', skin: '#c49b79', hair: '#312d2b', hairStyle: 'short',
+      body: '#a18b6e', sleeve: '#c49b79', legs: '#3b4e59', bg: '#6a6252', color: '#dbbd91' },
+    summer_resident: { name: 'Mrs Alvarez', skin: '#c69b7b', hair: '#b6a995', hairStyle: 'long',
+      body: '#977e72', sleeve: '#c69b7b', legs: '#605b58', bg: '#836e53', color: '#e4c694' },
+    summer_resident_b: { name: 'A resident', skin: '#d2ac87', hair: '#463b32', hairStyle: 'short',
+      body: '#799590', sleeve: '#d2ac87', legs: '#4c5654', bg: '#67776b', color: '#bad8ca' },
+    summer_driver: { name: 'The Driver', skin: '#dfb591', hair: '#73533d', hairStyle: 'short',
+      body: '#8a8e62', sleeve: '#b19a73', legs: '#4a5042', bg: '#76815c', color: '#d8d9a5' },
+  });
+
+  DM.Audio.define('summer_glass', { gap: 0.2, fn(a) {
+    a.noise({ dur: 0.25, gain: 0.023, ftype: 'highpass', freq: 2400, attack: 0.003 });
+    for (let i = 0; i < 4; i++) {
+      a.tone({ freq: 1200 + i * 480, freqEnd: 730 + i * 260, dur: 0.16, gain: 0.006, delay: i * 0.04 });
+    }
+  } });
+  DM.Audio.define('summer_siren', { gap: 1, fn(a) {
+    a.tone({ freq: 460, freqEnd: 670, dur: 1.8, gain: 0.009, type: 'sine', attack: 0.6 });
+    a.tone({ freq: 670, freqEnd: 440, dur: 1.8, gain: 0.008, type: 'sine', attack: 0.6, delay: 1.6 });
+  } });
+  DM.Audio.define('summer_crowd', { gap: 0.3, fn(a) {
+    for (let i = 0; i < 5; i++) {
+      a.noise({ dur: 0.21, gain: 0.012, ftype: 'bandpass', freq: 380 + i * 97, q: 3,
+        attack: 0.07, delay: i * 0.19 });
+    }
+  } });
+  DM.Audio.define('summer_water', { gap: 0.5, fn(a) {
+    a.noise({ dur: 1.5, gain: 0.032, ftype: 'lowpass', freq: 1600, attack: 0.17 });
+    a.tone({ freq: 70, freqEnd: 43, dur: 0.7, gain: 0.028, type: 'sine', attack: 0.06 });
+  } });
+  DM.Audio.define('summer_hiss', { gap: 0.15, fn(a) {
+    a.noise({ dur: 0.6, gain: 0.022, ftype: 'highpass', freq: 1700, attack: 0.08 });
+  } });
+  DM.Audio.define('summer_vent', { gap: 0.5, fn(a) {
+    a.noise({ dur: 1.8, gain: 0.027, ftype: 'lowpass', freq: 1200, freqEnd: 300, attack: 0.3 });
+    a.tone({ freq: 85, freqEnd: 42, dur: 0.6, gain: 0.025, type: 'triangle' });
+  } });
+  DM.Audio.define('summer_aim', { gap: 0.4, fn(a) {
+    a.tone({ freq: 330, freqEnd: 440, dur: 0.22, gain: 0.025, type: 'triangle', attack: 0.02 });
+    a.tone({ freq: 440, dur: 0.3, gain: 0.018, type: 'triangle', delay: 0.24, attack: 0.02 });
+    a.noise({ dur: 0.08, gain: 0.012, ftype: 'highpass', freq: 2100, delay: 0.05 });
+  } });
+  DM.Audio.define('summer_shot', { gap: 0.15, fn(a) {
+    a.noise({ dur: 0.12, gain: 0.045, ftype: 'bandpass', freq: 1200, q: 0.6, echo: 0.12 });
+    a.tone({ freq: 100, freqEnd: 40, dur: 0.1, gain: 0.03, type: 'triangle' });
+  } });
+  DM.Audio.define('summer_throw', { gap: 0.1, fn(a) {
+    a.noise({ dur: 0.18, gain: 0.013, ftype: 'bandpass', freq: 700, freqEnd: 1600, attack: 0.04 });
+  } });
+  DM.Audio.define('summer_gas', { gap: 0.2, fn(a) {
+    a.noise({ dur: 1.2, gain: 0.023, ftype: 'highpass', freq: 2100, attack: 0.12 });
+  } });
+  DM.Audio.define('summer_metal', { gap: 0.15, fn(a) {
+    a.noise({ dur: 0.3, gain: 0.027, ftype: 'bandpass', freq: 1100, q: 2 });
+    a.tone({ freq: 173, freqEnd: 91, dur: 0.45, gain: 0.02, type: 'triangle', echo: 0.15 });
+  } });
+  DM.Audio.define('summer_ram', { gap: 0.5, fn(a) {
+    a.tone({ freq: 52, freqEnd: 95, dur: 1.3, gain: 0.025, type: 'sawtooth', cutoff: 180, attack: 0.3 });
+    a.noise({ dur: 0.9, gain: 0.017, ftype: 'lowpass', freq: 280, attack: 0.2 });
+  } });
+  DM.Audio.define('summer_safe', { gap: 0.2, fn(a) {
+    a.tone({ freq: 392, dur: 0.5, gain: 0.025, type: 'sine', echo: 0.2 });
+    a.tone({ freq: 523, dur: 0.8, gain: 0.018, type: 'sine', delay: 0.15, echo: 0.2 });
+  } });
+  DM.Ambience.beds.summer_street = { layers: [
+    { kind: 'drone', oscs: [{ f: 52, wave: 'sine' }, { f: 78, wave: 'sine', g: 0.3 }],
+      cutoff: 180, gain: 0.014, lfo: { rate: 0.055, depth: 0.3 } },
+    { kind: 'wind', ftype: 'bandpass', freq: 330, q: 0.5, gain: 0.008 },
+    { kind: 'events', sound: 'summer_crowd', every: [5, 9], first: [1, 2], gain: 0.65 },
+    { kind: 'events', sound: 'summer_siren', every: [17, 27], first: [4, 8], gain: 0.6 },
+    { kind: 'events', sound: 'summer_glass', every: [12, 20], first: [9, 12], gain: 0.28 },
+  ] };
+  DM.Ambience.beds.summer_fire = { layers: [
+    { kind: 'wind', ftype: 'lowpass', freq: 260, gain: 0.017, lfo: { rate: 0.17, depth: 0.3 } },
+    { kind: 'drone', oscs: [{ f: 47, wave: 'sine' }], cutoff: 160, gain: 0.012 },
+    { kind: 'events', sound: 'summer_metal', every: [9, 15], first: [5, 9], gain: 0.22 },
+  ] };
+  // Sparse, humid chords; the drum layer only arrives as the situation escalates.
+  DM.MusicTracks.summer_street = {
+    bpm: 68, level: -1, barsPerChord: 2, echo: 0.4,
+    prog: [[48, 55, 58, 62], [46, 53, 57, 60], [45, 52, 55, 60], [43, 50, 55, 59]],
+    layers: [
+      { kind: 'pad', wave: 'sine', gain: 0.026, attack: 2.3 },
+      { kind: 'bass', wave: 'sine', gain: 0.055, every: 8, oct: -12 },
+      { kind: 'arp', wave: 'triangle', gain: 0.024, every: 3, pattern: [0, -1, 2, 3, -1, 1, 4, -1],
+        oct: 12, cutoff: 1600, len: 2.8 },
+      { kind: 'tick', gain: 0.028, every: 4 },
+      { kind: 'kick', gain: 0.13, pattern: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0], min: 0.5 },
+    ],
+  };
+  DM.MusicTracks.summer_truck = {
+    bpm: 106, level: -2, barsPerChord: 1, echo: 0.24,
+    prog: [[48, 55, 58, 62], [48, 55, 58, 63], [46, 53, 57, 60], [43, 50, 54, 59]],
+    layers: [
+      { kind: 'pad', wave: 'sine', gain: 0.022, attack: 0.8 },
+      { kind: 'arp', wave: 'triangle', gain: 0.028, every: 1, pattern: [0, 2, 1, 3, 0, 2, 4, 2],
+        oct: 12, cutoff: 2100, len: 1.4 },
+      { kind: 'bass', wave: 'sawtooth', gain: 0.033, oct: -12, every: 4, cutoff: 350 },
+      { kind: 'kick', gain: 0.16, pattern: [1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0], min: 0.2 },
+      { kind: 'snare', gain: 0.04, pattern: [0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0], min: 0.6 },
+    ],
+  };
+
+  function brick(g, x, y, w, h, warm = false) {
+    g.fillStyle = warm ? '#59443b' : '#444743';
+    g.fillRect(x, y, w, h);
+    g.strokeStyle = warm ? '#342e2b' : '#2c3333';
+    g.lineWidth = 2;
+    for (let yy = y; yy < y + h; yy += 18) {
+      G.line(g, x, yy, x + w, yy);
+      for (let xx = x + ((yy - y) / 18 % 2) * 23; xx < x + w; xx += 46) {
+        G.line(g, xx, yy, xx, Math.min(yy + 18, y + h));
+      }
+    }
+    g.fillStyle = 'rgba(12,17,18,0.18)';
+    g.fillRect(x, y + h - 12, w, 12);
+  }
+  function windowFrame(g, x, y, lit = false) {
+    g.fillStyle = '#918374';
+    g.fillRect(x - 27, y - 38, 54, 76);
+    g.fillStyle = lit ? '#9f8350' : '#172729';
+    g.fillRect(x - 22, y - 33, 44, 65);
+    g.fillStyle = '#b4a18a';
+    g.fillRect(x - 2, y - 34, 4, 67);
+    g.fillRect(x - 23, y - 3, 46, 4);
+    g.fillStyle = '#272e2c';
+    g.fillRect(x - 31, y + 34, 62, 9);
+  }
+  function facade(g, x, y, w, name, warm) {
+    brick(g, x, y, w, 230, warm);
+    g.fillStyle = '#222c2a';
+    g.fillRect(x - 9, y - 12, w + 18, 17);
+    g.fillStyle = '#9b8771';
+    g.fillRect(x - 6, y + 3, w + 12, 5);
+    for (let xx = x + 55; xx < x + w - 20; xx += 90) windowFrame(g, xx, y + 63, false);
+    g.fillStyle = '#23322f';
+    g.fillRect(x + 18, y + 116, w - 36, 38);
+    if (name) G.text(g, name, x + w / 2, y + 143, { size: 20, align: 'center', color: '#c9ba94', spacing: 2 });
+    g.fillStyle = '#142324';
+    g.fillRect(x + 20, y + 166, w - 40, 54);
+    g.strokeStyle = '#9f9a7c';
+    g.lineWidth = 4;
+    for (let xx = x + 30; xx < x + w - 20; xx += 66) G.line(g, xx, y + 166, xx, y + 220);
+    g.strokeStyle = '#867459';
+    g.lineWidth = 11;
+    G.line(g, x + 25, y + 175, x + w - 24, y + 208);
+    G.line(g, x + 35, y + 213, x + w - 34, y + 177);
+    g.strokeStyle = '#b19a75';
+    g.lineWidth = 1;
+    G.line(g, x + 25, y + 173, x + w - 24, y + 206);
+  }
+  function shopDetail(g, wall) {
+    const x = wall.x;
+    const y = wall.y;
+    const width = wall.w;
+    const shutter = x > 400 && x < 870;
+    if (shutter) {
+      g.fillStyle = '#5f665e';
+      g.fillRect(x + 22, y + 165, width - 44, 56);
+      g.strokeStyle = '#29332e';
+      g.lineWidth = 2;
+      for (let yy = y + 168; yy < y + 220; yy += 6) G.line(g, x + 23, yy, x + width - 23, yy);
+      g.strokeStyle = '#b3ac8c';
+      G.line(g, x + 30, y + 175, x + width - 39, y + 190);
+    } else {
+      g.strokeStyle = '#b0bda6';
+      g.lineWidth = 1.4;
+      for (let xx = x + 45; xx < x + width - 30; xx += 87) {
+        G.line(g, xx, y + 168, xx + 19, y + 192);
+        G.line(g, xx + 19, y + 192, xx + 4, y + 217);
+        G.line(g, xx + 19, y + 192, xx + 38, y + 200);
+      }
+      g.fillStyle = '#8d6d49';
+      for (let xx = x + 36; xx < x + width - 28; xx += 55) g.fillRect(xx, y + 207, 29, 8);
+    }
+    if (x < 400 || x > 1200) {
+      g.fillStyle = '#68513e';
+      g.fillRect(x + 12, y + 148, width - 24, 22);
+      for (let xx = x + 16; xx < x + width - 20; xx += 30) {
+        g.fillStyle = '#ad956a';
+        g.fillRect(xx, y + 149, 14, 20);
+      }
+      g.strokeStyle = '#3e352b';
+      g.lineWidth = 3;
+      G.line(g, x + 12, y + 170, x + width - 12, y + 170);
+    }
+    escape(g, x + 40, y + 10, Math.min(130, width - 85));
+  }
+  function escape(g, x, y, w) {
+    g.strokeStyle = '#8b8980';
+    g.lineWidth = 3;
+    g.strokeRect(x, y, w, 65);
+    for (let xx = x; xx < x + w; xx += 14) G.line(g, xx, y, xx, y + 65);
+    for (const xx of [x + 10, x + w - 10]) G.line(g, xx, y + 65, xx + 45, y + 180);
+    for (let yy = 0; yy < 115; yy += 12) {
+      G.line(g, x + 10 + yy * 0.4, y + 65 + yy, x + w - 10 + yy * 0.4, y + 65 + yy);
+    }
+  }
+  function car(g, x, y, angle, burnt = false) {
+    g.save();
+    g.translate(x, y);
+    g.rotate(angle);
+    g.fillStyle = '#151f23';
+    G.rr(g, -78, -37, 160, 86, 16);
+    g.fill();
+    g.fillStyle = burnt ? '#584b3f' : '#5f716a';
+    G.rr(g, -78, -42, 153, 76, 15);
+    g.fill();
+    g.fillStyle = '#a2a58f';
+    g.fillRect(-43, -34, 65, 60);
+    g.fillStyle = '#223a3c';
+    g.fillRect(-32, -31, 40, 54);
+    g.fillStyle = '#c5b69b';
+    g.fillRect(-80, -29, 5, 51);
+    g.fillRect(73, -29, 5, 51);
+    g.strokeStyle = burnt ? '#2b2925' : '#83998c';
+    g.lineWidth = 2;
+    G.line(g, 30, -30, 30, 24);
+    g.restore();
+  }
+  const STREET_PROPS = [
+    { kind: 'car', x: 510, y: 510, angle: 0.22, burnt: true },
+    { kind: 'car', x: 1620, y: 970, angle: -0.15, burnt: true },
+    { kind: 'car', x: 240, y: 1080, angle: 0.04 },
+    { kind: 'overturned', x: 1060, y: 750, angle: -0.25 },
+    { kind: 'car', x: 1810, y: 480, angle: 0.18 },
+    { kind: 'car', x: 1320, y: 415, angle: -0.05 },
+    { kind: 'shelter', x: 765, y: 1100 },
+    { kind: 'news', x: 390, y: 945 },
+    { kind: 'news', x: 965, y: 450 },
+    { kind: 'news', x: 1430, y: 1135 },
+    { kind: 'bin', x: 375, y: 655, burning: true },
+    { kind: 'bin', x: 1190, y: 550, burning: true },
+    { kind: 'bin', x: 1770, y: 820, burning: true },
+    { kind: 'lamp', x: 315, y: 390 },
+    { kind: 'lamp', x: 910, y: 1070 },
+    { kind: 'lamp', x: 1810, y: 1110 },
+  ];
+  const TRUCK_PROPS = [
+    { kind: 'barricade', x: 290, y: 430 },
+    { kind: 'barricade', x: 640, y: 365 },
+    { kind: 'barricade', x: 1550, y: 375 },
+    { kind: 'barricade', x: 1750, y: 1240 },
+    { kind: 'car', x: 330, y: 610, angle: 1.3, burnt: true },
+    { kind: 'car', x: 1810, y: 580, angle: -0.4, burnt: true },
+    { kind: 'overturned', x: 1120, y: 1240, angle: -0.05 },
+    { kind: 'sandbags', x: 265, y: 915 },
+    { kind: 'sandbags', x: 1800, y: 975 },
+    { kind: 'sandbags', x: 1450, y: 1230 },
+    { kind: 'bin', x: 1630, y: 1135, burning: true },
+    { kind: 'lamp', x: 1750, y: 405 },
+  ];
+  function prop(g, item) {
+    const { x, y, kind } = item;
+    if (kind === 'car') {
+      car(g, x, y, item.angle || 0, item.burnt);
+      return;
+    }
+    g.save();
+    g.translate(x, y);
+    if (kind === 'overturned') {
+      g.rotate(item.angle || 0);
+      g.fillStyle = '#172022';
+      G.rr(g, -88, -40, 176, 83, 13);
+      g.fill();
+      g.fillStyle = '#59554a';
+      g.fillRect(-75, -34, 150, 68);
+      g.strokeStyle = '#978771';
+      g.lineWidth = 3;
+      G.line(g, -70, 0, 70, 0);
+      for (const xx of [-53, 53]) {
+        G.line(g, xx, -40, xx, 40);
+        for (const yy of [-37, 37]) {
+          g.fillStyle = '#171c1c';
+          G.rr(g, xx - 16, yy - 11, 32, 22, 5);
+          g.fill();
+          g.fillStyle = '#726e62';
+          g.fillRect(xx - 8, yy - 3, 16, 6);
+        }
+      }
+    } else if (kind === 'shelter') {
+      g.fillStyle = '#293435';
+      g.fillRect(-88, -40, 176, 75);
+      g.fillStyle = 'rgba(121,155,151,0.22)';
+      g.fillRect(-79, -34, 158, 55);
+      g.strokeStyle = '#a0a391';
+      g.lineWidth = 4;
+      g.strokeRect(-88, -40, 176, 75);
+      G.line(g, -26, -40, -26, 35);
+      G.line(g, 35, -40, 35, 35);
+      g.fillStyle = '#75634f';
+      g.fillRect(-65, 9, 115, 16);
+      g.strokeStyle = '#c0b5a0';
+      g.lineWidth = 1;
+      G.line(g, 55, -32, 39, -7);
+      G.line(g, 39, -7, 65, 12);
+      G.line(g, 39, -7, 23, 2);
+    } else if (kind === 'news') {
+      g.fillStyle = '#7e5144';
+      G.rr(g, -19, -30, 38, 61, 4);
+      g.fill();
+      g.fillStyle = '#cdc1a5';
+      g.fillRect(-13, -21, 26, 29);
+      g.fillStyle = '#514e43';
+      for (let yy = -17; yy < 7; yy += 5) g.fillRect(-9, yy, yy === -17 ? 19 : 14, 2);
+      g.fillStyle = '#292d2a';
+      g.fillRect(-13, 17, 26, 6);
+    } else if (kind === 'bin') {
+      g.fillStyle = '#3d5146';
+      G.ellipse(g, 0, 6, 25, 29);
+      g.fill();
+      g.strokeStyle = '#8a957a';
+      g.lineWidth = 2;
+      for (let xx = -17; xx <= 17; xx += 7) G.line(g, xx, -15, xx, 27);
+      g.fillStyle = '#141b1b';
+      G.ellipse(g, 0, -17, 25, 11);
+      g.fill();
+    } else if (kind === 'lamp') {
+      g.fillStyle = '#525b52';
+      G.ellipse(g, 0, 0, 14, 9);
+      g.fill();
+      g.strokeStyle = '#929684';
+      g.lineWidth = 5;
+      G.line(g, 0, 0, 0, -92);
+      G.line(g, 0, -92, 35, -92);
+      g.fillStyle = '#383f3a';
+      G.rr(g, 27, -98, 26, 14, 4);
+      g.fill();
+    } else if (kind === 'barricade') {
+      g.strokeStyle = '#796548';
+      g.lineWidth = 7;
+      for (const xx of [-55, 55]) {
+        G.line(g, xx - 13, 28, xx + 8, -18);
+        G.line(g, xx + 17, 28, xx - 8, -18);
+      }
+      g.fillStyle = '#b4a380';
+      g.fillRect(-80, -18, 160, 23);
+      g.save();
+      g.beginPath();
+      g.rect(-80, -18, 160, 23);
+      g.clip();
+      g.strokeStyle = '#433f32';
+      g.lineWidth = 15;
+      for (let xx = -85; xx < 100; xx += 34) G.line(g, xx, 8, xx + 26, -21);
+      g.restore();
+    } else if (kind === 'sandbags') {
+      for (let row = 0; row < 2; row++) {
+        for (let col = 0; col < 4; col++) {
+          g.fillStyle = row ? '#8a8060' : '#a0946f';
+          G.rr(g, -72 + col * 35 + row * 7, -14 + row * 22, 34, 23, 9);
+          g.fill();
+          g.strokeStyle = '#615d48';
+          g.lineWidth = 1;
+          g.stroke();
+        }
+      }
+    }
+    g.restore();
+  }
+  function streetDressing(g, arena) {
+    const items = arena ? TRUCK_PROPS : STREET_PROPS;
+    for (const item of items) prop(g, item);
+    const anchors = items.map(item => ({ x: item.x, y: item.y, r: item.kind === 'car' ? 85 : 55 }));
+    const random = U.seeded(arena ? 77113 : 77112);
+    // Deliberate broken-glass/newspaper clusters fill street-sized dead zones,
+    // not a uniform noise texture. They are flat so no rescue route is blocked.
+    for (let row = 0; row < 4; row++) {
+      for (let col = 0; col < 8; col++) {
+        const x = 145 + col * 245 + (row % 2) * 35 + (random() - 0.5) * 90;
+        const y = 470 + row * 205 + (col % 3) * 21 + (random() - 0.5) * 80;
+        anchors.push({ x, y, r: 44 });
+        g.strokeStyle = 'rgba(12,17,18,0.6)';
+        g.lineWidth = 4;
+        G.line(g, x - 34, y + 13, x + 37, y - 9);
+        for (let n = 0; n < 6 + (col + row) % 8; n++) {
+          const xx = x + (random() - 0.5) * 85;
+          const yy = y + (random() - 0.5) * 55;
+          g.fillStyle = n % 3 ? '#727f77' : '#b3aa8b';
+          g.beginPath();
+          g.moveTo(xx, yy);
+          g.lineTo(xx + 4 + random() * 7, yy - 3);
+          g.lineTo(xx + 3, yy + 5 + random() * 4);
+          g.fill();
+        }
+        if ((row + col) % 3 === 0) {
+          g.fillStyle = '#424b44';
+          G.ellipse(g, x + 20, y + 7, 34, 18);
+          g.fill();
+          g.strokeStyle = '#92927b';
+          g.lineWidth = 1;
+          for (let yy = -10; yy <= 10; yy += 5) G.line(g, x - 5, y + 7 + yy, x + 44, y + 7 + yy);
+        }
+        g.fillStyle = '#a2987d';
+        g.save();
+        g.translate(x + 23, y + 4);
+        g.rotate(random());
+        g.fillRect(-13, -7, 20 + (row % 2) * 6, 10 + (col % 2) * 4);
+        g.fillStyle = '#4d5148';
+        for (let line = -4; line < 6; line += 4) g.fillRect(-9, line, 16, 1);
+        g.restore();
+      }
+    }
+    return anchors;
+  }
+  S.streetProps = { avenue: STREET_PROPS, truck: TRUCK_PROPS };
+  function street(g, width, height, arena = false) {
+    const random = U.seeded(arena ? 7719 : 7708);
+    g.fillStyle = '#232c2c';
+    g.fillRect(0, 0, width, height);
+    for (let i = 0; i < 5200; i++) {
+      const x = random() * width;
+      const y = random() * height;
+      g.fillStyle = i % 2 ? 'rgba(190,172,130,0.07)' : 'rgba(8,15,19,0.16)';
+      g.fillRect(x, y, 2 + random() * 5, 1 + random() * 2);
+    }
+    for (const y of [290, height - 230]) {
+      g.fillStyle = '#68635a';
+      g.fillRect(55, y, width - 110, 115);
+      g.strokeStyle = '#373b36';
+      g.lineWidth = 2;
+      for (let x = 55; x < width - 55; x += 68) G.line(g, x, y, x, y + 115);
+      g.fillStyle = '#9f9782';
+      g.fillRect(55, y + (y === 290 ? 107 : 0), width - 110, 7);
+    }
+    g.fillStyle = '#aa9863';
+    for (let x = 100; x < width - 120; x += 140) {
+      g.fillRect(x, height / 2 - 5, 66, 5);
+      g.fillRect(x, height / 2 + 9, 66, 5);
+    }
+    for (const x of [290, width - 370]) {
+      for (let y = 450; y < height - 265; y += 48) {
+        g.fillStyle = '#b0a584';
+        g.fillRect(x, y, 78, 24);
+      }
+    }
+    // The solid building surfaces use the map's summerBuilding wall style.
+    escape(g, 1470, 310, 230);
+    for (let i = 0; i < 60; i++) {
+      const x = 100 + random() * (width - 200);
+      const y = 400 + random() * (height - 470);
+      g.save();
+      g.translate(x, y);
+      g.rotate(random() * 3);
+      g.fillStyle = '#a99e80';
+      g.fillRect(-8, -5, 16, 10);
+      g.fillStyle = '#53584c';
+      g.fillRect(-6, -2, 11, 1);
+      g.fillRect(-6, 1, 9, 1);
+      g.restore();
+    }
+    for (const [x, y] of [[580, 800], [1430, 910], [1150, 440]]) {
+      g.fillStyle = '#1b2323';
+      G.ellipse(g, x, y, 33, 22);
+      g.fill();
+      g.strokeStyle = '#68695c';
+      g.lineWidth = 2;
+      for (let dy = -14; dy <= 14; dy += 7) G.line(g, x - 24, y + dy, x + 24, y + dy);
+    }
+    return streetDressing(g, arena);
+  }
+  function tenement(g, width, height) {
+    const random = U.seeded(776);
+    g.fillStyle = '#172326';
+    g.fillRect(0, 0, width, height);
+    g.fillStyle = '#49453e';
+    g.fillRect(200, 90, 1240, 1270);
+    for (let floor = 0; floor < 5; floor++) {
+      const y = 130 + floor * 235;
+      for (const x of [240, 940]) {
+        g.fillStyle = floor % 2 ? '#696253' : '#736650';
+        g.fillRect(x, y, 440, 210);
+        g.strokeStyle = 'rgba(32,30,25,0.34)';
+        g.lineWidth = 1;
+        for (let yy = y; yy < y + 210; yy += 14) G.line(g, x, yy, x + 440, yy);
+        for (let i = 0; i < 42; i++) {
+          const xx = x + random() * 430;
+          const yy = y + random() * 205;
+          g.fillStyle = 'rgba(14,23,22,0.08)';
+          g.fillRect(xx, yy, 15 + random() * 26, 2);
+        }
+        g.fillStyle = ['#5a706b', '#745951', '#5d646b'][floor % 3];
+        G.rr(g, x + 28, y + 30, 118, 142, 6);
+        g.fill();
+        g.fillStyle = '#cabd9b';
+        G.rr(g, x + 38, y + 40, 96, 28, 5);
+        g.fill();
+        g.strokeStyle = '#9a9a7b';
+        g.lineWidth = 2;
+        for (let yy = y + 85; yy < y + 165; yy += 19) G.line(g, x + 32, yy, x + 140, yy);
+        g.fillStyle = '#a18b61';
+        g.fillRect(x + 260, y + 28, 110, 61);
+        g.fillStyle = '#4c655b';
+        G.circle(g, x + 313, y + 58, 16);
+        g.fill();
+        g.fillStyle = '#d8c29a';
+        G.circle(g, x + 313, y + 58, 10);
+        g.fill();
+        g.fillStyle = '#2e3936';
+        g.fillRect(x + 365, y + 155, 52, 35);
+        g.fillStyle = '#617f76';
+        g.fillRect(x + 371, y + 160, 40, 24);
+        g.fillStyle = '#b69c70';
+        g.fillRect(x + 185, y + 161, 38, 22);
+        g.fillStyle = '#d0c4a8';
+        g.fillRect(x + 190, y + 162, 29, 3);
+      }
+      g.fillStyle = '#7a7863';
+      g.fillRect(710, y, 220, 210);
+      g.strokeStyle = '#3a4d49';
+      g.lineWidth = 3;
+      for (let yy = y + 6; yy < y + 210; yy += 14) G.line(g, 735, yy, 905, yy);
+      G.text(g, ['V', 'IV', 'III', 'II', 'I'][floor], 706, y + 35,
+        { size: 20, align: 'right', color: '#d8c89e', weight: 600 });
+      g.fillStyle = '#a99d80';
+      g.fillRect(695, y - 7, 8, 220);
+      g.fillRect(931, y - 7, 8, 220);
+    }
+    g.fillStyle = '#5e7160';
+    g.fillRect(675, 1335, 290, 155);
+    g.strokeStyle = '#a6c5ab';
+    g.lineWidth = 3;
+    g.strokeRect(680, 1340, 280, 145);
+    G.text(g, 'TO THE STREET', 820, 1450, { size: 19, align: 'center', spacing: 3, color: '#cbd8ba' });
+    for (const x of [570, 1065]) {
+      g.fillStyle = '#917b59';
+      G.rr(g, x, 1440, 110, 42, 8);
+      g.fill();
+      g.strokeStyle = '#403a2f';
+      G.line(g, x + 10, 1461, x + 97, 1461);
+    }
+  }
+
+  class Haze extends DM.Entity {
+    constructor(state) {
+      super({ x: 900, y: 700, r: 3000, body: false, solid: false, static: true, disintegratable: false, layer: 3 });
+      this.state = state;
+    }
+    render(g, world) {
+      if (DM.Save.settings.fx === 'off') return;
+      const reduced = DM.SettingsSchema.reducedFlashing();
+      const time = reduced ? 0 : world.time;
+      g.fillStyle = 'rgba(187,149,98,0.035)';
+      for (let i = 0; i < 9; i++) {
+        const x = (i * 237 + time * 7) % world.w;
+        const y = 380 + Math.sin(i * 2.1 + time * 0.08) * 100 + i * 70;
+        G.ellipse(g, x, y, 190, 26);
+        g.fill();
+      }
+    }
+  }
+  function lights(world, add) {
+    for (const e of world.entities) {
+      if (e.dead) continue;
+      if (e instanceof S.FireGrid) {
+        const keys = [...e.active].sort((a, b) => {
+          const aa = e.point(a);
+          const bb = e.point(b);
+          return U.dist(aa.x, aa.y, world.player.x, world.player.y) - U.dist(bb.x, bb.y, world.player.x, world.player.y);
+        }).slice(0, 16);
+        for (const key of keys) {
+          const p = e.point(key);
+          const steady = DM.SettingsSchema.reducedFlashing() || DM.Save.settings.fx === 'off';
+          const flicker = steady ? 1 : 0.94 + Math.sin(world.time * 3.7 + key * 1.6) * 0.045 +
+            Math.sin(world.time * 6.1 + key) * 0.015;
+          add(p.x, p.y, 270, { i: 0.88 * flicker, color: '#f5ad60', k: 0.36 });
+        }
+      }
+      if (e.light) {
+        const l = e.light(world);
+        if (l) add(e.x, e.y, l.r, l);
+      }
+    }
+  }
+  for (const id of ['summer_avenue', 'summer_tenement', 'summer_truck']) {
+    DM.Ambience.maps[id] = { bed: id === 'summer_tenement' ? 'summer_fire' : 'summer_street',
+      surface: id === 'summer_tenement' ? 'wood' : 'concrete' };
+    DM.Atmosphere.register(id, {
+      shadow: 'rgba(9,16,22,0.55)',
+      light: { ambient: 'rgba(8,14,22,0.59)', lights },
+      weather: [{ type: 'haze', n: 20, alpha: 0.025 }],
+    });
+  }
+  Object.assign(DM.Ambience.cues, {
+    'long_summer.avenue': 'summer_street', 'long_summer.tenement': 'summer_street', 'long_summer.truck': 'summer_truck'
+  });
+  // Existing per-map wall drawing keeps the facade above its solid collision mass.
+  S.addStreetFrontages = function (world, arena = false) {
+    world.wallStyles.summerBuilding = {
+      draw(g, wall) {
+        facade(g, wall.x, wall.y, wall.w, wall.buildingName, wall.warm);
+        shopDetail(g, wall);
+      },
+    };
+    const names = arena ? ['EAST RIVER ARMOURY', '', '', 'NATIONAL GUARD'] : ['MERCER • GROCERY', '', 'ALVAREZ • ROOMS', ''];
+    for (let i = 0; i < 4; i++) {
+      const x = [90, 480, 875, 1270][i];
+      world.wall(x, 60, i === 3 ? 690 : 360, 220, 'summerBuilding', { buildingName: names[i], warm: i % 2 === 0 });
+    }
+  };
+  S.installArt = function (ctx, type) {
+    const w = ctx.world;
+    if (type === 'tenement') w.bake((g, width, height) => tenement(g, width, w.playableHeight || height));
+    else w.bake((g, width, height) => {
+      w.summerDressing = street(g, width, w.playableHeight || height, type === 'truck');
+    });
+    ctx.add(new Haze(ctx.flags.summer));
+  };
+  S.backdrop = function (g) {
+    const sky = g.createLinearGradient(0, 0, 0, 720);
+    sky.addColorStop(0, '#0c1c25');
+    sky.addColorStop(0.65, '#664834');
+    sky.addColorStop(1, '#ae7744');
+    g.fillStyle = sky;
+    g.fillRect(0, 0, 1280, 720);
+    for (let layer = 0; layer < 3; layer++) {
+      const rnd = U.seeded(77 + layer);
+      for (let x = -15; x < 1300; x += 65) {
+        const y = 460 - rnd() * (160 - layer * 25) + layer * 50;
+        g.fillStyle = ['#39413d', '#273337', '#13262c'][layer];
+        g.fillRect(x, y, 59, 720 - y);
+        if (layer < 2) continue;
+        for (let yy = y + 17; yy < 710; yy += 23) {
+          for (let xx = x + 9; xx < x + 52; xx += 13) {
+            if (rnd() > 0.85) {
+              g.fillStyle = '#9f895b';
+              g.fillRect(xx, yy, 5, 8);
+            }
+          }
+        }
+      }
+    }
+    G.glow(g, 1010, 510, 220, '#ec9e51', 0.14);
   };
 })();
 </script>
@@ -18309,6 +20708,43 @@
             g.fillRect(x, y, 46, 46);
           }
         }
+        const random = U.seeded(88673);
+        // Years of chairs, boots and equipment leave wear, not a pristine grid.
+        for (let i = 0; i < 430; i++) {
+          const x = 80 + random() * (width - 160);
+          const y = 220 + random() * (height - 300);
+          g.strokeStyle = i % 3 ? 'rgba(13,22,25,0.22)' : 'rgba(169,168,139,0.16)';
+          g.lineWidth = 1 + random() * 2;
+          G.line(g, x, y, x + 9 + random() * 31, y + random() * 5);
+        }
+        // Worn ribbed mat beneath the operator's chair and desk.
+        g.fillStyle = '#3e4540';
+        G.rr(g, 1310, 470, 365, 300, 10);
+        g.fill();
+        g.strokeStyle = '#626656';
+        g.lineWidth = 1;
+        for (let y = 480; y < 760; y += 7) G.line(g, 1320, y, 1665, y);
+        g.fillStyle = 'rgba(173,158,119,0.16)';
+        G.ellipse(g, 1490, 680, 110, 68);
+        g.fill();
+        // The rack ports (bottom centre) feed the actual floor trays and desk.
+        for (const [rackX, trayX] of [[472, 475], [752, 752], [1202, 1203]]) {
+          for (let cable = 0; cable < 4; cable++) {
+            const offset = cable * 4 - 6;
+            g.beginPath();
+            g.moveTo(rackX + offset, 575);
+            g.lineTo(trayX + offset, 615);
+            g.lineTo(trayX + offset, 735 + cable * 5);
+            g.lineTo(1380, 735 + cable * 5);
+            g.lineTo(1380 + cable * 4, 595);
+            g.strokeStyle = '#102024';
+            g.lineWidth = 5;
+            g.stroke();
+            g.strokeStyle = ['#827358', '#526e66', '#8d735c', '#6b7474'][cable];
+            g.lineWidth = 2;
+            g.stroke();
+          }
+        }
         for (const x of [475, 752, 1203]) {
           g.strokeStyle = '#17292f';
           g.lineWidth = 22;
@@ -18321,7 +20757,7 @@
           for (let y = 610; y < 1020; y += 23)
             G.line(g, x - 14, y, x + 14, y);
         }
-        g.fillStyle = '#273b40';
+        g.fillStyle = 'rgba(39,59,64,0.28)';
         g.fillRect(1320, 450, 350, 260);
         g.strokeStyle = 'rgba(172,210,209,0.6)';
         g.lineWidth = 4;
@@ -21420,6 +23856,391 @@
     chapter, Pendulum, CarriageDoor, Evacuee, SilkSpectre, RouteSwitch, RailArc, LostMoment, Anchor,
     TimeRing, TransitGuard, TransitWitness, NinthComplete
   };
+})();
+</script>
+<script>/* src/data/chapters/long-summer.js */
+/* THE LONG SUMMER — original optional fan fiction. Decisions accumulate, not a last-button ending. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const S = DM.Summer;
+  const K = DM.BonusKit;
+  const G = DM.Gfx;
+  const U = DM.U;
+
+  class SummerOwl extends K.Companion {
+    constructor(state, x, y) {
+      super(x, y, 'niteowl');
+      this.state = state;
+      this.showName = false;
+      this.grappleT = 0;
+      this.landing = null;
+    }
+    beginGrapple(target, done) {
+      if (this.grappleT > 0) return;
+      this.origin = { x: this.x, y: this.y };
+      this.landing = target;
+      this.grappleT = 1.3;
+      this.onLanded = done;
+      DM.Audio.play('summer_throw');
+    }
+    update(dt, world) {
+      if (this.grappleT > 0) {
+        if (world.ceasefire) return;
+        this.grappleT = Math.max(0, this.grappleT - dt);
+        const t = 1 - this.grappleT / 1.3;
+        this.x = U.lerp(this.origin.x, this.landing.x, t);
+        this.y = U.lerp(this.origin.y, this.landing.y, t) - Math.sin(t * Math.PI) * 50;
+        this.vx = 0;
+        this.vy = 0;
+        if (!this.grappleT && this.onLanded) this.onLanded();
+        return;
+      }
+      super.update(dt, world);
+    }
+    renderEmissive(g, world) {
+      super.renderEmissive(g, world);
+      if (this.grappleT > 0) {
+        g.strokeStyle = '#c7ba92';
+        g.lineWidth = 2;
+        G.line(g, this.x, this.y, this.landing.x, this.landing.y - 20);
+      }
+    }
+  }
+
+  function init(ctx, width, height, spawn) {
+    const w = ctx.newWorld({ w: width, h: height + 340, zoom: 1, bg: '#13212a' });
+    w.playableHeight = height;
+    w.spawn = spawn;
+    // A new area's briefing must not follow the previous area's camera or marker.
+    ctx.camTarget = { x: spawn.x, y: spawn.y - 80 };
+    ctx.hud.marker = null;
+    ctx.hud.clearTransient();
+    ctx.hud.setObjective(null);
+    w.room(40, 40, width - 80, height - 80);
+    const state = ctx.add(new S.CityState(ctx));
+    ctx.flags.summer = state;
+    state.world = w;
+    const comedian = ctx.add(new S.Comedian(state, spawn.x + 80, spawn.y + 65));
+    const owl = ctx.add(new SummerOwl(state, spawn.x - 60, spawn.y + 65));
+    ctx.flags.comedian = comedian;
+    ctx.flags.owl = owl;
+    return w;
+  }
+  function ready(ctx) {
+    ctx.lock(false);
+    ctx.player.energy = 100;
+    ctx.player.coherence = 100;
+    S.startReadableCamera(ctx);
+  }
+
+  function avenue(ctx) {
+    const w = init(ctx, 2050, 1320, { x: 290, y: 640 });
+    const state = ctx.flags.summer;
+    S.installArt(ctx, 'avenue');
+    S.addStreetFrontages(w);
+    const balconyWall = w.wall(1535, 390, 160, 20, 'low');
+    const seeds = [[510, 510], [545, 560], [1620, 970], [375, 655], [1190, 550], [1770, 820]];
+    ctx.add(new S.FireGrid(state, { x: 80, y: 400, w: 1880, h: 660 }, seeds));
+    ctx.flags.hydrants = [ctx.add(new S.Hydrant(state, 570, 570)), ctx.add(new S.Hydrant(state, 1560, 910))];
+    ctx.flags.rioters = [];
+    for (const [x, y, molotov] of [
+      [660, 800, false], [960, 680, false], [1250, 820, false], [1780, 700, false],
+      [815, 480, true], [1450, 550, true]
+    ]) ctx.flags.rioters.push(ctx.add(new S.Rioter(state, x, y, molotov)));
+    for (const [x, y] of [[940, 940], [1200, 450], [1700, 1090]]) ctx.add(new DM.Props.Crate(x, y));
+    ctx.flags.grapple = ctx.add(new K.Terminal(1510, 420, 'Ask Nite Owl to open the balcony', () => {
+      if (ctx.flags.grappleOpen || ctx.flags.owl.grappleT > 0) return;
+      ctx.flags.owl.beginGrapple({ x: 1620, y: 330 }, () => {
+        ctx.flags.grappleOpen = true;
+        balconyWall.noCollide = true;
+        w.bark(ctx.flags.owl, 'Stairs are open. Get them out, Jon.');
+        DM.Audio.play('summer_metal');
+      });
+    }, () => !ctx.flags.grappleOpen));
+    // Heat alone can be reduced with one hydrant. Require a real change in
+    // the crowd before Jon can declare the avenue safe and leave it behind.
+    const crowdSettled = () => ctx.flags.rioters.filter(e => e.ko || e.dead).length;
+    ctx.flags.crowdSettled = crowdSettled;
+    ctx.flags.exit = ctx.add(new K.Terminal(1765, 360, 'Enter the tenement', () => {
+      if (state.heat >= 40) ctx.toast('THE STREET IS STILL ON EDGE · LOWER CITY HEAT', S.AMBER);
+      else if (crowdSettled() < 2) ctx.toast('HELP TWO RIOTERS STOP FIGHTING OR LEAVE', S.AMBER);
+      else if (!ctx.flags.grappleOpen) ctx.toast('DAN CAN OPEN THE BALCONY ROUTE', S.AMBER);
+      else ctx.flags.avenueExit = true;
+    }));
+    ctx.add(new K.Sign(1765, 300, 'ALVAREZ ROOMS', S.AMBER, 15));
+    return w;
+  }
+
+  function tenement(ctx) {
+    const w = init(ctx, 1640, 1640, { x: 820, y: 1380 });
+    const state = ctx.flags.summer;
+    state.safePoint = { x: 820, y: 1400 };
+    S.installArt(ctx, 'tenement');
+    ctx.flags.comedian.silent = true;
+    ctx.flags.comedian.x = 1080;
+    ctx.flags.comedian.y = 1450;
+    ctx.flags.owl.holdPosition = true;
+    ctx.flags.owl.x = 710;
+    ctx.flags.owl.y = 1430;
+    for (let i = 0; i < 5; i++) {
+      const y = 130 + i * 235;
+      w.room(240, y, 440, 210, { t: 12, doors: [{ side: 'right', at: 75, w: 84 }] });
+      w.room(940, y, 440, 210, { t: 12, doors: [{ side: 'left', at: 75, w: 84 }] });
+    }
+    const fire = ctx.add(new S.FireGrid(state, { x: 210, y: 110, w: 1200, h: 1220 },
+      [[410, 220], [1190, 485], [535, 940], [1130, 1170], [800, 730]]));
+    const barrier = w.wall(710, 940, 220, 28, 'low');
+    ctx.flags.beam = ctx.add(new S.StairBeam(state, 820, 947, barrier));
+    ctx.flags.vent = ctx.add(new K.Terminal(820, 175, 'Tear open the roof', () => {
+      if (ctx.player.scale < 1.5) {
+        ctx.toast('G TO EXPAND · THEN E AT THE ROOF LATCH', S.AMBER);
+        return;
+      }
+      fire.vent();
+      ctx.toast('SMOKE VENTED · THE FIRE WILL NOT SPREAD', S.TEAL);
+    }, () => !fire.vented));
+    ctx.flags.residents = [];
+    const placements = [[460, 255], [1140, 255], [460, 490], [1140, 725], [460, 960], [1140, 1195]];
+    for (let id = 0; id < placements.length; id++) {
+      const [x, y] = placements[id];
+      const route = [{ x: x < 820 ? 703 : 917, y }, { x: 820, y }, state.safePoint];
+      const e = ctx.add(new S.Resident(state, x, y, id, route));
+      if ((ctx.flags.rescuedMask || 0) & (1 << id)) {
+        e.safe = true;
+        e.x = 720 + id * 32;
+        e.y = 1405;
+        e.grabbable = false;
+        e.interact = null;
+      }
+      ctx.flags.residents.push(e);
+    }
+    ctx.flags.looter = ctx.add(new S.Rioter(state, 1170, 960));
+    ctx.flags.looter.exitPoint = state.safePoint;
+    // Keep the next-mission prompt outside the residents' glowing safe zone.
+    ctx.flags.exit = ctx.add(new K.Terminal(994, 1410, 'Leave for the armoury', () => {
+      if (ctx.flags.rescued < 6) ctx.toast('SIX RESIDENTS MUST REACH THE STREET', S.AMBER);
+      else ctx.flags.tenementExit = true;
+    }, () => ctx.flags.rescued >= 6));
+    return w;
+  }
+
+  function truckMap(ctx) {
+    const w = init(ctx, 2050, 1480, { x: 530, y: 1040 });
+    const state = ctx.flags.summer;
+    state.safePoint = { x: 540, y: 1120 };
+    S.installArt(ctx, 'truck');
+    S.addStreetFrontages(w, true);
+    ctx.add(new S.FireGrid(state, { x: 80, y: 350, w: 1880, h: 940 }, [[330, 610], [1810, 580], [1630, 1135]]));
+    ctx.flags.hydrants = [ctx.add(new S.Hydrant(state, 475, 555)), ctx.add(new S.Hydrant(state, 1570, 1130))];
+    ctx.flags.comedian.silent = true;
+    ctx.flags.truck = ctx.add(new S.RiotTruck(state, 1110, 650));
+    w.boss = ctx.flags.truck;
+    for (const [x, y] of [[650, 810], [1400, 1060], [1610, 480], [350, 900]]) ctx.add(new DM.Props.Crate(x, y));
+    w.decals.push(g => {
+      g.fillStyle = 'rgba(92,150,133,0.17)';
+      G.ellipse(g, state.safePoint.x, state.safePoint.y, 90, 55);
+      g.fill();
+      K.ring(g, state.safePoint.x, state.safePoint.y, 70, '#729c85', 2);
+    });
+    ctx.add(new K.Sign(420, 1060, 'SAFE PASSAGE', S.TEAL, 15));
+    return w;
+  }
+
+  const ENDINGS = {
+    calm: {
+      title: 'MERCY',
+      text: 'By dawn the street has its people back. Six residents sit on the kerb in borrowed coats. ' +
+        'The boy from the truck is among them. Order, I discover, is not the same thing as silence.',
+      comedian: 'You left them all something to complain about tomorrow.',
+      jon: 'Yes. Tomorrow.',
+    },
+    uneasy: {
+      title: 'ORDER',
+      text: 'The fires are lower. Six people have somewhere to stand. The street is quiet enough for an official ' +
+        'to call it restored. I can see the morning. It has not decided whether to forgive us.',
+      comedian: 'They will call this a good night. Watch.',
+      jon: 'I am watching the people they will not count.',
+    },
+    burning: {
+      title: 'SILENCE',
+      text: 'The city stops shouting. That is not the same thing as peace. There are doors that will not open ' +
+        'in the morning, names that will not be called, and a blue light remembered for the wrong reason.',
+      comedian: 'Quiet at last.',
+      jon: 'There is less of the city left to make a sound.',
+    },
+  };
+  class SummerComplete {
+    constructor(play, record) {
+      this.play = play;
+      this.record = record;
+      this.t = 0;
+      this.cursor = 'pointer';
+      this.tone = S.tone(record.stats, record.flags);
+      this.ending = ENDINGS[this.tone];
+    }
+    enter() {
+      DM.Audio.stopHums();
+      DM.Audio.play('success');
+      DM.Audio.music.play('summer_street');
+      this.menu = new DM.UI.Menu([
+        { label: 'RETURN TO BONUS LEVELS', action: () => DM.Engine.set(new DM.Scenes.BonusMenu()) },
+        { label: 'PLAY AGAIN · LEAVE A DIFFERENT CITY', action: () => DM.Bonus.start('long_summer', false) },
+      ], { x: 640, y: 570, w: 720, itemH: 42, size: 20, align: 'center', accent: S.AMBER });
+    }
+    update(dt) {
+      this.t += dt;
+      if (this.t > 1) this.menu.update(dt);
+    }
+    render(g) {
+      S.backdrop(g, this.t);
+      g.fillStyle = 'rgba(9,18,24,0.94)';
+      g.fillRect(105, 40, 1070, 640);
+      g.strokeStyle = '#776c58';
+      g.strokeRect(105, 40, 1070, 640);
+      G.text(g, 'THE LONG SUMMER · BONUS III COMPLETE', 640, 93,
+        { align: 'center', size: 15, spacing: 4, color: S.AMBER });
+      G.text(g, this.ending.title, 640, 163, { align: 'center', size: 52, spacing: 7, weight: 700, color: '#efe2c3' });
+      G.paragraph(g, this.ending.text, 248, 206, 784, 27, { size: 20, font: DM.FONTS.type, color: '#d9cfba' });
+      const f = this.record.flags;
+      const s = this.record.stats;
+      const rows = [
+        ['PEOPLE SPARED / UNMADE', `${s.spared || 0} / ${s.disintegrated || 0}`],
+        ['COMEDIAN CASUALTIES', String(f.comedianCasualties || 0)],
+        ['RESIDENTS RESCUED', `${f.rescued || 0} / 6`],
+        ['CITY HEAT', `${Math.round(f.heat || 0)} / 100`],
+      ];
+      rows.forEach(([label, value], i) => {
+        G.text(g, label, 617, 344 + i * 33, { align: 'right', size: 15, spacing: 2, color: '#b0bcb3' });
+        G.text(g, value, 648, 344 + i * 33, { size: 22, color: i === 1 && f.comedianCasualties ? S.RED : S.TEAL });
+      });
+      G.paragraph(g, '“' + this.ending.comedian + '”', 248, 489, 784, 23,
+        { size: 17, align: 'left', font: DM.FONTS.type, color: '#d8b889' });
+      this.menu.render(g);
+      G.postFx(g);
+    }
+  }
+
+  const chapter = DM.Bonus.register({
+    id: 'long_summer', numeral: 'BONUS III', title: 'The Long Summer', date: 'August 1977', place: 'New York',
+    clock: 5, color: '#6f4c36', music: 'summer_street', form: 'manhattan',
+    menuAccent: S.AMBER, menuTitle: ['THE LONG', 'SUMMER'], menuLocation: 'NEW YORK · AUGUST 1977',
+    menuCast: ['comedian', 'niteowl'], menuBackdrop: S.backdrop,
+    menuSummary: 'The police are on strike. The city is burning. You have been sent to restore order.',
+    menuBrief: 'Keep people alive. Bring six residents home. Your most dangerous weapon may be the man beside you.',
+    menuTagline: 'A QUIET STREET IS NOT ALWAYS A SAVED STREET.',
+    menuEmblem(g, x, y) {
+      K.ring(g, x, y, 65, S.AMBER, 3);
+      g.strokeStyle = S.AMBER;
+      g.lineWidth = 3;
+      g.beginPath();
+      g.arc(x, y, 37, 0.1, Math.PI - 0.1);
+      g.stroke();
+      for (const dx of [-21, 21]) {
+        G.circle(g, x + dx, y - 17, 6);
+        g.fillStyle = S.AMBER;
+        g.fill();
+      }
+      g.strokeStyle = S.RED;
+      G.line(g, x + 18, y - 65, x + 37, y - 6);
+    },
+    bonusComplete: SummerComplete,
+    persistFlags: ['heat', 'rescued', 'rescuedMask', 'comedianCasualties', 'restraints', 'grappleOpen',
+      'beamCleared', 'vented', 'driverOutcome', 'avenueExit', 'tenementExit'],
+    intro: [
+      'It is August 1977. The fans have stopped in a thousand windows. The police do not come when people call.',
+      'Dan has brought ropes and blankets. Edward has brought ammunition. We have both been told this is a rescue.',
+      'I can lower the temperature of a city. I do not yet know how to lower its anger.'
+    ],
+    maps: { summer_avenue: avenue, summer_tenement: tenement, summer_truck: truckMap },
+    stages: [
+      {
+        id: 'avenue', label: 'Blackout Avenue', map: 'summer_avenue', checkpoint: true,
+        run: function* (ctx) {
+          yield ctx.dialog([
+            ['niteowl', 'The tenement is burning. But we cannot move anyone through a street like this.'],
+            ['comedian', 'Then give them a reason to get out of it.'],
+            ['niteowl', 'Jon, those are live rounds. He raises his gun before firing. Lift him while he aims. ' +
+              'A quick hold takes his gun away for ten seconds.'],
+            ['manhattan', 'I was told to help the people here. I do not see an exception for the angry ones.'],
+            ['niteowl', 'Make sure at least two rioters have stopped fighting or gone home. Spare them if you can. ' +
+              'Rip the red hydrants free; catch the bottles and drop them in the water. ' +
+              'I can grapple to the balcony when you call me.'],
+          ]);
+          ready(ctx);
+          ctx.objective('Calm the avenue · Reach the tenement', () =>
+            `Heat ${Math.round(ctx.flags.heat)} / 100 (below 40) · Rioters settled ${Math.min(2, ctx.flags.crowdSettled())} / 2`);
+          ctx.marker(1510, 420, 'BALCONY ROUTE');
+          ctx.tutorial('Hold C on the Comedian to disarm him. Spare rioters. Lift red hydrants. E calls Dan.', 16);
+          yield ctx.until(() => ctx.flags.avenueExit);
+          ctx.objectiveDone();
+          yield ctx.dialog([
+            ['niteowl', 'The way is open. There are still people upstairs.'],
+            ['comedian', ctx.flags.restraints ? 'You going to carry me all night?' : 'You are taking the long way round this.'],
+            ['manhattan', 'It is the only way that leaves people at the end of it.'],
+          ]);
+        },
+      },
+      {
+        id: 'tenement', label: 'The Tenement', map: 'summer_tenement', checkpoint: true,
+        run: function* (ctx) {
+          yield ctx.dialog([
+            ['niteowl', 'Five floors. Six residents. I will keep the street door open. Edward, stay with me.'],
+            ['comedian', 'A room full of people who cannot shoot back. I think you can manage.'],
+            ['niteowl', 'E asks them to follow; telekinesis can carry them. They are safe only at the green exit. ' +
+              'Lift the beam off the stairs.'],
+            ['manhattan', 'The fire is gathering itself. Temporal Sight shows where it will be in three seconds.'],
+            ['niteowl', 'Your duplicate can reassure another resident while you work. At the top landing, ' +
+              'grow with G, then use the roof latch with E to let the smoke out.'],
+          ]);
+          ready(ctx);
+          ctx.objective('Bring six residents to the street', () => `${ctx.flags.rescued} / 6 safely outside`);
+          ctx.marker(820, 1400, 'SAFE EXIT');
+          ctx.tutorial('E guides residents; C carries them. F predicts fire. R helps another room. G + E vents.', 16);
+          yield ctx.until(() => ctx.flags.tenementExit);
+          ctx.objectiveDone();
+          yield ctx.dialog([
+            ['summer_resident', 'The photographs are upstairs. Leave them. My daughter is here.'],
+            ['niteowl', 'There is a riot truck on the next block. Someone took it from the armoury.'],
+            ['manhattan', 'I can see a boy behind the windscreen. He is more frightened than anyone outside it.'],
+          ]);
+        },
+      },
+      {
+        id: 'truck', label: 'The Armoury Truck', map: 'summer_truck', checkpoint: true,
+        run: function* (ctx) {
+          yield ctx.dialog([
+            ['summer_driver', 'They kept coming. I thought if I had the truck they would stop.'],
+            ['niteowl', 'Cannon and four wheels, Jon. The teal rings are machinery. The amber cab is a person. ' +
+              'Use Q or thrown crates on the parts. Keep the cab intact.'],
+            ['comedian', 'Or I could make one shot and we could all go home.'],
+            ['manhattan', 'Not all of us.'],
+            ['niteowl', 'When he comes out, E guides him to the green safe passage. Watch Edward.'],
+          ]);
+          ready(ctx);
+          ctx.objective('Stop the truck · Decide what happens to its driver');
+          ctx.tutorial('Q or thrown crates break teal parts. The amber cab is lethal. Amber lanes warn of a ram.', 16);
+          yield ctx.until(() => ctx.flags.truck.disabled);
+          if (!ctx.flags.driverOutcome) {
+            ctx.objective('Bring the driver to safe passage · Stop the Comedian');
+            ctx.marker(540, 1120, 'SAFE PASSAGE');
+            ctx.tutorial('Hold C on the Comedian to disarm him. E guides the driver; C can carry him to safety.', 16);
+          }
+          yield ctx.until(() => !!ctx.flags.driverOutcome);
+          ctx.lock(true);
+          ctx.objectiveDone();
+          const tone = S.tone(ctx.stats, ctx.flags);
+          yield ctx.dialog([
+            ['niteowl', ctx.flags.driverOutcome === 'spared' ? 'He is out. Keep walking. You are safe now.' :
+              'There was a person in there. That is what the report needs to say.'],
+            ['comedian', ENDINGS[tone].comedian],
+            ['manhattan', ENDINGS[tone].jon],
+          ]);
+        },
+      },
+    ],
+  });
+  Object.assign(S, { SummerOwl, SummerComplete, ENDINGS, chapter });
 })();
 </script>
 <script>/* src/main.js */

@@ -63,9 +63,10 @@ try {
     };
   });
   check('main campaign still has exactly six chapters and the original final chapter',await page.evaluate(()=>DM.Chapters.list.length===6&&DM.Chapters.next('karnak')===null));
-  check('both bonus adventures are independently registered',await page.evaluate(()=>DM.Bonus.list.map(c=>c.id).join(',')==='last_broadcast,ninth_minute'));
-  await page.evaluate(()=>{DM.Engine.set(new DM.Scenes.BonusMenu());T.step(.3);});
-  check('new adventure is selected by default in the two-level menu',await page.evaluate(()=>DM.Engine.top().chapter.id==='ninth_minute'));
+  check('all three bonus adventures are independently registered',await page.evaluate(()=>DM.Bonus.list.map(c=>c.id).join(',')==='last_broadcast,ninth_minute,long_summer'));
+  // Select the existing adventure explicitly now that the menu defaults to the third card.
+  await page.evaluate(()=>{DM.Bonus.selectedId='ninth_minute';DM.Engine.set(new DM.Scenes.BonusMenu());T.step(.3);});
+  check('selected adventure is restored in the three-level menu',await page.evaluate(()=>DM.Engine.top().chapter.id==='ninth_minute'));
   await page.screenshot({path:path.join(out,'01-bonus-menu.png')});
   await page.evaluate(()=>T.key('ArrowLeft'));
   check('left/right selection still exposes the original adventure and its own resume button',await page.evaluate(()=>DM.Engine.top().chapter.id==='last_broadcast'&&DM.Engine.top().menu.items[0].label==='RESUME ADVENTURE'));

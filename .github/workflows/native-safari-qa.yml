@@ -1,0 +1,59 @@
+name: Native Safari QA
+on:
+  workflow_dispatch:
+  push:
+    branches: [codex/bonus-three]
+    paths: ['.github/workflows/native-safari-qa.yml', 'src/**', 'dist/**', 'index.html', 'tests/safari-platform.py']
+  pull_request:
+    branches: [codex/bonus-polish]
+    types: [ready_for_review, reopened]
+permissions:
+  contents: read
+concurrency:
+  group: safari-qa-review
+  cancel-in-progress: true
+jobs:
+  safari:
+    runs-on: macos-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify the published HTML without source transformation
+        run: |
+          node tools/build.mjs
+          git diff --exit-code -- dist/dr-manhattan.html
+      - name: Run native Safari WebDriver over loopback HTTP
+        shell: bash
+        run: |
+          mkdir -p tests/out/native-safari
+          sw_vers > tests/out/native-safari/macos.txt
+          /usr/bin/safaridriver --version > tests/out/native-safari/driver.txt
+          sudo /usr/bin/safaridriver --enable
+          python3 -m http.server 8765 --bind 127.0.0.1 > tests/out/native-safari/http.log 2>&1 &
+          http_pid=$!
+          /usr/bin/safaridriver -p 4444 > tests/out/native-safari/driver.log 2>&1 &
+          driver_pid=$!
+          trap 'kill "$driver_pid" "$http_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4444/status > tests/out/native-safari/driver-status.json; then break; fi
+            sleep 1
+          done
+          set +e
+          python3 tests/safari-platform.py > tests/out/native-safari/run.log 2>&1
+          result=$?
+          set -e
+          printf 'native-safari exit=%s\n' "$result" > tests/out/native-safari/exits.txt
+          cat tests/out/native-safari/run.log
+          exit "$result"
+      - name: Preserve Safari evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-safari-evidence
+          path: tests/out/native-safari/
+          retention-days: 14

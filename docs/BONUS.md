@@ -1,111 +1,125 @@
 # Bonus adventures
 
-Open `index.html` or `dist/dr-manhattan.html` in a desktop browser. Click once for sound,
-then choose **BONUS LEVELS**. Select an adventure with its card or the left/right keys.
-Neither requires campaign completion. Keyboard and mouse/trackpad are required; touch
-controls are not implemented. Both begin with all six Manhattan powers.
+Three original optional fan adventures for **Dr. Manhattan: The Watchmaker's Son**.
+This branch remains **unmerged**. `codex/bonus-three` builds on the finished
+`codex/bonus-polish` branch. The original six chapters, music and ending are
+unchanged. PR #1 and all `claude/*` branches are untouched.
 
-## The Last Broadcast
+## Play
 
-New York, November 1976. Nite Owl and Rorschach investigate three missing radio engineers.
-Cross the rooftops, free the engineers, put the blue circular and gold square coils in
-matching docks with telekinesis, then break three shield pylons and disable the Carrier.
-The optional evidence changes the conclusion. Broadcasting brings interceptors; shutting
-down quietly avoids that fight.
+Open `index.html` or the generated `dist/dr-manhattan.html` in a desktop browser.
+Click once to enable sound, choose **BONUS LEVELS**, then select one of the three
+cards (or use left/right). No campaign completion is required. Keyboard and
+mouse/trackpad are required; touch gameplay has not been added.
 
-The polished rooftops have wet tar, water towers, fans, antenna beacons, skylights and a
-neon station sign. The relay has meters, tape reels, cables, a glass booth and engineer
-cages. The transmitter sits beneath a lattice mast and guy wires. Rain, relay hum,
-Switchman's radio cadence and distance-sensitive static give the place its own sound.
-The Carrier tracks Jon with two dishes, warns before sweeping a beam, drops its casing
-when the shield fails, and detaches both dishes for its damaged phase.
+The original controls apply: WASD/arrows move, mouse aims, C/left mouse holds
+telekinesis, Q disintegrates, Space teleports, R duplicates, F/Shift uses Temporal
+Sight, G expands, E interacts, H recalls the hint, Esc pauses and M mutes.
 
-**Companion jobs:** knock out a guard rather than unmaking them, then press E nearby to
-let Rorschach question them for evidence. At the locked booth, E calls Nite Owl to hack;
-keep nearby enemies away for four uninterrupted seconds. Killing the guard removes the
-interrogation opportunity. Neither job is required to finish the main rescue objective.
-The ending and Rorschach's final line distinguish no human deaths, mixed actions, and
-more people unmade than spared. Damage from ordinary throws remains nonlethal.
+## The Last Broadcast — Bonus I
 
-## The Ninth Minute
+New York, November 1976. Nite Owl and Rorschach trace three missing radio engineers
+to a relay station and transmitter roof. Rescue the engineers, ground two coils
+with telekinesis, break the shield pylons and disable the Carrier. Broadcasting
+the evidence brings interceptors; shutting down quietly avoids that last fight.
 
-New York, February 1977. Join Silk Spectre and Nite Owl at Harrow Street, where six people
-are caught in a repeating moment. Set the signal to SERVICE, clear drones and cross the
-rail hazards. E calls Laurie to each carriage; protect her while she opens it. Passengers
-count only when they reach the exit. There are three optional memories revealed by F.
+Rorschach can question a knocked-out guard: stand beside the spared person and
+press E. A guard who was unmade cannot provide evidence. At the supervisor's booth,
+E calls Nite Owl to the console. Keep enemies away for four uninterrupted seconds;
+the cyan ring shows progress. Interrogation, the hacked booth and the transmitter
+record provide three evidence items. Both final routes also respond to the human
+ledger and include a companion reaction. Nonlethal attacks spare people; only
+Disintegrate unmakes them.
 
-The station has cream/green tiles, masonry signage, benches, a newsstand, litter and
-platform lights. A three-car ghost train arrives, opens, departs and rewinds on the same
-nine-second clock as the hazards. Its seven silhouettes gain colour under Temporal Sight.
-Tunnel rumble, wheel squeal, doors, a sparse announcement and rewind sound follow that
-clock. Four human transit guards repeat their patrol until engaged. Laurie reacts once
-to the first one unmade; the completion screen records spared/gone and has three moral
-conclusions.
+The Carrier tracks Jon with its dishes, telegraphs a sweeping beam, exposes a
+casing and releases a damaged dish after half health. The encounter camera keeps
+it on screen. All six powers are available from the start.
 
-The Pendulum now swings a weighted arm with real contact. Its amber arc warns before a
-sweep; the brass shutter visibly opens on its core. Below half health the clock fractures
-into two counter-swinging arms. Returning a missile still opens the core early. The camera
-frames both Jon and the boss rather than leaving the boss beneath the HUD. Release the
-loop immediately, or hold F in the anchor to preserve its records. Both routes can rescue
-the passengers.
+## The Ninth Minute — Bonus II
 
-## Preserved campaign and saves
+New York, February 1977. Silk Spectre and Nite Owl help six passengers caught at
+Harrow Street. The visible train follows the same nine-second world clock as the
+hazards: arrival, doors, departure and rewind. Temporal Sight slows both the
+visual train and the cycle cues; dedicated ambience continues around them.
 
-The original six chapter files, their soundtrack data and original ending remain unchanged.
-Both bonus records live in `dr-manhattan.bonus.v1`, separate from campaign progress,
-Continue and ending totals. Settings are shared. Blocked browser storage permits only
-session progress; cross-file save migration is not guaranteed. This is original fan fiction,
-not official Watchmen continuity.
+Set routing to SERVICE and clear the station. At each stranded carriage, E calls
+Laurie to open its door. Nearby enemies interrupt her. Passengers count only when
+they reach the safe exit. Four human transit guards repeat their short patrols
+until engaged; they use the ordinary human spared/gone ledger. Laurie reacts once
+to the first unmaking. The conclusion has gentle, mixed and detached readings in
+addition to the temporal choice.
 
-## Architecture
+The Pendulum has a physical weighted arm. Its brass shutters open for the final
+three seconds of the nine-second cycle; a returned missile can open them early.
+After half health it fractures into two arms and the music deepens. The warning
+arc precedes the swept contact. Keep moving, use Sight or teleport, and attack the
+open core. The camera frames Jon and the full machine, including at arena edges.
 
-- `src/game/bonus.js`: bonus registry, menu and isolated persistence.
-- `src/game/bonus-kit.js`: shared labels, terminals, lights, companions, masks, swept-contact
-  geometry, encounter camera framing and moral summaries.
-- `src/data/chapters/last-broadcast.js` and `ninth-minute.js`: story/maps/encounters.
-- `src/data/bonus-broadcast-atmosphere.js` and `bonus-ninth-atmosphere.js`: procedural scenery,
-  original bonus ambience/recipes and timed environmental animation.
-- `src/core/gfx.js`: the only new core rendering hook is optional `look.mask(ctx, t)`.
-  It does nothing for existing campaign looks. No global portrait/HUD/follower override is used.
+Three optional lost moments need Sight. The final choice releases the loop at
+once or asks Jon to hold F at an anchor to preserve the records. Both rescue routes
+remain playable; the human ledger changes the closing meaning.
 
-The base branch lacks the proposed generic entity-light callback. Bonus map lighting
-profiles therefore forward each bonus entity's `light()` through the existing profile
-`lights(world, add)` API. This keeps the original lighting engine unchanged.
+## The Long Summer — Bonus III
 
-## Test and rebuild
+New York, August 1977. Restrain the Comedian, calm Blackout Avenue, rescue six
+residents from a five-storey tenement and stop a stolen riot truck. City Heat
+responds to actions throughout the adventure; the final Mercy, Order or Silence
+outcome is not selected by a last-button choice.
+
+[Full play guide](LONG-SUMMER.md) ·
+[Exact tests, caveats and successor handover](LONG-SUMMER-HANDOVER.md).
+
+## Art and sound
+
+All adventures retain procedural figures, dialogue, lighting, weather, powers and
+the original WebAudio synthesizer. The first two retain their Part A scenery and
+sound improvements; the third adds summer streets, a furnished building, fire and
+truck machinery, dedicated ambience and two new arrangements. Existing campaign
+tracks and recipes are not replaced. Music normalization is measured, not a claim
+of subjective listening or artistic parity.
+
+## Saves
+
+`last_broadcast`, `ninth_minute` and `long_summer` each have their own checkpoint and
+completion record in `dr-manhattan.bonus.v1`. They do not advance the campaign's
+Continue point, change its ending or add bonus statistics to campaign totals.
+Settings are shared. If storage is blocked, progress is session-only. Cross-file
+save migration is not guaranteed. Retry restores a stage-entry checkpoint, not
+continuous mid-room progress.
+
+## Shared code and tests
+
+`src/game/bonus-kit.js` supplies common label, ring, burst, terminal, sign, companion
+and boss-framing helpers. Bonus portrait masks use the existing optional
+`look.mask(ctx, t)` interface, without replacing the global portrait function.
+There is no Ninth Minute dependency on the Last Broadcast chapter file. Summer
+adds separately named encounter, truck, atmosphere and chapter scripts; see its
+play guide for file ownership.
 
 ```sh
-npm install
+npm install --ignore-scripts
 npx playwright install chromium
 node tools/build.mjs
 npm test
 node tests/bonus.mjs
 node tests/ninth-minute.mjs
+node tests/long-summer.mjs
 node tests/bonus.mjs dist/dr-manhattan.html
 node tests/ninth-minute.mjs dist/dr-manhattan.html
+node tests/long-summer.mjs dist/dr-manhattan.html
 ```
 
-Run all eleven suites sequentially, retain real exit codes, and retry a failure once before
-diagnosing it. The original nine suites are not weakened. The bonus tests use real inputs
-with setup shortcuts and some invulnerability; they do not prove balance or a complete
-unassisted playthrough. Offline harness results do not prove file loading or persistence.
-GitHub runners use real file navigation and normal browser storage.
+`npm test` remains the original nine suites. Run all three bonus suites too,
+sequentially, and retain actual exit codes. Tests use setup positioning and some
+invulnerability; they are not unassisted human playthroughs or balance reviews.
+The optional offline harness is not proof of real file loading or persistence.
 
-To reproduce the visual comparison, check out baseline `5f64f6dd98bb649d15f435e136a816deb96157c3`
-in a separate folder, then run:
+Part A comparisons remain in `docs/screenshots/bonus-polish/`; its reproducible
+capture script is `tests/capture-bonus-polish.mjs`. The new adventure's 14 review
+views are in `docs/screenshots/long-summer/`, produced by
+`node tests/capture-long-summer.mjs`. Use the handovers for the authoritative tested
+commits and exact results. Nothing is automatically merged or deployed.
 
-```sh
-node tests/capture-bonus-polish.mjs --before-root=/path/to/baseline
-```
+## Portable bonus saves and browser QA
 
-It produces 41 screenshots at 1280x720: six maps before/after, each normally and under Sight;
-both phases of both bosses before/after, normally and under Sight; and the original pier.
-The capture settings are recorded beside the images. They use actual four-second gameplay,
-clear dialogue and restore coherence each second. Map overview cameras match literally;
-boss comparison uses the same player position and the actual encounter camera.
-
-## Review boundary
-
-Work is on `codex/bonus-polish`, for a draft PR into `chatgpt/bonus-adventures`. Nothing is
-merged or deployed. PR #1 and all `claude/*` branches remain separate. The future third
-adventure is gated by the Part A review, not bundled into this build.
+In the **BONUS LEVELS** menu, choose **BACK UP / RESTORE BONUS SAVES** to export a JSON copy of your adventure progress, preview another backup and restore it with a separate confirmation. Campaign and settings are not included. Keep your old copy until migration has been verified. Keyboard and mouse are still required for gameplay. See [platform verification, performance and limits](PLATFORM-QA-HANDOVER.md) and the [first-time player checklist](HUMAN-PLAYTEST.md).

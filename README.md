@@ -1,6 +1,6 @@
 # Dr. Manhattan: The Watchmaker's Son
 
-Bonus adventures: see [docs/BONUS.md](docs/BONUS.md).
+Bonus adventures: see [docs/BONUS.md](docs/BONUS.md); [backup/browser/performance notes](docs/PLATFORM-QA-HANDOVER.md).
 
 A browser game inspired by *Watchmen*. You play Jon Osterman's journey: a physicist in 1959, an accident in an intrinsic field chamber, a body rebuilt atom by atom, and then Dr. Manhattan, gaining powers chapter by chapter until the Doomsday Clock reaches midnight.
 
