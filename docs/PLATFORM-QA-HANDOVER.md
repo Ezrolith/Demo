@@ -80,8 +80,21 @@ before export. It does not weaken any backup validity assertion or change
 production code. A local inlined-script Chromium check passed 16/16; the
 normal-file [read-only browser rerun 40197987036](https://github.com/Ezrolith/Demo/actions/runs/40197987036)
 and [full regression rerun 40197987008](https://github.com/Ezrolith/Demo/actions/runs/40197987008)
-are authoritative for this test-only fix. Record their completed conclusions;
-do not treat an in-progress action as green.
+have now both **completed successfully**. The previously failing **WebKit source
+backup passed 17 checks, exit 0**, as did WebKit standalone backup and every
+other browser/representation. Both four-times CPU throttling probes also passed.
+
+The final regression ran the **12 source suites sequentially**; each passed on
+its first attempt with **exit 0**. Exact bonus acceptance lines:
+`BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).`,
+`NINTH MINUTE PASSED: 75 checks (normal file loading).`, and
+`LONG SUMMER PASSED: 82 checks (normal file loading).` Source portability,
+all three standalone adventures and standalone portability also passed
+(**17 portability checks** each). The real-input rescue-and-reload runner finished
+`LIVE JOURNEY PASSED: 15 checks; minimum coherence 92.00.`, exit 0.
+This recovery changes the test's timing only; no further production gameplay
+or save files were modified. The red first attempt remains in GitHub history
+with its cause documented rather than hidden.
 
 ## What is still genuinely unresolved
 
