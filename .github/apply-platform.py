@@ -26,6 +26,7 @@ replace('src/game/bonus.js', 'y: 480, w: 620, itemH: 40, size: 21', 'y: 480, w: 
 replace('src/game/bonus.js', 'ALL POWERS AVAILABLE · EACH ADVENTURE SAVES SEPARATELY',
         'KEYBOARD + MOUSE · ALL POWERS · SEPARATE BONUS SAVES')
 runpy.run_path('.github/platform-qa-refine.py')
+runpy.run_path('.github/platform-hardening.py')
 
 replace('tests/play-audit-followup.mjs',
         "const out = path.join(root, 'tests/out/audit-followup');",
