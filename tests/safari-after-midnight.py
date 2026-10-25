@@ -196,7 +196,11 @@ try:
             check(label + ': actual character-card click chooses ' + hero, js('return DM.AfterMidnight.data.selection.hero===arguments[0]', hero))
         shot(label + '-case-board')
         click_logical("const r=DM.Engine.top().modeRect(0);return {x:r.x+r.w/2,y:r.y+r.h/2};")
+        wait("return DM.Engine.top().modeIndex===0&&DM.Engine.top().selected().ch.kind==='story'")
+        check(label + ': actual mode click selects story cases from the remembered mode', js("return DM.AfterMidnight.data.selection.mode==='story'"))
         click_logical("const r=DM.Engine.top().caseRect(0);return {x:r.x+r.w/2,y:r.y+25};")
+        wait("return DM.Engine.top().selected().ch.amId==='dead_air'&&DM.Engine.top().selected().hero.id==='rorschach'")
+        check(label + ': actual case click selects Dead Air before starting', js("return DM.AfterMidnight.data.selection.case==='dead_air'"))
         click_logical("const m=DM.Engine.top().menu;let i=m.items.findIndex(x=>x.label.startsWith('RESUME'));if(i<0)i=m.items.findIndex(x=>x.label==='OPEN CASE FILE');if(i<0)throw new Error('Case action missing');const r=m.rowRect(i);return {x:r.x+r.w/2,y:r.y+r.h/2};")
         wait("return DM.Engine.top() instanceof DM.Scenes.Interlude || DM.dev.play()?.chapter.id==='am_dead_air'")
         if js('return DM.Engine.top() instanceof DM.Scenes.Interlude'):
