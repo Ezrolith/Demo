@@ -33,6 +33,9 @@ jobs:
           old = "isinstance(value, dict) and 'error' in value"
           assert s.count(old) == 1
           s = s.replace(old, "isinstance(value, dict) and value.get('error') and 'message' in value")
+          old = "key('\\ue007')"
+          assert s.count(old) == 1
+          s = s.replace(old, "key('\\ue006')  # Primary Return, not numeric-keypad Enter.")
           s = s.replace('native Safari, file navigation and W3C input', 'native Safari, loopback HTTP and W3C input; file sandbox unchanged')
           p.write_text(s)
           PY
