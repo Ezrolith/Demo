@@ -1,100 +1,117 @@
 # QA continuation — 25 October 2026
 
-**Branch:** `codex/gameplay-qa-polish`, from `codex/bonus-three` at
-`ed65bbfb0416f08e5aa507bf221bdcc7ca413dff`. Draft PR targets `codex/bonus-three`.
-No merge or deployment. Original campaign, graphics, lighting, music and Claude
-branches are unchanged. `dist/dr-manhattan.html` is generated from source.
+**Review:** [draft PR #5](https://github.com/Ezrolith/Demo/pull/5), `codex/gameplay-qa-polish` → `codex/bonus-three`.
+Base: `ed65bbfb0416f08e5aa507bf221bdcc7ca413dff`.
+**Verified code/test commit:** `c52043db57ac8058953fa21174fdb143e2f802a6`.
+The final evidence revision changes this handover and results JSON only.
+No merge or deployment. Original campaign, graphics, renderer, lighting, music,
+atmosphere, PR #4 and Claude branches are unchanged.
 
-## Reviewed and changed
+## Assessment and changes
 
 Read README, HANDOVER, BONUS, GAMEPLAY-AUDIT-FOLLOWUP, PLATFORM-QA-HANDOVER,
-HUMAN-PLAYTEST, the four existing draft PRs and relevant source/tests. PR #4 has
-no discussion comments. Older branch/integration instructions are historical;
-the later platform handover supersedes earlier unverified-browser statements.
+HUMAN-PLAYTEST, the four existing draft PRs, source, tests and visual evidence.
+The branch already contains the three adventures, companions, bosses, moral
+outcomes and portable saves; earlier branch instructions and platform caveats are historical.
 
 Two independently reproduced player problems were fixed:
 
-- **Silent bonus-save failure.** A bonus-only quota/storage exception left an
-  apparent Resume checkpoint in memory with nothing on disk and no warning.
-  Failed reads/writes now set an accurate availability status. A write failure
-  displays one in-game warning per outage, and Bonus Levels permanently reminds
-  the player to export before closing. In-memory progress remains exportable.
-  A successful write or restore clears the warning; failed restores retain data.
-  Campaign progress/settings are isolated. Source: `bonus.js`,
-  `bonus-portability.js`; regression: `tests/bonus-storage.mjs`.
-- **Repeated Rorschach interrogation.** Requesting guard A, then B before
-  Rorschach arrived, left A pending. After B's interrogation, approaching A
-  replayed the dialogue and reset the dispatch marker. Retargeting now cancels
-  the old request; only the active, unfinished request can complete. Source:
-  `last-broadcast.js`; regression: `tests/bonus-interrogation.mjs`.
+- **Silent bonus-save failure:** a quota/storage exception left Resume progress
+  in memory without writing it to disk or telling the player. Failed reads and
+  writes now set accurate status; a write failure produces one warning per
+  outage, and Bonus Levels reminds the player to export before closing.
+  Unsaved progress remains exportable. Successful writes/restores clear the
+  warning; failed restores retain existing data. Campaign/settings are isolated.
+- **Repeated interrogation:** requesting guard A, then B before Rorschach arrived,
+  left A pending. Visiting A after B replayed dialogue and reset the dispatch
+  marker. Retargeting now cancels the earlier request; only the active unfinished
+  request can complete.
 
-All three read-only workflows now accept PRs into `codex/bonus-three` and test
-updates via `synchronize`. Browser/Safari concurrency is scoped per PR. The
-regression workflow retains the original twelve suites and adds the focused
-checks on source and standalone, plus full real-input Summer journeys on both.
+Production edits: `src/game/bonus.js`, `src/game/bonus-portability.js`,
+`src/data/chapters/last-broadcast.js`, and rebuilt `dist/dr-manhattan.html`.
+The read-only workflows now cover PRs into `codex/bonus-three`, including updates.
+Browser/Safari concurrency is per PR.
 
-## Gameplay and verification
+## Final results
 
-The existing real-RAF runner now supports `--complete`: after the six-resident
-rescue, it reloads and resumes the actual truck checkpoint, fights the moving
-truck with Q aimed at machinery, restrains the Comedian, uses E to rescue the
-driver and verifies the Mercy ending. Normal damage stays enabled. After the
-initial scene/settings setup it uses no actor relocation, state edits,
-health/energy refills, invulnerability or stage skips. Read-only position
-telemetry guides this known route; this is not first-time human play.
+| Verification | Actual result |
+| --- | --- |
+| Original campaign | All nine suites passed |
+| Three adventures, source and standalone | Last Broadcast 42, Ninth Minute 75, Long Summer 82 checks per build; all exit 0 |
+| Backup / storage faults / interrogation, both builds | 17 / 14 / 7 checks per build; all exit 0 |
+| Full real-input Summer, source and standalone | 18 checks each; Mercy, 14 spared, 0 unmade, 0 Comedian casualties, 6/6 rescued; lowest observed coherence 66 locally |
+| Three browser engines, both builds | 64 platform checks and 17 backup checks per browser/build; all exit 0 |
+| Chromium, Firefox, WebKit rescue/reload route | 15 checks per engine; all exit 0 |
+| Native macOS Safari over loopback HTTP | 90 checks; exit 0 |
+| Build and code | Syntax, YAML/shell checks, reproducible standalone, clean working tree |
 
-Initial full source route: **18 checks passed, minimum coherence 66**, six
-residents rescued, driver spared, zero human deaths. Focused source tests:
-storage **14/14**, interrogation **7/7**, zero page errors. Before the fixes,
-storage fault injection produced no warning; the interrogation regression
-reproduced two dialogues/two marker updates and exited 1. Final sequential
-regression and fresh hosted browser/Safari results will be recorded here when
-complete; do not treat their dispatch as success.
+**23 required local commands pass**, after correcting inherited test setup.
+Fresh hosted runs on the verified commit: [full regression](https://github.com/Ezrolith/Demo/actions/runs/40222735874),
+[browser/performance](https://github.com/Ezrolith/Demo/actions/runs/40222735867),
+[native Safari](https://github.com/Ezrolith/Demo/actions/runs/40222735894).
+**All three runs succeeded.** The twelve source suites passed on their first
+attempt; all standalone/focused checks and both full journeys exited 0.
+The evidence-only commit skips duplicate CI; source, tests, workflows and HTML
+remain identical to the verified commit.
 
-Artifacts are under `tests/out/qa-polish/`, `tests/out/bonus-storage/`,
-`tests/out/bonus-interrogation/` and `tests/out/audit-followup/<engine>/<build>/`.
-Source and standalone full-journey evidence now have separate directories.
-Screenshots of the new warning and interrogation outcome were inspected.
+`tests/play-audit-followup.mjs --complete` extends the existing route through the
+moving truck fight, Comedian restraint, driver escort and ending, after a genuine
+checkpoint reload. After explicit initial scene/settings setup, it uses ordinary
+keyboard/mouse and real RAF, without placement, refills, invulnerability, quest
+edits or skips. Read-only telemetry guides this known route; it is not a first-time
+human playthrough. Source and standalone evidence have separate directories.
 
-Rebuild using `node tools/build.mjs`. Run `npm test` (original nine), then the
-three adventure suites, `bonus-portability`, `bonus-storage` and
-`bonus-interrogation`. Run those six bonus/focused suites against
-`dist/dr-manhattan.html` too. Finally run
-`node tests/play-audit-followup.mjs index.html --complete` and the same with
-`dist/dr-manhattan.html`. Keep actual exits/logs; do not weaken assertions.
+Additional normal-menu, normal-damage play: Last Broadcast rooftop encounter
+(six guards spared and natural E interrogation); Ninth Minute platform (five
+drones cleared, SERVICE selected, safe-tunnel marker and H hint recall).
+No developer start, placement, refills or invulnerability. Screenshots inspected.
 
-## Performance and remaining work
+## Test failures retained and resolved
 
-The first local full-regression attempt exposed an inherited sequencing race in
-`tests/saves.mjs`: its "yard ready" predicate could pass during the frame between
-instant map construction and the start of the briefing/guard spawn. It attacked
-an empty encounter, then timed out waiting for the warehouse. Readiness now
-requires four actual live guards, no dialogue/context lock and an unlocked
-player. The four-kill Retry/Continue assertions and their tolerances are
-unchanged. No campaign source changed. The initial failure log is retained in
-`tests/out/qa-polish/saves.log`; the corrected suite is rerun separately.
+The first local save-suite attempt timed out: its readiness predicate passed
+between instant map construction and guard spawning, so it attacked an empty
+yard. A second attempt passed persistence but exposed the same early-ready window
+in wave/input fixtures and a non-Mac check assuming Linux on this Mac.
+The fixtures now wait for actual guards/objectives and unlocked dialogue/context;
+Linux and Mac shortcut policies are explicitly exercised in separate contexts.
+All 46 original assertion lines and 50 wait/timing/tolerance lines are unchanged;
+production input and campaign code were not modified.
 
-The next full save attempt passed persistence but exposed the same early-ready
-window in both wave-scene input fixtures, and a non-Mac check that assumed the
-host was Linux. Both input fixtures now wait for the real wave objective and
-unlocked context/dialogue; the non-Mac fixture explicitly identifies as Linux,
-just as the existing Mac fixture explicitly identifies as MacIntel. The six
-isolated input checks now pass on this Mac. Movement thresholds, repeat/fade
-assertions, timeouts and production input code remain unchanged. That failed
-attempt remains in `saves-corrected.log`; the final complete run is
-`saves-final.log`.
+Earlier failures: `tests/out/qa-polish/saves.log`, `saves-corrected.log`.
+Final complete success: `saves-final.log`. The isolated six-check input probe also
+passed. Before-fix storage/interrogation evidence and after-fix screenshots are
+under `tests/out/bonus-storage*` and `tests/out/bonus-interrogation*`.
 
-Reviewed the existing three-engine, native Safari and 4x CPU-throttle evidence.
-The measured slow-CPU High/Low gap remains a limitation. No render quality,
-lighting, rain, fire, musical or ambience reduction was introduced. A repeated
-static-puddle scan was investigated, but its measured cost was modest
-(approximately 0.029 ms per puddle/frame on this Mac); it was left alone.
-The suspected Summer Pause-objective overflow was also ruled out by screenshot
-and canvas measurement: approximately 601 px of text fits its 656 px content
-width, including with web-font requests blocked.
+## Performance and remaining verification
 
-Still needed: an unbiased first-time human playthrough; subjective listening at
-fixed volume; real slow-device/long-session testing; native Safari direct-file
-opening; assistive-technology review. Touch gameplay remains unsupported. The
-controlled bonus suites use setup shortcuts; passing them does not establish
-every story's natural difficulty or certify that the game has no other bugs.
+Fresh artifact measurements, median of nine scene medians: unthrottled Chromium
+High approximately 60 fps; 4x CPU slowdown with requested High approximately
+30 fps, requested Low approximately 60 fps. The normal quality governor remained
+enabled. These are different runner conditions from the older 20/30 fps report,
+not evidence of an optimisation: this review did not change the renderer,
+quality defaults or atmospheric effects. Firefox was approximately 58.5 fps;
+automated WebKit approximately 41.7 fps. Real slow-device and long-session
+performance remain unverified.
+
+A static-puddle scan was investigated but its measured cost was modest, so it
+was left alone. The suspected Summer Pause-text overflow was ruled out by
+screenshot/measurement: approximately 601 px fits 656 px of content width.
+
+Still needed: first-time human discovery/pacing, subjective listening at fixed
+volume, physical slow devices, native Safari direct downloaded-file opening and
+assistive technology. Touch gameplay remains unsupported. Controlled suites use
+setup shortcuts; green checks do not certify every story's natural difficulty.
+
+## Continue safely
+
+Keep PR #5 draft; no merge/deploy. Build with `node tools/build.mjs`; never edit the
+standalone by hand. `npm test` runs the original nine; additionally run the three
+adventures, `bonus-portability`, `bonus-storage` and `bonus-interrogation`.
+Run those six bonus/focused suites on the standalone too, and the full
+`play-audit-followup.mjs <index.html|dist/dr-manhattan.html> --complete` route.
+Evidence summary: [qa-polish-results.json](qa-polish-results.json).
+Logs/screenshots remain in `tests/out/` locally and the linked CI artifacts
+(retained for 14 days).
+
+Standalone: **933,374 bytes**, SHA-256
+`45bd1cf75d5e192d56911ef439980588fcdde222265cbd0724c95246d75dac46`.
