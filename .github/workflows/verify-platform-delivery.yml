@@ -7,7 +7,7 @@ permissions:
   contents: read
 concurrency:
   group: verify-platform-delivery
-  cancel-in-progress: true
+  cancel-in-progress: false
 jobs:
   regression:
     runs-on: ubuntu-latest
@@ -84,7 +84,7 @@ jobs:
           pulseaudio --start --exit-idle-time=-1
           pactl load-module module-null-sink sink_name=qa_audio
           pactl set-default-sink qa_audio
-      - name: Engine matrix, known-route journeys and 4x CPU probe
+      - name: Engine matrix, known-route journeys and 4x CPU probes
         shell: bash
         run: |
           mkdir -p tests/out/platform-matrix
@@ -108,6 +108,7 @@ jobs:
             run_check "journey-$browser" env QA_BROWSER="$browser" node tests/play-audit-followup.mjs
           done
           run_check chromium-4x env QA_BROWSER=chromium QA_CPU=4 node tests/platform-qa.mjs dist/dr-manhattan.html
+          run_check chromium-4x-low env QA_BROWSER=chromium QA_CPU=4 QA_QUALITY=low node tests/platform-qa.mjs dist/dr-manhattan.html
           exit "$failed"
       - name: Preserve exact tested source and reports
         if: always()
