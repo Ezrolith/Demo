@@ -1,0 +1,54 @@
+name: Platform QA
+on:
+  push:
+    branches: [codex/bonus-three]
+    paths: ['tests/platform-qa.mjs', '.github/workflows/platform-qa.yml', 'src/game/bonus-portability.js']
+permissions:
+  contents: read
+concurrency:
+  group: platform-qa-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  platforms:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --ignore-scripts
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Browser and source/build matrix, sequentially
+        shell: bash
+        run: |
+          mkdir -p tests/out/platform-qa
+          failed=0
+          for browser in chromium firefox webkit; do
+            for target in index.html dist/dr-manhattan.html; do
+              name="${browser}-$(basename "$target")"
+              set +e
+              QA_BROWSER="$browser" node tests/platform-qa.mjs "$target" > "tests/out/platform-qa/$name.log" 2>&1
+              result=$?
+              set -e
+              printf '%s exit=%s\n' "$name" "$result" | tee -a tests/out/platform-qa/exits.txt
+              cat "tests/out/platform-qa/$name.log"
+              if [ "$result" -ne 0 ]; then failed=1; fi
+            done
+          done
+          set +e
+          QA_BROWSER=chromium QA_CPU=4 node tests/platform-qa.mjs dist/dr-manhattan.html > tests/out/platform-qa/chromium-4x.log 2>&1
+          result=$?
+          set -e
+          printf 'chromium-4x exit=%s\n' "$result" | tee -a tests/out/platform-qa/exits.txt
+          cat tests/out/platform-qa/chromium-4x.log
+          if [ "$result" -ne 0 ]; then failed=1; fi
+          exit "$failed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: platform-qa-${{ github.run_id }}
+          path: tests/out/platform-qa/
+          retention-days: 14
