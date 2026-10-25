@@ -18,7 +18,9 @@ assert.ok(['chromium', 'firefox', 'webkit'].includes(engine), 'known browser eng
 const target = process.argv.find(a => a.endsWith('.html')) || 'index.html';
 const offline = process.argv.includes('--offline');
 const cpu = Number(process.env.QA_CPU || 1);
-const slug = `${engine}-${target.startsWith('dist/') ? 'dist' : 'source'}-${cpu}x`;
+const quality = process.env.QA_QUALITY || 'high';
+assert.ok(['high', 'balanced', 'low'].includes(quality), 'known quality');
+const slug = `${engine}-${target.startsWith('dist/') ? 'dist' : 'source'}-${cpu}x-${quality}`;
 const out = path.join(root, 'tests/out/platform-qa', slug);
 mkdirSync(out, { recursive: true });
 const browser = await pw[engine].launch({ headless: true,
@@ -28,11 +30,15 @@ const browser = await pw[engine].launch({ headless: true,
 const context = await browser.newContext({ viewport: { width: 1280, height: 720 } });
 const page = await context.newPage();
 const errors = [], checks = [], scenes = [];
-const report = { engine, version: browser.version(), target, cpuSlowdown: cpu,
+const report = { engine, version: browser.version(), target, cpuSlowdown: cpu, quality,
   mode: offline ? 'inlined scripts, memory storage' : 'normal file navigation, browser storage',
   checks, errors, scenes, limitations: ['Known stage entries, not first-time human play.',
     'WebKit is not branded macOS Safari; CPU throttling is not a physical low-end device.'] };
 page.on('pageerror', e => errors.push(String(e)));
+report.console = [];
+page.on('console', m => {
+  if (['warning', 'error'].includes(m.type())) report.console.push(m.text());
+});
 const check = (name, ok) => {
   assert.ok(ok, name);
   checks.push(name);
@@ -46,13 +52,21 @@ const read = () => page.evaluate(() => {
     time: p?.world.realTime, error: DM.Engine.error ? String(DM.Engine.error) : null };
 });
 async function settle() {
-  for (let i = 0; i < 50; i++) {
+  // Chapter generators may schedule their first dialogue after one update.
+  await page.waitForTimeout(450);
+  let calmSince = 0;
+  for (let i = 0; i < 100; i++) {
     const busy = await page.evaluate(() => {
       const p = DM.dev.play();
       return !p || DM.Engine.top() !== p || p.dialog.active || p.ctx.locked || DM.Engine.fading;
     });
-    if (!busy) return;
-    await page.keyboard.press('e');
+    if (busy) {
+      calmSince = 0;
+      await page.keyboard.press('e');
+    } else {
+      calmSince++;
+      if (calmSince >= 6) return;
+    }
     await page.waitForTimeout(100);
   }
   throw new Error('stage did not release control');
@@ -111,25 +125,35 @@ try {
   check('game boots without engine errors', !(await read()).error);
   // A genuine input gesture, not an autoplay-policy override.
   await page.mouse.click(640, 360);
+  await page.waitForTimeout(200);
+  report.audioAfterFirstClick = await page.evaluate(() => ({
+    state: DM.Audio.ctx?.state, time: DM.Audio.ctx?.currentTime, rate: DM.Audio.ctx?.sampleRate,
+    active: navigator.userActivation?.isActive, hidden: document.hidden,
+  }));
+  if (report.audioAfterFirstClick.state !== 'running') await page.keyboard.press('z');
   await page.waitForFunction(() => DM.Audio.ctx?.state === 'running', null, { timeout: 10000 });
-  check('audio unlocks from an actual user gesture', await page.evaluate(() => DM.Audio.ctx.state === 'running'));
+  check('audio unlocks from actual user input', await page.evaluate(() => DM.Audio.ctx.state === 'running'));
   if (cpu !== 1) {
     assert.equal(engine, 'chromium', 'CPU throttle requires Chromium CDP');
     const cdp = await context.newCDPSession(page);
     await cdp.send('Emulation.setCPUThrottlingRate', { rate: cpu });
   }
-  await page.evaluate(() => {
+  await page.evaluate(quality => {
     DM.Save.settings.focusPause = false;
+    DM.Save.settings.quality = quality;
+    DM.Engine.resize();
     DM.Engine.set(new DM.Scenes.BonusMenu());
-  });
+  }, quality);
   await page.waitForTimeout(400);
   check('all three cards are present', await page.evaluate(() => DM.Bonus.list.length === 3));
   await page.keyboard.press('ArrowLeft');
   await page.waitForTimeout(100);
   check('keyboard selects another adventure', await page.evaluate(() => DM.Bonus.selectedId === 'ninth_minute'));
   await page.keyboard.press('ArrowRight');
+  await page.waitForFunction(() => DM.Bonus.selectedId === 'long_summer');
   await page.keyboard.press('Enter');
-  await page.waitForTimeout(400);
+  await page.waitForFunction(() => DM.Engine.top() instanceof DM.Scenes.Interlude ||
+    DM.dev.play()?.chapter.id === 'long_summer', null, { timeout: 5000 });
   check('selected adventure opens through the real menu', await page.evaluate(() =>
     DM.Engine.top() instanceof DM.Scenes.Interlude || DM.dev.play()?.chapter.id === 'long_summer'));
 
@@ -186,8 +210,14 @@ try {
     }
   }
   await page.keyboard.press('m');
-  await page.waitForTimeout(900);
+  await page.waitForFunction(() => DM.Audio.muted);
+  // The ambience bus has a 0.3 s exponential fade; measure after its tail.
+  await page.waitForTimeout(2600);
   const muted = await meter(0.4);
+  report.mute = muted;
+  report.muteState = await page.evaluate(() => ({ muted: DM.Audio.muted,
+    music: DM.Audio.musicBus.gain.value, sfx: DM.Audio.sfxBus.gain.value,
+    ambience: DM.Audio.ambBus.gain.value }));
   check('mute silences the actual output, including ambience', muted.rms < 0.0001);
   await page.keyboard.press('m');
   await page.waitForTimeout(400);
@@ -220,6 +250,11 @@ try {
 } catch (error) {
   report.status = 'failed';
   report.failure = String(error.stack || error);
+  try {
+    report.lastState = await read();
+    report.lastAudio = await page.evaluate(() => ({ state: DM.Audio.ctx?.state,
+      time: DM.Audio.ctx?.currentTime, rate: DM.Audio.ctx?.sampleRate }));
+  } catch (_) {}
   try { await page.screenshot({ path: path.join(out, 'failure.png') }); } catch (_) {}
   console.error(error);
   process.exitCode = 1;

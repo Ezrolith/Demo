@@ -481,6 +481,42 @@ try {
   check('destroying mechanical parts does not count as unmaking a person', await page.evaluate(() =>
     !T.p().ctx.flags.truck.driver.dead && !T.p().ctx.flags.driverOutcome && T.p().ctx.stats.disintegrated === 0));
   check('half-health triggers the telegraphed ram phase', await page.evaluate(() => T.p().ctx.flags.truck.phase === 2));
+  check('a viewport wider than the truck arena has a feasible centred camera', await page.evaluate(() => {
+    const p = T.p();
+    const t = p.ctx.flags.truck;
+    const old = { px: p.player.x, py: p.player.y, bx: t.x, by: t.y };
+    try {
+      // Controlled reproduction of the positions observed in the real-input approach.
+      Object.assign(p.player, { x: 587, y: 1040 });
+      Object.assign(t, { x: 1179, y: 658 });
+      const point = t.cameraFrame.target(0.6);
+      return point.feasible && Math.abs(point.x - p.world.w / 2) < 0.01 &&
+        t.cameraFrame.projectionSafe(0.6, point.x, point.y);
+    } finally {
+      Object.assign(p.player, { x: old.px, y: old.py });
+      Object.assign(t, { x: old.bx, y: old.by });
+    }
+  }));
+  check('truck approach framing stays readable rather than collapsing to minimum zoom', await page.evaluate(() => {
+    const p = T.p();
+    const t = p.ctx.flags.truck;
+    const c = p.world.camera;
+    const old = { px: p.player.x, py: p.player.y, bx: t.x, by: t.y,
+      cx: c.x, cy: c.y, zoom: c.zoom, targetZoom: c.targetZoom };
+    try {
+      Object.assign(p.player, { x: 587, y: 1040 });
+      Object.assign(t, { x: 1179, y: 658 });
+      c.zoom = p.world.baseZoom;
+      t.cameraFrame.update();
+      return c.targetZoom >= 0.5 && c.zoom >= 0.5 &&
+        t.cameraFrame.projectionSafe(c.zoom, c.x, c.y);
+    } finally {
+      Object.assign(p.player, { x: old.px, y: old.py });
+      Object.assign(t, { x: old.bx, y: old.by });
+      Object.assign(c, { x: old.cx, y: old.cy, zoom: old.zoom, targetZoom: old.targetZoom });
+      t.cameraFrame.update();
+    }
+  }));
   check('truck framing includes the machine at all four arena corners', await page.evaluate(() => {
     const p = T.p();
     const t = p.ctx.flags.truck;

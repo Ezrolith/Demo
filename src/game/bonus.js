@@ -166,10 +166,13 @@
         label: 'CONTROLS', action: () => E.push(new DM.Scenes.Controls())
       });
       items.push({
+        label: 'BACK UP / RESTORE BONUS SAVES', action: () => DM.BonusBackup.open()
+      });
+      items.push({
         label: 'BACK TO THE MAIN GAME', action: () => E.set(new DM.Scenes.Title())
       });
       this.menu = new DM.UI.Menu(items, {
-        x: 85, y: 480, w: 620, itemH: 40, size: 21, accent: ch.menuAccent || '#e3ba68', onBack: () => E.set(new DM.Scenes.Title())
+        x: 85, y: 480, w: 620, itemH: 33, size: 18, accent: ch.menuAccent || '#e3ba68', onBack: () => E.set(new DM.Scenes.Title())
       });
       DM.Audio.music.play(ch.music || 'bonus_noir');
     }
@@ -272,7 +275,7 @@
       G.text(ctx, ch.menuTagline || 'SOME NIGHTS NEVER MAKE THE PAPERS.', 977, 629, {
         size: 11, align: 'center', spacing: 1.4, color: '#dad4c3'
       });
-      G.text(ctx, 'ALL POWERS AVAILABLE · EACH ADVENTURE SAVES SEPARATELY', 88, 660, {
+      G.text(ctx, 'KEYBOARD + MOUSE · ALL POWERS · SEPARATE BONUS SAVES', 88, 660, {
         size: 11, spacing: 1.5, color: '#b5ad99'
       });
       G.postFx(ctx);

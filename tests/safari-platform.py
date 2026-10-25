@@ -13,7 +13,7 @@ OUT = ROOT / 'tests/out/native-safari'
 OUT.mkdir(parents=True, exist_ok=True)
 BASE = 'http://127.0.0.1:4444'
 session = None
-report = {'checks': [], 'scenes': [], 'method': 'native Safari, file navigation and W3C input'}
+report = {'checks': [], 'scenes': [], 'method': 'native Safari, loopback HTTP and W3C input; file sandbox unchanged'}
 
 
 def call(method, endpoint, data=None):
@@ -25,7 +25,7 @@ def call(method, endpoint, data=None):
             value = json.load(response).get('value')
     except urllib.error.HTTPError as error:
         raise RuntimeError(error.read().decode()) from error
-    if isinstance(value, dict) and 'error' in value:
+    if isinstance(value, dict) and value.get('error') and 'message' in value:
         raise RuntimeError(str(value))
     return value
 
@@ -108,7 +108,7 @@ try:
     command('/window/rect', {'width': 1400, 'height': 900})
     for target in ['index.html', 'dist/dr-manhattan.html']:
         label = 'source' if target == 'index.html' else 'dist'
-        command('/url', {'url': (ROOT / target).as_uri()})
+        command('/url', {'url': 'http://127.0.0.1:8765/' + target})
         wait('return !!window.DM?.dev')
         js("window.__qaErrors=[]; window.addEventListener('error', e=>window.__qaErrors.push(e.message));")
         check(label + ': boots without engine error', not state().get('error'))
@@ -124,7 +124,7 @@ try:
         wait("return DM.Bonus.selectedId==='ninth_minute'")
         key('\ue014')
         wait("return DM.Bonus.selectedId==='long_summer'")
-        key('\ue007')
+        key('\ue006')  # Primary Return, not numeric-keypad Enter.
         wait("return DM.Engine.top() instanceof DM.Scenes.Interlude || DM.dev.play()?.chapter.id==='long_summer'")
         check(label + ': real menu navigation starts the selected adventure', True)
         for chapter in ['last_broadcast', 'ninth_minute', 'long_summer']:
@@ -141,13 +141,15 @@ try:
                 check(f'{label} {chapter}/{index}: pause freezes simulation', state()['time'] == t)
                 key('\ue00c')
                 wait('return DM.Engine.top()===DM.dev.play()')
-                command('/actions', {'actions': [{'type': 'key', 'id': 'keyboard', 'actions': [
-                    {'type': 'keyDown', 'value': 'f'}]}]})
-                time.sleep(0.35)
-                slow = js('return DM.dev.play().world.timeScale')
-                command('/actions', {'actions': [{'type': 'key', 'id': 'keyboard', 'actions': [
-                    {'type': 'keyUp', 'value': 'f'}]}]})
-                check(f'{label} {chapter}/{index}: Temporal Sight responds', slow < 0.9)
+                # Read-only telemetry during one genuine hold/release action sequence.
+                js("""window.__qaSightMin=1; const deadline=performance.now()+1200;
+                    function sample(){const p=DM.dev.play(); if(p) window.__qaSightMin=Math.min(window.__qaSightMin,p.world.timeScale);
+                        if(performance.now()<deadline) requestAnimationFrame(sample);}
+                    requestAnimationFrame(sample);""")
+                key('f', 450)
+                wait("return !DM.Input.down('timesight') && !DM.dev.play().world.timesight")
+                slow = js('return window.__qaSightMin')
+                check(f'{label} {chapter}/{index}: Temporal Sight activates and releases', slow < 0.9)
                 key('h')
                 time.sleep(2)
                 current = state()

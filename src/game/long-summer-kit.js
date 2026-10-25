@@ -56,11 +56,15 @@
       const e = this.extent;
       const hw = DM.W / 2 / zoom;
       const hh = DM.H / 2 / zoom;
-      const minX = Math.max(hw, b.x + e.right - (DM.W / 2 - 38) / zoom, p.x + p.r - (DM.W / 2 - 38) / zoom);
-      const maxX = Math.min(w.w - hw, b.x - e.left + (DM.W / 2 - 38) / zoom, p.x - p.r + (DM.W / 2 - 38) / zoom);
-      const minY = Math.max(hh, b.y + e.bottom - (DM.H / 2 - 135) / zoom,
+      // A view wider than the arena must be centred, not given impossible edge bounds.
+      const minX = Math.max(w.w <= 2 * hw ? w.w / 2 : hw,
+        b.x + e.right - (DM.W / 2 - 38) / zoom, p.x + p.r - (DM.W / 2 - 38) / zoom);
+      const maxX = Math.min(w.w <= 2 * hw ? w.w / 2 : w.w - hw,
+        b.x - e.left + (DM.W / 2 - 38) / zoom, p.x - p.r + (DM.W / 2 - 38) / zoom);
+      const minY = Math.max(w.h <= 2 * hh ? w.h / 2 : hh, b.y + e.bottom - (DM.H / 2 - 135) / zoom,
         p.y + p.r + 32 - (DM.H / 2 - HUD_BOTTOM) / zoom);
-      const maxY = Math.min(w.h - hh, b.y - e.top + (DM.H / 2 - 125) / zoom, p.y - p.r + (DM.H / 2 - 112) / zoom);
+      const maxY = Math.min(w.h <= 2 * hh ? w.h / 2 : w.h - hh,
+        b.y - e.top + (DM.H / 2 - 125) / zoom, p.y - p.r + (DM.H / 2 - 112) / zoom);
       return {
         x: U.clamp(U.lerp(p.x, b.x, 0.35), minX, maxX),
         y: U.clamp(U.lerp(p.y, b.y, 0.35), minY, maxY),

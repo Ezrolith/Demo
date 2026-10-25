@@ -14,11 +14,13 @@ try {
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const offline = process.argv.includes('--offline');
 const target = process.argv.find(a => a.endsWith('.html')) || 'index.html';
-const out = path.join(root, 'tests/out/audit-followup');
+const engine = process.env.QA_BROWSER || 'chromium';
+assert.ok(['chromium', 'firefox', 'webkit'].includes(engine), 'known browser engine');
+const out = path.join(root, 'tests/out/audit-followup', engine);
 mkdirSync(out, { recursive: true });
-const browser = await pw.chromium.launch({ headless: true,
-  ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
-  args: ['--no-sandbox', '--autoplay-policy=no-user-gesture-required'] });
+const browser = await pw[engine].launch({ headless: true,
+  ...(engine === 'chromium' && process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
+  ...(engine === 'chromium' ? { args: ['--no-sandbox'] } : {}) });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const errors = [], checks = [], trace = [];
 let minimumHealth = 100;
