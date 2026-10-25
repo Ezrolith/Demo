@@ -19,7 +19,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python3 .github/apply-platform.py
+      - run: |
+          python3 .github/apply-platform.py
+          python3 .github/platform-final-fixes.py
+          find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
       - run: npm install --ignore-scripts
       - run: npx playwright install --with-deps chromium
       - name: Twelve source suites, sequentially
@@ -73,18 +76,20 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: python3 .github/apply-platform.py
-      - run: node tools/build.mjs
+      - run: |
+          python3 .github/apply-platform.py
+          python3 .github/platform-final-fixes.py
+          node tools/build.mjs
       - run: npm install --ignore-scripts
       - run: npx playwright install --with-deps chromium firefox webkit
-      - name: Provide a real audio backend to headless Firefox
+      - name: Audio backend for headless Firefox
         run: |
           sudo apt-get update -qq
           sudo apt-get install -y pulseaudio
           pulseaudio --start --exit-idle-time=-1
           pactl load-module module-null-sink sink_name=qa_audio
           pactl set-default-sink qa_audio
-      - name: Engine matrix, known-route journeys and 4x CPU probes
+      - name: Browser matrix, known-route journeys and 4x CPU probes
         shell: bash
         run: |
           mkdir -p tests/out/platform-matrix
@@ -114,7 +119,7 @@ jobs:
         if: always()
         run: |
           mkdir -p tests/out/platform-matrix
-          tar -czf tests/out/platform-matrix/tested-source.tgz src tests/*.mjs index.html tools/build.mjs package.json
+          tar -czf tests/out/platform-matrix/tested-source.tgz src tests/*.mjs tests/*.py index.html tools/build.mjs package.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -125,8 +130,51 @@ jobs:
             tests/out/bonus-portability/
             tests/out/audit-followup/
           retention-days: 14
+  safari:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: |
+          python3 .github/apply-platform.py
+          python3 .github/platform-final-fixes.py
+          node tools/build.mjs
+      - name: Native Safari with real input over loopback HTTP
+        shell: bash
+        run: |
+          mkdir -p tests/out/native-safari
+          sw_vers > tests/out/native-safari/macos.txt
+          /usr/bin/safaridriver --version > tests/out/native-safari/driver.txt
+          sudo /usr/bin/safaridriver --enable
+          python3 -m http.server 8765 --bind 127.0.0.1 > tests/out/native-safari/http.log 2>&1 &
+          http_pid=$!
+          /usr/bin/safaridriver -p 4444 > tests/out/native-safari/driver.log 2>&1 &
+          driver_pid=$!
+          trap 'kill "$driver_pid" "$http_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4444/status > tests/out/native-safari/driver-status.json; then break; fi
+            sleep 1
+          done
+          set +e
+          python3 tests/safari-platform.py > tests/out/native-safari/run.log 2>&1
+          result=$?
+          set -e
+          printf 'native-safari exit=%s\n' "$result" > tests/out/native-safari/exits.txt
+          cat tests/out/native-safari/run.log
+          exit "$result"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-safari-${{ github.run_id }}
+          path: tests/out/native-safari/
+          retention-days: 14
   publish:
-    needs: [regression, browsers]
+    needs: [regression, browsers, safari]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -137,15 +185,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Publish exactly the tested integration
+      - name: Commit only the verified integration on this review branch
         run: |
           test "$(git rev-parse HEAD)" = '${{ github.sha }}'
           python3 .github/apply-platform.py
+          python3 .github/platform-final-fixes.py
           node tools/build.mjs
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/game/bonus.js src/game/bonus-portability.js index.html tests/platform-qa.mjs tests/bonus-portability.mjs tests/play-audit-followup.mjs dist/dr-manhattan.html
-          git commit -m 'Add verified keyboard-accessible bonus backup/restore and cross-browser platform coverage'
+          git add src/game/bonus.js src/game/bonus-portability.js src/game/long-summer-kit.js index.html tests/platform-qa.mjs tests/bonus-portability.mjs tests/play-audit-followup.mjs tests/long-summer.mjs tests/safari-platform.py dist/dr-manhattan.html
+          git commit -m 'Fix truck camera readability and add verified portable saves with browser coverage'
           git push origin HEAD:refs/heads/codex/bonus-three
       - name: Preserve published playable build
         run: |
