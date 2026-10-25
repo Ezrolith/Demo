@@ -1,0 +1,160 @@
+name: Verify platform delivery
+on:
+  push:
+    branches: [codex/bonus-three]
+    paths: ['.github/workflows/verify-platform-delivery.yml']
+permissions:
+  contents: read
+concurrency:
+  group: verify-platform-delivery
+  cancel-in-progress: true
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 .github/apply-platform.py
+      - run: npm install --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Twelve source suites, sequentially
+        shell: bash
+        run: |
+          mkdir -p tests/out/platform-delivery
+          failed=0
+          for suite in smoke visual audio powers saves settings ledger encounters flows bonus ninth-minute long-summer; do
+            for attempt in 1 2; do
+              set +e
+              node "tests/$suite.mjs" > "tests/out/platform-delivery/$suite-$attempt.log" 2>&1
+              result=$?
+              set -e
+              printf '%s attempt=%s exit=%s\n' "$suite" "$attempt" "$result" | tee -a tests/out/platform-delivery/exits.txt
+              cat "tests/out/platform-delivery/$suite-$attempt.log"
+              if [ "$result" -eq 0 ]; then break; fi
+            done
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          done
+          exit "$failed"
+      - run: node tools/build.mjs
+      - name: Standalone and new portability checks
+        shell: bash
+        run: |
+          failed=0
+          for suite in bonus ninth-minute long-summer bonus-portability; do
+            set +e
+            node "tests/$suite.mjs" dist/dr-manhattan.html > "tests/out/platform-delivery/dist-$suite.log" 2>&1
+            result=$?
+            set -e
+            printf 'dist-%s exit=%s\n' "$suite" "$result" | tee -a tests/out/platform-delivery/exits.txt
+            cat "tests/out/platform-delivery/dist-$suite.log"
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          done
+          exit "$failed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: platform-regression-${{ github.run_id }}
+          path: |
+            tests/out/platform-delivery/
+            tests/out/bonus-portability/
+          retention-days: 14
+  browsers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python3 .github/apply-platform.py
+      - run: node tools/build.mjs
+      - run: npm install --ignore-scripts
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Provide a real audio backend to headless Firefox
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=qa_audio
+          pactl set-default-sink qa_audio
+      - name: Engine matrix, known-route journeys and 4x CPU probe
+        shell: bash
+        run: |
+          mkdir -p tests/out/platform-matrix
+          failed=0
+          run_check() {
+            name="$1"; shift
+            set +e
+            "$@" > "tests/out/platform-matrix/$name.log" 2>&1
+            result=$?
+            set -e
+            printf '%s exit=%s\n' "$name" "$result" | tee -a tests/out/platform-matrix/exits.txt
+            cat "tests/out/platform-matrix/$name.log"
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          }
+          for browser in chromium firefox webkit; do
+            for target in index.html dist/dr-manhattan.html; do
+              name="${browser}-$(basename "$target")"
+              run_check "$name" env QA_BROWSER="$browser" node tests/platform-qa.mjs "$target"
+              run_check "backup-$name" env QA_BROWSER="$browser" node tests/bonus-portability.mjs "$target"
+            done
+            run_check "journey-$browser" env QA_BROWSER="$browser" node tests/play-audit-followup.mjs
+          done
+          run_check chromium-4x env QA_BROWSER=chromium QA_CPU=4 node tests/platform-qa.mjs dist/dr-manhattan.html
+          exit "$failed"
+      - name: Preserve exact tested source and reports
+        if: always()
+        run: |
+          mkdir -p tests/out/platform-matrix
+          tar -czf tests/out/platform-matrix/tested-source.tgz src tests/*.mjs index.html tools/build.mjs package.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: platform-matrix-${{ github.run_id }}
+          path: |
+            tests/out/platform-matrix/
+            tests/out/platform-qa/
+            tests/out/bonus-portability/
+            tests/out/audit-followup/
+          retention-days: 14
+  publish:
+    needs: [regression, browsers]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: codex/bonus-three
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Publish exactly the tested integration
+        run: |
+          test "$(git rev-parse HEAD)" = '${{ github.sha }}'
+          python3 .github/apply-platform.py
+          node tools/build.mjs
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/game/bonus.js src/game/bonus-portability.js index.html tests/platform-qa.mjs tests/bonus-portability.mjs tests/play-audit-followup.mjs dist/dr-manhattan.html
+          git commit -m 'Add verified bonus backup/restore and cross-browser platform coverage'
+          git push origin HEAD:refs/heads/codex/bonus-three
+      - name: Preserve published playable build
+        run: |
+          git rev-parse HEAD > published-commit.txt
+          git archive --format=zip HEAD src tests tools index.html package.json docs .github > published-source.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: platform-published-${{ github.run_id }}
+          path: |
+            dist/dr-manhattan.html
+            published-commit.txt
+            published-source.zip
+          retention-days: 14
