@@ -65,6 +65,17 @@ jobs:
             if [ "$result" -ne 0 ]; then failed=1; fi
           done
           exit "$failed"
+      - name: Real-input rescue journey and reload-resume
+        shell: bash
+        run: |
+          mkdir -p tests/out/regression
+          set +e
+          node tests/play-audit-followup.mjs > tests/out/regression/live-journey.log 2>&1
+          result=$?
+          set -e
+          printf 'live-journey exit=%s\n' "$result" | tee -a tests/out/regression/exits.txt
+          cat tests/out/regression/live-journey.log
+          exit "$result"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
