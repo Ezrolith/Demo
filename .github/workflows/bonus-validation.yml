@@ -4,8 +4,8 @@ on:
     branches: [codex/bonus-three]
     paths: ['src/**', 'tests/**', 'index.html', 'package.json', 'tools/build.mjs', 'dist/**']
   pull_request:
-    branches: [codex/bonus-polish]
-    types: [opened, reopened, ready_for_review]
+    branches: [codex/bonus-polish, codex/bonus-three]
+    types: [opened, synchronize, reopened, ready_for_review]
 permissions:
   contents: read
 concurrency:
@@ -51,13 +51,17 @@ jobs:
           exit "$failed"
       - name: Bonus save import/export and safety, source
         run: node tests/bonus-portability.mjs index.html
+      - name: Focused bonus storage and interrogation regressions, source
+        run: |
+          node tests/bonus-storage.mjs index.html
+          node tests/bonus-interrogation.mjs index.html
       - name: All three standalone adventures and bonus save portability
         if: always()
         shell: bash
         run: |
           mkdir -p tests/out/regression
           failed=0
-          for suite in bonus ninth-minute long-summer bonus-portability; do
+          for suite in bonus ninth-minute long-summer bonus-portability bonus-storage bonus-interrogation; do
             set +e
             node "tests/$suite.mjs" dist/dr-manhattan.html > "tests/out/regression/dist-$suite.log" 2>&1
             result=$?
@@ -67,17 +71,22 @@ jobs:
             if [ "$result" -ne 0 ]; then failed=1; fi
           done
           exit "$failed"
-      - name: Real-input rescue journey and reload-resume
+      - name: Real-input complete adventure and reload-resume, both builds
         shell: bash
         run: |
           mkdir -p tests/out/regression
-          set +e
-          node tests/play-audit-followup.mjs > tests/out/regression/live-journey.log 2>&1
-          result=$?
-          set -e
-          printf 'live-journey exit=%s\n' "$result" | tee -a tests/out/regression/exits.txt
-          cat tests/out/regression/live-journey.log
-          exit "$result"
+          failed=0
+          for build in source dist; do
+            if [ "$build" = source ]; then target=index.html; else target=dist/dr-manhattan.html; fi
+            set +e
+            node tests/play-audit-followup.mjs "$target" --complete > "tests/out/regression/live-journey-$build.log" 2>&1
+            result=$?
+            set -e
+            printf 'live-journey-%s exit=%s\n' "$build" "$result" | tee -a tests/out/regression/exits.txt
+            cat "tests/out/regression/live-journey-$build.log"
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          done
+          exit "$failed"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

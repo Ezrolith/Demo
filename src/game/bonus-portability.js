@@ -98,10 +98,12 @@
       try {
         localStorage.setItem(KEY, JSON.stringify(next));
       } catch (_) {
+        DM.Bonus.storageFailure();
         throw new Error('Your browser blocked saving. Keep the backup and enable site storage before restoring.');
       }
       DM.Bonus.data = next;
       DM.Bonus.available = true;
+      DM.Bonus.storageWarned = false;
       return Object.keys({ ...incoming.checkpoints, ...incoming.completed }).length;
     },
     open() {

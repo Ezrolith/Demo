@@ -1,5 +1,7 @@
 # Gameplay audit follow-up — 25 October 2026
 
+> This is historical gameplay evidence. Its platform limitations are superseded by [the later platform QA](PLATFORM-QA-HANDOVER.md). For the current review branch and fresh results, see [QA polish](QA-POLISH-HANDOVER.md).
+
 ## Version, boundaries and completed outstanding action
 
 Repository `Ezrolith/Demo`, branch `codex/bonus-three`, draft [PR #4](https://github.com/Ezrolith/Demo/pull/4), into `codex/bonus-polish`.

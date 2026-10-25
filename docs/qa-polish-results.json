@@ -1,0 +1,696 @@
+{
+  "date": "2026-10-25",
+  "baseCommit": "ed65bbfb0416f08e5aa507bf221bdcc7ca413dff",
+  "verifiedCodeAndTests": "c52043db57ac8058953fa21174fdb143e2f802a6",
+  "productionChangeCommit": "d398fe7289d9bbba7c710bf65e2ddcd4dd964097",
+  "pullRequest": "https://github.com/Ezrolith/Demo/pull/5",
+  "local": {
+    "testedCommit": "c52043db57ac8058953fa21174fdb143e2f802a6",
+    "commands": [
+      {
+        "name": "smoke",
+        "exit": 0,
+        "lastLine": "Smoke test passed.",
+        "log": "smoke.log"
+      },
+      {
+        "name": "visual",
+        "exit": 0,
+        "lastLine": "All atmosphere checks passed.",
+        "log": "visual.log"
+      },
+      {
+        "name": "audio",
+        "exit": 0,
+        "lastLine": "All audio checks passed.",
+        "log": "audio.log"
+      },
+      {
+        "name": "powers",
+        "exit": 0,
+        "lastLine": "All mechanics checks passed.",
+        "log": "powers.log"
+      },
+      {
+        "name": "saves",
+        "exit": 0,
+        "lastLine": "All save & robustness checks passed.",
+        "initialExit": 1,
+        "log": "saves-final.log",
+        "note": "Initial failure preserved; final complete rerun exited 0."
+      },
+      {
+        "name": "settings",
+        "exit": 0,
+        "lastLine": "All settings & accessibility checks passed.",
+        "log": "settings.log"
+      },
+      {
+        "name": "ledger",
+        "exit": 0,
+        "lastLine": "All ledger & combat-feel checks passed.",
+        "log": "ledger.log"
+      },
+      {
+        "name": "encounters",
+        "exit": 0,
+        "lastLine": "All encounter checks passed.",
+        "log": "encounters.log"
+      },
+      {
+        "name": "flows",
+        "exit": 0,
+        "lastLine": "All story flow checks passed.",
+        "log": "flows.log"
+      },
+      {
+        "name": "bonus",
+        "exit": 0,
+        "lastLine": "BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).",
+        "log": "bonus.log"
+      },
+      {
+        "name": "ninth-minute",
+        "exit": 0,
+        "lastLine": "NINTH MINUTE PASSED: 75 checks (normal file loading).",
+        "log": "ninth-minute.log"
+      },
+      {
+        "name": "long-summer",
+        "exit": 0,
+        "lastLine": "LONG SUMMER PASSED: 82 checks (normal file loading).",
+        "log": "long-summer.log"
+      },
+      {
+        "name": "bonus-portability",
+        "exit": 0,
+        "lastLine": "BONUS PORTABILITY PASSED: 17 checks (chromium, index.html).",
+        "log": "bonus-portability.log"
+      },
+      {
+        "name": "bonus-storage",
+        "exit": 0,
+        "lastLine": "BONUS STORAGE PASSED: 14 checks (normal file loading).",
+        "log": "bonus-storage.log"
+      },
+      {
+        "name": "bonus-interrogation",
+        "exit": 0,
+        "lastLine": "BONUS INTERROGATION PASSED: 7 checks (index.html).",
+        "log": "bonus-interrogation.log"
+      },
+      {
+        "name": "dist-bonus",
+        "exit": 0,
+        "lastLine": "BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).",
+        "log": "dist-bonus.log"
+      },
+      {
+        "name": "dist-ninth-minute",
+        "exit": 0,
+        "lastLine": "NINTH MINUTE PASSED: 75 checks (normal file loading).",
+        "log": "dist-ninth-minute.log"
+      },
+      {
+        "name": "dist-long-summer",
+        "exit": 0,
+        "lastLine": "LONG SUMMER PASSED: 82 checks (normal file loading).",
+        "log": "dist-long-summer.log"
+      },
+      {
+        "name": "dist-bonus-portability",
+        "exit": 0,
+        "lastLine": "BONUS PORTABILITY PASSED: 17 checks (chromium, dist/dr-manhattan.html).",
+        "log": "dist-bonus-portability.log"
+      },
+      {
+        "name": "dist-bonus-storage",
+        "exit": 0,
+        "lastLine": "BONUS STORAGE PASSED: 14 checks (normal file loading).",
+        "log": "dist-bonus-storage.log"
+      },
+      {
+        "name": "dist-bonus-interrogation",
+        "exit": 0,
+        "lastLine": "BONUS INTERROGATION PASSED: 7 checks (dist/dr-manhattan.html).",
+        "log": "dist-bonus-interrogation.log"
+      },
+      {
+        "name": "journey-source",
+        "exit": 0,
+        "lastLine": "LIVE JOURNEY PASSED: 18 checks; minimum coherence 66.00.",
+        "log": "journey-source.log"
+      },
+      {
+        "name": "journey-dist",
+        "exit": 0,
+        "lastLine": "LIVE JOURNEY PASSED: 18 checks; minimum coherence 66.00.",
+        "log": "journey-dist.log"
+      }
+    ],
+    "earlierFailures": [
+      "saves.log: premature yard readiness",
+      "saves-corrected.log: premature wave readiness and non-Mac host assumption"
+    ],
+    "isolatedInputProbe": "saves-input-corrected.log: six checks passed"
+  },
+  "hosted": {
+    "regression": {
+      "run": 40222735874,
+      "status": "success",
+      "sourceSuites": 12,
+      "allSourceFirstAttemptExit0": true,
+      "standaloneSuites": 6,
+      "fullJourneys": {
+        "source": {
+          "checks": 18,
+          "lowestObservedCoherence": 66
+        },
+        "standalone": {
+          "checks": 18,
+          "lowestObservedCoherence": 66
+        }
+      }
+    },
+    "platform": {
+      "run": 40222735867,
+      "status": "success",
+      "engines": [
+        "chromium",
+        "firefox",
+        "webkit"
+      ],
+      "representations": [
+        "source",
+        "standalone"
+      ],
+      "platformChecksPerEngineAndBuild": 64,
+      "backupChecksPerEngineAndBuild": 17,
+      "rescueReloadChecksPerEngine": 15,
+      "rescueReloadLowestObservedCoherence": 92,
+      "cpuSlowdownProbes": {
+        "factor": 4,
+        "qualities": [
+          "high",
+          "low"
+        ],
+        "checksEach": 64,
+        "status": "success"
+      }
+    },
+    "nativeSafari": {
+      "run": 40222735894,
+      "status": "success",
+      "checks": 90,
+      "delivery": "loopback HTTP; not Finder/direct-file certification"
+    }
+  },
+  "normalInputOpenings": {
+    "method": "Actual title-menu entry, normal challenge/damage, real keyboard/mouse; read-only telemetry, no dev.start, placement, refills or quest edits.",
+    "broadcast": {
+      "state": {
+        "scene": "Pause",
+        "stack": [
+          "Play",
+          "Pause"
+        ],
+        "error": null,
+        "chapter": "last_broadcast",
+        "stage": 0,
+        "stageId": "arrival",
+        "form": "manhattan",
+        "powers": [
+          "telekinesis",
+          "disintegrate",
+          "teleport",
+          "duplicate",
+          "timesight",
+          "expand"
+        ],
+        "entities": 24,
+        "dialog": false
+      },
+      "x": 1191.406575121858,
+      "y": 653.9155382827616,
+      "hp": 100,
+      "energy": 100,
+      "spared": 6,
+      "gone": 0,
+      "objective": "Reach the relay entrance",
+      "god": false,
+      "challenge": "normal"
+    },
+    "ninth": {
+      "player": {
+        "state": {
+          "scene": "Pause",
+          "stack": [
+            "Play",
+            "Pause"
+          ],
+          "error": null,
+          "chapter": "ninth_minute",
+          "stage": 0,
+          "stageId": "platform",
+          "form": "manhattan",
+          "powers": [
+            "telekinesis",
+            "disintegrate",
+            "teleport",
+            "duplicate",
+            "timesight",
+            "expand"
+          ],
+          "entities": 10,
+          "dialog": false
+        },
+        "x": 1708.1132075471698,
+        "y": 926.2718733797813,
+        "hp": 100,
+        "energy": 100,
+        "spared": 0,
+        "gone": 0,
+        "objective": "Clear the platform \u00b7 Set the route to SERVICE",
+        "god": false,
+        "challenge": "normal"
+      },
+      "route": 1,
+      "remaining": 0,
+      "marker": {
+        "x": 1730,
+        "y": 330,
+        "label": "SERVICE TUNNEL"
+      }
+    },
+    "errors": []
+  },
+  "fullSummerJourneys": {
+    "source": {
+      "target": "index.html",
+      "checks": [
+        "actual nonlethal powers settle the avenue",
+        "E calls Nite Owl to open the balcony",
+        "tenement-arrival-live: Jon visible and old marker cleared",
+        "G and E open the roof vent",
+        "resident 0 follows E",
+        "resident 1 follows E",
+        "resident 2 follows E",
+        "resident 3 follows E",
+        "resident 4 follows E",
+        "resident 5 follows E",
+        "six real escorts reach safety without cheats",
+        "truck-arrival-live: Jon visible and old marker cleared",
+        "truck checkpoint preserves both preceding areas",
+        "reload then menu RESUME preserves the real truck checkpoint",
+        "moving truck stopped through normal mechanical-targeted Q casts",
+        "E invites the surviving driver to safe passage",
+        "full normal-damage journey earns Mercy with six rescued and no human deaths",
+        "no page or engine errors"
+      ],
+      "errors": [],
+      "minimumHealth": 66,
+      "trace": [
+        {
+          "label": "tenement-arrival-live",
+          "stage": 1,
+          "x": 820,
+          "y": 1380,
+          "hp": 100,
+          "rescued": 0,
+          "spared": 6,
+          "unmade": 0,
+          "heat": 0.5404679999999997,
+          "failed": false,
+          "dialog": true,
+          "time": 1.5508000000000024,
+          "god": false,
+          "screen": {
+            "x": 640,
+            "y": 439.23690547189494
+          },
+          "marker": null
+        },
+        {
+          "label": "six-rescued",
+          "stage": 1,
+          "x": 822.6802222788693,
+          "y": 1395.5992364477283,
+          "hp": 100,
+          "rescued": 6,
+          "spared": 13,
+          "unmade": 0,
+          "heat": 0,
+          "failed": false,
+          "dialog": false,
+          "time": 63.968900000001746,
+          "god": false,
+          "screen": {
+            "x": 646.1295166453053,
+            "y": 440.2294321153764
+          },
+          "marker": {
+            "x": 820,
+            "y": 1400,
+            "label": "SAFE EXIT"
+          }
+        },
+        {
+          "label": "truck-arrival-live",
+          "stage": 2,
+          "x": 530,
+          "y": 1040,
+          "hp": 100,
+          "rescued": 6,
+          "spared": 13,
+          "unmade": 0,
+          "heat": 0.4129424999999977,
+          "failed": false,
+          "dialog": true,
+          "time": 1.551300000000001,
+          "god": false,
+          "screen": {
+            "x": 343.0000000000001,
+            "y": 499.997413166176
+          },
+          "marker": null
+        }
+      ],
+      "mode": "normal file loading",
+      "method": "Real RAF and keyboard/mouse; first-spawn setup only; known route.",
+      "complete": true,
+      "truckCasts": 7,
+      "ending": {
+        "stats": {
+          "time": 103.43640000000327,
+          "disintegrated": 0,
+          "spared": 14,
+          "memories": 0
+        },
+        "flags": {
+          "heat": 0,
+          "rescued": 6,
+          "rescuedMask": 63,
+          "comedianCasualties": 0,
+          "restraints": 2,
+          "grappleOpen": true,
+          "beamCleared": true,
+          "vented": true,
+          "driverOutcome": "spared",
+          "avenueExit": true,
+          "tenementExit": true
+        }
+      }
+    },
+    "standalone": {
+      "target": "dist/dr-manhattan.html",
+      "checks": [
+        "actual nonlethal powers settle the avenue",
+        "E calls Nite Owl to open the balcony",
+        "tenement-arrival-live: Jon visible and old marker cleared",
+        "G and E open the roof vent",
+        "resident 0 follows E",
+        "resident 1 follows E",
+        "resident 2 follows E",
+        "resident 3 follows E",
+        "resident 4 follows E",
+        "resident 5 follows E",
+        "six real escorts reach safety without cheats",
+        "truck-arrival-live: Jon visible and old marker cleared",
+        "truck checkpoint preserves both preceding areas",
+        "reload then menu RESUME preserves the real truck checkpoint",
+        "moving truck stopped through normal mechanical-targeted Q casts",
+        "E invites the surviving driver to safe passage",
+        "full normal-damage journey earns Mercy with six rescued and no human deaths",
+        "no page or engine errors"
+      ],
+      "errors": [],
+      "minimumHealth": 66,
+      "trace": [
+        {
+          "label": "tenement-arrival-live",
+          "stage": 1,
+          "x": 820,
+          "y": 1380,
+          "hp": 100,
+          "rescued": 0,
+          "spared": 6,
+          "unmade": 0,
+          "heat": 0.5494139999999996,
+          "failed": false,
+          "dialog": true,
+          "time": 1.5513000000000006,
+          "god": false,
+          "screen": {
+            "x": 640,
+            "y": 439.2380492556349
+          },
+          "marker": null
+        },
+        {
+          "label": "six-rescued",
+          "stage": 1,
+          "x": 822.2618480650675,
+          "y": 1393.7727086463328,
+          "hp": 100,
+          "rescued": 6,
+          "spared": 13,
+          "unmade": 0,
+          "heat": 0,
+          "failed": false,
+          "dialog": false,
+          "time": 63.651900000001696,
+          "god": false,
+          "screen": {
+            "x": 646.1295087724902,
+            "y": 440.2295000016703
+          },
+          "marker": {
+            "x": 820,
+            "y": 1400,
+            "label": "SAFE EXIT"
+          }
+        },
+        {
+          "label": "truck-arrival-live",
+          "stage": 2,
+          "x": 530,
+          "y": 1040,
+          "hp": 100,
+          "rescued": 6,
+          "spared": 13,
+          "unmade": 0,
+          "heat": 0.4167225000000016,
+          "failed": false,
+          "dialog": true,
+          "time": 1.5513000000000012,
+          "god": false,
+          "screen": {
+            "x": 343.0000000000001,
+            "y": 499.997413166176
+          },
+          "marker": null
+        }
+      ],
+      "mode": "normal file loading",
+      "method": "Real RAF and keyboard/mouse; first-spawn setup only; known route.",
+      "complete": true,
+      "truckCasts": 7,
+      "ending": {
+        "stats": {
+          "time": 103.20210000000317,
+          "disintegrated": 0,
+          "spared": 14,
+          "memories": 0
+        },
+        "flags": {
+          "heat": 0,
+          "rescued": 6,
+          "rescuedMask": 63,
+          "comedianCasualties": 0,
+          "restraints": 2,
+          "grappleOpen": true,
+          "beamCleared": true,
+          "vented": true,
+          "driverOutcome": "spared",
+          "avenueExit": true,
+          "tenementExit": true
+        }
+      }
+    }
+  },
+  "freshSyntheticPerformance": [
+    {
+      "engine": "chromium",
+      "version": "156.0.8078.4",
+      "target": "dist/dr-manhattan.html",
+      "cpu": 1,
+      "requestedQuality": "high",
+      "status": "passed",
+      "maps": 9,
+      "medianFrameGapMs": 16.69999999999709,
+      "approxFps": 59.9,
+      "exampleTiming": {
+        "frames": 211,
+        "medianGapMs": 16.699999999999818,
+        "p95GapMs": 16.799999999999272,
+        "meanWorkMs": 2.569774160443139,
+        "quality": "high",
+        "governorDrop": 0,
+        "entities": 22
+      }
+    },
+    {
+      "engine": "chromium",
+      "version": "156.0.8078.4",
+      "target": "dist/dr-manhattan.html",
+      "cpu": 4,
+      "requestedQuality": "high",
+      "status": "passed",
+      "maps": 9,
+      "medianFrameGapMs": 33.400000000001455,
+      "approxFps": 29.9,
+      "exampleTiming": {
+        "frames": 99,
+        "medianGapMs": 33.30000000000018,
+        "p95GapMs": 50.100000000000364,
+        "meanWorkMs": 10.13998836471797,
+        "quality": "high",
+        "governorDrop": 0,
+        "entities": 21
+      }
+    },
+    {
+      "engine": "chromium",
+      "version": "156.0.8078.4",
+      "target": "dist/dr-manhattan.html",
+      "cpu": 4,
+      "requestedQuality": "low",
+      "status": "passed",
+      "maps": 9,
+      "medianFrameGapMs": 16.700000000000728,
+      "approxFps": 59.9,
+      "exampleTiming": {
+        "frames": 187,
+        "medianGapMs": 16.699999999999818,
+        "p95GapMs": 33.30000000000018,
+        "meanWorkMs": 9.5379667626946,
+        "quality": "low",
+        "governorDrop": 0,
+        "entities": 22
+      }
+    },
+    {
+      "engine": "chromium",
+      "version": "156.0.8078.4",
+      "target": "index.html",
+      "cpu": 1,
+      "requestedQuality": "high",
+      "status": "passed",
+      "maps": 9,
+      "medianFrameGapMs": 16.69999999999709,
+      "approxFps": 59.9,
+      "exampleTiming": {
+        "frames": 211,
+        "medianGapMs": 16.699999999999818,
+        "p95GapMs": 16.800000000000182,
+        "meanWorkMs": 2.5972265731749675,
+        "quality": "high",
+        "governorDrop": 0,
+        "entities": 22
+      }
+    },
+    {
+      "engine": "firefox",
+      "version": "157.0",
+      "target": "dist/dr-manhattan.html",
+      "cpu": 1,
+      "requestedQuality": "high",
+      "status": "passed",
+      "maps": 9,
+      "medianFrameGapMs": 17.07999999999811,
+      "approxFps": 58.5,
+      "exampleTiming": {
+        "frames": 211,
+        "medianGapMs": 17.079999999999927,
+        "p95GapMs": 17.11999999999898,
+        "meanWorkMs": 9.71269016316063,
+        "quality": "high",
+        "governorDrop": 0,
+        "entities": 22
+      }
+    },
+    {
+      "engine": "firefox",
+      "version": "157.0",
+      "target": "index.html",
+      "cpu": 1,
+      "requestedQuality": "high",
+      "status": "passed",
+      "maps": 9,
+      "medianFrameGapMs": 17.07999999999811,
+      "approxFps": 58.5,
+      "exampleTiming": {
+        "frames": 211,
+        "medianGapMs": 17.079999999999927,
+        "p95GapMs": 17.11999999999898,
+        "meanWorkMs": 9.345383792725126,
+        "quality": "high",
+        "governorDrop": 0,
+        "entities": 23
+      }
+    },
+    {
+      "engine": "webkit",
+      "version": "27.2",
+      "target": "dist/dr-manhattan.html",
+      "cpu": 1,
+      "requestedQuality": "high",
+      "status": "passed",
+      "maps": 9,
+      "medianFrameGapMs": 24,
+      "approxFps": 41.7,
+      "exampleTiming": {
+        "frames": 144,
+        "medianGapMs": 24,
+        "p95GapMs": 29,
+        "meanWorkMs": 2.4229395977320354,
+        "quality": "high",
+        "governorDrop": 0,
+        "entities": 22
+      }
+    },
+    {
+      "engine": "webkit",
+      "version": "27.2",
+      "target": "index.html",
+      "cpu": 1,
+      "requestedQuality": "high",
+      "status": "passed",
+      "maps": 9,
+      "medianFrameGapMs": 24,
+      "approxFps": 41.7,
+      "exampleTiming": {
+        "frames": 143,
+        "medianGapMs": 23,
+        "p95GapMs": 27,
+        "meanWorkMs": 2.3580318583289146,
+        "quality": "high",
+        "governorDrop": 0,
+        "entities": 21
+      }
+    }
+  ],
+  "performanceMethod": "Median of nine per-scene median frame gaps; requested quality, normal automatic governor enabled. Not a physical slow-device benchmark or evidence of an optimisation.",
+  "standalone": {
+    "bytes": 933374,
+    "sha256": "45bd1cf75d5e192d56911ef439980588fcdde222265cbd0724c95246d75dac46"
+  },
+  "limits": [
+    "Unbiased first-time human discovery and pacing",
+    "Subjective musical listening",
+    "Physical slow-device and long-session performance",
+    "Native Safari direct downloaded-file opening",
+    "Assistive technology",
+    "Touch gameplay unsupported"
+  ]
+}

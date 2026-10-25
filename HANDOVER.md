@@ -1,5 +1,7 @@
 # Handover: how to keep developing this game
 
+> **Current QA continuation (25 October 2026):** `codex/gameplay-qa-polish` starts from `codex/bonus-three` at `ed65bbf`, with a draft PR back into `codex/bonus-three`. Read [the current QA handover](docs/QA-POLISH-HANDOVER.md) for changes, fresh results and remaining limitations. **Do not merge or deploy.** The older Claude branch table and integration workflow below are historical; they are not the base or release instructions for this review.
+
 > Bonus adventures: see [docs/BONUS.md](docs/BONUS.md). The original campaign and separate Story H branch remain untouched.
 
 This file is for whoever picks the project up next, whether a person or an AI coding assistant. Read it first, then `README.md`, then `docs/ROADMAP.md`.

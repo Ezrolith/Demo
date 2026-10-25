@@ -5,12 +5,12 @@ on:
     branches: [codex/bonus-three]
     paths: ['.github/workflows/native-safari-qa.yml', 'src/**', 'dist/**', 'index.html', 'tests/safari-platform.py']
   pull_request:
-    branches: [codex/bonus-polish]
-    types: [ready_for_review, reopened]
+    branches: [codex/bonus-polish, codex/bonus-three]
+    types: [opened, synchronize, reopened, ready_for_review]
 permissions:
   contents: read
 concurrency:
-  group: safari-qa-review
+  group: safari-qa-review-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   safari:
