@@ -145,7 +145,7 @@ jobs:
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add src/game/bonus.js src/game/bonus-portability.js index.html tests/platform-qa.mjs tests/bonus-portability.mjs tests/play-audit-followup.mjs dist/dr-manhattan.html
-          git commit -m 'Add verified race-safe bonus backup/restore and cross-browser platform coverage'
+          git commit -m 'Add verified keyboard-accessible bonus backup/restore and cross-browser platform coverage'
           git push origin HEAD:refs/heads/codex/bonus-three
       - name: Preserve published playable build
         run: |
