@@ -1,0 +1,52 @@
+name: Native Safari QA
+on:
+  push:
+    branches: [codex/bonus-three]
+    paths: ['tests/safari-platform.py', '.github/workflows/native-safari-qa.yml']
+permissions:
+  contents: read
+concurrency:
+  group: native-safari-qa
+  cancel-in-progress: true
+jobs:
+  safari:
+    runs-on: macos-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build the same review candidate
+        run: |
+          python3 .github/apply-platform.py
+          node tools/build.mjs
+      - name: Native Safari WebDriver session
+        shell: bash
+        run: |
+          mkdir -p tests/out/native-safari
+          sw_vers > tests/out/native-safari/macos.txt
+          /usr/bin/safaridriver --version > tests/out/native-safari/driver.txt
+          sudo /usr/bin/safaridriver --enable
+          /usr/bin/safaridriver -p 4444 > tests/out/native-safari/driver.log 2>&1 &
+          driver_pid=$!
+          trap 'kill "$driver_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4444/status > tests/out/native-safari/driver-status.json; then break; fi
+            sleep 1
+          done
+          set +e
+          python3 tests/safari-platform.py > tests/out/native-safari/run.log 2>&1
+          result=$?
+          set -e
+          printf 'native-safari exit=%s\n' "$result" > tests/out/native-safari/exits.txt
+          cat tests/out/native-safari/run.log
+          exit "$result"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-safari-${{ github.run_id }}
+          path: tests/out/native-safari/
+          retention-days: 14
