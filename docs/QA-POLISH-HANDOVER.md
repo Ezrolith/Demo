@@ -65,6 +65,15 @@ three adventure suites, `bonus-portability`, `bonus-storage` and
 
 ## Performance and remaining work
 
+The first local full-regression attempt exposed an inherited sequencing race in
+`tests/saves.mjs`: its "yard ready" predicate could pass during the frame between
+instant map construction and the start of the briefing/guard spawn. It attacked
+an empty encounter, then timed out waiting for the warehouse. Readiness now
+requires four actual live guards, no dialogue/context lock and an unlocked
+player. The four-kill Retry/Continue assertions and their tolerances are
+unchanged. No campaign source changed. The initial failure log is retained in
+`tests/out/qa-polish/saves.log`; the corrected suite is rerun separately.
+
 Reviewed the existing three-engine, native Safari and 4x CPU-throttle evidence.
 The measured slow-CPU High/Low gap remains a limitation. No render quality,
 lighting, rain, fire, musical or ambience reduction was introduced. A repeated

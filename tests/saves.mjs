@@ -159,8 +159,11 @@ if (want(3)) {
   await g.gate();
   await g.ev(() => window.DM.dev.start('superman', 1));
   await g.until('yard ready', () => {
-    const p = window.DM.dev.play();
-    return p.ctx.stageIndex === 1 && !p.player.locked;
+    const DM = window.DM, p = DM.dev.play();
+    // Instant map construction yields a frame before the stage starts. Jon is
+    // initially unlocked, but the briefing and four guards do not exist yet.
+    return p.ctx.stageIndex === 1 && !p.ctx.locked && !p.dialog.active && !p.player.locked &&
+      p.world.entities.filter(e => e instanceof DM.Enemies.Gangster && !e.dead && !e.ko).length === 4;
   });
   await g.ev(() => {
     const DM = window.DM;
