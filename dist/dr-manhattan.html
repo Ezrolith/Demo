@@ -18307,20 +18307,27 @@
     }
     // The truck can turn during Disintegrate's brief cast delay. Only an
     // explicitly aimed cab shot may kill its occupant; wheel splash cannot.
-    onDisintegrateCast(c, world) {
+    onDisintegrateCast(c) {
       if (this.role !== 'cab') return;
       this.cabTargeted = U.dist(c.x, c.y, this.x, this.y) <= this.r;
-      this.cabCastTime = world.realTime || 0;
+      this.cabCast = c;
     }
     disintegrate(world, source) {
-      if (this.role === 'cab' && (!this.cabTargeted ||
-        (world.realTime || 0) - this.cabCastTime > 0.35)) {
-        const now = world.realTime || 0;
-        if (this.lastCabWarning == null || now - this.lastCabWarning > 1.8) {
-          world.bark(this, 'Someone is inside.');
-          this.lastCabWarning = now;
+      if (this.role === 'cab') {
+        // Tie intent to the actual resolving pulse, not elapsed wall time.
+        // Hitstop pauses that pulse but continues advancing world.realTime.
+        const pending = source?.powers?.disintegrate?.pending;
+        const resolving = this.cabCast && this.cabCast.t <= 0 && pending?.includes(this.cabCast);
+        if (!this.cabTargeted || !resolving) {
+          const now = world.realTime || 0;
+          if (this.lastCabWarning == null || now - this.lastCabWarning > 1.8) {
+            world.bark(this, 'Someone is inside.');
+            this.lastCabWarning = now;
+          }
+          return;
         }
-        return;
+        this.cabCast = null;
+        this.cabTargeted = false;
       }
       super.disintegrate(world, source);
     }
@@ -23635,6 +23642,11 @@
     const w = ctx.newWorld({ w: width, h: height + 340, zoom: 1, bg: '#13212a' });
     w.playableHeight = height;
     w.spawn = spawn;
+    // A new area's briefing must not follow the previous area's camera or marker.
+    ctx.camTarget = { x: spawn.x, y: spawn.y - 80 };
+    ctx.hud.marker = null;
+    ctx.hud.clearTransient();
+    ctx.hud.setObjective(null);
     w.room(40, 40, width - 80, height - 80);
     const state = ctx.add(new S.CityState(ctx));
     ctx.flags.summer = state;

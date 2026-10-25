@@ -94,20 +94,27 @@
     }
     // The truck can turn during Disintegrate's brief cast delay. Only an
     // explicitly aimed cab shot may kill its occupant; wheel splash cannot.
-    onDisintegrateCast(c, world) {
+    onDisintegrateCast(c) {
       if (this.role !== 'cab') return;
       this.cabTargeted = U.dist(c.x, c.y, this.x, this.y) <= this.r;
-      this.cabCastTime = world.realTime || 0;
+      this.cabCast = c;
     }
     disintegrate(world, source) {
-      if (this.role === 'cab' && (!this.cabTargeted ||
-        (world.realTime || 0) - this.cabCastTime > 0.35)) {
-        const now = world.realTime || 0;
-        if (this.lastCabWarning == null || now - this.lastCabWarning > 1.8) {
-          world.bark(this, 'Someone is inside.');
-          this.lastCabWarning = now;
+      if (this.role === 'cab') {
+        // Tie intent to the actual resolving pulse, not elapsed wall time.
+        // Hitstop pauses that pulse but continues advancing world.realTime.
+        const pending = source?.powers?.disintegrate?.pending;
+        const resolving = this.cabCast && this.cabCast.t <= 0 && pending?.includes(this.cabCast);
+        if (!this.cabTargeted || !resolving) {
+          const now = world.realTime || 0;
+          if (this.lastCabWarning == null || now - this.lastCabWarning > 1.8) {
+            world.bark(this, 'Someone is inside.');
+            this.lastCabWarning = now;
+          }
+          return;
         }
-        return;
+        this.cabCast = null;
+        this.cabTargeted = false;
       }
       super.disintegrate(world, source);
     }

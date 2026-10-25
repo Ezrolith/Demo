@@ -51,6 +51,11 @@
     const w = ctx.newWorld({ w: width, h: height + 340, zoom: 1, bg: '#13212a' });
     w.playableHeight = height;
     w.spawn = spawn;
+    // A new area's briefing must not follow the previous area's camera or marker.
+    ctx.camTarget = { x: spawn.x, y: spawn.y - 80 };
+    ctx.hud.marker = null;
+    ctx.hud.clearTransient();
+    ctx.hud.setObjective(null);
     w.room(40, 40, width - 80, height - 80);
     const state = ctx.add(new S.CityState(ctx));
     ctx.flags.summer = state;

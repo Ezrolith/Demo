@@ -164,6 +164,8 @@ try {
   await page.keyboard.press('g');
   await wait(0.7);
   await page.keyboard.press('e');
+  // Await the real animation frame that consumes E; never edit the vent state.
+  await page.waitForFunction(() => DM.dev.play().ctx.flags.summer.grid.vented, null, { timeout: 3000 });
   check('G and E open the roof vent', await page.evaluate(() => DM.dev.play().ctx.flags.summer.grid.vented));
   await wait(7.4);
   for (let id = 0; id < 6; id++) {
@@ -197,7 +199,7 @@ try {
     return cp.stage === 2 && cp.carry.flags.rescued === 6 && cp.carry.stats.disintegrated === 0;
   }));
   if (!offline) {
-    const checkpoint = await page.evaluate(() => JSON.stringify(DM.Bonus.data.checkpoints.long_summer));
+    const checkpoint = await page.evaluate(() => DM.Bonus.data.checkpoints.long_summer);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.waitForFunction(() => window.DM?.dev);
     await page.evaluate(() => {
@@ -209,8 +211,14 @@ try {
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => DM.dev.play()?.ctx.stageIndex === 2);
     const resumed = await read();
-    check('reload then menu RESUME preserves the real truck checkpoint', resumed.rescued === 6 &&
-      resumed.unmade === 0 && checkpoint === await page.evaluate(() => JSON.stringify(DM.Bonus.data.checkpoints.long_summer)));
+    const restored = await page.evaluate(() => DM.Bonus.data.checkpoints.long_summer);
+    const savedTime = checkpoint.carry.stats.time;
+    // Loading a map advances a real frame before its next checkpoint snapshot.
+    const elapsed = restored.carry.stats.time - savedTime;
+    assert.ok(elapsed >= 0 && elapsed <= resumed.time + 1 / 30, 'only real elapsed play time may advance on resume');
+    restored.carry.stats.time = savedTime;
+    assert.deepEqual(restored, checkpoint, 'all restored quest and moral data must match exactly');
+    check('reload then menu RESUME preserves the real truck checkpoint', resumed.rescued === 6 && resumed.unmade === 0);
     await shot('truck-resumed-live');
   }
   check('no page or engine errors', errors.length === 0 && await page.evaluate(() => !DM.Engine.error));

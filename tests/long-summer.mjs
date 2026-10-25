@@ -318,7 +318,19 @@ try {
     const n = p.ctx.flags.crowdSettled();
     return n >= 2 && p.ctx.stats.disintegrated === 0 && p.ctx.flags.heat < 40;
   }));
-  await page.evaluate(() => { T.interact(T.p().ctx.flags.exit); T.transition(); });
+  await page.evaluate(() => {
+    T.interact(T.p().ctx.flags.exit);
+    T.dialog();
+    T.step(1.6);
+  });
+  check('the tenement arrival briefing frames Jon and clears the old area marker', await page.evaluate(() => {
+    const p = T.p();
+    const screen = p.world.camera.toScreen(p.player.x, p.player.y);
+    return p.ctx.stageIndex === 1 && p.dialog.active && p.hud.marker === null &&
+      screen.x > 40 && screen.x < DM.W - 40 && screen.y > 125 && screen.y < 500;
+  }));
+  await shot('tenement-arrival-briefing');
+  await page.evaluate(() => T.dialog());
   check('E advances from the avenue into the checkpointed tenement', await page.evaluate(() =>
     DM.dev.state().stageId === 'tenement' && T.p().ctx.checkpoint === 1));
   check('the rescue is five storeys with six residents and only one enemy', await page.evaluate(() => {
@@ -409,7 +421,19 @@ try {
     T.step(2);
     return T.p().ctx.flags.rescued === 6 && T.p().ctx.stats.spared === n;
   }));
-  await page.evaluate(() => { T.interact(T.p().ctx.flags.exit); T.transition(); });
+  await page.evaluate(() => {
+    T.interact(T.p().ctx.flags.exit);
+    T.dialog();
+    T.step(1.6);
+  });
+  check('the truck arrival briefing frames Jon and clears the old area marker', await page.evaluate(() => {
+    const p = T.p();
+    const screen = p.world.camera.toScreen(p.player.x, p.player.y);
+    return p.ctx.stageIndex === 2 && p.dialog.active && p.hud.marker === null &&
+      screen.x > 40 && screen.x < DM.W - 40 && screen.y > 125 && screen.y < 500;
+  }));
+  await shot('truck-arrival-briefing');
+  await page.evaluate(() => T.dialog());
   check('the rescue exit advances through dialogue into the truck encounter', await page.evaluate(() =>
     DM.dev.state().stageId === 'truck' && T.p().ctx.flags.rescued === 6));
   check('truck parts are separate targets, the cab contains a human and it can move', await page.evaluate(() => {
@@ -519,6 +543,30 @@ try {
     const n = p.ctx.stats.disintegrated;
     T.step(0.3);
     return p.ctx.flags.driverOutcome === 'unmade' && n === 1 && p.ctx.stats.disintegrated === 1;
+  }));
+  check('a deliberately aimed cab pulse survives the boss impact freeze', await page.evaluate(() => {
+    T.start(2);
+    const p = T.p();
+    const cab = p.ctx.flags.truck.parts.find(e => e.role === 'cab');
+    T.place(cab.x - 130, cab.y + 30);
+    T.aim(cab.x, cab.y);
+    DM.Input.simulate('KeyQ', true);
+    T.step(1 / 60);
+    DM.Input.simulate('KeyQ', false);
+    const aimed = cab.cabTargeted && p.player.powers.disintegrate.pending.length === 1;
+    // Reproduce the same 0.2-second feedback freeze used by a truck phase change.
+    p.world.hitstop(0.2);
+    T.step(0.5);
+    return aimed && cab.dead && p.ctx.flags.driverOutcome === 'unmade' && p.ctx.stats.disintegrated === 1;
+  }));
+  check('an expired cab aim cannot authorise an unrelated later blast', await page.evaluate(() => {
+    T.start(2);
+    const p = T.p();
+    const cab = p.ctx.flags.truck.parts.find(e => e.role === 'cab');
+    // This old pulse has left the player's pending queue; it cannot grant lethal intent.
+    cab.onDisintegrateCast({ x: cab.x, y: cab.y, t: -0.01 }, p.world);
+    cab.disintegrate(p.world, p.player);
+    return !cab.dead && !p.ctx.flags.truck.driver.dead && !p.ctx.stats.disintegrated;
   }));
   check('three ending tiers derive from the ledger and Heat, not a final button', await page.evaluate(() =>
     DM.Summer.tone({ spared: 10, disintegrated: 0 }, { heat: 20, rescued: 6, comedianCasualties: 0 }) === 'calm' &&

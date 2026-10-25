@@ -1,0 +1,90 @@
+{
+  "target": "index.html",
+  "checks": [
+    "actual nonlethal powers settle the avenue",
+    "E calls Nite Owl to open the balcony",
+    "tenement-arrival-live: Jon visible and old marker cleared",
+    "G and E open the roof vent",
+    "resident 0 follows E",
+    "resident 1 follows E",
+    "resident 2 follows E",
+    "resident 3 follows E",
+    "resident 4 follows E",
+    "resident 5 follows E",
+    "six real escorts reach safety without cheats",
+    "truck-arrival-live: Jon visible and old marker cleared",
+    "truck checkpoint preserves both preceding areas",
+    "reload then menu RESUME preserves the real truck checkpoint",
+    "no page or engine errors"
+  ],
+  "errors": [],
+  "minimumHealth": 92,
+  "trace": [
+    {
+      "label": "tenement-arrival-live",
+      "stage": 1,
+      "x": 820,
+      "y": 1380,
+      "hp": 100,
+      "rescued": 0,
+      "spared": 6,
+      "unmade": 0,
+      "heat": 0.5669639999999996,
+      "failed": false,
+      "dialog": true,
+      "time": 1.5499999999999987,
+      "god": false,
+      "screen": {
+        "x": 640,
+        "y": 439.2350718455564
+      },
+      "marker": null
+    },
+    {
+      "label": "six-rescued",
+      "stage": 1,
+      "x": 817.3128683745306,
+      "y": 1398.191011679251,
+      "hp": 100,
+      "rescued": 6,
+      "spared": 13,
+      "unmade": 0,
+      "heat": 0,
+      "failed": false,
+      "dialog": false,
+      "time": 64.09750000000135,
+      "god": false,
+      "screen": {
+        "x": 646.1299990582938,
+        "y": 440.23023544265595
+      },
+      "marker": {
+        "x": 820,
+        "y": 1400,
+        "label": "SAFE EXIT"
+      }
+    },
+    {
+      "label": "truck-arrival-live",
+      "stage": 2,
+      "x": 530,
+      "y": 1040,
+      "hp": 100,
+      "rescued": 6,
+      "spared": 13,
+      "unmade": 0,
+      "heat": 0.4837274999999996,
+      "failed": false,
+      "dialog": true,
+      "time": 1.5499999999999996,
+      "god": false,
+      "screen": {
+        "x": 501.40000000000026,
+        "y": 396.3999999999999
+      },
+      "marker": null
+    }
+  ],
+  "mode": "normal file loading",
+  "method": "Real RAF and keyboard/mouse; first-spawn setup only; known route."
+}
