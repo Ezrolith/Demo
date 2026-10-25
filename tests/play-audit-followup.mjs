@@ -13,10 +13,11 @@ try {
 }
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const offline = process.argv.includes('--offline');
+const complete = process.argv.includes('--complete');
 const target = process.argv.find(a => a.endsWith('.html')) || 'index.html';
 const engine = process.env.QA_BROWSER || 'chromium';
 assert.ok(['chromium', 'firefox', 'webkit'].includes(engine), 'known browser engine');
-const out = path.join(root, 'tests/out/audit-followup', engine);
+const out = path.join(root, 'tests/out/audit-followup', engine, target.startsWith('dist/') ? 'standalone' : 'source');
 mkdirSync(out, { recursive: true });
 const browser = await pw[engine].launch({ headless: true,
   ...(engine === 'chromium' && process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
@@ -24,6 +25,7 @@ const browser = await pw[engine].launch({ headless: true,
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
 const errors = [], checks = [], trace = [];
 let minimumHealth = 100;
+let truckCasts = 0;
 page.on('pageerror', e => errors.push(String(e)));
 const check = (label, ok) => {
   assert.ok(ok, label);
@@ -223,10 +225,72 @@ try {
     check('reload then menu RESUME preserves the real truck checkpoint', resumed.rescued === 6 && resumed.unmade === 0);
     await shot('truck-resumed-live');
   }
+  if (complete) {
+    await dialogue();
+    await teleport(900, 1000);
+    // Read positions to aim ordinary Q pulses at the moving mechanical parts.
+    // No health/energy refills, target placement, or encounter-state edits.
+    for (let cast = 0; cast < 14; cast++) {
+      let target = await page.evaluate(() => {
+        const t = DM.dev.play().ctx.flags.truck;
+        const part = t.parts.find(p => p.role !== 'cab' && !p.dead);
+        return part && !t.disabled ? { x: part.x, y: part.y } : null;
+      });
+      if (!target) break;
+      const p = await read();
+      if (Math.hypot(target.x - p.x, target.y - p.y) > 470) {
+        await teleport(target.x - 200, target.y + 240);
+      }
+      await page.waitForFunction(() => DM.dev.play().player.energy >= 20, null, { timeout: 8000 });
+      // Teleport, regeneration and a moving chassis can all change the aim point.
+      target = await page.evaluate(() => {
+        const part = DM.dev.play().ctx.flags.truck.parts.find(p => p.role !== 'cab' && !p.dead);
+        return part ? { x: part.x, y: part.y } : null;
+      });
+      if (!target) break;
+      await aim(target.x, target.y);
+      await page.keyboard.press('q');
+      truckCasts++;
+      await wait(1.1);
+    }
+    check('moving truck stopped through normal mechanical-targeted Q casts', await page.evaluate(() => {
+      const t = DM.dev.play().ctx.flags.truck;
+      return t.disabled && !t.driver.dead && t.parts.filter(p => p.role !== 'cab').every(p => p.dead);
+    }));
+    await shot('truck-disabled-live');
+    const comedian = await page.evaluate(() => {
+      const e = DM.dev.play().ctx.flags.comedian;
+      return { x: e.x, y: e.y };
+    });
+    await teleport(comedian.x + 80, comedian.y + 80);
+    await aim(comedian.x, comedian.y);
+    await hold('c', 0.3);
+    const driver = await page.evaluate(() => {
+      const e = DM.dev.play().ctx.flags.truck.driver;
+      return { x: e.x, y: e.y };
+    });
+    await teleport(driver.x - 50, driver.y + 40);
+    await walk(driver.x - 40, driver.y + 25);
+    await page.keyboard.press('e');
+    await wait(0.15);
+    check('E invites the surviving driver to safe passage', await page.evaluate(() =>
+      DM.dev.play().ctx.flags.truck.driver.following));
+    await page.waitForFunction(() => DM.dev.play().ctx.flags.driverOutcome === 'spared', null, { timeout: 25000 });
+    await read();
+    await dialogue();
+    await page.waitForFunction(() => DM.Engine.top() instanceof DM.Summer.SummerComplete, null, { timeout: 10000 });
+    check('full normal-damage journey earns Mercy with six rescued and no human deaths', await page.evaluate(() => {
+      const s = DM.Engine.top(), r = DM.Bonus.data.completed.long_summer;
+      return s.ending.title === 'MERCY' && r.flags.rescued === 6 && r.flags.driverOutcome === 'spared' &&
+        r.flags.comedianCasualties === 0 && r.stats.disintegrated === 0;
+    }));
+    await shot('mercy-ending-live');
+  }
   check('no page or engine errors', errors.length === 0 && await page.evaluate(() => !DM.Engine.error));
   writeFileSync(path.join(out, 'journey.json'), JSON.stringify({ target, checks, errors, minimumHealth, trace,
     mode: offline ? 'inlined/memory storage' : 'normal file loading',
-    method: 'Real RAF and keyboard/mouse; first-spawn setup only; known route.' }, null, 2));
+    method: 'Real RAF and keyboard/mouse; first-spawn setup only; known route.', complete, truckCasts,
+    ending: complete ? await page.evaluate(() => DM.Bonus.data.completed.long_summer) : null }, null, 2));
   console.log(`LIVE JOURNEY PASSED: ${checks.length} checks; minimum coherence ${minimumHealth.toFixed(2)}.`);
 } catch (error) {
   try {

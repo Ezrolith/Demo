@@ -5,12 +5,12 @@ on:
     branches: [codex/bonus-three]
     paths: ['.github/workflows/platform-qa.yml', 'src/**', 'dist/**', 'index.html', 'tests/platform-qa.mjs', 'tests/bonus-portability.mjs', 'tests/play-audit-followup.mjs']
   pull_request:
-    branches: [codex/bonus-polish]
-    types: [ready_for_review, reopened]
+    branches: [codex/bonus-polish, codex/bonus-three]
+    types: [opened, synchronize, reopened, ready_for_review]
 permissions:
   contents: read
 concurrency:
-  group: platform-qa-review
+  group: platform-qa-review-${{ github.ref }}
   cancel-in-progress: true
 jobs:
   browsers:

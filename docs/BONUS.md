@@ -1,6 +1,7 @@
 # Bonus adventures
 
 Three original optional fan adventures for **Dr. Manhattan: The Watchmaker's Son**.
+Latest review: [QA polish and fresh test evidence](QA-POLISH-HANDOVER.md).
 This branch remains **unmerged**. `codex/bonus-three` builds on the finished
 `codex/bonus-polish` branch. The original six chapters, music and ending are
 unchanged. PR #1 and all `claude/*` branches are untouched.
@@ -86,6 +87,10 @@ Continue point, change its ending or add bonus statistics to campaign totals.
 Settings are shared. If storage is blocked, progress is session-only. Cross-file
 save migration is not guaranteed. Retry restores a stage-entry checkpoint, not
 continuous mid-room progress.
+
+Failed bonus saves now show a warning in play and a persistent reminder in Bonus
+Levels. Export a backup before closing to preserve session-only progress. Saving
+successfully again clears the warning; a failed restore keeps existing progress.
 
 ## Shared code and tests
 
