@@ -186,6 +186,7 @@
     const w = e.scene.world, p = e.scene.player;
     if (!w || !p) return;
     p.invuln = Math.max(p.invuln || 0, 0.6);
+    if (p.profile) return; // Human heroes get checkpoint grace, rather than atom reassembly.
     if (DM.FX && DM.FX.Reassembly) w.add(new DM.FX.Reassembly(p));
     else w.particles.implode(p.x, p.y, 160, 80, { life: 0.6, size: 3, color: '#bff1ff' });
   });

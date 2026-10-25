@@ -1,0 +1,169 @@
+name: After Midnight expansion QA
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [codex/bonus-three, codex/gameplay-qa-polish]
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+concurrency:
+  group: after-midnight-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and reproducible standalone
+        run: |
+          find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+          node tools/build.mjs
+          git diff --exit-code -- dist/dr-manhattan.html
+      - run: npm install --ignore-scripts
+      - run: npx playwright install --with-deps chromium
+      - name: Original campaign, existing adventures, saves and new content, sequentially
+        shell: bash
+        run: |
+          mkdir -p tests/out/after-midnight-regression
+          failed=0
+          check() {
+            name="$1"; shift
+            set +e
+            "$@" > "tests/out/after-midnight-regression/$name.log" 2>&1
+            result=$?
+            set -e
+            printf '%s exit=%s\n' "$name" "$result" | tee -a tests/out/after-midnight-regression/exits.txt
+            cat "tests/out/after-midnight-regression/$name.log"
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          }
+          for suite in smoke visual audio powers saves settings ledger encounters flows bonus ninth-minute long-summer bonus-portability bonus-storage bonus-interrogation vigilantes after-midnight-cases after-midnight-modes after-midnight-integration surveyor-gear; do
+            check "source-$suite" node "tests/$suite.mjs" index.html
+          done
+          for suite in bonus ninth-minute long-summer bonus-portability bonus-storage bonus-interrogation vigilantes after-midnight-cases after-midnight-modes after-midnight-integration surveyor-gear; do
+            check "standalone-$suite" node "tests/$suite.mjs" dist/dr-manhattan.html
+          done
+          for build in source standalone; do
+            if [ "$build" = source ]; then target=index.html; else target=dist/dr-manhattan.html; fi
+            check "$build-original-summer-live" node tests/play-audit-followup.mjs "$target" --complete
+            for route in play-after-midnight play-after-midnight-patrol play-after-midnight-undertow play-after-midnight-archive play-after-midnight-clock; do
+              check "$build-$route" node "tests/$route.mjs" "$target"
+            done
+          done
+          exit "$failed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: after-midnight-regression-${{ github.sha }}
+          path: tests/out/
+          retention-days: 14
+  browsers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --ignore-scripts
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Firefox virtual audio output
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=qa_audio
+          pactl set-default-sink qa_audio
+      - name: New heroes, modes and progress across three engines and both builds
+        shell: bash
+        run: |
+          mkdir -p tests/out/after-midnight-browser-logs
+          failed=0
+          for browser in chromium firefox webkit; do
+            for build in source standalone; do
+              if [ "$build" = source ]; then target=index.html; else target=dist/dr-manhattan.html; fi
+              for suite in vigilantes after-midnight-cases after-midnight-modes after-midnight-integration; do
+                name="$browser-$build-$suite"
+                set +e
+                QA_BROWSER="$browser" node "tests/$suite.mjs" "$target" > "tests/out/after-midnight-browser-logs/$name.log" 2>&1
+                result=$?
+                set -e
+                printf '%s exit=%s\n' "$name" "$result" | tee -a tests/out/after-midnight-browser-logs/exits.txt
+                cat "tests/out/after-midnight-browser-logs/$name.log"
+                if [ "$result" -ne 0 ]; then failed=1; fi
+              done
+            done
+          done
+          for settings in '1 high' '4 high' '4 low'; do
+            read -r cpu quality <<< "$settings"
+            name="performance-${cpu}x-$quality"
+            set +e
+            QA_CPU="$cpu" QA_QUALITY="$quality" node tests/after-midnight-performance.mjs dist/dr-manhattan.html > "tests/out/after-midnight-browser-logs/$name.log" 2>&1
+            result=$?
+            set -e
+            printf '%s exit=%s\n' "$name" "$result" | tee -a tests/out/after-midnight-browser-logs/exits.txt
+            cat "tests/out/after-midnight-browser-logs/$name.log"
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          done
+          exit "$failed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: after-midnight-browser-evidence
+          path: tests/out/
+          retention-days: 14
+  safari:
+    runs-on: macos-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Build consistency
+        run: |
+          node tools/build.mjs
+          git diff --exit-code -- dist/dr-manhattan.html
+      - name: Native Safari, new and original game probes
+        shell: bash
+        run: |
+          mkdir -p tests/out/native-safari-after-midnight
+          sudo /usr/bin/safaridriver --enable
+          python3 -m http.server 8765 --bind 127.0.0.1 > tests/out/native-safari-after-midnight/http.log 2>&1 &
+          http_pid=$!
+          /usr/bin/safaridriver -p 4444 > tests/out/native-safari-after-midnight/driver.log 2>&1 &
+          driver_pid=$!
+          trap 'kill "$driver_pid" "$http_pid" 2>/dev/null || true' EXIT
+          for attempt in $(seq 1 30); do
+            if curl -fsS http://127.0.0.1:4444/status > tests/out/native-safari-after-midnight/status.json; then break; fi
+            sleep 1
+          done
+          failed=0
+          for suite in safari-platform safari-after-midnight; do
+            set +e
+            python3 "tests/$suite.py" > "tests/out/native-safari-after-midnight/$suite.log" 2>&1
+            result=$?
+            set -e
+            printf '%s exit=%s\n' "$suite" "$result" | tee -a tests/out/native-safari-after-midnight/exits.txt
+            cat "tests/out/native-safari-after-midnight/$suite.log"
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          done
+          exit "$failed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: after-midnight-native-safari
+          path: tests/out/
+          retention-days: 14

@@ -1,6 +1,6 @@
 {
   "name": "dr-manhattan-watchmakers-son",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "A Watchmen fan game: play Jon Osterman's journey to Dr. Manhattan in the browser.",
   "scripts": {
@@ -19,7 +19,8 @@
     "test:bonus": "node tests/bonus.mjs",
     "test:ninth-minute": "node tests/ninth-minute.mjs",
     "test:adventures": "node tests/bonus.mjs && node tests/ninth-minute.mjs && node tests/long-summer.mjs",
-    "test:long-summer": "node tests/long-summer.mjs"
+    "test:long-summer": "node tests/long-summer.mjs",
+    "test:after-midnight": "node tests/vigilantes.mjs && node tests/after-midnight-cases.mjs && node tests/after-midnight-modes.mjs && node tests/after-midnight-integration.mjs && node tests/surveyor-gear.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

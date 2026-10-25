@@ -136,6 +136,11 @@ try {
     __storageFault.write = true;
     DM.Bonus.write();
   });
+  // This fixture starts Play directly, unlike the menu-only restore UI. Wait
+  // for its first-frame checkpoint before restoring another checkpoint below.
+  await page.waitForFunction(() => DM.dev.play()?.ctx.checkpointCarry &&
+    DM.Bonus.data.checkpoints.long_summer?.stage === 0 && DM.Bonus.data.checkpoints.long_summer.carry,
+    null, { polling: 50, timeout: 5000 });
   check('a later independent storage failure warns again after recovery', await page.evaluate(() =>
     !DM.Bonus.available && DM.dev.play().hud.toasts.filter(toast =>
       toast.text.includes('BONUS PROGRESS COULD NOT BE SAVED')).length === 1));

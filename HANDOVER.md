@@ -1,5 +1,7 @@
 # Handover: how to keep developing this game
 
+> **Active expansion:** `codex/watchmen-stories` starts from the reviewed QA head `b67f8b6`. [After Midnight handover](docs/AFTER-MIDNIGHT-HANDOVER.md) tracks the full expansion goal and verification gates. Three playable heroes, three story cases and two replay modes are additive; retain the original six chapters and three bonus adventures. No merge or deployment.
+
 > **Current QA continuation (25 October 2026):** `codex/gameplay-qa-polish` starts from `codex/bonus-three` at `ed65bbf`, with a draft PR back into `codex/bonus-three`. Read [the current QA handover](docs/QA-POLISH-HANDOVER.md) for changes, fresh results and remaining limitations. **Do not merge or deploy.** The older Claude branch table and integration workflow below are historical; they are not the base or release instructions for this review.
 
 > Bonus adventures: see [docs/BONUS.md](docs/BONUS.md). The original campaign and separate Story H branch remain untouched.

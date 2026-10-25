@@ -113,6 +113,7 @@
       items.push({ label: 'NEW GAME', action: () => this.newGame() });
       if (!items.includes(chapters)) items.push(chapters);
       if (DM.Bonus) items.push({ label: 'BONUS LEVELS', action: () => Engine.set(new Scenes.BonusMenu()) });
+      if (DM.AfterMidnight) items.push({ label: 'AFTER MIDNIGHT', sub: 'Choose Nite Owl, Silk Spectre or Rorschach.', action: () => Engine.set(new Scenes.AfterMidnightMenu()) });
       items.push({ label: 'SETTINGS', action: () => Engine.push(new Scenes.Settings()) });
       items.push({ label: 'CONTROLS', action: () => Engine.push(new Scenes.Controls()) });
       const keep = this.menu ? this.menu.sel : 0;

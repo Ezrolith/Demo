@@ -72,8 +72,8 @@
       this.chapter = ch;
       this.hud = new DM.HUD(this);
       this.dialog = new DM.Dialog();
-      this.player = new DM.Player(0, 0);
-      this.player.setForm(ch.form || 'manhattan');
+      this.player = ch.createPlayer ? ch.createPlayer(this) : new DM.Player(0, 0);
+      if (!ch.createPlayer) this.player.setForm(ch.form || 'manhattan');
       for (const id of (ch.startPowers || DM.Chapters.powersBefore(ch.index))) this.player.unlock(id);
       this.world = new DM.World({ w: DM.W, h: DM.H });
       this.failed = false;
@@ -156,7 +156,8 @@
       if (p.down && !this.failed) {
         this.failed = true;
         this.failT = 1.8;
-        if (this.chapter.bonus) DM.Bonus.death();
+        if (this.chapter.progress?.death) this.chapter.progress.death(this);
+        else if (this.chapter.bonus) DM.Bonus.death();
         else { Save.data.totals.decoherences++; Save.write(); }
         // Coming apart: a beat of freeze, then the world crawls while Jon's
         // atoms hang in the air (DM.Feedback drains the colour meanwhile).
@@ -164,9 +165,15 @@
         if (w.hitstop) w.hitstop(0.15);
         w.slowmoT = 1.2;
         w.slowmoTarget = 0.15;
-        w.particles.burst(p.x, p.y, 120, { color: ['#7fe3ff', '#5fd4ff', '#ffffff'], speed: [40, 360], life: [0.9, 2.2], size: [1.5, 3.5], drag: 0.3 });
-        p.hidden = true;
-        DM.Audio.play('disintegrate');
+        if (p.profile) {
+          w.particles.burst(p.x, p.y, 14, { color: ['#c8b993', '#8b8476'], speed: [15, 80], life: [0.2, 0.5], size: [1, 2.5], drag: 3, add: false });
+          p.hidden = false;
+          DM.Audio.play('impact');
+        } else {
+          w.particles.burst(p.x, p.y, 120, { color: ['#7fe3ff', '#5fd4ff', '#ffffff'], speed: [40, 360], life: [0.9, 2.2], size: [1.5, 3.5], drag: 0.3 });
+          p.hidden = true;
+          DM.Audio.play('disintegrate');
+        }
       }
       if (this.failed) {
         this.failT -= dt;
@@ -186,6 +193,7 @@
     }
 
     completeChapter() {
+      if (this.chapter.progress?.complete) return this.chapter.progress.complete(this);
       if (this.chapter.bonus) return DM.Bonus.complete(this);
       const ch = this.chapter;
       const st = this.ctx.stats;
