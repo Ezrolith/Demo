@@ -27,13 +27,14 @@ jobs:
           from pathlib import Path
           p = Path('tests/play-audit-followup.mjs')
           s = p.read_text()
-          old = 'const checkpoint = await page.evaluate(() => JSON.stringify(DM.Bonus.data.checkpoints.long_summer));'
-          assert s.count(old) == 1
-          s = s.replace(old, 'const checkpoint = await page.evaluate(() => DM.Bonus.data.checkpoints.long_summer);')
-          old = "    check('reload then menu RESUME preserves the real truck checkpoint', resumed.rescued === 6 &&\n      resumed.unmade === 0 && checkpoint === await page.evaluate(() => JSON.stringify(DM.Bonus.data.checkpoints.long_summer)));"
-          new = "    const restored = await page.evaluate(() => DM.Bonus.data.checkpoints.long_summer);\n    assert.deepEqual(restored, checkpoint, 'cold resume must restore the same checkpoint data');\n    check('reload then menu RESUME preserves the real truck checkpoint', resumed.rescued === 6 && resumed.unmade === 0);"
-          assert s.count(old) == 1
-          p.write_text(s.replace(old, new))
+          def replace(old, new):
+              global s
+              assert s.count(old) == 1, old
+              s = s.replace(old, new)
+          replace('const checkpoint = await page.evaluate(() => JSON.stringify(DM.Bonus.data.checkpoints.long_summer));', 'const checkpoint = await page.evaluate(() => DM.Bonus.data.checkpoints.long_summer);')
+          replace("    check('reload then menu RESUME preserves the real truck checkpoint', resumed.rescued === 6 &&\n      resumed.unmade === 0 && checkpoint === await page.evaluate(() => JSON.stringify(DM.Bonus.data.checkpoints.long_summer)));", "    const restored = await page.evaluate(() => DM.Bonus.data.checkpoints.long_summer);\n    assert.deepEqual(restored, checkpoint, 'cold resume must restore the same checkpoint data');\n    check('reload then menu RESUME preserves the real truck checkpoint', resumed.rescued === 6 && resumed.unmade === 0);")
+          replace("  check('G and E open the roof vent', await page.evaluate(() => DM.dev.play().ctx.flags.summer.grid.vented));", "  // Await the real animation frame that consumes E; never edit the vent state.\n  await page.waitForFunction(() => DM.dev.play().ctx.flags.summer.grid.vented, null, { timeout: 3000 });\n  check('G and E open the roof vent', await page.evaluate(() => DM.dev.play().ctx.flags.summer.grid.vented));")
+          p.write_text(s)
           PY
           find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
       - run: npm install --ignore-scripts
@@ -93,19 +94,20 @@ jobs:
             'Branch: `codex/bonus-three`; draft PR #4. No merge or deployment.', '',
             '## Corrections', '',
             '- Reset the Summer camera target and clear old markers/transient objectives when a new map is built. The previous street target otherwise pulled Jon off-screen throughout the next briefing; the BALCONY ROUTE marker also leaked into the tenement.',
-            '- Bind lethal cab targeting to the actual pending Disintegrate pulse instead of a 0.35-second wall-clock deadline. The game\'s legitimate 0.2-second impact freeze could expire a deliberately aimed cast. Wheel splash remains nonlethal; an expired cast cannot authorise later damage.', '',
+            '- Bind lethal cab targeting to the actual pending Disintegrate pulse instead of a 0.35-second wall-clock deadline. The legitimate 0.2-second impact freeze could expire a deliberately aimed cast. Wheel splash remains nonlethal; an expired cast cannot authorise later damage.', '',
             '## Verification', '',
             'The preceding full run 40139580928 completed successfully. This follow-up separately reruns all twelve source suites, rebuilds, and runs all three standalone suites.', '',
             'The new `tests/play-audit-followup.mjs` uses real RAF and Playwright keyboard/mouse actions from the original avenue spawn through six rescues to the truck briefing, then reloads the file and selects RESUME. No actor relocation, health/energy refill, godMode, injected quest flags or stage skips are used after first-spawn setup. It follows a known route, not a first-time human playthrough.', '',
             '| Command | Final output | Recorded exit |', '| --- | --- | --- |']
           for entry in (p / 'exits.txt').read_text().splitlines():
-            name, attempt, result = entry.split()
-            number = attempt.split('=')[1]
-            log = p / (name + ('' if name == 'live-journey' or name.startswith('dist-') else '-' + number) + '.log')
-            final = log.read_text().strip().splitlines()[-1] if log.exists() else 'See retained log'
-            lines.append(f'| {name} (attempt {number}) | `{final}` | {result.split("=")[1]} |')
+              name, attempt, result = entry.split()
+              number = attempt.split('=')[1]
+              log = p / (name + ('' if name == 'live-journey' or name.startswith('dist-') else '-' + number) + '.log')
+              final = log.read_text().strip().splitlines()[-1] if log.exists() else 'See retained log'
+              lines.append(f'| {name} (attempt {number}) | `{final}` | {result.split("=")[1]} |')
           j = json.loads(Path('tests/out/audit-followup/journey.json').read_text())
           lines += ['', f'Live journey checks: {len(j["checks"])}; minimum coherence: {j["minimumHealth"]:.2f}; page errors: {len(j["errors"])}.', '',
+            'The first hosted live-journey attempt checked the roof immediately after sending E, before its next game frame. The runner now waits for the actual vent state (with a bounded timeout), without changing game state or retrying inputs. Cold-resume comparisons use structural equality, not JSON key order.', '',
             '## Evidence and successor', '',
             '- `docs/screenshots/audit-followup/tenement-arrival-live.png`: actual new-area briefing and camera.',
             '- `six-rescued-live.png`: all six residents saved on the actual input route.',
