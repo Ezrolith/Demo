@@ -57,6 +57,32 @@ The permanent workflows now:
 
 Workflow files: `.github/workflows/bonus-validation.yml`, `platform-qa.yml`, `native-safari-qa.yml`. The final release-gate passed **before** the cleanup; the new clean workflows must report their own result separately.
 
+## Clean workflow follow-up: recovered an early-export test race
+
+After removing the old source transformations, the **native Safari clean workflow**
+[40196643428](https://github.com/Ezrolith/Demo/actions/runs/40196643428)
+passed all **90** checks without changing source before testing.
+
+The first clean browser workflow
+[40196643432](https://github.com/Ezrolith/Demo/actions/runs/40196643432)
+exited 1 on just **WebKit / source / backup**. The full log shows an early
+`TypeError: Cannot read properties of undefined (reading 'stage')` in the test
+at the very first export assertion. The test had called
+`DM.Engine.set(new DM.Scenes.Play())` and immediately read the checkpoint in
+the **same browser task**, before the first play-update created/persisted it.
+That was a test sequencing error; the WebKit **standalone** backup, other
+browser backup cases and all nine WebKit stage probes passed in that run.
+It does not demonstrate a lost user save.
+
+Commit `9dc39d3f4580c66a55101eaa926c6abba09e70ab` adds an explicit
+`page.waitForFunction` for the **real persisted stage-one checkpoint**
+before export. It does not weaken any backup validity assertion or change
+production code. A local inlined-script Chromium check passed 16/16; the
+normal-file [read-only browser rerun 40197987036](https://github.com/Ezrolith/Demo/actions/runs/40197987036)
+and [full regression rerun 40197987008](https://github.com/Ezrolith/Demo/actions/runs/40197987008)
+are authoritative for this test-only fix. Record their completed conclusions;
+do not treat an in-progress action as green.
+
 ## What is still genuinely unresolved
 
 1. **First-time human experience:** no unbiased playthrough for discovery of objectives, pacing, difficulty, aesthetic parity and dialogue comprehension. Known automation routes are not a substitute.
