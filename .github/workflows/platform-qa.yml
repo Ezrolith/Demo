@@ -19,6 +19,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Synchronise new probe with actual scene transitions
+        run: python3 .github/platform-qa-refine.py
       - run: npm install --ignore-scripts
       - run: npx playwright install --with-deps chromium firefox webkit
       - name: Browser and source/build matrix, sequentially
@@ -46,6 +48,9 @@ jobs:
           cat tests/out/platform-qa/chromium-4x.log
           if [ "$result" -ne 0 ]; then failed=1; fi
           exit "$failed"
+      - name: Preserve the exact probe source
+        if: always()
+        run: cp tests/platform-qa.mjs tests/out/platform-qa/probe-source.mjs
       - uses: actions/upload-artifact@v4
         if: always()
         with:
