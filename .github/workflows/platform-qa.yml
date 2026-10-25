@@ -1,17 +1,21 @@
-name: Platform QA
+name: Browser and performance QA
 on:
+  workflow_dispatch:
   push:
     branches: [codex/bonus-three]
-    paths: ['tests/platform-qa.mjs', '.github/workflows/platform-qa.yml', 'src/game/bonus-portability.js']
+    paths: ['.github/workflows/platform-qa.yml', 'src/**', 'dist/**', 'index.html', 'tests/platform-qa.mjs', 'tests/bonus-portability.mjs', 'tests/play-audit-followup.mjs']
+  pull_request:
+    branches: [codex/bonus-polish]
+    types: [ready_for_review, reopened]
 permissions:
   contents: read
 concurrency:
-  group: platform-qa-${{ github.ref }}
+  group: platform-qa-review
   cancel-in-progress: true
 jobs:
-  platforms:
+  browsers:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,41 +23,53 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Synchronise new probe with actual scene transitions
-        run: python3 .github/platform-qa-refine.py
+      - name: Verify the committed playable build
+        run: |
+          find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+          node tools/build.mjs
+          git diff --exit-code -- dist/dr-manhattan.html
       - run: npm install --ignore-scripts
       - run: npx playwright install --with-deps chromium firefox webkit
-      - name: Browser and source/build matrix, sequentially
+      - name: Enable virtual audio output for headless Firefox
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=qa_audio
+          pactl set-default-sink qa_audio
+      - name: Three engines, both builds, backup transfers and physical-input route
         shell: bash
         run: |
-          mkdir -p tests/out/platform-qa
+          mkdir -p tests/out/platform-clean
           failed=0
+          check() {
+            name="$1"; shift
+            set +e
+            "$@" > "tests/out/platform-clean/$name.log" 2>&1
+            result=$?
+            set -e
+            printf '%s exit=%s\n' "$name" "$result" | tee -a tests/out/platform-clean/exits.txt
+            cat "tests/out/platform-clean/$name.log"
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          }
           for browser in chromium firefox webkit; do
-            for target in index.html dist/dr-manhattan.html; do
-              name="${browser}-$(basename "$target")"
-              set +e
-              QA_BROWSER="$browser" node tests/platform-qa.mjs "$target" > "tests/out/platform-qa/$name.log" 2>&1
-              result=$?
-              set -e
-              printf '%s exit=%s\n' "$name" "$result" | tee -a tests/out/platform-qa/exits.txt
-              cat "tests/out/platform-qa/$name.log"
-              if [ "$result" -ne 0 ]; then failed=1; fi
-            done
+            check "$browser-source" env QA_BROWSER="$browser" node tests/platform-qa.mjs index.html
+            check "$browser-dist" env QA_BROWSER="$browser" node tests/platform-qa.mjs dist/dr-manhattan.html
+            check "$browser-backup-source" env QA_BROWSER="$browser" node tests/bonus-portability.mjs index.html
+            check "$browser-backup-dist" env QA_BROWSER="$browser" node tests/bonus-portability.mjs dist/dr-manhattan.html
+            check "$browser-journey" env QA_BROWSER="$browser" node tests/play-audit-followup.mjs
           done
-          set +e
-          QA_BROWSER=chromium QA_CPU=4 node tests/platform-qa.mjs dist/dr-manhattan.html > tests/out/platform-qa/chromium-4x.log 2>&1
-          result=$?
-          set -e
-          printf 'chromium-4x exit=%s\n' "$result" | tee -a tests/out/platform-qa/exits.txt
-          cat tests/out/platform-qa/chromium-4x.log
-          if [ "$result" -ne 0 ]; then failed=1; fi
+          check 'chromium-4x-high' env QA_BROWSER=chromium QA_CPU=4 QA_QUALITY=high node tests/platform-qa.mjs dist/dr-manhattan.html
+          check 'chromium-4x-low' env QA_BROWSER=chromium QA_CPU=4 QA_QUALITY=low node tests/platform-qa.mjs dist/dr-manhattan.html
           exit "$failed"
-      - name: Preserve the exact probe source
+      - name: Preserve exact test logs, frame timings, screenshots
         if: always()
-        run: cp tests/platform-qa.mjs tests/out/platform-qa/probe-source.mjs
-      - uses: actions/upload-artifact@v4
-        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: platform-qa-${{ github.run_id }}
-          path: tests/out/platform-qa/
+          name: browser-qa-evidence
+          path: |
+            tests/out/platform-clean/
+            tests/out/platform-qa/
+            tests/out/bonus-portability/
+            tests/out/audit-followup/
           retention-days: 14

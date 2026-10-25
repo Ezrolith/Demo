@@ -49,13 +49,15 @@ jobs:
             if [ "$result" -ne 0 ]; then failed=1; fi
           done
           exit "$failed"
-      - name: All three standalone adventures
+      - name: Bonus save import/export and safety, source
+        run: node tests/bonus-portability.mjs index.html
+      - name: All three standalone adventures and bonus save portability
         if: always()
         shell: bash
         run: |
           mkdir -p tests/out/regression
           failed=0
-          for suite in bonus ninth-minute long-summer; do
+          for suite in bonus ninth-minute long-summer bonus-portability; do
             set +e
             node "tests/$suite.mjs" dist/dr-manhattan.html > "tests/out/regression/dist-$suite.log" 2>&1
             result=$?

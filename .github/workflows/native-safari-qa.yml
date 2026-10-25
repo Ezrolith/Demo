@@ -1,17 +1,21 @@
 name: Native Safari QA
 on:
+  workflow_dispatch:
   push:
     branches: [codex/bonus-three]
-    paths: ['tests/safari-platform.py', '.github/workflows/native-safari-qa.yml']
+    paths: ['.github/workflows/native-safari-qa.yml', 'src/**', 'dist/**', 'index.html', 'tests/safari-platform.py']
+  pull_request:
+    branches: [codex/bonus-polish]
+    types: [ready_for_review, reopened]
 permissions:
   contents: read
 concurrency:
-  group: native-safari-qa
+  group: safari-qa-review
   cancel-in-progress: true
 jobs:
   safari:
     runs-on: macos-latest
-    timeout-minutes: 20
+    timeout-minutes: 25
     steps:
       - uses: actions/checkout@v4
         with:
@@ -19,27 +23,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Build the same review candidate
+      - name: Verify the published HTML without source transformation
         run: |
-          python3 .github/apply-platform.py
           node tools/build.mjs
-          python3 - <<'PY'
-          from pathlib import Path
-          p = Path('tests/safari-platform.py')
-          s = p.read_text()
-          old = "command('/url', {'url': (ROOT / target).as_uri()})"
-          assert s.count(old) == 1
-          s = s.replace(old, "command('/url', {'url': 'http://127.0.0.1:8765/' + target})")
-          old = "isinstance(value, dict) and 'error' in value"
-          assert s.count(old) == 1
-          s = s.replace(old, "isinstance(value, dict) and value.get('error') and 'message' in value")
-          old = "key('\\ue007')"
-          assert s.count(old) == 1
-          s = s.replace(old, "key('\\ue006')  # Primary Return, not numeric-keypad Enter.")
-          s = s.replace('native Safari, file navigation and W3C input', 'native Safari, loopback HTTP and W3C input; file sandbox unchanged')
-          p.write_text(s)
-          PY
-      - name: Native Safari WebDriver session
+          git diff --exit-code -- dist/dr-manhattan.html
+      - name: Run native Safari WebDriver over loopback HTTP
         shell: bash
         run: |
           mkdir -p tests/out/native-safari
@@ -62,14 +50,10 @@ jobs:
           printf 'native-safari exit=%s\n' "$result" > tests/out/native-safari/exits.txt
           cat tests/out/native-safari/run.log
           exit "$result"
-      - name: Preserve the actual probe source
+      - name: Preserve Safari evidence
         if: always()
-        run: |
-          mkdir -p tests/out/native-safari
-          cp tests/safari-platform.py tests/out/native-safari/probe-source.py
-      - uses: actions/upload-artifact@v4
-        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          name: native-safari-${{ github.run_id }}
+          name: native-safari-evidence
           path: tests/out/native-safari/
           retention-days: 14
