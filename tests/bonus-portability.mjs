@@ -41,6 +41,12 @@ try {
     window.__campaignBeforeBackup = localStorage.getItem('dr-manhattan.save');
     DM.Engine.set(new DM.Scenes.Play(), { chapter: 'long_summer', stage: 1 });
   });
+  // A freshly selected chapter registers its checkpoint in the first play update.
+  // Wait for real persistence rather than exporting in the same browser task.
+  await page.waitForFunction(() => {
+    const record = DM.Bonus.load().checkpoints.long_summer;
+    return record && record.stage === 1 && !!localStorage.getItem('dr-manhattan.bonus.v1');
+  }, null, { timeout: 10000 });
   const text = await page.evaluate(() => DM.BonusBackup.encode());
   check('export contains bonus progress only', JSON.parse(text).bonus.checkpoints.long_summer.stage === 1 &&
     !Object.hasOwn(JSON.parse(text), 'campaign'));
