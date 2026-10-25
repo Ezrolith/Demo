@@ -119,3 +119,7 @@ capture script is `tests/capture-bonus-polish.mjs`. The new adventure's 14 revie
 views are in `docs/screenshots/long-summer/`, produced by
 `node tests/capture-long-summer.mjs`. Use the handovers for the authoritative tested
 commits and exact results. Nothing is automatically merged or deployed.
+
+## Portable bonus saves and browser QA
+
+In the **BONUS LEVELS** menu, choose **BACK UP / RESTORE BONUS SAVES** to export a JSON copy of your adventure progress, preview another backup and restore it with a separate confirmation. Campaign and settings are not included. Keep your old copy until migration has been verified. Keyboard and mouse are still required for gameplay. See [platform verification, performance and limits](PLATFORM-QA-HANDOVER.md) and the [first-time player checklist](HUMAN-PLAYTEST.md).

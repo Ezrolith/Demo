@@ -1,5 +1,11 @@
 # Changes
 
+## Bonus compatibility and backup release (25 October 2026)
+- Added explicit bonus-save JSON export/preview/restore, with stale-file and keyboard-accessibility safeguards; original campaign saves unchanged.
+- Corrected Long Summer truck camera overzoom without changing original camera behaviour.
+- Independently verified Chromium, Firefox, WebKit, macOS Safari and all original/bonus regressions; recorded synthetic CPU performance limits.
+- Replaced temporary source-rewriting/publishing CI with clean, read-only browser and native Safari workflows. See [docs/PLATFORM-QA-HANDOVER.md](docs/PLATFORM-QA-HANDOVER.md).
+
 ## Independent-review corrections — 24 October 2026
 - Gave the Comedian a protected opening, cancellable 2.2-second warning and casualty cooldown; capped autonomous Heat.
 - Slowed fire propagation and proved a six-resident rescue with normal vulnerability and real escorts.
