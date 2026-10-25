@@ -23,6 +23,16 @@ jobs:
         run: |
           python3 .github/apply-platform.py
           node tools/build.mjs
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('tests/safari-platform.py')
+          s = p.read_text()
+          old = "command('/url', {'url': (ROOT / target).as_uri()})"
+          assert s.count(old) == 1
+          s = s.replace(old, "command('/url', {'url': 'http://127.0.0.1:8765/' + target})")
+          s = s.replace('native Safari, file navigation and W3C input', 'native Safari, loopback HTTP and W3C input; file sandbox unchanged')
+          p.write_text(s)
+          PY
       - name: Native Safari WebDriver session
         shell: bash
         run: |
@@ -30,9 +40,11 @@ jobs:
           sw_vers > tests/out/native-safari/macos.txt
           /usr/bin/safaridriver --version > tests/out/native-safari/driver.txt
           sudo /usr/bin/safaridriver --enable
+          python3 -m http.server 8765 --bind 127.0.0.1 > tests/out/native-safari/http.log 2>&1 &
+          http_pid=$!
           /usr/bin/safaridriver -p 4444 > tests/out/native-safari/driver.log 2>&1 &
           driver_pid=$!
-          trap 'kill "$driver_pid" 2>/dev/null || true' EXIT
+          trap 'kill "$driver_pid" "$http_pid" 2>/dev/null || true' EXIT
           for attempt in $(seq 1 30); do
             if curl -fsS http://127.0.0.1:4444/status > tests/out/native-safari/driver-status.json; then break; fi
             sleep 1
@@ -44,6 +56,11 @@ jobs:
           printf 'native-safari exit=%s\n' "$result" > tests/out/native-safari/exits.txt
           cat tests/out/native-safari/run.log
           exit "$result"
+      - name: Preserve the actual probe source
+        if: always()
+        run: |
+          mkdir -p tests/out/native-safari
+          cp tests/safari-platform.py tests/out/native-safari/probe-source.py
       - uses: actions/upload-artifact@v4
         if: always()
         with:
