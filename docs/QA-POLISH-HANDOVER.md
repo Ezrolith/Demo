@@ -74,6 +74,16 @@ player. The four-kill Retry/Continue assertions and their tolerances are
 unchanged. No campaign source changed. The initial failure log is retained in
 `tests/out/qa-polish/saves.log`; the corrected suite is rerun separately.
 
+The next full save attempt passed persistence but exposed the same early-ready
+window in both wave-scene input fixtures, and a non-Mac check that assumed the
+host was Linux. Both input fixtures now wait for the real wave objective and
+unlocked context/dialogue; the non-Mac fixture explicitly identifies as Linux,
+just as the existing Mac fixture explicitly identifies as MacIntel. The six
+isolated input checks now pass on this Mac. Movement thresholds, repeat/fade
+assertions, timeouts and production input code remain unchanged. That failed
+attempt remains in `saves-corrected.log`; the final complete run is
+`saves-final.log`.
+
 Reviewed the existing three-engine, native Safari and 4x CPU-throttle evidence.
 The measured slow-CPU High/Low gap remains a limitation. No render quality,
 lighting, rain, fire, musical or ambience reduction was introduced. A repeated

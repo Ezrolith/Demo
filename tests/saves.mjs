@@ -494,7 +494,8 @@ if (want(6)) {
 
 // ---- 7. Input you can trust --------------------------------------------------------------
 if (want(7)) {
-  const g = await open();
+  // Exercise the non-Mac shortcut policy independently of the runner's OS.
+  const g = await open({ init: () => Object.defineProperty(Navigator.prototype, 'platform', { get: () => 'Linux x86_64' }) });
   await g.gate();
   const alpha = await g.ev(() => {
     const c = document.createElement('canvas').getContext('2d');
@@ -514,7 +515,11 @@ if (want(7)) {
   assert('Gfx.text leaves globalAlpha as it found it (alpha 0, 1.5, 0.5)', alpha[0] === 1 && alpha[1] === 1 && alpha[2] === 0.5, alpha.join(','));
 
   await g.ev(() => window.DM.dev.start('deterrent', 1));
-  await g.until('waves1 control', () => !window.DM.dev.play().player.locked && window.DM.Engine.top() === window.DM.dev.play());
+  await g.until('waves1 control', () => {
+    const p = window.DM.dev.play();
+    return !p.ctx.locked && !p.dialog.active && !p.player.locked && window.DM.Engine.top() === p &&
+      p.hud.objective?.text === 'Break Operation Blue Fire';
+  });
   await g.page.keyboard.down('d');
   await g.wait(400);
   const vx0 = await g.ev(() => Math.round(window.DM.dev.play().player.vx));
@@ -559,7 +564,11 @@ if (want(7)) {
   const m = await open({ init: () => Object.defineProperty(Navigator.prototype, 'platform', { get: () => 'MacIntel' }) });
   await m.gate();
   await m.ev(() => window.DM.dev.start('deterrent', 1));
-  await m.until('waves1 control', () => !window.DM.dev.play().player.locked && window.DM.Engine.top() === window.DM.dev.play());
+  await m.until('waves1 control', () => {
+    const p = window.DM.dev.play();
+    return !p.ctx.locked && !p.dialog.active && !p.player.locked && window.DM.Engine.top() === p &&
+      p.hud.objective?.text === 'Break Operation Blue Fire';
+  });
   const y0 = await m.ev(() => window.DM.dev.play().player.y);
   await m.page.keyboard.down('Control');
   await m.page.keyboard.down('w');
