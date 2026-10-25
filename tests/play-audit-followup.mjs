@@ -139,7 +139,16 @@ try {
     DM.Engine.governor.enabled = false;
     DM.Engine.set(new DM.Scenes.Play(), { chapter: 'long_summer', stage: 0 });
   });
+  // Map construction yields a frame before the opening generator starts.
+  // Observe the actual briefing, rather than mistaking that gap for control.
+  await page.waitForFunction(() => DM.dev.play()?.ctx.stageIndex === 0 && DM.dev.play().dialog.active,
+    null, { polling: 50, timeout: 5000 });
   await dialogue();
+  await page.waitForFunction(() => {
+    const p = DM.dev.play();
+    return p?.ctx.stageIndex === 0 && !p.dialog.active && !p.ctx.locked && !p.player.locked &&
+      p.hud.objective?.text === 'Calm the avenue · Reach the tenement';
+  }, null, { polling: 50, timeout: 5000 });
   await aim(370, 705);
   await hold('c', 0.22);
   await hold('d', 0.7);
@@ -214,6 +223,8 @@ try {
     });
     await page.keyboard.press('Enter');
     await page.waitForFunction(() => DM.dev.play()?.ctx.stageIndex === 2);
+    await page.waitForFunction(() => DM.dev.play()?.ctx.stageIndex === 2 && DM.dev.play().dialog.active,
+      null, { polling: 50, timeout: 5000 });
     const resumed = await read();
     const restored = await page.evaluate(() => DM.Bonus.data.checkpoints.long_summer);
     const savedTime = checkpoint.carry.stats.time;
