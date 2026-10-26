@@ -189,6 +189,42 @@ try {
   check('timed guard, sustained guard and no guard have genuinely different damage',
     Math.abs(timed - 3) < 0.01 && Math.abs(held - 9) < 0.01 && Math.abs(released - 20) < 0.01);
 
+  // Measure actual velocity and distance: Player reads speedMax before powers
+  // update their display/damage flags, including the current guard state.
+  const movement = async (id, focus, energy = 100) => {
+    await start(id);
+    await ev(energy => { T.play().player.energy = energy; T.moveStart = T.play().player.x; }, energy);
+    await page.keyboard.down('d');
+    if (focus) await page.keyboard.down('f');
+    await ev(() => T.step(1 / 60));
+    const first = await ev(() => ({ vx: T.play().player.vx, guarding: T.play().player.guarding }));
+    await ev(() => T.step(0.75));
+    const held = await ev(() => ({ vx: T.play().player.vx, distance: T.play().player.x - T.moveStart }));
+    if (focus) await page.keyboard.up('f');
+    await ev(() => T.step(1 / 60));
+    const release = await ev(() => ({ vx: T.play().player.vx, guarding: T.play().player.guarding }));
+    await ev(() => T.step(0.75));
+    const recovered = await ev(() => T.play().player.vx);
+    await page.keyboard.up('d'); await ev(() => T.step(0.05));
+    return { first, held, release, recovered };
+  };
+  const walking = await movement('silkspectre', false);
+  const guarding = await movement('silkspectre', true);
+  check('Silk guard slows actual movement by 28 percent from its first frame and while held',
+    guarding.first.guarding && Math.abs(guarding.first.vx / walking.first.vx - 0.72) < 0.001 &&
+    Math.abs(guarding.held.distance / walking.held.distance - 0.72) < 0.001);
+  check('releasing Silk guard accelerates immediately and restores normal movement speed',
+    !guarding.release.guarding && guarding.release.vx > guarding.held.vx &&
+    Math.abs(guarding.recovered - walking.recovered) < 0.01);
+  const exhausted = await movement('silkspectre', true, 1);
+  check('unpowered Silk guard does not reduce movement speed',
+    !exhausted.first.guarding && Math.abs(exhausted.first.vx - walking.first.vx) < 0.01);
+  for (const id of ['niteowl', 'rorschach']) {
+    const normal = await movement(id, false), focus = await movement(id, true);
+    check(id + ': focus leaves actual movement speed unchanged',
+      Math.abs(focus.first.vx - normal.first.vx) < 0.01 && Math.abs(focus.held.distance - normal.held.distance) < 0.01);
+  }
+
   await start('niteowl');
   await ev(() => { T.foe(650, 500, true); T.aim = { x: 650, y: 565 }; });
   await key('q'); await ev(() => T.step(0.65));

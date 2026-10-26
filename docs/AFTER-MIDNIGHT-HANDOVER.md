@@ -56,6 +56,23 @@ assist reads the live focus input because Q runs before F's display update.
 
 ## Verification status
 
+### 26 October pre-review follow-up
+
+Corrected Silk Spectre's guard movement penalty. The player calculates movement
+before powers refresh their damage/render flags, so `speedMax` now reads live,
+eligible guard input. Pressing and releasing F affect movement immediately;
+parry timing and damage reduction remain on their existing path.
+
+Five new movement regressions first reproduced the original failure. Actor/gear
+checks now total 42 and pass on source and standalone in Chromium and WebKit.
+The other four expansion suites also pass again on both builds: 186 checks per
+build in Chromium, plus the separate WebKit actor checks. See the
+[pre-review check](PRE-REVIEW-CHECK.md) for the final route results and Git state.
+The full CI evidence below is the earlier baseline; consult the PR's latest
+checks for the new guard-fix revision.
+
+### Full baseline before the guard follow-up
+
 Chromium source and rebuilt standalone acceptance: 37 actor/gear checks,
 75 story checks across all nine case/hero combinations, 33 mode checks,
 31 selection/save/focus/defeat checks, and five actual-gear boss checks.
@@ -83,7 +100,8 @@ The expansion regression completes all 43 commands without a failed exit:
 20 source suites, 11 standalone suites and 12 ordinary-input routes. The
 independent original regression passes all twelve source suites on their first
 attempt, plus its standalone/save checks and full Summer journeys.
-Playable files remain identical to game commit `2df0c1b`.
+At that baseline, playable files matched game commit `2df0c1b`. The later guard
+follow-up changes `vigilantes.js` and rebuilds the standalone from source.
 
 [Expansion workflow](https://github.com/Ezrolith/Demo/actions/runs/40244798203),
 [original regression](https://github.com/Ezrolith/Demo/actions/runs/40244798197),

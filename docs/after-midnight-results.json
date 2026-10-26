@@ -344,5 +344,66 @@
         "exitCode": 0
       }
     ]
+  },
+  "evidenceScope": "Root revision, digest and workflow fields describe the full pre-follow-up baseline. followUp describes the later guard fix; consult current PR checks for its fresh full CI result.",
+  "followUp": {
+    "date": "2026-10-26",
+    "change": "Silk Spectre guard movement uses live eligible input before movement; existing parry and damage timing retained.",
+    "reproducedBeforeFix": true,
+    "sourceFile": "src/game/vigilantes.js",
+    "sourceSha256": "b01ebf20990a85f29eca19cb94359a8c599034a20a45168747bab2a7aa54bdc7",
+    "standaloneSha256": "13820d36dd305058fc813c9ea58795b87c044e48ff13a8b73de4bb7d850fdff9",
+    "syntaxAndReproducibleBuild": "success",
+    "chromiumAcceptance": {
+      "builds": [
+        "source",
+        "standalone"
+      ],
+      "checksPerBuild": {
+        "vigilantes": 42,
+        "cases": 75,
+        "modes": 33,
+        "integration": 31,
+        "surveyorGear": 5
+      },
+      "totalPerBuild": 186,
+      "conclusion": "success"
+    },
+    "webkitActors": {
+      "builds": [
+        "source",
+        "standalone"
+      ],
+      "checksPerBuild": 42,
+      "conclusion": "success"
+    },
+    "ordinaryInputRoutes": [
+      {
+        "build": "source",
+        "route": "play-after-midnight-undertow",
+        "conclusion": "success",
+        "summary": "UNDERTOW LIVE PASSED: 16 checks; lowest observed health 84.00 (silkspectre, index.html)."
+      },
+      {
+        "build": "source",
+        "route": "play-after-midnight-clock",
+        "conclusion": "success",
+        "summary": "RESCUE CLOCK LIVE PASSED: 12 checks; four safe, 200.06s left; lowest observed health 52.29; 2 hazards cleared (index.html)."
+      },
+      {
+        "build": "standalone",
+        "route": "play-after-midnight-undertow",
+        "conclusion": "success",
+        "summary": "UNDERTOW LIVE PASSED: 16 checks; lowest observed health 90.00 (silkspectre, dist/dr-manhattan.html)."
+      },
+      {
+        "build": "standalone",
+        "route": "play-after-midnight-clock",
+        "conclusion": "success",
+        "summary": "RESCUE CLOCK LIVE PASSED: 12 checks; four safe, 206.66s left; lowest observed health 77.85; 2 hazards cleared (dist/dr-manhattan.html)."
+      }
+    ],
+    "boundedCodeReview": "No further concrete blocker found; handover/guide links resolve.",
+    "independentCI": "Triggered by the guard-fix branch update. Use current PR checks; the workflow IDs in the root fields are the earlier full baseline."
   }
 }

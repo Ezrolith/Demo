@@ -24922,7 +24922,12 @@
       if (id === 'capacitor') this.energy = Math.min(this.maxEnergy, this.energy + 12);
       return true;
     }
-    get speedMax() { return this.profile.speed * this.speedMul * (1 + this.upgrades.mobility * 0.05) * (this.guarding ? 0.72 : 1); }
+    get speedMax() {
+      // Movement runs before powers refresh guarding for damage/rendering.
+      // Read eligible live input so press/release affects this frame's speed.
+      const guarding = this.profile.id === 'silkspectre' && this.canUsePowers && I.down('timesight') && this.energy > 2;
+      return this.profile.speed * this.speedMul * (1 + this.upgrades.mobility * 0.05) * (guarding ? 0.72 : 1);
+    }
     update(dt, world) {
       const wasGuarding = this.guarding;
       this.investigating = false; this.guarding = false;

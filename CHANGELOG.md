@@ -1,6 +1,7 @@
 # Changes
 
 ## 0.2.0 — After Midnight (draft)
+- Corrected Silk Spectre's guard movement slowdown from the first frame, including immediate release and low-stamina behavior; retained parry/damage timing and added five actual-movement regressions.
 - Added selectable Nite Owl, Silk Spectre and Rorschach, with eighteen distinct nonlethal gear actions, human vulnerability and physical traversal.
 - Added Dead Air, Undertow and The Glass Archive: three cases with three checkpoint stages each, new cast, themed art/weather/lighting and original musical arrangements.
 - Added Night Patrol with escalating waves, capped gear choices and extraction; Rescue Clock with physical escorts, threats, time bonuses and honest partial/timeout outcomes.
