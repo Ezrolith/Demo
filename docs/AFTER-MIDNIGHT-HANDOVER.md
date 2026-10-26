@@ -64,8 +64,10 @@ bonus-storage fixture with its real initial checkpoint. Assertions are retained.
 
 Ordinary-input routes use normal damage, actual menus/interludes, real RAF and
 read-only navigation telemetry, without placement, tester refills, quest edits
-or invulnerability. Source routes complete all three cases, Patrol and all four
-timed rescues. Standalone routes are being repeated before final review.
+or invulnerability. Source and standalone routes complete all three cases,
+Patrol and all four timed rescues. Full routes use Nite Owl for Dead Air,
+Silk Spectre for Undertow and Rescue Clock, and Rorschach for The Glass Archive;
+the acceptance suites separately exercise all nine hero/case combinations.
 Archive specifically measures actual boss melee hits; its driver must earn
 three before ranged gear can finish the encounter.
 
@@ -74,10 +76,31 @@ within 0.24 dB of title, without clipped samples. Original arrangements and SFX
 are unchanged. The original stochastic-noise peak check can vary between runs;
 retain failure and repeat logs instead of lowering its threshold.
 
-Three-engine, synthetic slowdown and native Safari checks are defined in
-`.github/workflows/after-midnight-validation.yml`; independent results are
-pending until the draft review runs. Native checks use managed macOS WebDriver
-over loopback HTTP, not personal Safari settings or Finder/direct-file proof.
+On test revision `e6f6b5f`, Chromium, Firefox and WebKit pass the four expansion
+suites on source and standalone: 24 invocations. Native Safari passes 251 new
+checks and 90 original checks across both builds. All four workflows pass.
+The expansion regression completes all 43 commands without a failed exit:
+20 source suites, 11 standalone suites and 12 ordinary-input routes. The
+independent original regression passes all twelve source suites on their first
+attempt, plus its standalone/save checks and full Summer journeys.
+Playable files remain identical to game commit `2df0c1b`.
+
+[Expansion workflow](https://github.com/Ezrolith/Demo/actions/runs/40244798203),
+[original regression](https://github.com/Ezrolith/Demo/actions/runs/40244798197),
+[original browser/performance](https://github.com/Ezrolith/Demo/actions/runs/40244798338)
+and [original Safari](https://github.com/Ezrolith/Demo/actions/runs/40244798297).
+[Machine-readable results](after-midnight-results.json) record the tested
+revision, suite counts, build digest, route coverage and measurement limits.
+
+Standalone performance/audio probes pass 36 checks each at baseline High,
+4x CPU slowdown High and 4x Low, with the normal governor enabled. Across three
+opening scenes, median frame times are approximately 16.7, 33.3 and 16.7 ms
+respectively. These are CI measurements, not a minimum-FPS guarantee for later
+waves, boss encounters or physical devices.
+
+Checks are defined in `.github/workflows/after-midnight-validation.yml`.
+Native checks use managed macOS WebDriver over loopback HTTP, not personal
+Safari settings or Finder/direct-file proof.
 
 ## Build and test
 

@@ -1,0 +1,348 @@
+{
+  "schemaVersion": 1,
+  "repository": "Ezrolith/Demo",
+  "pullRequest": "https://github.com/Ezrolith/Demo/pull/6",
+  "testedRevision": "e6f6b5f362bc1b218009036dcc5be95a295b352a",
+  "playableRevision": "2df0c1b3738b6cea0696faef8720c3ebc3d774e1",
+  "standaloneSha256": "35561cef219e5cbade2187bc688fe989a8a86c2256830d5bb19bde6057310a8f",
+  "workflows": [
+    {
+      "name": "After Midnight expansion QA",
+      "runId": 40244798203,
+      "conclusion": "success",
+      "jobs": {
+        "regression": "success",
+        "browsers": "success",
+        "safari": "success"
+      }
+    },
+    {
+      "name": "Bonus adventures regression",
+      "runId": 40244798197,
+      "conclusion": "success",
+      "originalSourceSuiteFirstAttempts": 12,
+      "retries": 0
+    },
+    {
+      "name": "Browser and performance QA",
+      "runId": 40244798338,
+      "conclusion": "success"
+    },
+    {
+      "name": "Native Safari QA",
+      "runId": 40244798297,
+      "conclusion": "success"
+    }
+  ],
+  "expansionAcceptanceChecksPerBuild": {
+    "vigilantes": 37,
+    "cases": 75,
+    "modes": 33,
+    "integration": 31,
+    "surveyorGear": 5
+  },
+  "expansionBrowserMatrix": {
+    "engines": [
+      "chromium",
+      "firefox",
+      "webkit"
+    ],
+    "builds": [
+      "source",
+      "standalone"
+    ],
+    "suites": [
+      "vigilantes",
+      "after-midnight-cases",
+      "after-midnight-modes",
+      "after-midnight-integration"
+    ],
+    "invocations": 24,
+    "conclusion": "success"
+  },
+  "nativeSafariChecks": {
+    "original": 90,
+    "expansion": 251,
+    "builds": [
+      "source",
+      "standalone"
+    ],
+    "transport": "managed macOS Safari WebDriver over loopback HTTP",
+    "conclusion": "success"
+  },
+  "guidedOrdinaryInputRoutes": {
+    "builds": [
+      "source",
+      "standalone"
+    ],
+    "routes": [
+      {
+        "case": "Dead Air",
+        "hero": "Nite Owl"
+      },
+      {
+        "case": "Undertow",
+        "hero": "Silk Spectre"
+      },
+      {
+        "case": "The Glass Archive",
+        "hero": "Rorschach",
+        "measuredMeleeHits": {
+          "source": 7,
+          "standalone": 6
+        }
+      },
+      {
+        "mode": "Night Patrol",
+        "result": "first wave cleared, kit and armour chosen, successful extraction"
+      },
+      {
+        "mode": "Rescue Clock",
+        "hero": "Silk Spectre",
+        "theme": "rooftops",
+        "result": "all four physical escorts safe, none lost, positive remaining time"
+      }
+    ],
+    "method": "Real menus, interludes, requestAnimationFrame and keyboard/mouse input; normal damage; read-only route telemetry; no placement, tester refills, invulnerability or quest edits.",
+    "localConclusion": "success",
+    "ciConclusion": "success",
+    "ciRescueClock": {
+      "source": {
+        "safe": 4,
+        "lost": 0,
+        "remainingSeconds": 205.79,
+        "lowestHealth": 60
+      },
+      "standalone": {
+        "safe": 4,
+        "lost": 0,
+        "remainingSeconds": 200.62,
+        "lowestHealth": 69.59
+      }
+    }
+  },
+  "performance": {
+    "browser": "Chromium 156.0.8078.4",
+    "build": "standalone",
+    "scenes": [
+      "Dead Air opening",
+      "Undertow opening",
+      "The Glass Archive opening"
+    ],
+    "governorEnabled": true,
+    "samples": [
+      {
+        "cpuSlowdown": 1,
+        "quality": "high",
+        "checks": 36,
+        "medianOfSceneMedianFrameMs": 16.7,
+        "conclusion": "success"
+      },
+      {
+        "cpuSlowdown": 4,
+        "quality": "high",
+        "checks": 36,
+        "medianOfSceneMedianFrameMs": 33.3,
+        "conclusion": "success"
+      },
+      {
+        "cpuSlowdown": 4,
+        "quality": "low",
+        "checks": 36,
+        "medianOfSceneMedianFrameMs": 16.7,
+        "conclusion": "success"
+      }
+    ],
+    "audio": "Finite, active and unclipped in each sampled scene."
+  },
+  "limits": [
+    "Guided automated routes do not establish unbiased first-time human discovery or pacing.",
+    "Full ordinary-input story routes cover one hero per case; acceptance suites separately exercise all nine hero/case combinations.",
+    "Patrol ordinary-input proof covers the first wave, camp upgrades and extraction, not an exhaustive late-wave balance test.",
+    "Slowdown measurements cover opening scenes on CI, not every encounter or physical device.",
+    "Subjective listening, assistive technology and native Safari direct-file opening remain unverified.",
+    "Touch gameplay is unsupported."
+  ],
+  "expansionRegression": {
+    "commands": 43,
+    "sourceSuites": 20,
+    "standaloneSuites": 11,
+    "ordinaryInputRoutes": 12,
+    "failedExits": 0,
+    "conclusion": "success",
+    "exits": [
+      {
+        "command": "source-smoke",
+        "exitCode": 0
+      },
+      {
+        "command": "source-visual",
+        "exitCode": 0
+      },
+      {
+        "command": "source-audio",
+        "exitCode": 0
+      },
+      {
+        "command": "source-powers",
+        "exitCode": 0
+      },
+      {
+        "command": "source-saves",
+        "exitCode": 0
+      },
+      {
+        "command": "source-settings",
+        "exitCode": 0
+      },
+      {
+        "command": "source-ledger",
+        "exitCode": 0
+      },
+      {
+        "command": "source-encounters",
+        "exitCode": 0
+      },
+      {
+        "command": "source-flows",
+        "exitCode": 0
+      },
+      {
+        "command": "source-bonus",
+        "exitCode": 0
+      },
+      {
+        "command": "source-ninth-minute",
+        "exitCode": 0
+      },
+      {
+        "command": "source-long-summer",
+        "exitCode": 0
+      },
+      {
+        "command": "source-bonus-portability",
+        "exitCode": 0
+      },
+      {
+        "command": "source-bonus-storage",
+        "exitCode": 0
+      },
+      {
+        "command": "source-bonus-interrogation",
+        "exitCode": 0
+      },
+      {
+        "command": "source-vigilantes",
+        "exitCode": 0
+      },
+      {
+        "command": "source-after-midnight-cases",
+        "exitCode": 0
+      },
+      {
+        "command": "source-after-midnight-modes",
+        "exitCode": 0
+      },
+      {
+        "command": "source-after-midnight-integration",
+        "exitCode": 0
+      },
+      {
+        "command": "source-surveyor-gear",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-bonus",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-ninth-minute",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-long-summer",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-bonus-portability",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-bonus-storage",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-bonus-interrogation",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-vigilantes",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-after-midnight-cases",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-after-midnight-modes",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-after-midnight-integration",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-surveyor-gear",
+        "exitCode": 0
+      },
+      {
+        "command": "source-original-summer-live",
+        "exitCode": 0
+      },
+      {
+        "command": "source-play-after-midnight",
+        "exitCode": 0
+      },
+      {
+        "command": "source-play-after-midnight-patrol",
+        "exitCode": 0
+      },
+      {
+        "command": "source-play-after-midnight-undertow",
+        "exitCode": 0
+      },
+      {
+        "command": "source-play-after-midnight-archive",
+        "exitCode": 0
+      },
+      {
+        "command": "source-play-after-midnight-clock",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-original-summer-live",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-play-after-midnight",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-play-after-midnight-patrol",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-play-after-midnight-undertow",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-play-after-midnight-archive",
+        "exitCode": 0
+      },
+      {
+        "command": "standalone-play-after-midnight-clock",
+        "exitCode": 0
+      }
+    ]
+  }
+}
