@@ -257,6 +257,8 @@
 
   // ---- Controls -----------------------------------------------------------------
   function controlRows() {
+    const actor = Engine.stack.find(scene => scene.player)?.player;
+    if (actor?.controlRows) return actor.controlRows;
     const tk = Input.bindings.telekinesis || [];
     const orC = tk.includes('KeyC') ? ' OR C' : '';
     const toggle = Schema.value('tkMode') === 'toggle';
@@ -294,7 +296,8 @@
     render(ctx) {
       dim(ctx, 0.88);
       Gfx.text(ctx, 'CONTROLS', DM.W / 2, 100, { size: 44, color: '#eefbff', align: 'center', weight: 700, spacing: 10 });
-      Gfx.text(ctx, 'Powers unlock as Jon changes. You start as a man.', DM.W / 2, 134, { size: 15, color: 'rgba(200,225,240,0.6)', align: 'center', font: F.type });
+      const actor = Engine.stack.find(scene => scene.player)?.player;
+      Gfx.text(ctx, actor?.profile ? actor.profile.name + ' · Human, vulnerable, resourceful.' : 'Powers unlock as Jon changes. You start as a man.', DM.W / 2, 134, { size: 15, color: 'rgba(200,225,240,0.6)', align: 'center', font: F.type });
       controlRows().forEach(([a, b], i) => {
         const y = 184 + i * 31;
         Gfx.text(ctx, a, DM.W / 2 - 20, y, { size: 17, color: DM.C.blue, align: 'right', spacing: 2 });
@@ -366,7 +369,7 @@
       DM.Audio.setMusicFilter(500);
       // Three decoherences at one checkpoint: offer the gentler challenge, without nagging.
       this.offer = DM.Challenge.deaths(this.play) >= 3 && Schema.value('challenge') !== 'story' && !Schema.value('invulnerable');
-      const items = [{ label: 'REASSEMBLE', action: () => this.play.retry() }];
+      const items = [{ label: this.play.chapter.afterMidnight ? 'GET BACK UP' : 'REASSEMBLE', action: () => this.play.retry() }];
       if (this.offer) {
         items.push({
           label: 'TRY STORY CHALLENGE',
@@ -385,8 +388,8 @@
     }
     render(ctx) {
       dim(ctx, Math.min(0.8, this.t));
-      Gfx.text(ctx, 'DECOHERENCE', DM.W / 2, 270, { size: 64, color: '#bff1ff', align: 'center', weight: 700, spacing: 14 });
-      Gfx.text(ctx, 'Your intrinsic field came apart. You have put yourself back together before.', DM.W / 2, 316, { size: 18, color: 'rgba(220,238,255,0.75)', align: 'center', font: F.type });
+      Gfx.text(ctx, this.play.chapter.afterMidnight ? 'DOWN, NOT OUT' : 'DECOHERENCE', DM.W / 2, 270, { size: 64, color: '#bff1ff', align: 'center', weight: 700, spacing: 14 });
+      Gfx.text(ctx, this.play.chapter.afterMidnight ? 'You are only human. Take a breath and return to the checkpoint.' : 'Your intrinsic field came apart. You have put yourself back together before.', DM.W / 2, 316, { size: 18, color: 'rgba(220,238,255,0.75)', align: 'center', font: F.type });
       if (this.t <= 0.6) return;
       this.menu.render(ctx);
       if (this.offer) {

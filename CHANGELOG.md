@@ -1,5 +1,15 @@
 # Changes
 
+## 0.2.0 — After Midnight (draft)
+- Part A review: isolated optional gear from campaign hot loops, strengthened hero visibility, cleared mode arrivals, added dense themed dressing and replay layouts, split the board into two screens, and reformatted the six expansion files. See [the Part A report](docs/AFTER-MIDNIGHT-PART-A.md).
+- Corrected Silk Spectre's guard movement slowdown from the first frame, including immediate release and low-stamina behavior; retained parry/damage timing and added five actual-movement regressions.
+- Added selectable Nite Owl, Silk Spectre and Rorschach, with eighteen distinct nonlethal gear actions, human vulnerability and physical traversal.
+- Added Dead Air, Undertow and The Glass Archive: three cases with three checkpoint stages each, new cast, themed art/weather/lighting and original musical arrangements.
+- Added Night Patrol with escalating waves, capped gear choices and extraction; Rescue Clock with physical escorts, threats, time bonuses and honest partial/timeout outcomes.
+- Added independent hero/case checkpoints, personal bests, field manuals, safe restart and portable progress with preview and explicit restore.
+- Kept the original six chapters, three bonus adventures, save slots and original art/music paths intact. Human defeat/retry effects are separate from Manhattan's atom effects.
+- New content remains a draft review candidate; nothing is merged or deployed. See [the player guide](docs/AFTER-MIDNIGHT.md) and [technical handover](docs/AFTER-MIDNIGHT-HANDOVER.md).
+
 ## Bonus compatibility and backup release (25 October 2026)
 - Added explicit bonus-save JSON export/preview/restore, with stale-file and keyboard-accessibility safeguards; original campaign saves unchanged.
 - Corrected Long Summer truck camera overzoom without changing original camera behaviour.

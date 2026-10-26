@@ -237,6 +237,8 @@
     // (Chapter Select resumes there); Continue only ever moves forward, so
     // replaying an earlier chapter never loses the furthest point.
     checkpointAt(chapterId, stage, carry) {
+      const progress = DM.Chapters.get(chapterId)?.progress;
+      if (progress?.checkpointAt) return progress.checkpointAt(chapterId, stage, carry);
       if (DM.Chapters.get(chapterId)?.bonus) return DM.Bonus.checkpointAt(chapterId, stage, carry);
       const c = carry || null;
       if (stage > 0) this.data.checkpoints[chapterId] = { stage, carry: c };

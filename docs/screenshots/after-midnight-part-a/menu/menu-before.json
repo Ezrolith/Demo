@@ -1,0 +1,31 @@
+{
+  "label": "before",
+  "records": [
+    {
+      "screenshot": "combined-board-before-live.webp",
+      "seconds": 10.011,
+      "step": "combined",
+      "hero": "niteowl",
+      "items": [
+        "OPEN CASE FILE",
+        "HERO CONTROLS & TACTICS",
+        "BACK UP / RESTORE PROGRESS",
+        "BACK TO THE MAIN GAME"
+      ],
+      "error": null,
+      "sourceScreenshot": "combined-board-before-live.png",
+      "pixelSha256": "7727245e2bf6758c96583f21c7385bee26a77a3d9fd173f7239de9eb72e39ffe"
+    }
+  ],
+  "errors": [],
+  "captureEncoding": {
+    "sourceFormat": "PNG",
+    "publishedFormat": "lossless WebP",
+    "lossless": true,
+    "exact": true,
+    "verification": "Decoded RGBA pixel bytes are identical to the original PNG.",
+    "sceneOrPixelChanges": false,
+    "originalPNGsRetainedLocally": true,
+    "integrityManifest": "../pixel-integrity.json"
+  }
+}

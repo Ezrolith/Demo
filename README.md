@@ -2,6 +2,12 @@
 
 Bonus adventures: see [docs/BONUS.md](docs/BONUS.md); [backup/browser/performance notes](docs/PLATFORM-QA-HANDOVER.md).
 
+**After Midnight expansion:** choose Nite Owl, Silk Spectre or Rorschach for three new cases,
+Night Patrol and Rescue Clock. Each hero has six distinct pieces of field gear and their own
+checkpoints. Open **AFTER MIDNIGHT** on the title screen. [Player guide](docs/AFTER-MIDNIGHT.md) ·
+[Development and verification](docs/AFTER-MIDNIGHT-HANDOVER.md) ·
+[Part A review response](docs/AFTER-MIDNIGHT-PART-A.md).
+
 A browser game inspired by *Watchmen*. You play Jon Osterman's journey: a physicist in 1959, an accident in an intrinsic field chamber, a body rebuilt atom by atom, and then Dr. Manhattan, gaining powers chapter by chapter until the Doomsday Clock reaches midnight.
 
 It runs in any modern browser on Mac or PC, with no installs, no server and no build step.

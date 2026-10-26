@@ -8,7 +8,7 @@
     version: 1, checkpoints: {}, completed: {}, deaths: 0
   });
   const Bonus = {
-    list: [], data: null, available: true,
+    list: [], data: null, available: true, storageWarned: false,
     register(ch) {
       ch.bonus = true;
       ch.index = 0;
@@ -28,8 +28,16 @@
       if (this.data)
         return this.data;
       this.data = fresh();
+      let raw;
       try {
-        const d = JSON.parse(localStorage.getItem(KEY) || 'null');
+        raw = localStorage.getItem(KEY);
+      }
+      catch (_) {
+        this.storageFailure();
+        return this.data;
+      }
+      try {
+        const d = JSON.parse(raw || 'null');
         if (d && d.version === 1) {
           for (const ch of this.list) {
             const cp = d.checkpoints && d.checkpoints[ch.id];
@@ -61,9 +69,22 @@
     write() {
       try {
         localStorage.setItem(KEY, JSON.stringify(this.data));
+        this.available = true;
+        this.storageWarned = false;
+        return true;
       }
       catch (_) {
-        this.available = false;
+        this.storageFailure();
+        return false;
+      }
+    },
+    storageFailure() {
+      this.available = false;
+      if (this.storageWarned) return;
+      const play = E.stack.find(scene => scene.chapter && scene.chapter.bonus && scene.hud);
+      if (play) {
+        play.hud.toast('BONUS PROGRESS COULD NOT BE SAVED · BACK UP FROM BONUS LEVELS', '#efb47a');
+        this.storageWarned = true;
       }
     },
     checkpointAt(id, stage, carry) {
@@ -275,8 +296,9 @@
       G.text(ctx, ch.menuTagline || 'SOME NIGHTS NEVER MAKE THE PAPERS.', 977, 629, {
         size: 11, align: 'center', spacing: 1.4, color: '#dad4c3'
       });
-      G.text(ctx, 'KEYBOARD + MOUSE · ALL POWERS · SEPARATE BONUS SAVES', 88, 660, {
-        size: 11, spacing: 1.5, color: '#b5ad99'
+      G.text(ctx, Bonus.available ? 'KEYBOARD + MOUSE · ALL POWERS · SEPARATE BONUS SAVES'
+        : 'BONUS PROGRESS IS SESSION ONLY · EXPORT A BACKUP BEFORE CLOSING', 88, 660, {
+        size: 11, spacing: 1.5, color: Bonus.available ? '#b5ad99' : '#efb47a'
       });
       G.postFx(ctx);
     }

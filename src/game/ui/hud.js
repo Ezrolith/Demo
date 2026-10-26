@@ -283,10 +283,10 @@
       const x = DM.W - 28;
       if (p.form !== 'human') backing(ctx, x - 48 - 220 - 12, 16, 220 + 24, 42);
       if (ch) Gfx.clock(ctx, x - 18, 40, 18, ch.clock, { blood: true });
-      if (p.form === 'manhattan') {
+      if (p.form === 'manhattan' || p.profile) {
         const w = 220;
         const bx = x - 48 - w;
-        Gfx.text(ctx, 'COHERENCE', bx, 33, { size: 11, color: 'rgba(200,225,240,0.75)', spacing: 3 });
+        Gfx.text(ctx, p.profile ? 'HEALTH' : 'COHERENCE', bx, 33, { size: 11, color: 'rgba(200,225,240,0.75)', spacing: 3 });
         const frac = p.coherence / p.maxCoherence;
         const col = frac < 0.35 ? (Math.sin(this.t * 10) > 0 ? '#ff5a4a' : '#ff9a8a') : '#bff1ff';
         Gfx.bar(ctx, bx, 40, w, 9, frac, col, { segments: 10 });
@@ -300,7 +300,7 @@
     }
 
     renderPowers(ctx, p) {
-      const defs = DM.Powers.list.filter((d) => p.powers[d.id] && d.forms.includes(p.form));
+      const defs = (p.powerDefs || DM.Powers.list).filter((d) => p.powers[d.id] && d.forms.includes(p.form));
       if (!defs.length) return;
       const size = 58, gap = 10;
       const total = defs.length * size + (defs.length - 1) * gap;
@@ -309,7 +309,7 @@
       const bw = Math.max(total, 300);
       const eLow = p.noEnergyT > 0;
       backing(ctx, DM.W / 2 - bw / 2 - 12, y0 - 34, bw + 24, size + 46);
-      Gfx.text(ctx, 'INTRINSIC FIELD', DM.W / 2 - bw / 2, y0 - 16, { size: 10, color: eLow ? '#ff5a4a' : 'rgba(200,225,240,0.65)', spacing: 3 });
+      Gfx.text(ctx, p.gearLabel || 'INTRINSIC FIELD', DM.W / 2 - bw / 2, y0 - 16, { size: 10, color: eLow ? '#ff5a4a' : 'rgba(200,225,240,0.65)', spacing: 3 });
       Gfx.bar(ctx, DM.W / 2 - bw / 2, y0 - 11, bw, 5, p.energy / p.maxEnergy, eLow ? '#ff5a4a' : '#5fd4ff');
       defs.forEach((d, i) => {
         const st = p.powers[d.id];
@@ -321,7 +321,9 @@
         ctx.strokeStyle = active ? d.color : ready ? 'rgba(160,210,240,0.35)' : 'rgba(160,210,240,0.12)';
         ctx.lineWidth = active ? 2 : 1;
         ctx.strokeRect(x + 0.5, y0 + 0.5, size - 1, size - 1);
-        Gfx.icon(ctx, d.id, x + size / 2, y0 + size / 2 - 5, 30, ready || active ? d.color : 'rgba(150,170,190,0.4)', this.t);
+        const color = ready || active ? d.color : 'rgba(150,170,190,0.4)';
+        if (d.icon) d.icon(ctx, x + size / 2, y0 + size / 2 - 5, 30, color, this.t);
+        else Gfx.icon(ctx, d.id, x + size / 2, y0 + size / 2 - 5, 30, color, this.t);
         if (st.cd > 0 && d.cooldown > 0) {
           const k = st.cd / d.cooldown;
           ctx.fillStyle = 'rgba(0,0,0,0.55)';

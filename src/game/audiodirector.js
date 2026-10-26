@@ -205,7 +205,7 @@
         return;
       }
       // Heartbeat.
-      const low = p.form === 'manhattan' && p.coherence < HEART_LOW;
+      const low = (p.form === 'manhattan' || p.profile) && p.coherence < HEART_LOW;
       if (low) {
         if (!this.low) this.beatT = 0;
         this.beatT -= dt;
@@ -255,7 +255,7 @@
       if (p.moving && !p.down && !p.hidden && this.stepSign && s !== this.stepSign) {
         const m = Amb().maps[play.ctx.mapName];
         const surface = m && m.surface;
-        if (surface && p.form === 'human') Audio.play('step', { surface });
+        if (surface && (p.form === 'human' || p.profile)) Audio.play('step', { surface });
         else if (surface && p.form === 'manhattan' && ++this.stepCount % 2 === 0) Audio.play('step', { surface, form: 'manhattan' });
       }
       this.stepSign = s;

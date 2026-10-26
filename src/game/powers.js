@@ -34,7 +34,8 @@
     def.forms = def.forms || ['manhattan'];
     def.cost = def.cost || 0;
     def.cooldown = def.cooldown || 0;
-    Powers.list.push(def);
+    // Optional player loadouts stay addressable without extending Jon's loops.
+    if (!def.playerOnly) Powers.list.push(def);
     Powers.byId[def.id] = def;
     return def;
   };
@@ -93,7 +94,7 @@
   // Player.update stamps p.powerFrame; only a scene that was already on top last
   // frame counts, so the key that closes an overlay is not replayed into Jon.
   Powers.latch = (p) => {
-    for (const def of Powers.list) {
+    for (const def of p.powerDefs || Powers.list) {
       const s = p.powers[def.id];
       if (!s || !def.forms.includes(p.form) || !Input.pressed(def.action)) continue;
       if (def.press) arm(s);

@@ -279,17 +279,28 @@
         label: 'E · ASK RORSCHACH TO QUESTION HIM', range: 85,
         enabled: () => this.ko && !this.dead && !this.ctx.flags.interrogated,
         onInteract: () => {
+          const companion = this.ctx.flags.rorschach;
+          if (companion.taskTarget instanceof SignalGuard)
+            companion.taskTarget.interrogating = false;
           this.interrogating = true;
-          this.ctx.flags.rorschach.taskTarget = this;
+          companion.taskTarget = this;
           this.ctx.toast('RORSCHACH IS COMING OVER', GOLD);
         },
       };
     }
     update(dt, world) {
       super.update(dt, world);
-      if (!this.interrogating || world.ceasefire || this.dead)
+      if (!this.interrogating)
         return;
       const companion = this.ctx.flags.rorschach;
+      if (this.dead || this.ctx.flags.interrogated || companion.taskTarget !== this) {
+        this.interrogating = false;
+        if (companion.taskTarget === this)
+          companion.taskTarget = null;
+        return;
+      }
+      if (world.ceasefire)
+        return;
       if (U.dist(companion.x, companion.y, this.x, this.y) > 75)
         return;
       this.interrogating = false;

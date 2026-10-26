@@ -11,7 +11,7 @@
   'use strict';
   const DM = (window.DM = window.DM || {});
 
-  DM.VERSION = '0.1.0';
+  DM.VERSION = '0.2.0';
 
   // Logical resolution. The engine letterboxes this to any window size.
   DM.W = 1280;

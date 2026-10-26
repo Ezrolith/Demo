@@ -1,0 +1,47 @@
+{
+  "label": "after",
+  "records": [
+    {
+      "screenshot": "hero-screen-after-live.webp",
+      "seconds": 10.01,
+      "step": "hero",
+      "hero": "niteowl",
+      "items": [
+        "CHOOSE A CASE OR MODE",
+        "HERO CONTROLS & TACTICS",
+        "BACK UP / RESTORE PROGRESS",
+        "BACK TO THE MAIN GAME"
+      ],
+      "error": null,
+      "sourceScreenshot": "hero-screen-after-live.png",
+      "pixelSha256": "b16f00f6a8508d2c76604110c2649cc1e877a3727152aa9314b1109e8e0ff3e4"
+    },
+    {
+      "screenshot": "case-screen-after-live.webp",
+      "seconds": 10.009099999994039,
+      "step": "cases",
+      "hero": "silkspectre",
+      "items": [
+        "OPEN CASE FILE",
+        "HERO CONTROLS & TACTICS",
+        "BACK UP / RESTORE PROGRESS",
+        "CHANGE HERO",
+        "BACK TO THE MAIN GAME"
+      ],
+      "error": null,
+      "sourceScreenshot": "case-screen-after-live.png",
+      "pixelSha256": "d06c86b1ac6d1d6e5cc0ad9b295b933e8826243d8515c9902ac0635864daeb74"
+    }
+  ],
+  "errors": [],
+  "captureEncoding": {
+    "sourceFormat": "PNG",
+    "publishedFormat": "lossless WebP",
+    "lossless": true,
+    "exact": true,
+    "verification": "Decoded RGBA pixel bytes are identical to the original PNG.",
+    "sceneOrPixelChanges": false,
+    "originalPNGsRetainedLocally": true,
+    "integrityManifest": "../pixel-integrity.json"
+  }
+}

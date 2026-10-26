@@ -1,5 +1,13 @@
 # Handover: how to keep developing this game
 
+> **Part A review response (26 October 2026):** [Part A report](docs/AFTER-MIDNIGHT-PART-A.md) covers performance isolation, hero visibility, density/variants, the two-step board, style and fresh sequential verification. Work stays on `codex/watchmen-stories` / draft PR #6. Stop after Part A; The Glass Palace / Part B has not been started. Preserve the six campaign chapter files, original music and original engine presentation.
+
+> **Review handoff (26 October 2026):** use `codex/watchmen-stories` and draft PR #6. Start with [the pre-review check](docs/PRE-REVIEW-CHECK.md), then [the expansion handover](docs/AFTER-MIDNIGHT-HANDOVER.md). The guard-speed follow-up has fresh focused validation; earlier full CI is identified by its tested revision. Keep this work in draft, without merging or deploying.
+
+> **Active expansion:** `codex/watchmen-stories` starts from the reviewed QA head `b67f8b6`. [After Midnight handover](docs/AFTER-MIDNIGHT-HANDOVER.md) tracks the full expansion goal and verification gates. Three playable heroes, three story cases and two replay modes are additive; retain the original six chapters and three bonus adventures. No merge or deployment.
+
+> **Current QA continuation (25 October 2026):** `codex/gameplay-qa-polish` starts from `codex/bonus-three` at `ed65bbf`, with a draft PR back into `codex/bonus-three`. Read [the current QA handover](docs/QA-POLISH-HANDOVER.md) for changes, fresh results and remaining limitations. **Do not merge or deploy.** The older Claude branch table and integration workflow below are historical; they are not the base or release instructions for this review.
+
 > Bonus adventures: see [docs/BONUS.md](docs/BONUS.md). The original campaign and separate Story H branch remain untouched.
 
 This file is for whoever picks the project up next, whether a person or an AI coding assistant. Read it first, then `README.md`, then `docs/ROADMAP.md`.

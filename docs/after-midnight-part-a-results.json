@@ -1,0 +1,699 @@
+{
+  "schemaVersion": 1,
+  "scope": "Part A only; Part B not started",
+  "repository": "Ezrolith/Demo",
+  "branch": "codex/watchmen-stories",
+  "pullRequest": "https://github.com/Ezrolith/Demo/pull/6",
+  "baseRevision": "c60f5b1818e4241932110b905f4651de59f9cb4d",
+  "comparisonBase": "ed65bbfb0416f08e5aa507bf221bdcc7ca413dff",
+  "environment": {
+    "platform": "darwin",
+    "architecture": "arm64",
+    "node": "v24.21.0",
+    "chromium": "151.0.7922.34"
+  },
+  "sourceScriptsSha256": "8faba66147205479b1d9a8de9f7faff0d156ec1183a9af814119dd864a5b6bee",
+  "standaloneSha256": "5ae1caa5a84f502c09af7e27a4272c995bb579e5cf7f87b9f5db8c3c891bbbe7",
+  "performance": {
+    "reportedSlowerHostReproduced": false,
+    "unchangedVisualFunctionSha256": "83c9e132e8f9366303c8ff410b9ca35759fb1e615011d8d23cb4f75c0c9cfd4b",
+    "beforePaired": [
+      {
+        "run": 1,
+        "baseline": {
+          "on": 9.28,
+          "off": 8.4
+        },
+        "expansion": {
+          "on": 9.25,
+          "off": 8.45
+        },
+        "postEffectPass": true,
+        "within105PercentOfBaseline": true
+      },
+      {
+        "run": 2,
+        "baseline": {
+          "on": 9.3,
+          "off": 8.44
+        },
+        "expansion": {
+          "on": 9.35,
+          "off": 8.5
+        },
+        "postEffectPass": true,
+        "within105PercentOfBaseline": true
+      },
+      {
+        "run": 3,
+        "baseline": {
+          "on": 9.68,
+          "off": 8.75
+        },
+        "expansion": {
+          "on": 9.32,
+          "off": 8.41
+        },
+        "postEffectPass": true,
+        "within105PercentOfBaseline": true
+      }
+    ],
+    "afterPaired": [
+      {
+        "run": 1,
+        "baseline": {
+          "on": 9.37,
+          "off": 8.51
+        },
+        "expansion": {
+          "on": 9.16,
+          "off": 8.32
+        },
+        "postEffectPass": true,
+        "within105PercentOfBaseline": true
+      },
+      {
+        "run": 2,
+        "baseline": {
+          "on": 9.83,
+          "off": 8.95
+        },
+        "expansion": {
+          "on": 9.17,
+          "off": 8.31
+        },
+        "postEffectPass": true,
+        "within105PercentOfBaseline": true
+      },
+      {
+        "run": 3,
+        "baseline": {
+          "on": 9.78,
+          "off": 9.01
+        },
+        "expansion": {
+          "on": 9.43,
+          "off": 8.63
+        },
+        "postEffectPass": true,
+        "within105PercentOfBaseline": true
+      }
+    ],
+    "threeConsecutiveVisualRuns": [
+      {
+        "run": 1,
+        "exitCode": 0,
+        "measurements": [
+          "✓ pre-composited post effects cost within 15% of none (DPR 1)  — 2.51 vs 2.29 ms/frame",
+          "✓ pre-composited post effects cost within 15% of none (DPR 2)  — 10.12 vs 9.15 ms/frame"
+        ],
+        "finalLine": "All atmosphere checks passed."
+      },
+      {
+        "run": 2,
+        "exitCode": 0,
+        "measurements": [
+          "✓ pre-composited post effects cost within 15% of none (DPR 1)  — 2.6 vs 2.36 ms/frame",
+          "✓ pre-composited post effects cost within 15% of none (DPR 2)  — 9.47 vs 8.66 ms/frame"
+        ],
+        "finalLine": "All atmosphere checks passed."
+      },
+      {
+        "run": 3,
+        "exitCode": 0,
+        "measurements": [
+          "✓ pre-composited post effects cost within 15% of none (DPR 1)  — 2.58 vs 2.38 ms/frame",
+          "✓ pre-composited post effects cost within 15% of none (DPR 2)  — 9.01 vs 8.2 ms/frame"
+        ],
+        "finalLine": "All atmosphere checks passed."
+      }
+    ],
+    "thresholdsUnchanged": true,
+    "qualification": "Local before pairs already met the 5 percent bound. Optional global work was removed; the externally reported raster-cost delta is not attributed or reproduced by this host."
+  },
+  "visibility": {
+    "threshold": 1.8,
+    "metric": {
+      "colorSpace": "sRGB channels linearized with the standard 0.04045 transfer breakpoint",
+      "luminanceWeights": [
+        0.2126,
+        0.7152,
+        0.0722
+      ],
+      "hero": "median luminance in a facing-aligned ellipse, world radii 12 and 16",
+      "floor": "median luminance in a 28..48-world-unit annulus, excluding other character bodies",
+      "dressing": "Baked floor dressing is retained; no post-observation bright-pixel exclusion.",
+      "ratio": "(max(hero,floor)+0.05)/(min(hero,floor)+0.05)",
+      "minimum": 1.8
+    },
+    "views": 27,
+    "minimumContrast": 1.9071432336149312,
+    "minimumWallSeconds": 10.02229999999702,
+    "normalDamage": true,
+    "actorOrCameraEdits": false,
+    "errors": 0,
+    "failures": 0,
+    "metadata": "screenshots/after-midnight-part-a/after/capture-after.json",
+    "noviceOneSecondRecognitionVerified": false
+  },
+  "density": {
+    "checksPerBuild": 53,
+    "builds": [
+      "source",
+      "standalone"
+    ],
+    "conclusion": "success",
+    "coverage": "Fifteen story/theme/preset entries; continuous critical 400 logical-pixel windows at normal zoom against genuine prop metadata; shared art/collision; free connected seeds; actual lamp differences; original save isolation."
+  },
+  "menu": {
+    "integrationChecksPerBuild": 36,
+    "steps": [
+      "hero",
+      "cases and modes"
+    ],
+    "minimumLogicalTextPx": 13,
+    "liveUiCaptures": 3
+  },
+  "style": {
+    "beforeLinesOver140": 89,
+    "afterLinesOver140": 0,
+    "maximumLineLength": 116,
+    "files": [
+      {
+        "file": "src/game/vigilantes.js",
+        "maxLineLength": 111,
+        "normalizedAstSha256": "8918af5970495759ff4801f292282bffa2a1696cd55633d3395ef6e6295dde6e",
+        "astEquivalent": true,
+        "oneSiblingStatementPerLine": true
+      },
+      {
+        "file": "src/game/after-midnight.js",
+        "maxLineLength": 100,
+        "normalizedAstSha256": "1ae7830297e64e68531fb5524391b260a6cd436b319834f92dee833b0e9344c6",
+        "astEquivalent": true,
+        "oneSiblingStatementPerLine": true
+      },
+      {
+        "file": "src/game/after-midnight-menu.js",
+        "maxLineLength": 100,
+        "normalizedAstSha256": "fa74ca5c2b0c55b60f5be8389f312f7ffa2bca90062ccf6ce7f49def1c735761",
+        "astEquivalent": true,
+        "oneSiblingStatementPerLine": true
+      },
+      {
+        "file": "src/game/after-midnight-modes.js",
+        "maxLineLength": 116,
+        "normalizedAstSha256": "00f7fa73b3d4e0c6f7507d394f98c8f67b021cf2ca4f9fdc4c3287dc99c655fa",
+        "astEquivalent": true,
+        "oneSiblingStatementPerLine": true
+      },
+      {
+        "file": "src/data/after-midnight-atmosphere.js",
+        "maxLineLength": 100,
+        "normalizedAstSha256": "1baec6ee84406c64601558422f305a2836fec9ce890acac294c97c11f6d09ded",
+        "astEquivalent": true,
+        "oneSiblingStatementPerLine": true
+      },
+      {
+        "file": "src/data/after-midnight-cases.js",
+        "maxLineLength": 116,
+        "normalizedAstSha256": "4416692b3495e66dd6b4be4a47aaf8c4f7b778f67700d6a88c44e7ecc61af6c7",
+        "astEquivalent": true,
+        "oneSiblingStatementPerLine": true
+      }
+    ]
+  },
+  "suiteResults": {
+    "source": {
+      "startedAtUtc": "2026-10-26T15:25:24.942Z",
+      "target": "index.html",
+      "method": "One child process at a time; stdout/stderr retained together; real process exit codes.",
+      "sourceScriptsSha256": "8faba66147205479b1d9a8de9f7faff0d156ec1183a9af814119dd864a5b6bee",
+      "standaloneSha256": "5ae1caa5a84f502c09af7e27a4272c995bb579e5cf7f87b9f5db8c3c891bbbe7",
+      "suites": [
+        {
+          "suite": "smoke",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 98.77,
+          "finalLine": "Smoke test passed.",
+          "log": "tests/out/part-a/final-source/smoke.log"
+        },
+        {
+          "suite": "visual",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 77.3,
+          "finalLine": "All atmosphere checks passed.",
+          "log": "tests/out/part-a/final-source/visual.log"
+        },
+        {
+          "suite": "audio",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 243.01,
+          "finalLine": "All audio checks passed.",
+          "log": "tests/out/part-a/final-source/audio.log"
+        },
+        {
+          "suite": "powers",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 54.64,
+          "finalLine": "All mechanics checks passed.",
+          "log": "tests/out/part-a/final-source/powers.log"
+        },
+        {
+          "suite": "saves",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 108.72,
+          "finalLine": "All save & robustness checks passed.",
+          "log": "tests/out/part-a/final-source/saves.log"
+        },
+        {
+          "suite": "settings",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 68.34,
+          "finalLine": "All settings & accessibility checks passed.",
+          "log": "tests/out/part-a/final-source/settings.log"
+        },
+        {
+          "suite": "ledger",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 34.03,
+          "finalLine": "All ledger & combat-feel checks passed.",
+          "log": "tests/out/part-a/final-source/ledger.log"
+        },
+        {
+          "suite": "encounters",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.07,
+          "finalLine": "All encounter checks passed.",
+          "log": "tests/out/part-a/final-source/encounters.log"
+        },
+        {
+          "suite": "flows",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 131.9,
+          "finalLine": "All story flow checks passed.",
+          "log": "tests/out/part-a/final-source/flows.log"
+        },
+        {
+          "suite": "bonus",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 2.72,
+          "finalLine": "BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).",
+          "log": "tests/out/part-a/final-source/bonus.log"
+        },
+        {
+          "suite": "ninth-minute",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 5.71,
+          "finalLine": "NINTH MINUTE PASSED: 75 checks (normal file loading).",
+          "log": "tests/out/part-a/final-source/ninth-minute.log"
+        },
+        {
+          "suite": "long-summer",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 9.05,
+          "finalLine": "LONG SUMMER PASSED: 82 checks (normal file loading).",
+          "log": "tests/out/part-a/final-source/long-summer.log"
+        },
+        {
+          "suite": "vigilantes",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.14,
+          "finalLine": "VIGILANTES PASSED: 43 checks (chromium, index.html).",
+          "log": "tests/out/part-a/final-source/vigilantes.log"
+        },
+        {
+          "suite": "after-midnight-cases",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 2.54,
+          "finalLine": "AFTER MIDNIGHT CASES PASSED: 75 checks (chromium, index.html).",
+          "log": "tests/out/part-a/final-source/after-midnight-cases.log"
+        },
+        {
+          "suite": "after-midnight-modes",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 4.35,
+          "finalLine": "AFTER MIDNIGHT MODES PASSED: 45 checks (index.html).",
+          "log": "tests/out/part-a/final-source/after-midnight-modes.log"
+        },
+        {
+          "suite": "after-midnight-integration",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.69,
+          "finalLine": "AFTER MIDNIGHT INTEGRATION PASSED: 36 checks (index.html).",
+          "log": "tests/out/part-a/final-source/after-midnight-integration.log"
+        },
+        {
+          "suite": "surveyor-gear",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.42,
+          "finalLine": "SURVEYOR GEAR PASSED: 5 checks (index.html).",
+          "log": "tests/out/part-a/final-source/surveyor-gear.log"
+        }
+      ],
+      "finishedAtUtc": "2026-10-26T15:39:31.358Z",
+      "passed": true
+    },
+    "standalone": {
+      "startedAtUtc": "2026-10-26T15:39:31.386Z",
+      "target": "dist/dr-manhattan.html",
+      "method": "One child process at a time; stdout/stderr retained together; real process exit codes.",
+      "sourceScriptsSha256": "8faba66147205479b1d9a8de9f7faff0d156ec1183a9af814119dd864a5b6bee",
+      "standaloneSha256": "5ae1caa5a84f502c09af7e27a4272c995bb579e5cf7f87b9f5db8c3c891bbbe7",
+      "suites": [
+        {
+          "suite": "smoke",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 98.64,
+          "finalLine": "Smoke test passed.",
+          "log": "tests/out/part-a/final-standalone/smoke.log"
+        },
+        {
+          "suite": "visual",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 77.03,
+          "finalLine": "All atmosphere checks passed.",
+          "log": "tests/out/part-a/final-standalone/visual.log"
+        },
+        {
+          "suite": "audio",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 242.75,
+          "finalLine": "All audio checks passed.",
+          "log": "tests/out/part-a/final-standalone/audio.log"
+        },
+        {
+          "suite": "powers",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 54.79,
+          "finalLine": "All mechanics checks passed.",
+          "log": "tests/out/part-a/final-standalone/powers.log"
+        },
+        {
+          "suite": "saves",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 108.71,
+          "finalLine": "All save & robustness checks passed.",
+          "log": "tests/out/part-a/final-standalone/saves.log"
+        },
+        {
+          "suite": "settings",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 68.37,
+          "finalLine": "All settings & accessibility checks passed.",
+          "log": "tests/out/part-a/final-standalone/settings.log"
+        },
+        {
+          "suite": "ledger",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 34.07,
+          "finalLine": "All ledger & combat-feel checks passed.",
+          "log": "tests/out/part-a/final-standalone/ledger.log"
+        },
+        {
+          "suite": "encounters",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.07,
+          "finalLine": "All encounter checks passed.",
+          "log": "tests/out/part-a/final-standalone/encounters.log"
+        },
+        {
+          "suite": "flows",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 130.7,
+          "finalLine": "All story flow checks passed.",
+          "log": "tests/out/part-a/final-standalone/flows.log"
+        },
+        {
+          "suite": "bonus",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 2.71,
+          "finalLine": "BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).",
+          "log": "tests/out/part-a/final-standalone/bonus.log"
+        },
+        {
+          "suite": "ninth-minute",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 5.76,
+          "finalLine": "NINTH MINUTE PASSED: 75 checks (normal file loading).",
+          "log": "tests/out/part-a/final-standalone/ninth-minute.log"
+        },
+        {
+          "suite": "long-summer",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 9.07,
+          "finalLine": "LONG SUMMER PASSED: 82 checks (normal file loading).",
+          "log": "tests/out/part-a/final-standalone/long-summer.log"
+        },
+        {
+          "suite": "vigilantes",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.14,
+          "finalLine": "VIGILANTES PASSED: 43 checks (chromium, dist/dr-manhattan.html).",
+          "log": "tests/out/part-a/final-standalone/vigilantes.log"
+        },
+        {
+          "suite": "after-midnight-cases",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 2.52,
+          "finalLine": "AFTER MIDNIGHT CASES PASSED: 75 checks (chromium, dist/dr-manhattan.html).",
+          "log": "tests/out/part-a/final-standalone/after-midnight-cases.log"
+        },
+        {
+          "suite": "after-midnight-modes",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 4.34,
+          "finalLine": "AFTER MIDNIGHT MODES PASSED: 45 checks (dist/dr-manhattan.html).",
+          "log": "tests/out/part-a/final-standalone/after-midnight-modes.log"
+        },
+        {
+          "suite": "after-midnight-integration",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.67,
+          "finalLine": "AFTER MIDNIGHT INTEGRATION PASSED: 36 checks (dist/dr-manhattan.html).",
+          "log": "tests/out/part-a/final-standalone/after-midnight-integration.log"
+        },
+        {
+          "suite": "surveyor-gear",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.48,
+          "finalLine": "SURVEYOR GEAR PASSED: 5 checks (dist/dr-manhattan.html).",
+          "log": "tests/out/part-a/final-standalone/surveyor-gear.log"
+        }
+      ],
+      "finishedAtUtc": "2026-10-26T15:53:36.202Z",
+      "passed": true
+    }
+  },
+  "protectedFiles": [
+    {
+      "file": "src/data/chapters/prologue.js",
+      "sha256": "89336acfb4020351805b9a1a05e78c3ed12785e4828529fe76c1f51202882b41",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/chapters/reassembly.js",
+      "sha256": "6a382b1ca39e78507a6b0faee1c255e45789d476159fab8ee46c7931e44c1e92",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/chapters/superman.js",
+      "sha256": "02107723da289a293c0305320c8283b4b86ef88374fcdbc862bdf7dce0b1a009",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/chapters/deterrent.js",
+      "sha256": "3bc020bb95a0229cff7afe41cb93e6d33da41f91651f467e6ebde7f82d2879b1",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/chapters/mars.js",
+      "sha256": "bd40cf8d7da1d58f3c61d569cdbb651c7c2a53a4e5679a2b73c501f44577e126",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/chapters/karnak.js",
+      "sha256": "f801f588f3a529dafac2d8e528e0ca8f4e4037c0d22114f5fb34fcfb35c920e3",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/music.js",
+      "sha256": "ef2db5abae5cb4431c81c936c3565f56267e4473be5782343184edc1d1fed426",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/bonus-broadcast-atmosphere.js",
+      "sha256": "7791c444df1a6862a12fb60a1ff2cefc1fb3a5e7a25612f677d62bcfad3d49da",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/bonus-ninth-atmosphere.js",
+      "sha256": "149112e6313ae60b1717a3a86a36fe347692b33cca1bb8617a96e5cc5bbca24d",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/bonus-summer-atmosphere.js",
+      "sha256": "235e5367aa6f9f5a92ec8c32f20ae074bffb039814f49c8be912fb0bb6c8e1c1",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/engine.js",
+      "sha256": "62a1f17744145311c613797c5a0200f04369343615b5264968833f6d5cfdb1e8",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/gfx.js",
+      "sha256": "20d9e86e93452abf17e0dfa54d4778afbbd4c0f245cdafc147a063ab8b00e451",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/lighting.js",
+      "sha256": "20529a97d4521ba5e22a56814d6aaca5406abf80848f08a216f5c132cae9a79d",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/camera.js",
+      "sha256": "81b58f13d7f3df6c40284984c65831ce694f17b6afc6dca8be15e08ec9104bbf",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/weather.js",
+      "sha256": "9fbc1d6fa17a0a209e3e63036c949ab462fdc3fd94c450e06ea29d89c88003e4",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/audio.js",
+      "sha256": "bc3592dbee242505b8b39058169b70882087728dc1f1d0f211ec4e71955c2565",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/world.js",
+      "sha256": "e5a959cb5dd8336397c2d4109f51fd55cd9a96346bc507d70fdfec589b9310b1",
+      "unchanged": true
+    }
+  ],
+  "captures": {
+    "gameplayBefore": 9,
+    "gameplayAfter": 27,
+    "menuViews": 3,
+    "total": 39,
+    "pixelIdentical": true,
+    "lossless": true,
+    "publishedBytes": 24376100,
+    "integrity": "screenshots/after-midnight-part-a/pixel-integrity.json"
+  },
+  "independentCI": "The branch update triggers fresh read-only workflows; inspect PR checks for their current outcome. These suite and capture results are local verification of the recorded source/build digests.",
+  "limits": [
+    "Originating slower performance host was not reproduced.",
+    "Unfamiliar-human one-second recognition was not measured.",
+    "Initial live views do not exhaust later combat, lighting or wave states.",
+    "Physical devices, subjective listening, assistive technology and Safari direct-file opening remain unverified.",
+    "Touch gameplay is unsupported."
+  ],
+  "ordinaryInputFollowUp": [
+    {
+      "build": "source",
+      "route": "play-after-midnight",
+      "exitCode": 0,
+      "summary": "AFTER MIDNIGHT LIVE PASSED: 12 checks; lowest observed health 104.90 (niteowl, index.html)."
+    },
+    {
+      "build": "source",
+      "route": "play-after-midnight-patrol",
+      "exitCode": 0,
+      "summary": "NORMAL PATROL PASSED: two spared, gear chosen, real field kit and extraction; lowest observed health 108.9 (index.html)."
+    },
+    {
+      "build": "source",
+      "route": "play-after-midnight-undertow",
+      "exitCode": 0,
+      "summary": "UNDERTOW LIVE PASSED: 16 checks; lowest observed health 84.00 (silkspectre, index.html)."
+    },
+    {
+      "build": "source",
+      "route": "play-after-midnight-archive",
+      "exitCode": 0,
+      "summary": "ARCHIVE LIVE PASSED: 12 checks; lowest observed health 86.70; 7 boss melee hits (rorschach, index.html)."
+    },
+    {
+      "build": "source",
+      "route": "play-after-midnight-clock",
+      "exitCode": 0,
+      "summary": "RESCUE CLOCK LIVE PASSED: 12 checks; four safe, 205.73s left; lowest observed health 50.00; 2 hazards cleared (index.html)."
+    },
+    {
+      "build": "standalone",
+      "route": "play-after-midnight-patrol",
+      "exitCode": 0,
+      "summary": "NORMAL PATROL PASSED: two spared, gear chosen, real field kit and extraction; lowest observed health 93.60000000000002 (dist/dr-manhattan.html)."
+    }
+  ]
+}
