@@ -83,6 +83,15 @@ try {
     const h = DM.AfterMidnight.heroes;
     return h.length === 3 && h.every(h => h.abilities.length === 6) && new Set(h.flatMap(h => h.abilities.map(a => a.id))).size === 18;
   }));
+  check('optional hero gear does not expand the original campaign power registry', await ev(() => {
+    const AM = DM.AfterMidnight;
+    return DM.Powers.list.every(def => !def.playerOnly && !def.id.startsWith('am_')) &&
+      AM.heroes.every(hero => {
+        const player = AM.createPlayer(hero.id);
+        return player.powerDefs.length === 6 && player.powerDefs.every(def =>
+          def === DM.Powers.get(def.id) && def.playerOnly && player.has(def.id));
+      });
+  }));
 
   for (const id of ['niteowl', 'silkspectre', 'rorschach']) {
     await start(id);

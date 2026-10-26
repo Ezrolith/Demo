@@ -6,6 +6,10 @@ Choose **AFTER MIDNIGHT** from the title screen. The original Manhattan campaign
 and its three bonus adventures remain in their existing menus. The new cases
 are available immediately, without finishing the original story.
 
+First choose your hero from the large portraits, then choose a case or replay
+mode on the second screen. Enter continues; Escape returns to the previous
+screen. Field manuals and progress backups are reachable from both screens.
+
 ## Choose your hero
 
 | Hero | Approach | Signature tools |
@@ -57,6 +61,10 @@ recorded honestly, rather than counted as a win.
 Both modes use three distinct locations: **Rain over North Borough**, **East
 River Storm**, and **The Glass Archive**. Personal bests are kept per hero,
 mode and location.
+
+Replay locations have two cover and lighting layouts that alternate between
+recorded attempts. Each hero has a personal light and costume rim; Nite Owl's
+goggles also cast a short forward lamp cone.
 
 ## Progress and backups
 

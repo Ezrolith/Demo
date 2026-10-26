@@ -28,6 +28,19 @@ jobs:
           git diff --exit-code -- dist/dr-manhattan.html
       - run: npm install --ignore-scripts
       - run: npx playwright install --with-deps chromium
+      - name: Original campaign cost against the requested base, then three visual runs
+        shell: bash
+        env:
+          PART_A_BASE_SHA: ${{ github.event.pull_request.base.sha || 'ed65bbfb0416f08e5aa507bf221bdcc7ca413dff' }}
+        run: |
+          mkdir -p tests/out/part-a "$RUNNER_TEMP/bonus-three-a1"
+          git fetch --depth=1 origin "$PART_A_BASE_SHA"
+          git archive "$PART_A_BASE_SHA" | tar -x -C "$RUNNER_TEMP/bonus-three-a1"
+          node tests/part-a-campaign-cost.mjs "$RUNNER_TEMP/bonus-three-a1" .
+          for run in 1 2 3; do
+            node tests/visual.mjs index.html > "tests/out/part-a/visual-after-$run.log" 2>&1
+            cat "tests/out/part-a/visual-after-$run.log"
+          done
       - name: Original campaign, existing adventures, saves and new content, sequentially
         shell: bash
         run: |
@@ -43,10 +56,10 @@ jobs:
             cat "tests/out/after-midnight-regression/$name.log"
             if [ "$result" -ne 0 ]; then failed=1; fi
           }
-          for suite in smoke visual audio powers saves settings ledger encounters flows bonus ninth-minute long-summer bonus-portability bonus-storage bonus-interrogation vigilantes after-midnight-cases after-midnight-modes after-midnight-integration surveyor-gear; do
+          for suite in smoke visual audio powers saves settings ledger encounters flows bonus ninth-minute long-summer bonus-portability bonus-storage bonus-interrogation vigilantes after-midnight-cases after-midnight-modes after-midnight-integration surveyor-gear after-midnight-density; do
             check "source-$suite" node "tests/$suite.mjs" index.html
           done
-          for suite in bonus ninth-minute long-summer bonus-portability bonus-storage bonus-interrogation vigilantes after-midnight-cases after-midnight-modes after-midnight-integration surveyor-gear; do
+          for suite in bonus ninth-minute long-summer bonus-portability bonus-storage bonus-interrogation vigilantes after-midnight-cases after-midnight-modes after-midnight-integration surveyor-gear after-midnight-density; do
             check "standalone-$suite" node "tests/$suite.mjs" dist/dr-manhattan.html
           done
           for build in source standalone; do
@@ -56,6 +69,7 @@ jobs:
               check "$build-$route" node "tests/$route.mjs" "$target"
             done
           done
+          check "hero-live-contrast" node tests/capture-after-midnight-part-a.mjs --all-heroes --assert-contrast
           exit "$failed"
       - uses: actions/upload-artifact@v4
         if: always()

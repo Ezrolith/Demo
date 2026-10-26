@@ -25,6 +25,43 @@ const step = sec => ev(sec => T.step(sec), sec);
 const check = (name, pass) => { assert.ok(pass, name); checks.push(name); console.log('PASS ' + name); };
 const key = async name => { await page.keyboard.down(name); await step(0.04); await page.keyboard.up(name); await step(0.06); };
 const click = async (x, y) => { await page.mouse.click(x, y); await step(0.08); };
+const boardAction = async label => {
+  const rect = await ev(label => {
+    const menu = DM.Engine.top().menu;
+    const index = menu.items.findIndex(item => item.label === label);
+    if (index < 0) throw new Error('Board action missing: ' + label);
+    return menu.rowRect(index);
+  }, label);
+  await click(rect.x + rect.w / 2, rect.y + rect.h / 2);
+};
+const boardCard = async (kind, index) => {
+  const rect = await ev(([kind, index]) => DM.Engine.top()[kind + 'Rect'](index), [kind, index]);
+  await click(rect.x + rect.w / 2, rect.y + rect.h / 2);
+};
+const menuTextSizes = () => ev(() => {
+  const G = DM.Gfx, sizes = [];
+  const originalText = G.text, paragraph = G.paragraph;
+  const backdrop = DM.Scenes.backdrop, city = DM.Bonus?.city;
+  G.text = (g, text, x, y, options = {}) => {
+    sizes.push(options.size || 20);
+    return originalText(g, text, x, y, options);
+  };
+  G.paragraph = (g, text, x, y, width, leading, options = {}) => {
+    sizes.push(options.size || 20);
+    return paragraph(g, text, x, y, width, leading, options);
+  };
+  // This isolates UI font declarations, not gameplay-image evidence.
+  DM.Scenes.backdrop = () => {};
+  if (DM.Bonus) DM.Bonus.city = () => {};
+  try { DM.Engine.top().render(DM.Engine.ctx); }
+  finally {
+    G.text = originalText;
+    G.paragraph = paragraph;
+    DM.Scenes.backdrop = backdrop;
+    if (DM.Bonus) DM.Bonus.city = city;
+  }
+  return sizes;
+});
 const boot = async () => {
   await page.waitForFunction(() => window.DM?.dev && DM.AfterMidnight?.heroes?.length === 3, null, { polling: 100 });
   await ev(() => {
@@ -68,27 +105,44 @@ try {
     return scene.menu.rowRect(i);
   });
   await click(titleRow.x + 90, titleRow.y + 20);
-  check('actual title click opens the character/case board', await ev(() => DM.Engine.top() instanceof DM.Scenes.AfterMidnightMenu));
+  check('actual title click opens the character/case board', await ev(() =>
+    DM.Engine.top() instanceof DM.Scenes.AfterMidnightMenu && DM.Engine.top().step === 'hero'));
+  check('hero choice has large portraits and no case-start action before continuing', await ev(() => {
+    const board = DM.Engine.top();
+    return board.heroRect(0).w >= 300 && board.heroRect(0).h >= 340 &&
+      board.menu.items.some(item => item.label === 'CHOOSE A CASE OR MODE') &&
+      !board.menu.items.some(item => item.label === 'OPEN CASE FILE' || item.label.startsWith('RESUME'));
+  }));
+  check('hero-choice text is at least thirteen logical pixels', Math.min(...await menuTextSizes()) >= 13);
   await click(960, 170);
   check('hero card selects Rorschach without starting a game', await ev(() =>
     DM.Engine.top() instanceof DM.Scenes.AfterMidnightMenu && DM.AfterMidnight.data.selection.hero === 'rorschach' && !DM.dev.play()));
   await key('ArrowLeft');
   check('keyboard hero selection chooses Silk Spectre and persists it', await ev(() =>
     DM.AfterMidnight.data.selection.hero === 'silkspectre' && JSON.parse(localStorage.getItem('dr-manhattan.after-midnight.v1')).selection.hero === 'silkspectre'));
-  await click(600, 305);
-  await click(990, 390);
+  await key('ArrowDown'); await key('ArrowDown'); await key('ArrowDown'); await key('Enter');
+  await page.locator('#after-midnight-backup').waitFor();
+  check('keyboard navigation reaches progress backup directly from hero choice', await ev(() =>
+    document.getElementById('after-midnight-backup')?.getAttribute('role') === 'dialog'));
+  await key('Escape'); await page.locator('#after-midnight-backup').waitFor({ state: 'detached' });
+  await boardCard('hero', 1); await key('Enter');
+  check('Enter continues from hero choice to a separate case/mode screen', await ev(() =>
+    DM.Engine.top().step === 'cases' && DM.Engine.top().selected().hero.id === 'silkspectre'));
+  check('case/mode text is at least thirteen logical pixels', Math.min(...await menuTextSizes()) >= 13);
+  await boardCard('mode', 1);
+  await boardCard('case', 2);
   check('mode and location cards select a museum Patrol', await ev(() => {
     const s = DM.Engine.top().selected();
     return s.ch.amId === 'patrol' && s.run.theme === 'museum' && s.hero.id === 'silkspectre';
   }));
-  await click(920, 550);
+  await boardAction('HERO CONTROLS & TACTICS');
   check('field manual opens for the selected hero with six actual gear abilities', await ev(() =>
     DM.Engine.top() instanceof DM.AfterMidnight.GearScreen && DM.Engine.top().hero.id === 'silkspectre' && DM.Engine.top().hero.abilities.length === 6));
   await page.screenshot({ path: path.join(out, 'hero-manual.png') });
   await key('Escape');
-  await click(250, 305);
-  await click(980, 390);
-  await click(900, 513);
+  await boardCard('mode', 0);
+  await boardCard('case', 2);
+  await boardAction('OPEN CASE FILE');
   await step(1.5);
   check('a fresh selected case starts its original-style comic interlude', await ev(() =>
     DM.Engine.top() instanceof DM.Scenes.Interlude && DM.Engine.top().ch.amId === 'glass_archive'));
@@ -110,11 +164,16 @@ try {
     AM.progress.checkpointAt(p.chapter.id, 1, carry);
     DM.Engine.set(new DM.Scenes.AfterMidnightMenu()); T.step(0.1);
   });
+  await boardAction('CHOOSE A CASE OR MODE');
   check('board names a real resume point for the matching hero/case', await ev(() => DM.Engine.top().menu.items[0].label.startsWith('RESUME')));
-  await click(250, 170);
+  await boardAction('CHANGE HERO');
+  await boardCard('hero', 0);
+  await boardAction('CHOOSE A CASE OR MODE');
   check('choosing another hero does not offer the first hero checkpoint', await ev(() =>
     !DM.Engine.top().menu.items.some(item => item.label.startsWith('RESUME'))));
-  await click(600, 170);
+  await boardAction('CHANGE HERO');
+  await boardCard('hero', 1);
+  await boardAction('CHOOSE A CASE OR MODE');
   const restartRow = await ev(() => { const m = DM.Engine.top().menu; return m.rowRect(m.items.findIndex(i => i.label === 'RESTART CASE')); });
   await click(restartRow.x + 90, restartRow.y + 15);
   check('restarting a checkpoint requires a safe-default confirmation', await ev(() => DM.Engine.top().menu.items[0].label === 'KEEP MY CHECKPOINT' && DM.Engine.top().menu.sel === 0));
@@ -128,6 +187,7 @@ try {
   check('real reload retains the selected hero, case and checkpoint', await ev(() => {
     const s = DM.Engine.top().selected(); return s.hero.id === 'silkspectre' && s.ch.amId === 'glass_archive' && s.checkpoint.stage === 1;
   }));
+  await boardAction('CHOOSE A CASE OR MODE');
   const resumeRow = await ev(() => DM.Engine.top().menu.rowRect(0));
   await click(resumeRow.x + 90, resumeRow.y + 15); await step(1.5); await ev(() => T.dialog());
   check('actual Resume restores hero identity and earned checkpoint state', await ev(() =>

@@ -1,0 +1,951 @@
+{
+  "label": "before",
+  "target": "index.html",
+  "browser": "151.0.7922.34",
+  "requestedDpr": 1,
+  "threshold": 1.8,
+  "allHeroes": false,
+  "method": "Real stage start, real opening-dialogue keyboard input, ten seconds of live normal-damage RAF.",
+  "screenshotMethod": "Untouched current game-canvas pixels; PNG and measurement metadata read in the same evaluation.",
+  "contrastMetric": {
+    "colorSpace": "sRGB channels linearized with the standard 0.04045 transfer breakpoint",
+    "luminanceWeights": [
+      0.2126,
+      0.7152,
+      0.0722
+    ],
+    "hero": "median luminance in a facing-aligned ellipse, world radii 12 and 16",
+    "floor": "median luminance in a 28..48-world-unit annulus, excluding other character bodies",
+    "dressing": "Baked floor dressing is retained; no post-observation bright-pixel exclusion.",
+    "ratio": "(max(hero,floor)+0.05)/(min(hero,floor)+0.05)",
+    "minimum": 1.8
+  },
+  "limitations": [
+    "Initial live stage views, not full playthroughs or every combat/lighting state.",
+    "The numerical contrast check cannot establish one-second recognition by a first-time viewer.",
+    "The ordinary quality governor remains enabled; effective DPR and tier are recorded."
+  ],
+  "records": [
+    {
+      "view": {
+        "id": "dead-air",
+        "caseId": "dead_air",
+        "hero": "niteowl",
+        "theme": "rooftops"
+      },
+      "opening": {
+        "sawDialogue": true
+      },
+      "start": {
+        "wallTime": 1342.5999999940395,
+        "worldTime": 1.0009,
+        "realTime": 1.0009,
+        "stage": 0,
+        "hero": "niteowl",
+        "health": 110,
+        "x": 270,
+        "y": 1060
+      },
+      "screenshot": "dead-air-niteowl-before-live.webp",
+      "wallSeconds": 10.02709999999404,
+      "worldSeconds": 10.006800000000013,
+      "worldRealSeconds": 10.006800000000013,
+      "scene": "Play",
+      "chapter": "am_dead_air",
+      "stage": 0,
+      "map": "am_rooftops",
+      "theme": "rooftops",
+      "variant": null,
+      "dialogueActive": false,
+      "paused": false,
+      "failed": false,
+      "hero": {
+        "id": "niteowl",
+        "x": 270,
+        "y": 1060,
+        "facing": -0.18292775860164592,
+        "health": 93,
+        "maxHealth": 110,
+        "down": false,
+        "godMode": false,
+        "logicalScreen": {
+          "x": 278.09993700323713,
+          "y": 426.9500043682393
+        },
+        "backingScreen": {
+          "x": 278.09993700323713,
+          "y": 426.9500043682393
+        }
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "effects": "full",
+        "quality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "camera": {
+        "x": 621.3592233009708,
+        "y": 995.000000000001,
+        "zoom": 1.03,
+        "ox": -6.116190574301857e-05,
+        "oy": 4.241010099038217e-06
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "contrast": {
+        "ratio": 1.6167749869893586,
+        "threshold": 1.8,
+        "passed": false,
+        "enoughPixels": true,
+        "hero": {
+          "count": 637,
+          "p10": 0.022954866589246167,
+          "median": 0.07717125191779953,
+          "p90": 0.20880417276596946
+        },
+        "floor": {
+          "count": 4781,
+          "p10": 0.02265091907301916,
+          "median": 0.028657359831258052,
+          "p90": 0.0371467728792091
+        },
+        "excludedBodyPixels": 270,
+        "sampleBounds": {
+          "x": 227,
+          "y": 376,
+          "width": 103,
+          "height": 103
+        }
+      },
+      "error": null,
+      "errors": [],
+      "sourceScreenshot": "dead-air-niteowl-before-live.png",
+      "pixelSha256": "589bda2188b4e738a07ead8c9ea61dfa55ff2d4bf05a305b11e81745b11680f7"
+    },
+    {
+      "view": {
+        "id": "undertow",
+        "caseId": "undertow",
+        "hero": "silkspectre",
+        "theme": "harbour"
+      },
+      "opening": {
+        "sawDialogue": true
+      },
+      "start": {
+        "wallTime": 1102,
+        "worldTime": 0.9162,
+        "realTime": 0.9162,
+        "stage": 0,
+        "hero": "silkspectre",
+        "health": 90,
+        "x": 270,
+        "y": 1060
+      },
+      "screenshot": "undertow-silkspectre-before-live.webp",
+      "wallSeconds": 10.023,
+      "worldSeconds": 9.94280000000003,
+      "worldRealSeconds": 9.99280000000003,
+      "scene": "Play",
+      "chapter": "am_undertow",
+      "stage": 0,
+      "map": "am_harbour",
+      "theme": "harbour",
+      "variant": null,
+      "dialogueActive": false,
+      "paused": false,
+      "failed": false,
+      "hero": {
+        "id": "silkspectre",
+        "x": 270,
+        "y": 1060,
+        "facing": -0.18292775860164592,
+        "health": 80,
+        "maxHealth": 90,
+        "down": false,
+        "godMode": false,
+        "logicalScreen": {
+          "x": 278.0999990907098,
+          "y": 426.95000005103344
+        },
+        "backingScreen": {
+          "x": 278.0999990907098,
+          "y": 426.95000005103344
+        }
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "effects": "full",
+        "quality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "camera": {
+        "x": 621.3592233009708,
+        "y": 995.000000000001,
+        "zoom": 1.03,
+        "ox": -8.828060762157626e-07,
+        "oy": 4.954805914271847e-08
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "contrast": {
+        "ratio": 1.1662880384073526,
+        "threshold": 1.8,
+        "passed": false,
+        "enoughPixels": true,
+        "hero": {
+          "count": 637,
+          "p10": 0.025226181774348187,
+          "median": 0.041791706472175984,
+          "p90": 0.2930191643465905
+        },
+        "floor": {
+          "count": 4777,
+          "p10": 0.042644662303326884,
+          "median": 0.057055569283497636,
+          "p90": 0.0894923663729523
+        },
+        "excludedBodyPixels": 274,
+        "sampleBounds": {
+          "x": 227,
+          "y": 376,
+          "width": 103,
+          "height": 103
+        }
+      },
+      "error": null,
+      "errors": [],
+      "sourceScreenshot": "undertow-silkspectre-before-live.png",
+      "pixelSha256": "6181a9ab5718c1970d1809c239ae3a4e6330fafb7fb98264b7840fe9728e3301"
+    },
+    {
+      "view": {
+        "id": "glass-archive",
+        "caseId": "glass_archive",
+        "hero": "rorschach",
+        "theme": "museum"
+      },
+      "opening": {
+        "sawDialogue": true
+      },
+      "start": {
+        "wallTime": 953.2999999970198,
+        "worldTime": 0.7501000000000001,
+        "realTime": 0.7501000000000001,
+        "stage": 0,
+        "hero": "rorschach",
+        "health": 100,
+        "x": 270,
+        "y": 1060
+      },
+      "screenshot": "glass-archive-rorschach-before-live.webp",
+      "wallSeconds": 10.02240000000596,
+      "worldSeconds": 10.00710000000002,
+      "worldRealSeconds": 10.00710000000002,
+      "scene": "Play",
+      "chapter": "am_glass_archive",
+      "stage": 0,
+      "map": "am_museum",
+      "theme": "museum",
+      "variant": null,
+      "dialogueActive": false,
+      "paused": false,
+      "failed": false,
+      "hero": {
+        "id": "rorschach",
+        "x": 270,
+        "y": 1060,
+        "facing": -0.18292775860164587,
+        "health": 100,
+        "maxHealth": 100,
+        "down": false,
+        "godMode": false,
+        "logicalScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        },
+        "backingScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        }
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "effects": "full",
+        "quality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "camera": {
+        "x": 621.3592233009708,
+        "y": 995.000000000001,
+        "zoom": 1.03,
+        "ox": 0,
+        "oy": 0
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "contrast": {
+        "ratio": 1.050118472180063,
+        "threshold": 1.8,
+        "passed": false,
+        "enoughPixels": true,
+        "hero": {
+          "count": 637,
+          "p10": 0.030005544812478857,
+          "median": 0.09115049849923702,
+          "p90": 0.33561074058042695
+        },
+        "floor": {
+          "count": 5051,
+          "p10": 0.06727592753099161,
+          "median": 0.08441388018459126,
+          "p90": 0.1291664808995517
+        },
+        "excludedBodyPixels": 0,
+        "sampleBounds": {
+          "x": 227,
+          "y": 376,
+          "width": 103,
+          "height": 103
+        }
+      },
+      "error": null,
+      "errors": [],
+      "sourceScreenshot": "glass-archive-rorschach-before-live.png",
+      "pixelSha256": "6e288e32a4db01926458ed895d176e60aa6a278a7f22c0d0becdbbbe885c564a"
+    },
+    {
+      "view": {
+        "id": "patrol-rooftops",
+        "caseId": "patrol",
+        "hero": "niteowl",
+        "theme": "rooftops"
+      },
+      "opening": {
+        "sawDialogue": true
+      },
+      "start": {
+        "wallTime": 858,
+        "worldTime": 0.6666000000000001,
+        "realTime": 0.6666000000000001,
+        "stage": 0,
+        "hero": "niteowl",
+        "health": 110,
+        "x": 270,
+        "y": 1060
+      },
+      "screenshot": "patrol-rooftops-niteowl-before-live.webp",
+      "wallSeconds": 10.02240000000596,
+      "worldSeconds": 10.007999999999994,
+      "worldRealSeconds": 10.007999999999994,
+      "scene": "Play",
+      "chapter": "am_patrol",
+      "stage": 0,
+      "map": "patrol_arena",
+      "theme": "rooftops",
+      "variant": null,
+      "dialogueActive": false,
+      "paused": false,
+      "failed": false,
+      "hero": {
+        "id": "niteowl",
+        "x": 270,
+        "y": 1060,
+        "facing": -0.1829277586016458,
+        "health": 110,
+        "maxHealth": 110,
+        "down": false,
+        "godMode": false,
+        "logicalScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        },
+        "backingScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        }
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "effects": "full",
+        "quality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "camera": {
+        "x": 621.3592233009708,
+        "y": 995.000000000001,
+        "zoom": 1.03,
+        "ox": 0,
+        "oy": 0
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "contrast": {
+        "ratio": 1.0618713467455445,
+        "threshold": 1.8,
+        "passed": false,
+        "enoughPixels": true,
+        "hero": {
+          "count": 637,
+          "p10": 0.01290930610534203,
+          "median": 0.022105103951989634,
+          "p90": 0.08889234641301272
+        },
+        "floor": {
+          "count": 5051,
+          "p10": 0.022563228945701022,
+          "median": 0.02656634384072671,
+          "p90": 0.03469213850031863
+        },
+        "excludedBodyPixels": 0,
+        "sampleBounds": {
+          "x": 227,
+          "y": 376,
+          "width": 103,
+          "height": 103
+        }
+      },
+      "error": null,
+      "errors": [],
+      "sourceScreenshot": "patrol-rooftops-niteowl-before-live.png",
+      "pixelSha256": "ca57462b9727564250758251fad27dfeffce01824d0bbb27cc892cbbf480868d"
+    },
+    {
+      "view": {
+        "id": "patrol-harbour",
+        "caseId": "patrol",
+        "hero": "silkspectre",
+        "theme": "harbour"
+      },
+      "opening": {
+        "sawDialogue": true
+      },
+      "start": {
+        "wallTime": 857.2000000029802,
+        "worldTime": 0.6674,
+        "realTime": 0.6674,
+        "stage": 0,
+        "hero": "silkspectre",
+        "health": 90,
+        "x": 270,
+        "y": 1060
+      },
+      "screenshot": "patrol-harbour-silkspectre-before-live.webp",
+      "wallSeconds": 10.02379999999702,
+      "worldSeconds": 10.006600000000024,
+      "worldRealSeconds": 10.006600000000024,
+      "scene": "Play",
+      "chapter": "am_patrol",
+      "stage": 0,
+      "map": "patrol_arena",
+      "theme": "harbour",
+      "variant": null,
+      "dialogueActive": false,
+      "paused": false,
+      "failed": false,
+      "hero": {
+        "id": "silkspectre",
+        "x": 270,
+        "y": 1060,
+        "facing": -0.1829277586016457,
+        "health": 90,
+        "maxHealth": 90,
+        "down": false,
+        "godMode": false,
+        "logicalScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        },
+        "backingScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        }
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "effects": "full",
+        "quality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "camera": {
+        "x": 621.3592233009708,
+        "y": 995.000000000001,
+        "zoom": 1.03,
+        "ox": 0,
+        "oy": 0
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "contrast": {
+        "ratio": 1.224332611055311,
+        "threshold": 1.8,
+        "passed": false,
+        "enoughPixels": true,
+        "hero": {
+          "count": 637,
+          "p10": 0.0227723993141831,
+          "median": 0.03499712585948307,
+          "p90": 0.1255824353847982
+        },
+        "floor": {
+          "count": 5051,
+          "p10": 0.04126527638500298,
+          "median": 0.054064753035737816,
+          "p90": 0.07958861659699412
+        },
+        "excludedBodyPixels": 0,
+        "sampleBounds": {
+          "x": 227,
+          "y": 376,
+          "width": 103,
+          "height": 103
+        }
+      },
+      "error": null,
+      "errors": [],
+      "sourceScreenshot": "patrol-harbour-silkspectre-before-live.png",
+      "pixelSha256": "952f338ef445af9014f306fd97f21f8a0fe134a6a9f596188b956632f4550f6c"
+    },
+    {
+      "view": {
+        "id": "patrol-museum",
+        "caseId": "patrol",
+        "hero": "rorschach",
+        "theme": "museum"
+      },
+      "opening": {
+        "sawDialogue": true
+      },
+      "start": {
+        "wallTime": 836.4000000059605,
+        "worldTime": 0.6663999999999999,
+        "realTime": 0.6663999999999999,
+        "stage": 0,
+        "hero": "rorschach",
+        "health": 100,
+        "x": 270,
+        "y": 1060
+      },
+      "screenshot": "patrol-museum-rorschach-before-live.webp",
+      "wallSeconds": 10.02540000000596,
+      "worldSeconds": 10.009100000000014,
+      "worldRealSeconds": 10.009100000000014,
+      "scene": "Play",
+      "chapter": "am_patrol",
+      "stage": 0,
+      "map": "patrol_arena",
+      "theme": "museum",
+      "variant": null,
+      "dialogueActive": false,
+      "paused": false,
+      "failed": false,
+      "hero": {
+        "id": "rorschach",
+        "x": 270,
+        "y": 1060,
+        "facing": -0.1829277586016458,
+        "health": 100,
+        "maxHealth": 100,
+        "down": false,
+        "godMode": false,
+        "logicalScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        },
+        "backingScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        }
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "effects": "full",
+        "quality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "camera": {
+        "x": 621.3592233009708,
+        "y": 995.000000000001,
+        "zoom": 1.03,
+        "ox": 0,
+        "oy": 0
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "contrast": {
+        "ratio": 1.4821307828828068,
+        "threshold": 1.8,
+        "passed": false,
+        "enoughPixels": true,
+        "hero": {
+          "count": 637,
+          "p10": 0.02743878448845507,
+          "median": 0.04387098242601224,
+          "p90": 0.14301067104966644
+        },
+        "floor": {
+          "count": 5051,
+          "p10": 0.07115142999976203,
+          "median": 0.08912907267304372,
+          "p90": 0.12343849792865297
+        },
+        "excludedBodyPixels": 0,
+        "sampleBounds": {
+          "x": 227,
+          "y": 376,
+          "width": 103,
+          "height": 103
+        }
+      },
+      "error": null,
+      "errors": [],
+      "sourceScreenshot": "patrol-museum-rorschach-before-live.png",
+      "pixelSha256": "00a2ec4cbcd4b0029406058268153a9c68fb7f59d0656034c90125fac4afc15e"
+    },
+    {
+      "view": {
+        "id": "rescue-rooftops",
+        "caseId": "rescue_clock",
+        "hero": "rorschach",
+        "theme": "rooftops"
+      },
+      "opening": {
+        "sawDialogue": true
+      },
+      "start": {
+        "wallTime": 3371.2999999970198,
+        "worldTime": 0.9168000000000003,
+        "realTime": 0.9168000000000003,
+        "stage": 0,
+        "hero": "rorschach",
+        "health": 100,
+        "x": 270,
+        "y": 1060
+      },
+      "screenshot": "rescue-rooftops-rorschach-before-live.webp",
+      "wallSeconds": 10.02229999999702,
+      "worldSeconds": 9.991100000000014,
+      "worldRealSeconds": 9.991100000000014,
+      "scene": "Play",
+      "chapter": "am_rescue_clock",
+      "stage": 0,
+      "map": "rescue_arena",
+      "theme": "rooftops",
+      "variant": null,
+      "dialogueActive": false,
+      "paused": false,
+      "failed": false,
+      "hero": {
+        "id": "rorschach",
+        "x": 270,
+        "y": 1060,
+        "facing": -0.18292775860164592,
+        "health": 100,
+        "maxHealth": 100,
+        "down": false,
+        "godMode": false,
+        "logicalScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        },
+        "backingScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        }
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "effects": "full",
+        "quality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "camera": {
+        "x": 621.3592233009708,
+        "y": 995.000000000001,
+        "zoom": 1.03,
+        "ox": 0,
+        "oy": 0
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "contrast": {
+        "ratio": 1.186821019473003,
+        "threshold": 1.8,
+        "passed": false,
+        "enoughPixels": true,
+        "hero": {
+          "count": 637,
+          "p10": 0.014408965784634869,
+          "median": 0.023080578303620234,
+          "p90": 0.0974730014154236
+        },
+        "floor": {
+          "count": 5051,
+          "p10": 0.03106886498298396,
+          "median": 0.03673356644597918,
+          "p90": 0.04541005070556127
+        },
+        "excludedBodyPixels": 0,
+        "sampleBounds": {
+          "x": 227,
+          "y": 376,
+          "width": 103,
+          "height": 103
+        }
+      },
+      "error": null,
+      "errors": [],
+      "sourceScreenshot": "rescue-rooftops-rorschach-before-live.png",
+      "pixelSha256": "62c90d2cafcb0557a81351b2da63dd0e9b98bb21fe72c3450fde4a049ae63a94"
+    },
+    {
+      "view": {
+        "id": "rescue-harbour",
+        "caseId": "rescue_clock",
+        "hero": "niteowl",
+        "theme": "harbour"
+      },
+      "opening": {
+        "sawDialogue": true
+      },
+      "start": {
+        "wallTime": 1124.7999999970198,
+        "worldTime": 0.9171000000000002,
+        "realTime": 0.9171000000000002,
+        "stage": 0,
+        "hero": "niteowl",
+        "health": 110,
+        "x": 270,
+        "y": 1060
+      },
+      "screenshot": "rescue-harbour-niteowl-before-live.webp",
+      "wallSeconds": 10.02620000000298,
+      "worldSeconds": 9.992500000000025,
+      "worldRealSeconds": 9.992500000000025,
+      "scene": "Play",
+      "chapter": "am_rescue_clock",
+      "stage": 0,
+      "map": "rescue_arena",
+      "theme": "harbour",
+      "variant": null,
+      "dialogueActive": false,
+      "paused": false,
+      "failed": false,
+      "hero": {
+        "id": "niteowl",
+        "x": 270,
+        "y": 1060,
+        "facing": -0.18292775860164592,
+        "health": 110,
+        "maxHealth": 110,
+        "down": false,
+        "godMode": false,
+        "logicalScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        },
+        "backingScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        }
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "effects": "full",
+        "quality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "camera": {
+        "x": 621.3592233009708,
+        "y": 995.000000000001,
+        "zoom": 1.03,
+        "ox": 0,
+        "oy": 0
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "contrast": {
+        "ratio": 1.4048493074618844,
+        "threshold": 1.8,
+        "passed": false,
+        "enoughPixels": true,
+        "hero": {
+          "count": 637,
+          "p10": 0.021951026840743935,
+          "median": 0.033575142384575644,
+          "p90": 0.12666474171010367
+        },
+        "floor": {
+          "count": 5051,
+          "p10": 0.052667570491998716,
+          "median": 0.06741048089999947,
+          "p90": 0.09310344940124021
+        },
+        "excludedBodyPixels": 0,
+        "sampleBounds": {
+          "x": 227,
+          "y": 376,
+          "width": 103,
+          "height": 103
+        }
+      },
+      "error": null,
+      "errors": [],
+      "sourceScreenshot": "rescue-harbour-niteowl-before-live.png",
+      "pixelSha256": "4f6486a1223c6a02304700123618d070fd8ffe98f95accc47ac962f8fd0a2999"
+    },
+    {
+      "view": {
+        "id": "rescue-museum",
+        "caseId": "rescue_clock",
+        "hero": "silkspectre",
+        "theme": "museum"
+      },
+      "opening": {
+        "sawDialogue": true
+      },
+      "start": {
+        "wallTime": 1162.2000000029802,
+        "worldTime": 0.9160999999999999,
+        "realTime": 0.9160999999999999,
+        "stage": 0,
+        "hero": "silkspectre",
+        "health": 90,
+        "x": 270,
+        "y": 1060
+      },
+      "screenshot": "rescue-museum-silkspectre-before-live.webp",
+      "wallSeconds": 10.0235,
+      "worldSeconds": 10.008700000000003,
+      "worldRealSeconds": 10.008700000000003,
+      "scene": "Play",
+      "chapter": "am_rescue_clock",
+      "stage": 0,
+      "map": "rescue_arena",
+      "theme": "museum",
+      "variant": null,
+      "dialogueActive": false,
+      "paused": false,
+      "failed": false,
+      "hero": {
+        "id": "silkspectre",
+        "x": 270,
+        "y": 1060,
+        "facing": -0.18292775860164592,
+        "health": 90,
+        "maxHealth": 90,
+        "down": false,
+        "godMode": false,
+        "logicalScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        },
+        "backingScreen": {
+          "x": 278.1,
+          "y": 426.94999999999897
+        }
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "effects": "full",
+        "quality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "camera": {
+        "x": 621.3592233009708,
+        "y": 995.000000000001,
+        "zoom": 1.03,
+        "ox": 0,
+        "oy": 0
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "contrast": {
+        "ratio": 1.6475291029208945,
+        "threshold": 1.8,
+        "passed": false,
+        "enoughPixels": true,
+        "hero": {
+          "count": 637,
+          "p10": 0.0269754685059099,
+          "median": 0.04228075737485584,
+          "p90": 0.14316291188814315
+        },
+        "floor": {
+          "count": 5051,
+          "p10": 0.0822499457224787,
+          "median": 0.10203523341465695,
+          "p90": 0.13740371809350024
+        },
+        "excludedBodyPixels": 0,
+        "sampleBounds": {
+          "x": 227,
+          "y": 376,
+          "width": 103,
+          "height": 103
+        }
+      },
+      "error": null,
+      "errors": [],
+      "sourceScreenshot": "rescue-museum-silkspectre-before-live.png",
+      "pixelSha256": "6cdaf63a700db475d448982f2112effbbad3f72bfb10e0b9956e606ded71e9fe"
+    }
+  ],
+  "errors": [],
+  "failures": [],
+  "captureEncoding": {
+    "sourceFormat": "PNG",
+    "publishedFormat": "lossless WebP",
+    "lossless": true,
+    "exact": true,
+    "verification": "Decoded RGBA pixel bytes are identical to the original PNG.",
+    "sceneOrPixelChanges": false,
+    "originalPNGsRetainedLocally": true,
+    "integrityManifest": "../pixel-integrity.json"
+  }
+}

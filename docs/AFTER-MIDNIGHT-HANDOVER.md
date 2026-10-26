@@ -4,6 +4,10 @@ Optional expansion on `codex/watchmen-stories`, based on reviewed snapshot
 `b67f8b6`. Draft review targets `codex/bonus-three`. No merge or deployment.
 [Player guide](AFTER-MIDNIGHT.md).
 
+The current [Part A review response](AFTER-MIDNIGHT-PART-A.md) covers the later
+performance, visibility, environment, menu and style corrections. Its fresh
+verification supersedes the historical counts below. Part B is not started.
+
 ## Content and architecture
 
 Three selectable human heroes: Nite Owl, Silk Spectre and Rorschach, each with

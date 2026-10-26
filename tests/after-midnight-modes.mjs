@@ -88,6 +88,11 @@ try {
   for (const hero of ['niteowl', 'silkspectre', 'rorschach']) {
     for (const theme of ['rooftops', 'harbour', 'museum']) {
       await start('patrol', hero, theme); await step(3);
+      check(hero + ': Patrol arrival is clear of terminal artwork in ' + theme, await ev(() => {
+        const play = T.play(), player = play.player;
+        return play.world.entities.filter(entity => entity instanceof DM.BonusKit.Terminal).every(entity =>
+          Math.hypot(entity.x - player.x, entity.y - player.y) > 55);
+      }));
       check(hero + ' can enter a live normal-damage Patrol in ' + theme, await ev(({ hero, theme }) => {
         const p = T.play(), d = p.ctx.flags.director;
         return p.player.profile.id === hero && p.player.form === 'vigilante' && !p.player.godMode &&
@@ -139,6 +144,11 @@ try {
   // Validate physical paths in every decorated arena, including thin low walls.
   for (const theme of ['rooftops', 'harbour', 'museum']) {
     await start('rescue_clock', 'silkspectre', theme);
+    check(theme + ': Rescue Clock arrival is clear of terminal artwork', await ev(() => {
+      const play = T.play(), player = play.player;
+      return play.world.entities.filter(entity => entity instanceof DM.BonusKit.Terminal).every(entity =>
+        Math.hypot(entity.x - player.x, entity.y - player.y) > 55);
+    }));
     check(theme + ': all four civilian routes fit through actual cover geometry', await ev(() => {
       const p = T.play(), AM = DM.AfterMidnight, w = p.world, d = p.ctx.flags.director;
       return d.civilians.every(e => {

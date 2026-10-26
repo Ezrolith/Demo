@@ -20,6 +20,29 @@ const browser = await pw.chromium.launch({ headless: true,
   ...(process.env.CHROMIUM_PATH ? { executablePath: process.env.CHROMIUM_PATH } : {}),
 });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+
+const boardAction = async label => {
+  const point = await page.evaluate(label => {
+    const menu = DM.Engine.top().menu;
+    const index = menu.items.findIndex(item => item.label === label);
+    if (index < 0) throw new Error('Board action missing: ' + label);
+    const rect = menu.rowRect(index);
+    return { x: rect.x + rect.w / 2, y: rect.y + rect.h / 2 };
+  }, label);
+  await page.mouse.click(point.x, point.y);
+  if (label === 'CHOOSE A CASE OR MODE') {
+    await page.waitForFunction(() => DM.Engine.top()?.step === 'cases');
+  } else await page.waitForTimeout(100);
+};
+const boardCard = async (kind, index) => {
+  const point = await page.evaluate(([kind, index]) => {
+    const rect = DM.Engine.top()[kind + 'Rect'](index);
+    return { x: rect.x + rect.w / 2, y: rect.y + rect.h / 2 };
+  }, [kind, index]);
+  await page.mouse.click(point.x, point.y);
+  await page.waitForTimeout(100);
+};
+
 const errors = [], checks = [], trace = [], evaded = new Set(), observedHazardHits = new Set();
 let lowestHealth = Infinity, held = new Set(), lastShot = 0;
 page.on('pageerror', e => errors.push(String(e)));
@@ -174,6 +197,7 @@ try {
     return { x: r.x + 170, y: r.y + 50 };
   });
   await page.mouse.click(hero.x, hero.y); await page.waitForTimeout(100);
+  await boardAction('CHOOSE A CASE OR MODE');
   const mode = await page.evaluate(() => {
     const r = DM.Engine.top().modeRect(2); return { x: r.x + 150, y: r.y + 20 };
   });
@@ -183,7 +207,7 @@ try {
     return { x: r.x + 170, y: r.y + 45 };
   });
   await page.mouse.click(theme.x, theme.y); await page.waitForTimeout(100); await shot('case-board');
-  await page.mouse.click(970, 515);
+  await boardAction('START THIS RUN');
   await page.waitForFunction(() => DM.Engine.top() instanceof DM.Scenes.Interlude || DM.dev.play()?.chapter.id === 'am_rescue_clock');
   const sawInterlude = await page.evaluate(() => DM.Engine.top() instanceof DM.Scenes.Interlude);
   if (sawInterlude) {

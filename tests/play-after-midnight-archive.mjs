@@ -18,6 +18,29 @@ const out = path.join(root, 'tests/out/play-after-midnight-archive', hero, targe
 mkdirSync(out, { recursive: true });
 const browser = await pw.chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
+
+const boardAction = async label => {
+  const point = await page.evaluate(label => {
+    const menu = DM.Engine.top().menu;
+    const index = menu.items.findIndex(item => item.label === label);
+    if (index < 0) throw new Error('Board action missing: ' + label);
+    const rect = menu.rowRect(index);
+    return { x: rect.x + rect.w / 2, y: rect.y + rect.h / 2 };
+  }, label);
+  await page.mouse.click(point.x, point.y);
+  if (label === 'CHOOSE A CASE OR MODE') {
+    await page.waitForFunction(() => DM.Engine.top()?.step === 'cases');
+  } else await page.waitForTimeout(100);
+};
+const boardCard = async (kind, index) => {
+  const point = await page.evaluate(([kind, index]) => {
+    const rect = DM.Engine.top()[kind + 'Rect'](index);
+    return { x: rect.x + rect.w / 2, y: rect.y + rect.h / 2 };
+  }, [kind, index]);
+  await page.mouse.click(point.x, point.y);
+  await page.waitForTimeout(100);
+};
+
 const errors = [], checks = [], trace = [];
 let lowestHealth = Infinity, held = new Set(), lastShot = 0, bossMeleeHits = 0;
 const seenPhases = new Set(), chargePhases = new Set();
@@ -176,9 +199,10 @@ try {
     return { x: r.x + 170, y: r.y + 50 };
   }, hero);
   await page.mouse.click(heroPoint.x, heroPoint.y); await page.waitForTimeout(100);
-  await page.mouse.click(230, 307); await page.waitForTimeout(100);
-  await page.mouse.click(1015, 390); await page.waitForTimeout(100);
-  await screenshot('case-board'); await page.mouse.click(970, 515);
+  await boardAction('CHOOSE A CASE OR MODE');
+  await boardCard('mode', 0);
+  await boardCard('case', 2);
+  await screenshot('case-board'); await boardAction('OPEN CASE FILE');
   await page.waitForFunction(() => DM.dev.play()?.chapter.id === 'am_glass_archive' || DM.Engine.top() instanceof DM.Scenes.Interlude);
   if (await page.evaluate(() => DM.Engine.top() instanceof DM.Scenes.Interlude)) {
     await page.waitForTimeout(700); await screenshot('case-interlude');

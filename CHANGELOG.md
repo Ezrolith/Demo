@@ -1,6 +1,7 @@
 # Changes
 
 ## 0.2.0 — After Midnight (draft)
+- Part A review: isolated optional gear from campaign hot loops, strengthened hero visibility, cleared mode arrivals, added dense themed dressing and replay layouts, split the board into two screens, and reformatted the six expansion files. See [the Part A report](docs/AFTER-MIDNIGHT-PART-A.md).
 - Corrected Silk Spectre's guard movement slowdown from the first frame, including immediate release and low-stamina behavior; retained parry/damage timing and added five actual-movement regressions.
 - Added selectable Nite Owl, Silk Spectre and Rorschach, with eighteen distinct nonlethal gear actions, human vulnerability and physical traversal.
 - Added Dead Air, Undertow and The Glass Archive: three cases with three checkpoint stages each, new cast, themed art/weather/lighting and original musical arrangements.

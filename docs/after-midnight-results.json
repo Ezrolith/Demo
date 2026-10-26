@@ -345,7 +345,7 @@
       }
     ]
   },
-  "evidenceScope": "Root revision, digest and workflow fields describe the full pre-follow-up baseline. followUp describes the later guard fix; consult current PR checks for its fresh full CI result.",
+  "evidenceScope": "Historical pre-review baseline and guard follow-up. See latestVerification for the later Part A review response.",
   "followUp": {
     "date": "2026-10-26",
     "change": "Silk Spectre guard movement uses live eligible input before movement; existing parry and damage timing retained.",
@@ -405,5 +405,6 @@
     ],
     "boundedCodeReview": "No further concrete blocker found; handover/guide links resolve.",
     "independentCI": "Triggered by the guard-fix branch update. Use current PR checks; the workflow IDs in the root fields are the earlier full baseline."
-  }
+  },
+  "latestVerification": "after-midnight-part-a-results.json"
 }

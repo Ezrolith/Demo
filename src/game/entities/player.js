@@ -131,7 +131,7 @@
       this.drain = false;
       this.regenMul = 1;
       this.reticleFail = Math.max(0, (this.reticleFail || 0) - dt);
-      for (const def of DM.Powers.list) {
+      for (const def of this.powerDefs || DM.Powers.list) {
         const st = this.powers[def.id];
         if (!st || !def.forms.includes(this.form)) continue;
         st.cd = Math.max(0, st.cd - dt);
@@ -258,7 +258,7 @@
     // Power effects drawn above entities (beams, reticles).
     renderFx(ctx, world) {
       if (this.hidden) return;
-      for (const def of DM.Powers.list) {
+      for (const def of this.powerDefs || DM.Powers.list) {
         const st = this.powers[def.id];
         if (!st || !def.render || !def.forms.includes(this.form)) continue;
         def.render(ctx, this, st, world);

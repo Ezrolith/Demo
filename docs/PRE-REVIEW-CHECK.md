@@ -1,5 +1,9 @@
 # Review entry point — 26 October 2026
 
+The newer [Part A review response](AFTER-MIDNIGHT-PART-A.md) supersedes the
+guard-only check below. It records A1–A5, per-build suite exits and live evidence.
+Part B has not been started.
+
 Review `codex/watchmen-stories` in [draft PR #6](https://github.com/Ezrolith/Demo/pull/6),
 targeting `codex/bonus-three`. Keep it in draft: no merge or deployment.
 
