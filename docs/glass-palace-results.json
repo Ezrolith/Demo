@@ -1,0 +1,1560 @@
+{
+  "schemaVersion": 1,
+  "scope": "Part B: The Glass Palace",
+  "repository": "Ezrolith/Demo",
+  "branch": "codex/glass-palace",
+  "base": "codex/watchmen-stories",
+  "baseRevision": "c206ae6e815a0c7734f0701e8ab6cc075efd5621",
+  "codeRevision": "dbd93c5f5b0a9acc72063d9d9f6eccaf1e7dda81",
+  "pullRequest": "https://github.com/Ezrolith/Demo/pull/7",
+  "sourceScriptsSha256": "1ecae5560a788a38cd1b110aaf89c7830fb844c4c449c8cf6bfe08d1dab0218f",
+  "standaloneSha256": "08af18c60ebc301a5dfcc4940df2f32d6ec0b41e2effd77c5a95b8e93e815150",
+  "suites": {
+    "source": {
+      "startedAtUtc": "2026-10-26T21:42:43.974Z",
+      "target": "index.html",
+      "method": "One child process at a time; stdout/stderr retained together; real process exit codes.",
+      "sourceScriptsSha256": "1ecae5560a788a38cd1b110aaf89c7830fb844c4c449c8cf6bfe08d1dab0218f",
+      "standaloneSha256": "08af18c60ebc301a5dfcc4940df2f32d6ec0b41e2effd77c5a95b8e93e815150",
+      "suites": [
+        {
+          "suite": "smoke",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 98.59,
+          "finalLine": "Smoke test passed.",
+          "log": "tests/out/glass-palace/final-source/smoke.log"
+        },
+        {
+          "suite": "visual",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 77.56,
+          "finalLine": "All atmosphere checks passed.",
+          "log": "tests/out/glass-palace/final-source/visual.log"
+        },
+        {
+          "suite": "audio",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 243.41,
+          "finalLine": "All audio checks passed.",
+          "log": "tests/out/glass-palace/final-source/audio.log"
+        },
+        {
+          "suite": "powers",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 53.7,
+          "finalLine": "All mechanics checks passed.",
+          "log": "tests/out/glass-palace/final-source/powers.log"
+        },
+        {
+          "suite": "saves",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 108.04,
+          "finalLine": "All save & robustness checks passed.",
+          "log": "tests/out/glass-palace/final-source/saves.log"
+        },
+        {
+          "suite": "settings",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 68.85,
+          "finalLine": "All settings & accessibility checks passed.",
+          "log": "tests/out/glass-palace/final-source/settings.log"
+        },
+        {
+          "suite": "ledger",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 33.86,
+          "finalLine": "All ledger & combat-feel checks passed.",
+          "log": "tests/out/glass-palace/final-source/ledger.log"
+        },
+        {
+          "suite": "encounters",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.28,
+          "finalLine": "All encounter checks passed.",
+          "log": "tests/out/glass-palace/final-source/encounters.log"
+        },
+        {
+          "suite": "flows",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 141.29,
+          "finalLine": "All story flow checks passed.",
+          "log": "tests/out/glass-palace/final-source/flows.log"
+        },
+        {
+          "suite": "bonus",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 2.72,
+          "finalLine": "BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).",
+          "log": "tests/out/glass-palace/final-source/bonus.log"
+        },
+        {
+          "suite": "ninth-minute",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 5.92,
+          "finalLine": "NINTH MINUTE PASSED: 75 checks (normal file loading).",
+          "log": "tests/out/glass-palace/final-source/ninth-minute.log"
+        },
+        {
+          "suite": "long-summer",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 9.29,
+          "finalLine": "LONG SUMMER PASSED: 82 checks (normal file loading).",
+          "log": "tests/out/glass-palace/final-source/long-summer.log"
+        },
+        {
+          "suite": "vigilantes",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.14,
+          "finalLine": "VIGILANTES PASSED: 43 checks (chromium, index.html).",
+          "log": "tests/out/glass-palace/final-source/vigilantes.log"
+        },
+        {
+          "suite": "after-midnight-cases",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 2.58,
+          "finalLine": "AFTER MIDNIGHT CASES PASSED: 75 checks (chromium, index.html).",
+          "log": "tests/out/glass-palace/final-source/after-midnight-cases.log"
+        },
+        {
+          "suite": "after-midnight-modes",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 4.53,
+          "finalLine": "AFTER MIDNIGHT MODES PASSED: 45 checks (index.html).",
+          "log": "tests/out/glass-palace/final-source/after-midnight-modes.log"
+        },
+        {
+          "suite": "after-midnight-integration",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.75,
+          "finalLine": "AFTER MIDNIGHT INTEGRATION PASSED: 36 checks (index.html).",
+          "log": "tests/out/glass-palace/final-source/after-midnight-integration.log"
+        },
+        {
+          "suite": "surveyor-gear",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.45,
+          "finalLine": "SURVEYOR GEAR PASSED: 5 checks (index.html).",
+          "log": "tests/out/glass-palace/final-source/surveyor-gear.log"
+        },
+        {
+          "suite": "glass-palace",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.73,
+          "finalLine": "GLASS PALACE PASSED: 76 checks (chromium, index.html).",
+          "log": "tests/out/glass-palace/final-source/glass-palace.log"
+        }
+      ],
+      "finishedAtUtc": "2026-10-26T21:57:01.650Z",
+      "passed": true
+    },
+    "standalone": {
+      "startedAtUtc": "2026-10-26T21:57:01.684Z",
+      "target": "dist/dr-manhattan.html",
+      "method": "One child process at a time; stdout/stderr retained together; real process exit codes.",
+      "sourceScriptsSha256": "1ecae5560a788a38cd1b110aaf89c7830fb844c4c449c8cf6bfe08d1dab0218f",
+      "standaloneSha256": "08af18c60ebc301a5dfcc4940df2f32d6ec0b41e2effd77c5a95b8e93e815150",
+      "suites": [
+        {
+          "suite": "smoke",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 98.56,
+          "finalLine": "Smoke test passed.",
+          "log": "tests/out/glass-palace/final-standalone/smoke.log"
+        },
+        {
+          "suite": "visual",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 77.54,
+          "finalLine": "All atmosphere checks passed.",
+          "log": "tests/out/glass-palace/final-standalone/visual.log"
+        },
+        {
+          "suite": "audio",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 242.77,
+          "finalLine": "All audio checks passed.",
+          "log": "tests/out/glass-palace/final-standalone/audio.log"
+        },
+        {
+          "suite": "powers",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 53.93,
+          "finalLine": "All mechanics checks passed.",
+          "log": "tests/out/glass-palace/final-standalone/powers.log"
+        },
+        {
+          "suite": "saves",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 118.98,
+          "finalLine": "All save & robustness checks passed.",
+          "log": "tests/out/glass-palace/final-standalone/saves.log"
+        },
+        {
+          "suite": "settings",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 68.49,
+          "finalLine": "All settings & accessibility checks passed.",
+          "log": "tests/out/glass-palace/final-standalone/settings.log"
+        },
+        {
+          "suite": "ledger",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 34.01,
+          "finalLine": "All ledger & combat-feel checks passed.",
+          "log": "tests/out/glass-palace/final-standalone/ledger.log"
+        },
+        {
+          "suite": "encounters",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.11,
+          "finalLine": "All encounter checks passed.",
+          "log": "tests/out/glass-palace/final-standalone/encounters.log"
+        },
+        {
+          "suite": "flows",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 137.62,
+          "finalLine": "All story flow checks passed.",
+          "log": "tests/out/glass-palace/final-standalone/flows.log"
+        },
+        {
+          "suite": "bonus",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 2.7,
+          "finalLine": "BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).",
+          "log": "tests/out/glass-palace/final-standalone/bonus.log"
+        },
+        {
+          "suite": "ninth-minute",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 5.82,
+          "finalLine": "NINTH MINUTE PASSED: 75 checks (normal file loading).",
+          "log": "tests/out/glass-palace/final-standalone/ninth-minute.log"
+        },
+        {
+          "suite": "long-summer",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 9.3,
+          "finalLine": "LONG SUMMER PASSED: 82 checks (normal file loading).",
+          "log": "tests/out/glass-palace/final-standalone/long-summer.log"
+        },
+        {
+          "suite": "vigilantes",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.2,
+          "finalLine": "VIGILANTES PASSED: 43 checks (chromium, dist/dr-manhattan.html).",
+          "log": "tests/out/glass-palace/final-standalone/vigilantes.log"
+        },
+        {
+          "suite": "after-midnight-cases",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 2.65,
+          "finalLine": "AFTER MIDNIGHT CASES PASSED: 75 checks (chromium, dist/dr-manhattan.html).",
+          "log": "tests/out/glass-palace/final-standalone/after-midnight-cases.log"
+        },
+        {
+          "suite": "after-midnight-modes",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 4.5,
+          "finalLine": "AFTER MIDNIGHT MODES PASSED: 45 checks (dist/dr-manhattan.html).",
+          "log": "tests/out/glass-palace/final-standalone/after-midnight-modes.log"
+        },
+        {
+          "suite": "after-midnight-integration",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.72,
+          "finalLine": "AFTER MIDNIGHT INTEGRATION PASSED: 36 checks (dist/dr-manhattan.html).",
+          "log": "tests/out/glass-palace/final-standalone/after-midnight-integration.log"
+        },
+        {
+          "suite": "surveyor-gear",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.45,
+          "finalLine": "SURVEYOR GEAR PASSED: 5 checks (dist/dr-manhattan.html).",
+          "log": "tests/out/glass-palace/final-standalone/surveyor-gear.log"
+        },
+        {
+          "suite": "glass-palace",
+          "exitCode": 0,
+          "signal": null,
+          "error": null,
+          "seconds": 1.74,
+          "finalLine": "GLASS PALACE PASSED: 76 checks (chromium, dist/dr-manhattan.html).",
+          "log": "tests/out/glass-palace/final-standalone/glass-palace.log"
+        }
+      ],
+      "finishedAtUtc": "2026-10-26T22:11:25.781Z",
+      "passed": true
+    }
+  },
+  "hubWebKit": {
+    "source": {
+      "engine": "webkit",
+      "browser": "26.5",
+      "checks": [
+        "hub is additive to the original six chapters, three adventures and three cases",
+        "every moment defines exactly three distinct data-driven challenges",
+        "Karnak detail uses the actual four-emitter map and rejects an incomplete shutdown",
+        "fresh saves unlock the first campaign pane and the existing optional content only",
+        "title places THE GLASS PALACE immediately after NEW GAME and keeps the existing menus",
+        "the longest Continue title menu fits above the footer without losing its last action",
+        "actual title input opens a walkable noncombat palace without changing original slots",
+        "only normally unlocked moments have visible panes",
+        "real movement input moves Jon freely through the hub",
+        "combat inputs cannot produce combat actors or consume hub health",
+        "viewing, walking and combat-key input leave all three original slots byte-identical",
+        "zero fragments produce zero earned structure pieces in the actual hub world",
+        "unlocked panes use their level map renderers and have live drawing activity",
+        "live vignette rendering does not write any original progress slot",
+        "campaign pane visibility follows the saved reached index",
+        "combined ledger sums retained sources without double-counting campaign completed records",
+        "ledger and moment reads never rewrite source formats or bytes",
+        "four original reflection tiers distinguish unwritten, mercy, balance and detachment",
+        "the central glass slab opens the combined ledger and its reflection",
+        "reading the slab leaves all old progress slots byte-identical",
+        "walking to a pane and pressing E offers play, resume and challenges",
+        "challenge panel shows three definitions and current earned status",
+        "pane and challenge views preserve all original save bytes",
+        "moment resume metadata reads matching checkpoints and the selected After Midnight hero",
+        "reading resume metadata leaves all original bytes untouched",
+        "campaign Resume normalizes legacy numeric-string carry without rewriting its source",
+        "mars: actual pane Resume enters the existing level checkpoint",
+        "ninth_minute: actual pane Resume enters the existing level checkpoint",
+        "am_undertow: actual pane Resume enters the existing level checkpoint",
+        "failed and downed completions cannot grant fragments",
+        "real campaign completion grants only the two fulfilled challenges",
+        "actual level-end rendering shows the two-of-three moment status",
+        "a later real completion can earn the missing level-specific fragment",
+        "repeated completion callbacks cannot duplicate already earned fragments",
+        "reassembly: the actual campaign completion path awards its three fulfilled challenges",
+        "superman: the actual campaign completion path awards its three fulfilled challenges",
+        "deterrent: the actual campaign completion path awards its three fulfilled challenges",
+        "mars: the actual campaign completion path awards its three fulfilled challenges",
+        "karnak: the actual campaign completion path awards its three fulfilled challenges",
+        "eighteen earned fragments rebuild eighteen real central structure pieces",
+        "hub rebuild at half progress leaves original save slots untouched",
+        "campaign completion alone does not unlock the epilogue",
+        "last_broadcast: the actual bonus completion path awards its level-specific challenges",
+        "last_broadcast: missing bonus completion still prevents the epilogue",
+        "ninth_minute: the actual bonus completion path awards its level-specific challenges",
+        "ninth_minute: missing bonus completion still prevents the epilogue",
+        "long_summer: the actual bonus completion path awards its level-specific challenges",
+        "all six campaign and three bonus completions unlock the epilogue without requiring After Midnight",
+        "am_dead_air: the actual After Midnight completion hook grants its three challenge fragments",
+        "am_undertow: the actual After Midnight completion hook grants its three challenge fragments",
+        "am_glass_archive: the actual After Midnight completion hook grants its three challenge fragments",
+        "all thirty-six fragments assemble all thirty-six central pieces",
+        "central geometry visibly grows between zero, half and full progress",
+        "viewing the complete palace keeps every old slot byte-for-byte unchanged",
+        "completed panes display their three-of-three challenge status",
+        "each missing campaign or bonus completion independently blocks the epilogue",
+        "return: combined ledger selects its distinct ninety-second epilogue",
+        "return: timed narration does not finish or record its ending early",
+        "return: epilogue returns to the hub and records only its new-slot ending flag",
+        "return: epilogue playback leaves all three original save bytes unchanged",
+        "observe: combined ledger selects its distinct ninety-second epilogue",
+        "observe: timed narration does not finish or record its ending early",
+        "observe: epilogue returns to the hub and records only its new-slot ending flag",
+        "observe: epilogue playback leaves all three original save bytes unchanged",
+        "depart: combined ledger selects its distinct ninety-second epilogue",
+        "depart: timed narration does not finish or record its ending early",
+        "depart: epilogue returns to the hub and records only its new-slot ending flag",
+        "depart: epilogue playback leaves all three original save bytes unchanged",
+        "all three epilogue variants are distinct",
+        "new-slot challenge and epilogue progress survives a real page reload",
+        "reloading the game retains original save bytes",
+        "blocked hub persistence retains session progress and warns honestly",
+        "a successful hub-only write recovers persistence without touching old slots",
+        "corrupt and newer hub saves are preserved rather than overwritten",
+        "all former save bytes remain unchanged through hub storage recovery probes",
+        "hub tests produce no browser or engine errors"
+      ],
+      "errors": []
+    },
+    "standalone": {
+      "engine": "webkit",
+      "browser": "26.5",
+      "checks": [
+        "hub is additive to the original six chapters, three adventures and three cases",
+        "every moment defines exactly three distinct data-driven challenges",
+        "Karnak detail uses the actual four-emitter map and rejects an incomplete shutdown",
+        "fresh saves unlock the first campaign pane and the existing optional content only",
+        "title places THE GLASS PALACE immediately after NEW GAME and keeps the existing menus",
+        "the longest Continue title menu fits above the footer without losing its last action",
+        "actual title input opens a walkable noncombat palace without changing original slots",
+        "only normally unlocked moments have visible panes",
+        "real movement input moves Jon freely through the hub",
+        "combat inputs cannot produce combat actors or consume hub health",
+        "viewing, walking and combat-key input leave all three original slots byte-identical",
+        "zero fragments produce zero earned structure pieces in the actual hub world",
+        "unlocked panes use their level map renderers and have live drawing activity",
+        "live vignette rendering does not write any original progress slot",
+        "campaign pane visibility follows the saved reached index",
+        "combined ledger sums retained sources without double-counting campaign completed records",
+        "ledger and moment reads never rewrite source formats or bytes",
+        "four original reflection tiers distinguish unwritten, mercy, balance and detachment",
+        "the central glass slab opens the combined ledger and its reflection",
+        "reading the slab leaves all old progress slots byte-identical",
+        "walking to a pane and pressing E offers play, resume and challenges",
+        "challenge panel shows three definitions and current earned status",
+        "pane and challenge views preserve all original save bytes",
+        "moment resume metadata reads matching checkpoints and the selected After Midnight hero",
+        "reading resume metadata leaves all original bytes untouched",
+        "campaign Resume normalizes legacy numeric-string carry without rewriting its source",
+        "mars: actual pane Resume enters the existing level checkpoint",
+        "ninth_minute: actual pane Resume enters the existing level checkpoint",
+        "am_undertow: actual pane Resume enters the existing level checkpoint",
+        "failed and downed completions cannot grant fragments",
+        "real campaign completion grants only the two fulfilled challenges",
+        "actual level-end rendering shows the two-of-three moment status",
+        "a later real completion can earn the missing level-specific fragment",
+        "repeated completion callbacks cannot duplicate already earned fragments",
+        "reassembly: the actual campaign completion path awards its three fulfilled challenges",
+        "superman: the actual campaign completion path awards its three fulfilled challenges",
+        "deterrent: the actual campaign completion path awards its three fulfilled challenges",
+        "mars: the actual campaign completion path awards its three fulfilled challenges",
+        "karnak: the actual campaign completion path awards its three fulfilled challenges",
+        "eighteen earned fragments rebuild eighteen real central structure pieces",
+        "hub rebuild at half progress leaves original save slots untouched",
+        "campaign completion alone does not unlock the epilogue",
+        "last_broadcast: the actual bonus completion path awards its level-specific challenges",
+        "last_broadcast: missing bonus completion still prevents the epilogue",
+        "ninth_minute: the actual bonus completion path awards its level-specific challenges",
+        "ninth_minute: missing bonus completion still prevents the epilogue",
+        "long_summer: the actual bonus completion path awards its level-specific challenges",
+        "all six campaign and three bonus completions unlock the epilogue without requiring After Midnight",
+        "am_dead_air: the actual After Midnight completion hook grants its three challenge fragments",
+        "am_undertow: the actual After Midnight completion hook grants its three challenge fragments",
+        "am_glass_archive: the actual After Midnight completion hook grants its three challenge fragments",
+        "all thirty-six fragments assemble all thirty-six central pieces",
+        "central geometry visibly grows between zero, half and full progress",
+        "viewing the complete palace keeps every old slot byte-for-byte unchanged",
+        "completed panes display their three-of-three challenge status",
+        "each missing campaign or bonus completion independently blocks the epilogue",
+        "return: combined ledger selects its distinct ninety-second epilogue",
+        "return: timed narration does not finish or record its ending early",
+        "return: epilogue returns to the hub and records only its new-slot ending flag",
+        "return: epilogue playback leaves all three original save bytes unchanged",
+        "observe: combined ledger selects its distinct ninety-second epilogue",
+        "observe: timed narration does not finish or record its ending early",
+        "observe: epilogue returns to the hub and records only its new-slot ending flag",
+        "observe: epilogue playback leaves all three original save bytes unchanged",
+        "depart: combined ledger selects its distinct ninety-second epilogue",
+        "depart: timed narration does not finish or record its ending early",
+        "depart: epilogue returns to the hub and records only its new-slot ending flag",
+        "depart: epilogue playback leaves all three original save bytes unchanged",
+        "all three epilogue variants are distinct",
+        "new-slot challenge and epilogue progress survives a real page reload",
+        "reloading the game retains original save bytes",
+        "blocked hub persistence retains session progress and warns honestly",
+        "a successful hub-only write recovers persistence without touching old slots",
+        "corrupt and newer hub saves are preserved rather than overwritten",
+        "all former save bytes remain unchanged through hub storage recovery probes",
+        "hub tests produce no browser or engine errors"
+      ],
+      "errors": []
+    }
+  },
+  "realInputTours": {
+    "source": {
+      "engine": "chromium",
+      "browser": "151.0.7922.34",
+      "checks": [
+        "validation fixture unlocks twelve panes without claiming completed history or palace fragments",
+        "actual title input opens the palace without source-slot writes",
+        "all twelve pane destinations are available to the walking tour",
+        "prologue: ordinary walking reaches the pane interaction",
+        "prologue: real E opens its own Play / Resume / Challenges menu",
+        "prologue: actual menu input exposes three challenge entries",
+        "prologue: returning from both panels leaves source save bytes and write trace unchanged",
+        "reassembly: ordinary walking reaches the pane interaction",
+        "reassembly: real E opens its own Play / Resume / Challenges menu",
+        "reassembly: actual menu input exposes three challenge entries",
+        "reassembly: returning from both panels leaves source save bytes and write trace unchanged",
+        "superman: ordinary walking reaches the pane interaction",
+        "superman: real E opens its own Play / Resume / Challenges menu",
+        "superman: actual menu input exposes three challenge entries",
+        "superman: returning from both panels leaves source save bytes and write trace unchanged",
+        "deterrent: ordinary walking reaches the pane interaction",
+        "deterrent: real E opens its own Play / Resume / Challenges menu",
+        "deterrent: actual menu input exposes three challenge entries",
+        "deterrent: returning from both panels leaves source save bytes and write trace unchanged",
+        "mars: ordinary walking reaches the pane interaction",
+        "mars: real E opens its own Play / Resume / Challenges menu",
+        "mars: actual menu input exposes three challenge entries",
+        "mars: returning from both panels leaves source save bytes and write trace unchanged",
+        "karnak: ordinary walking reaches the pane interaction",
+        "karnak: real E opens its own Play / Resume / Challenges menu",
+        "karnak: actual menu input exposes three challenge entries",
+        "karnak: returning from both panels leaves source save bytes and write trace unchanged",
+        "last_broadcast: ordinary walking reaches the pane interaction",
+        "last_broadcast: real E opens its own Play / Resume / Challenges menu",
+        "last_broadcast: actual menu input exposes three challenge entries",
+        "last_broadcast: returning from both panels leaves source save bytes and write trace unchanged",
+        "ninth_minute: ordinary walking reaches the pane interaction",
+        "ninth_minute: real E opens its own Play / Resume / Challenges menu",
+        "ninth_minute: actual menu input exposes three challenge entries",
+        "ninth_minute: returning from both panels leaves source save bytes and write trace unchanged",
+        "long_summer: ordinary walking reaches the pane interaction",
+        "long_summer: real E opens its own Play / Resume / Challenges menu",
+        "long_summer: actual menu input exposes three challenge entries",
+        "long_summer: returning from both panels leaves source save bytes and write trace unchanged",
+        "am_dead_air: ordinary walking reaches the pane interaction",
+        "am_dead_air: real E opens its own Play / Resume / Challenges menu",
+        "am_dead_air: actual menu input exposes three challenge entries",
+        "am_dead_air: returning from both panels leaves source save bytes and write trace unchanged",
+        "am_undertow: ordinary walking reaches the pane interaction",
+        "am_undertow: real E opens its own Play / Resume / Challenges menu",
+        "am_undertow: actual menu input exposes three challenge entries",
+        "am_undertow: returning from both panels leaves source save bytes and write trace unchanged",
+        "am_glass_archive: ordinary walking reaches the pane interaction",
+        "am_glass_archive: real E opens its own Play / Resume / Challenges menu",
+        "am_glass_archive: actual menu input exposes three challenge entries",
+        "am_glass_archive: returning from both panels leaves source save bytes and write trace unchanged",
+        "every visited pane has rendered its own original builder without an error",
+        "walking and reading challenge menus grants no artificial fragments",
+        "the completed tour preserves all three source slots byte-for-byte and makes no write attempt",
+        "all twelve panes were reached with real movement input",
+        "no browser or engine error occurred during the full tour"
+      ],
+      "errors": [],
+      "visits": [
+        {
+          "id": "prologue",
+          "title": "The Watchmaker's Son",
+          "x": 420,
+          "y": 350,
+          "seconds": 12.966,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 434.0794869914823,
+            "y": 455.635326448114,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "prologue",
+            "error": null
+          }
+        },
+        {
+          "id": "reassembly",
+          "title": "Reassembly",
+          "x": 840,
+          "y": 350,
+          "seconds": 7.14,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 851.5133843862266,
+            "y": 455.635326448114,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "reassembly",
+            "error": null
+          }
+        },
+        {
+          "id": "superman",
+          "title": "The Superman Exists",
+          "x": 1260,
+          "y": 350,
+          "seconds": 3.737,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1255.4556455594216,
+            "y": 455.635326448114,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "superman",
+            "error": null
+          }
+        },
+        {
+          "id": "deterrent",
+          "title": "The Deterrent",
+          "x": 1680,
+          "y": 350,
+          "seconds": 7.34,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1672.9915316750619,
+            "y": 455.635326448114,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "deterrent",
+            "error": null
+          }
+        },
+        {
+          "id": "mars",
+          "title": "The Watchmaker",
+          "x": 350,
+          "y": 700,
+          "seconds": 14.478,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 362.20676357186346,
+            "y": 801.282033313441,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "mars",
+            "error": null
+          }
+        },
+        {
+          "id": "karnak",
+          "title": "Karnak",
+          "x": 1750,
+          "y": 700,
+          "seconds": 12.192,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1740.8791916360308,
+            "y": 801.282033313441,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "karnak",
+            "error": null
+          }
+        },
+        {
+          "id": "last_broadcast",
+          "title": "The Last Broadcast",
+          "x": 350,
+          "y": 1050,
+          "seconds": 15.193,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 355.4829615209836,
+            "y": 1152.118104308725,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "last_broadcast",
+            "error": null
+          }
+        },
+        {
+          "id": "ninth_minute",
+          "title": "The Ninth Minute",
+          "x": 1750,
+          "y": 1050,
+          "seconds": 12.21,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1738.1539364975167,
+            "y": 1152.118104308725,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "ninth_minute",
+            "error": null
+          }
+        },
+        {
+          "id": "long_summer",
+          "title": "The Long Summer",
+          "x": 420,
+          "y": 1450,
+          "seconds": 14.961,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 427.83627188410014,
+            "y": 1549.2285803974307,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "long_summer",
+            "error": null
+          }
+        },
+        {
+          "id": "am_dead_air",
+          "title": "Dead Air",
+          "x": 840,
+          "y": 1450,
+          "seconds": 7.338,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 847.2378722198317,
+            "y": 1549.2285803974307,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "am_dead_air",
+            "error": null
+          }
+        },
+        {
+          "id": "am_undertow",
+          "title": "Undertow",
+          "x": 1260,
+          "y": 1450,
+          "seconds": 3.738,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1249.1119193968334,
+            "y": 1549.2285803974307,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "am_undertow",
+            "error": null
+          }
+        },
+        {
+          "id": "am_glass_archive",
+          "title": "The Glass Archive",
+          "x": 1680,
+          "y": 1450,
+          "seconds": 7.121,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1664.5509279905293,
+            "y": 1549.2285803974307,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "am_glass_archive",
+            "error": null
+          }
+        }
+      ],
+      "previews": [
+        {
+          "id": "prologue",
+          "renders": 51,
+          "sourceMap": "gila",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "reassembly",
+          "renders": 72,
+          "sourceMap": "void",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "superman",
+          "renders": 68,
+          "sourceMap": "range",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "deterrent",
+          "renders": 49,
+          "sourceMap": "proving",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "mars",
+          "renders": 59,
+          "sourceMap": "mars",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "karnak",
+          "renders": 57,
+          "sourceMap": "karnak",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "last_broadcast",
+          "renders": 69,
+          "sourceMap": "broadcast_roofs",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "ninth_minute",
+          "renders": 68,
+          "sourceMap": "ninth_platform",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "long_summer",
+          "renders": 55,
+          "sourceMap": "summer_avenue",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "am_dead_air",
+          "renders": 76,
+          "sourceMap": "am_rooftops",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "am_undertow",
+          "renders": 79,
+          "sourceMap": "am_harbour",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "am_glass_archive",
+          "renders": 55,
+          "sourceMap": "am_museum",
+          "usesOwnBuilder": true,
+          "error": null
+        }
+      ],
+      "keyboardPolls": 1121,
+      "method": "Actual title entry and real WASD/E/mouse/Escape input; read-only navigation telemetry; normal RAF.",
+      "fixtureProvenance": "Explicit reached=6 validation fixture; completion records and palace fragments remain empty.",
+      "sourceWrites": [],
+      "sourceSlotsUnchanged": true
+    },
+    "standalone": {
+      "engine": "chromium",
+      "browser": "151.0.7922.34",
+      "checks": [
+        "validation fixture unlocks twelve panes without claiming completed history or palace fragments",
+        "actual title input opens the palace without source-slot writes",
+        "all twelve pane destinations are available to the walking tour",
+        "prologue: ordinary walking reaches the pane interaction",
+        "prologue: real E opens its own Play / Resume / Challenges menu",
+        "prologue: actual menu input exposes three challenge entries",
+        "prologue: returning from both panels leaves source save bytes and write trace unchanged",
+        "reassembly: ordinary walking reaches the pane interaction",
+        "reassembly: real E opens its own Play / Resume / Challenges menu",
+        "reassembly: actual menu input exposes three challenge entries",
+        "reassembly: returning from both panels leaves source save bytes and write trace unchanged",
+        "superman: ordinary walking reaches the pane interaction",
+        "superman: real E opens its own Play / Resume / Challenges menu",
+        "superman: actual menu input exposes three challenge entries",
+        "superman: returning from both panels leaves source save bytes and write trace unchanged",
+        "deterrent: ordinary walking reaches the pane interaction",
+        "deterrent: real E opens its own Play / Resume / Challenges menu",
+        "deterrent: actual menu input exposes three challenge entries",
+        "deterrent: returning from both panels leaves source save bytes and write trace unchanged",
+        "mars: ordinary walking reaches the pane interaction",
+        "mars: real E opens its own Play / Resume / Challenges menu",
+        "mars: actual menu input exposes three challenge entries",
+        "mars: returning from both panels leaves source save bytes and write trace unchanged",
+        "karnak: ordinary walking reaches the pane interaction",
+        "karnak: real E opens its own Play / Resume / Challenges menu",
+        "karnak: actual menu input exposes three challenge entries",
+        "karnak: returning from both panels leaves source save bytes and write trace unchanged",
+        "last_broadcast: ordinary walking reaches the pane interaction",
+        "last_broadcast: real E opens its own Play / Resume / Challenges menu",
+        "last_broadcast: actual menu input exposes three challenge entries",
+        "last_broadcast: returning from both panels leaves source save bytes and write trace unchanged",
+        "ninth_minute: ordinary walking reaches the pane interaction",
+        "ninth_minute: real E opens its own Play / Resume / Challenges menu",
+        "ninth_minute: actual menu input exposes three challenge entries",
+        "ninth_minute: returning from both panels leaves source save bytes and write trace unchanged",
+        "long_summer: ordinary walking reaches the pane interaction",
+        "long_summer: real E opens its own Play / Resume / Challenges menu",
+        "long_summer: actual menu input exposes three challenge entries",
+        "long_summer: returning from both panels leaves source save bytes and write trace unchanged",
+        "am_dead_air: ordinary walking reaches the pane interaction",
+        "am_dead_air: real E opens its own Play / Resume / Challenges menu",
+        "am_dead_air: actual menu input exposes three challenge entries",
+        "am_dead_air: returning from both panels leaves source save bytes and write trace unchanged",
+        "am_undertow: ordinary walking reaches the pane interaction",
+        "am_undertow: real E opens its own Play / Resume / Challenges menu",
+        "am_undertow: actual menu input exposes three challenge entries",
+        "am_undertow: returning from both panels leaves source save bytes and write trace unchanged",
+        "am_glass_archive: ordinary walking reaches the pane interaction",
+        "am_glass_archive: real E opens its own Play / Resume / Challenges menu",
+        "am_glass_archive: actual menu input exposes three challenge entries",
+        "am_glass_archive: returning from both panels leaves source save bytes and write trace unchanged",
+        "every visited pane has rendered its own original builder without an error",
+        "walking and reading challenge menus grants no artificial fragments",
+        "the completed tour preserves all three source slots byte-for-byte and makes no write attempt",
+        "all twelve panes were reached with real movement input",
+        "no browser or engine error occurred during the full tour"
+      ],
+      "errors": [],
+      "visits": [
+        {
+          "id": "prologue",
+          "title": "The Watchmaker's Son",
+          "x": 420,
+          "y": 350,
+          "seconds": 13.054,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 426.4545119090712,
+            "y": 449.769455954467,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "prologue",
+            "error": null
+          }
+        },
+        {
+          "id": "reassembly",
+          "title": "Reassembly",
+          "x": 840,
+          "y": 350,
+          "seconds": 7.189,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 849.5155964266967,
+            "y": 449.769455954467,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "reassembly",
+            "error": null
+          }
+        },
+        {
+          "id": "superman",
+          "title": "The Superman Exists",
+          "x": 1260,
+          "y": 350,
+          "seconds": 3.702,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1251.2185961381665,
+            "y": 449.769455954467,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "superman",
+            "error": null
+          }
+        },
+        {
+          "id": "deterrent",
+          "title": "The Deterrent",
+          "x": 1680,
+          "y": 350,
+          "seconds": 7.091,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1666.6733927362814,
+            "y": 449.769455954467,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "deterrent",
+            "error": null
+          }
+        },
+        {
+          "id": "mars",
+          "title": "The Watchmaker",
+          "x": 350,
+          "y": 700,
+          "seconds": 14.461,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 355.59881224484184,
+            "y": 795.4115126786038,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "mars",
+            "error": null
+          }
+        },
+        {
+          "id": "karnak",
+          "title": "Karnak",
+          "x": 1750,
+          "y": 700,
+          "seconds": 12.211,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1738.3009427065365,
+            "y": 795.4115126786038,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "karnak",
+            "error": null
+          }
+        },
+        {
+          "id": "last_broadcast",
+          "title": "The Last Broadcast",
+          "x": 350,
+          "y": 1050,
+          "seconds": 15.194,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 352.8444839183776,
+            "y": 1152.049006508479,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "last_broadcast",
+            "error": null
+          }
+        },
+        {
+          "id": "ninth_minute",
+          "title": "The Ninth Minute",
+          "x": 1750,
+          "y": 1050,
+          "seconds": 12.293,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1743.1201390200551,
+            "y": 1152.049006508479,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "ninth_minute",
+            "error": null
+          }
+        },
+        {
+          "id": "long_summer",
+          "title": "The Long Summer",
+          "x": 420,
+          "y": 1450,
+          "seconds": 14.962,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 428.59569165691687,
+            "y": 1545.3277026125309,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "long_summer",
+            "error": null
+          }
+        },
+        {
+          "id": "am_dead_air",
+          "title": "Dead Air",
+          "x": 840,
+          "y": 1450,
+          "seconds": 7.19,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 851.7918045539087,
+            "y": 1545.3277026125309,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "am_dead_air",
+            "error": null
+          }
+        },
+        {
+          "id": "am_undertow",
+          "title": "Undertow",
+          "x": 1260,
+          "y": 1450,
+          "seconds": 3.703,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1253.6296301143755,
+            "y": 1545.3277026125309,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "am_undertow",
+            "error": null
+          }
+        },
+        {
+          "id": "am_glass_archive",
+          "title": "The Glass Archive",
+          "x": 1680,
+          "y": 1450,
+          "seconds": 7.072,
+          "position": {
+            "hubOnTop": true,
+            "scene": "GlassPalace",
+            "x": 1667.050593113944,
+            "y": 1545.3277026125309,
+            "health": 100,
+            "down": false,
+            "godMode": false,
+            "invulnerable": false,
+            "powers": 0,
+            "canUsePowers": false,
+            "enemies": 0,
+            "interactMoment": "am_glass_archive",
+            "error": null
+          }
+        }
+      ],
+      "previews": [
+        {
+          "id": "prologue",
+          "renders": 51,
+          "sourceMap": "gila",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "reassembly",
+          "renders": 72,
+          "sourceMap": "void",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "superman",
+          "renders": 76,
+          "sourceMap": "range",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "deterrent",
+          "renders": 53,
+          "sourceMap": "proving",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "mars",
+          "renders": 65,
+          "sourceMap": "mars",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "karnak",
+          "renders": 54,
+          "sourceMap": "karnak",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "last_broadcast",
+          "renders": 70,
+          "sourceMap": "broadcast_roofs",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "ninth_minute",
+          "renders": 66,
+          "sourceMap": "ninth_platform",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "long_summer",
+          "renders": 54,
+          "sourceMap": "summer_avenue",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "am_dead_air",
+          "renders": 70,
+          "sourceMap": "am_rooftops",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "am_undertow",
+          "renders": 72,
+          "sourceMap": "am_harbour",
+          "usesOwnBuilder": true,
+          "error": null
+        },
+        {
+          "id": "am_glass_archive",
+          "renders": 55,
+          "sourceMap": "am_museum",
+          "usesOwnBuilder": true,
+          "error": null
+        }
+      ],
+      "keyboardPolls": 1127,
+      "method": "Actual title entry and real WASD/E/mouse/Escape input; read-only navigation telemetry; normal RAF.",
+      "fixtureProvenance": "Explicit reached=6 validation fixture; completion records and palace fragments remain empty.",
+      "sourceWrites": [],
+      "sourceSlotsUnchanged": true
+    }
+  },
+  "protectedFiles": [
+    {
+      "file": "src/data/chapters/prologue.js",
+      "sha256": "89336acfb4020351805b9a1a05e78c3ed12785e4828529fe76c1f51202882b41",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/chapters/reassembly.js",
+      "sha256": "6a382b1ca39e78507a6b0faee1c255e45789d476159fab8ee46c7931e44c1e92",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/chapters/superman.js",
+      "sha256": "02107723da289a293c0305320c8283b4b86ef88374fcdbc862bdf7dce0b1a009",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/chapters/deterrent.js",
+      "sha256": "3bc020bb95a0229cff7afe41cb93e6d33da41f91651f467e6ebde7f82d2879b1",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/chapters/mars.js",
+      "sha256": "bd40cf8d7da1d58f3c61d569cdbb651c7c2a53a4e5679a2b73c501f44577e126",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/chapters/karnak.js",
+      "sha256": "f801f588f3a529dafac2d8e528e0ca8f4e4037c0d22114f5fb34fcfb35c920e3",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/music.js",
+      "sha256": "ef2db5abae5cb4431c81c936c3565f56267e4473be5782343184edc1d1fed426",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/bonus-broadcast-atmosphere.js",
+      "sha256": "7791c444df1a6862a12fb60a1ff2cefc1fb3a5e7a25612f677d62bcfad3d49da",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/bonus-ninth-atmosphere.js",
+      "sha256": "149112e6313ae60b1717a3a86a36fe347692b33cca1bb8617a96e5cc5bbca24d",
+      "unchanged": true
+    },
+    {
+      "file": "src/data/bonus-summer-atmosphere.js",
+      "sha256": "235e5367aa6f9f5a92ec8c32f20ae074bffb039814f49c8be912fb0bb6c8e1c1",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/engine.js",
+      "sha256": "62a1f17744145311c613797c5a0200f04369343615b5264968833f6d5cfdb1e8",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/gfx.js",
+      "sha256": "20d9e86e93452abf17e0dfa54d4778afbbd4c0f245cdafc147a063ab8b00e451",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/lighting.js",
+      "sha256": "20529a97d4521ba5e22a56814d6aaca5406abf80848f08a216f5c132cae9a79d",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/weather.js",
+      "sha256": "9fbc1d6fa17a0a209e3e63036c949ab462fdc3fd94c450e06ea29d89c88003e4",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/camera.js",
+      "sha256": "81b58f13d7f3df6c40284984c65831ce694f17b6afc6dca8be15e08ec9104bbf",
+      "unchanged": true
+    },
+    {
+      "file": "src/core/audio.js",
+      "sha256": "bc3592dbee242505b8b39058169b70882087728dc1f1d0f211ec4e71955c2565",
+      "unchanged": true
+    },
+    {
+      "file": "src/game/world.js",
+      "sha256": "e5a959cb5dd8336397c2d4109f51fd55cd9a96346bc507d70fdfec589b9310b1",
+      "unchanged": true
+    }
+  ],
+  "music": {
+    "title-1": {
+      "rms50": -24.08623494198883,
+      "peak": 0.1281086802482605
+    },
+    "glass_palace-1": {
+      "rms50": -25.066712489099228,
+      "peak": 0.13620297610759735
+    },
+    "glass_palace-0": {
+      "rms50": -26.866448824579145,
+      "peak": 0.1179165467619896
+    }
+  },
+  "style": [
+    {
+      "file": "src/game/glass-palace-progress.js",
+      "splitLiterals": 0,
+      "beforeLines": 493,
+      "afterLines": 493,
+      "maxLineLength": 109,
+      "normalizedAstSha256": "a5e8a4725d5a26ae403f7448403e1cd19fd982ffa18d7ac7b6433609187ffd86",
+      "sourceSha256Before": "baf2db0c7a1d8ab4c6d6abcb3020d39504992ae1da73bf59394f05244c6e9d61",
+      "sourceSha256After": "baf2db0c7a1d8ab4c6d6abcb3020d39504992ae1da73bf59394f05244c6e9d61",
+      "astEquivalent": true,
+      "oneSiblingStatementPerLine": true
+    },
+    {
+      "file": "src/game/glass-palace-scene.js",
+      "splitLiterals": 0,
+      "beforeLines": 792,
+      "afterLines": 792,
+      "maxLineLength": 99,
+      "normalizedAstSha256": "f128f730c0ca7b909d70b74cf59821590082a7a7ef8168354e8a2eaf81e78d5e",
+      "sourceSha256Before": "928d51cfca5bbff63e915e8edb85c06d19e4df4f3ce8163661305b61002c9db6",
+      "sourceSha256After": "928d51cfca5bbff63e915e8edb85c06d19e4df4f3ce8163661305b61002c9db6",
+      "astEquivalent": true,
+      "oneSiblingStatementPerLine": true
+    },
+    {
+      "file": "src/game/glass-palace-epilogue.js",
+      "splitLiterals": 0,
+      "beforeLines": 215,
+      "afterLines": 215,
+      "maxLineLength": 113,
+      "normalizedAstSha256": "59d735d3443f74538f37064e9c585fce02d6b3e7e964016da66fd12e6ecf854a",
+      "sourceSha256Before": "afbe622c24362287925a42b81330fd31610d90aa2322e1fdcf9e23566e4e8e64",
+      "sourceSha256After": "afbe622c24362287925a42b81330fd31610d90aa2322e1fdcf9e23566e4e8e64",
+      "astEquivalent": true,
+      "oneSiblingStatementPerLine": true
+    },
+    {
+      "file": "src/game/glass-palace-integration.js",
+      "splitLiterals": 0,
+      "beforeLines": 61,
+      "afterLines": 61,
+      "maxLineLength": 81,
+      "normalizedAstSha256": "0cc54e988d052617017be70561cf071a01e559ee1475af52032092bbe847e19a",
+      "sourceSha256Before": "9b80d0abcce8ba6f537cb2316278d7acaeae57331abf64e10d1785869d23fe13",
+      "sourceSha256After": "9b80d0abcce8ba6f537cb2316278d7acaeae57331abf64e10d1785869d23fe13",
+      "astEquivalent": true,
+      "oneSiblingStatementPerLine": true
+    },
+    {
+      "file": "src/data/glass-palace-atmosphere.js",
+      "splitLiterals": 0,
+      "beforeLines": 65,
+      "afterLines": 65,
+      "maxLineLength": 99,
+      "normalizedAstSha256": "2cbbec6ac37523fab1e6f679302f2617dcce10aea960a00e9dbf14eb5106e618",
+      "sourceSha256Before": "a2ddddf0c554a2516658c7f263e3e25cde2544de0a2198084a8893175d622a7c",
+      "sourceSha256After": "a2ddddf0c554a2516658c7f263e3e25cde2544de0a2198084a8893175d622a7c",
+      "astEquivalent": true,
+      "oneSiblingStatementPerLine": true
+    }
+  ],
+  "captures": {
+    "metadata": "screenshots/glass-palace/capture-source.json",
+    "integrity": "screenshots/glass-palace/pixel-integrity.json",
+    "count": 3,
+    "fragments": [
+      0,
+      18,
+      36
+    ],
+    "allLiveHubPhasesAtLeastTenSeconds": true,
+    "sourceSlotsByteIdentical": true,
+    "losslessPixelsVerified": true,
+    "halfAndFullProgressPreparedWithControlledCompletionFixtures": true,
+    "naturallyEarningAllChallengesClaimed": false
+  },
+  "independentCI": {
+    "runId": 40532192903,
+    "codeRevision": "dbd93c5f5b0a9acc72063d9d9f6eccaf1e7dda81",
+    "status": "in_progress",
+    "url": "https://github.com/Ezrolith/Demo/actions/runs/40532192903"
+  },
+  "limits": [
+    "Half/full live views use disclosed controlled completion-fixture saves, not naturally earned challenge histories.",
+    "Natural all-twelve-level replay and challenge-time balance were not established.",
+    "Physical devices, subjective listening, assistive technology and native Safari direct-file opening remain unverified.",
+    "Touch gameplay remains unsupported."
+  ]
+}

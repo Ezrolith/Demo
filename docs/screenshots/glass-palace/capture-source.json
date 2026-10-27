@@ -1,0 +1,1165 @@
+{
+  "label": "source",
+  "target": "index.html",
+  "browser": "151.0.7922.34",
+  "dpr": 1,
+  "method": "Fresh context per state; normal RAF, one second of real W movement, then ten seconds before raw canvas capture.",
+  "screenshotMethod": "Current unmodified game canvas and same-evaluation metadata; no renderer or camera override.",
+  "controlledCompletionFixture": {
+    "method": "Actual Play.completeChapter() paths with controlled completion fixtures, before entering the hub.",
+    "naturalPlaythrough": false,
+    "stats": {
+      "time": 1,
+      "spared": 4,
+      "disintegrated": 0,
+      "memories": 6
+    },
+    "flags": {
+      "repaired": true,
+      "calibrated": true,
+      "reassembled": true,
+      "evidence": 7,
+      "engineers": 7,
+      "passengers": 6,
+      "rescued": 6,
+      "heat": 10,
+      "clues": 7,
+      "downloaded": true,
+      "departed": true,
+      "ledger": true,
+      "surveyorCaptured": true,
+      "archiveReturned": true
+    },
+    "reassemblyForm": "manhattan",
+    "karnakEmitterRefs": [
+      {
+        "dead": true
+      },
+      {
+        "neutralized": true
+      },
+      {
+        "dead": true
+      },
+      {
+        "dead": true
+      }
+    ],
+    "note": "These fixtures satisfy challenge predicates without playing the levels. No GP challenge or fragment fields are edited."
+  },
+  "limitations": [
+    "Half/full progress comes from controlled completion-fixture saves, not natural playthroughs.",
+    "Captures establish live hub behavior and geometry for those saves, not challenge balance or earned times.",
+    "Only panes near the live player are refreshed; their render counters and errors are retained."
+  ],
+  "records": [
+    {
+      "state": "zero",
+      "screenshot": "palace-0-fragments-source-live.webp",
+      "preparation": "Fresh game; no completion fixtures.",
+      "progressPreparedByFixture": false,
+      "naturalLevelPlaythroughsClaimed": false,
+      "completionHistory": [],
+      "sourceSlotIntegrity": {
+        "byteIdentical": true,
+        "writes": [],
+        "sha256": {
+          "dr-manhattan.save": "6a699266c344aa19cad935784dd7e4c904db86c3ecdcdeaad1779c542a2591ea",
+          "dr-manhattan.bonus.v1": "6a699266c344aa19cad935784dd7e4c904db86c3ecdcdeaad1779c542a2591ea",
+          "dr-manhattan.after-midnight.v1": "6a699266c344aa19cad935784dd7e4c904db86c3ecdcdeaad1779c542a2591ea"
+        }
+      },
+      "wallSeconds": 10.024799999982118,
+      "worldSeconds": 10.007400000000011,
+      "worldRealSeconds": 10.007400000000011,
+      "wallSecondsSinceHubEntry": 11.027899999976158,
+      "walk": {
+        "input": "W",
+        "heldMs": 1000,
+        "from": {
+          "x": 1050,
+          "y": 1310
+        },
+        "to": {
+          "x": 1050,
+          "y": 1198.711464160758
+        }
+      },
+      "fragmentCount": 0,
+      "structureCount": 0,
+      "structurePieces": 0,
+      "structureRise": 0,
+      "ledger": {
+        "spared": 0,
+        "unmade": 0,
+        "memories": 0,
+        "time": 0,
+        "disintegrated": 0,
+        "sources": {
+          "campaign": {
+            "spared": 0,
+            "unmade": 0,
+            "memories": 0,
+            "time": 0
+          },
+          "bonus": {
+            "spared": 0,
+            "unmade": 0,
+            "memories": 0,
+            "time": 0
+          },
+          "afterMidnight": {
+            "spared": 0,
+            "unmade": 0,
+            "memories": 0,
+            "time": 0
+          }
+        },
+        "note": "Campaign totals; latest retained bonus completions and After Midnight records. Replays follow each save slot’s rules."
+      },
+      "epilogueUnlocked": false,
+      "hero": {
+        "x": 1050,
+        "y": 1194.5956327384051,
+        "health": 100,
+        "maxHealth": 100,
+        "down": false,
+        "godMode": false,
+        "form": "manhattan"
+      },
+      "camera": {
+        "x": 1050,
+        "y": 1014.5956327384057,
+        "zoom": 0.9,
+        "ox": 0,
+        "oy": 0
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "requestedQuality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "noCombatActors": true,
+      "preview": [
+        {
+          "id": "prologue",
+          "renders": 0,
+          "sourceMap": null,
+          "error": null,
+          "usingLevelBuilder": false
+        },
+        {
+          "id": "last_broadcast",
+          "renders": 12,
+          "sourceMap": "broadcast_roofs",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "ninth_minute",
+          "renders": 12,
+          "sourceMap": "ninth_platform",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "long_summer",
+          "renders": 12,
+          "sourceMap": "summer_avenue",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "am_dead_air",
+          "renders": 12,
+          "sourceMap": "am_rooftops",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "am_undertow",
+          "renders": 12,
+          "sourceMap": "am_harbour",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "am_glass_archive",
+          "renders": 12,
+          "sourceMap": "am_museum",
+          "error": null,
+          "usingLevelBuilder": true
+        }
+      ],
+      "writes": [],
+      "error": null,
+      "browserErrors": [],
+      "sourceScreenshot": "palace-0-fragments-source-live.png",
+      "rgbaSha256": "2f7fdc6e2b0b13ea20917227a7d980429556d1b11478e0c9a0eefdf6a10021a6"
+    },
+    {
+      "state": "half",
+      "screenshot": "palace-18-fragments-source-live.webp",
+      "preparation": "Controlled completion-fixture progress.",
+      "progressPreparedByFixture": true,
+      "naturalLevelPlaythroughsClaimed": false,
+      "completionHistory": [
+        {
+          "id": "prologue",
+          "status": 3,
+          "fragments": 3,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "reassembly",
+          "status": 3,
+          "fragments": 6,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "superman",
+          "status": 3,
+          "fragments": 9,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "deterrent",
+          "status": 3,
+          "fragments": 12,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "mars",
+          "status": 3,
+          "fragments": 15,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "karnak",
+          "status": 3,
+          "fragments": 18,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        }
+      ],
+      "sourceSlotIntegrity": {
+        "byteIdentical": true,
+        "writes": [],
+        "sha256": {
+          "dr-manhattan.save": "2547c4e2cf29de101550a4c7ff4ed8e73c7b33718798226f19dbbee2e24288a5",
+          "dr-manhattan.bonus.v1": "6a699266c344aa19cad935784dd7e4c904db86c3ecdcdeaad1779c542a2591ea",
+          "dr-manhattan.after-midnight.v1": "6a699266c344aa19cad935784dd7e4c904db86c3ecdcdeaad1779c542a2591ea"
+        }
+      },
+      "wallSeconds": 10.024,
+      "worldSeconds": 10.008300000000023,
+      "worldRealSeconds": 10.008300000000023,
+      "wallSecondsSinceHubEntry": 11.02630000001192,
+      "walk": {
+        "input": "W",
+        "heldMs": 1000,
+        "from": {
+          "x": 1050,
+          "y": 1310
+        },
+        "to": {
+          "x": 1050,
+          "y": 1198.7158636802171
+        }
+      },
+      "fragmentCount": 18,
+      "structureCount": 18,
+      "structurePieces": 18,
+      "structureRise": 0.5,
+      "ledger": {
+        "spared": 24,
+        "unmade": 0,
+        "memories": 36,
+        "time": 6,
+        "disintegrated": 0,
+        "sources": {
+          "campaign": {
+            "spared": 24,
+            "unmade": 0,
+            "memories": 36,
+            "time": 6
+          },
+          "bonus": {
+            "spared": 0,
+            "unmade": 0,
+            "memories": 0,
+            "time": 0
+          },
+          "afterMidnight": {
+            "spared": 0,
+            "unmade": 0,
+            "memories": 0,
+            "time": 0
+          }
+        },
+        "note": "Campaign totals; latest retained bonus completions and After Midnight records. Replays follow each save slot’s rules."
+      },
+      "epilogueUnlocked": false,
+      "hero": {
+        "x": 1050,
+        "y": 1194.6030105836683,
+        "health": 100,
+        "maxHealth": 100,
+        "down": false,
+        "godMode": false,
+        "form": "manhattan"
+      },
+      "camera": {
+        "x": 1050,
+        "y": 1014.6030105836688,
+        "zoom": 0.9,
+        "ox": 0,
+        "oy": 0
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "requestedQuality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "noCombatActors": true,
+      "preview": [
+        {
+          "id": "prologue",
+          "renders": 0,
+          "sourceMap": null,
+          "error": null,
+          "usingLevelBuilder": false
+        },
+        {
+          "id": "reassembly",
+          "renders": 8,
+          "sourceMap": "void",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "superman",
+          "renders": 8,
+          "sourceMap": "range",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "deterrent",
+          "renders": 0,
+          "sourceMap": null,
+          "error": null,
+          "usingLevelBuilder": false
+        },
+        {
+          "id": "mars",
+          "renders": 7,
+          "sourceMap": "mars",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "karnak",
+          "renders": 7,
+          "sourceMap": "karnak",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "last_broadcast",
+          "renders": 7,
+          "sourceMap": "broadcast_roofs",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "ninth_minute",
+          "renders": 7,
+          "sourceMap": "ninth_platform",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "long_summer",
+          "renders": 7,
+          "sourceMap": "summer_avenue",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "am_dead_air",
+          "renders": 7,
+          "sourceMap": "am_rooftops",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "am_undertow",
+          "renders": 7,
+          "sourceMap": "am_harbour",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "am_glass_archive",
+          "renders": 7,
+          "sourceMap": "am_museum",
+          "error": null,
+          "usingLevelBuilder": true
+        }
+      ],
+      "writes": [],
+      "error": null,
+      "browserErrors": [],
+      "sourceScreenshot": "palace-18-fragments-source-live.png",
+      "rgbaSha256": "4374bf42eb262e17f46a6dd4a8624367c0bd89b9333ec8e94146a41978e73089"
+    },
+    {
+      "state": "full",
+      "screenshot": "palace-36-fragments-source-live.webp",
+      "preparation": "Controlled completion-fixture progress.",
+      "progressPreparedByFixture": true,
+      "naturalLevelPlaythroughsClaimed": false,
+      "completionHistory": [
+        {
+          "id": "prologue",
+          "status": 3,
+          "fragments": 3,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "reassembly",
+          "status": 3,
+          "fragments": 6,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "superman",
+          "status": 3,
+          "fragments": 9,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "deterrent",
+          "status": 3,
+          "fragments": 12,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "mars",
+          "status": 3,
+          "fragments": 15,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "karnak",
+          "status": 3,
+          "fragments": 18,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "last_broadcast",
+          "status": 3,
+          "fragments": 21,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "ninth_minute",
+          "status": 3,
+          "fragments": 24,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "long_summer",
+          "status": 3,
+          "fragments": 27,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 100,
+          "maxHealth": 100,
+          "godMode": false
+        },
+        {
+          "id": "am_dead_air",
+          "status": 3,
+          "fragments": 30,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 110,
+          "maxHealth": 110,
+          "godMode": false
+        },
+        {
+          "id": "am_undertow",
+          "status": 3,
+          "fragments": 33,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 110,
+          "maxHealth": 110,
+          "godMode": false
+        },
+        {
+          "id": "am_glass_archive",
+          "status": 3,
+          "fragments": 36,
+          "completionMethod": "Play.completeChapter",
+          "stage": 0,
+          "stats": {
+            "time": 1,
+            "spared": 4,
+            "disintegrated": 0,
+            "memories": 6
+          },
+          "flags": {
+            "repaired": true,
+            "calibrated": true,
+            "reassembled": true,
+            "evidence": 7,
+            "engineers": 7,
+            "passengers": 6,
+            "rescued": 6,
+            "heat": 10,
+            "clues": 7,
+            "downloaded": true,
+            "departed": true,
+            "ledger": true,
+            "surveyorCaptured": true,
+            "archiveReturned": true
+          },
+          "health": 110,
+          "maxHealth": 110,
+          "godMode": false
+        }
+      ],
+      "sourceSlotIntegrity": {
+        "byteIdentical": true,
+        "writes": [],
+        "sha256": {
+          "dr-manhattan.save": "2547c4e2cf29de101550a4c7ff4ed8e73c7b33718798226f19dbbee2e24288a5",
+          "dr-manhattan.bonus.v1": "c2662653eb30d6455a41f443ee10d95820b4251f5283e6e7e86a1e25e8832130",
+          "dr-manhattan.after-midnight.v1": "7af58caa599d05faa78cfeaa0344a751c14fb6826abac64f0021f3b2b131f740"
+        }
+      },
+      "wallSeconds": 10.027399999976158,
+      "worldSeconds": 10.007999999999992,
+      "worldRealSeconds": 10.007999999999992,
+      "wallSecondsSinceHubEntry": 11.029,
+      "walk": {
+        "input": "W",
+        "heldMs": 1000,
+        "from": {
+          "x": 1050,
+          "y": 1310
+        },
+        "to": {
+          "x": 1050,
+          "y": 1198.7125591135884
+        }
+      },
+      "fragmentCount": 36,
+      "structureCount": 36,
+      "structurePieces": 36,
+      "structureRise": 1,
+      "ledger": {
+        "spared": 48,
+        "unmade": 0,
+        "memories": 72,
+        "time": 12,
+        "disintegrated": 0,
+        "sources": {
+          "campaign": {
+            "spared": 24,
+            "unmade": 0,
+            "memories": 36,
+            "time": 6
+          },
+          "bonus": {
+            "spared": 12,
+            "unmade": 0,
+            "memories": 18,
+            "time": 3
+          },
+          "afterMidnight": {
+            "spared": 12,
+            "unmade": 0,
+            "memories": 18,
+            "time": 3
+          }
+        },
+        "note": "Campaign totals; latest retained bonus completions and After Midnight records. Replays follow each save slot’s rules."
+      },
+      "epilogueUnlocked": true,
+      "hero": {
+        "x": 1050,
+        "y": 1194.598585182593,
+        "health": 100,
+        "maxHealth": 100,
+        "down": false,
+        "godMode": false,
+        "form": "manhattan"
+      },
+      "camera": {
+        "x": 1050,
+        "y": 1014.5985851825936,
+        "zoom": 0.9,
+        "ox": 0,
+        "oy": 0
+      },
+      "settings": {
+        "challenge": "normal",
+        "invulnerable": false,
+        "requestedQuality": "high",
+        "effectiveQuality": "high",
+        "governorEnabled": true,
+        "effectiveDpr": 1
+      },
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "noCombatActors": true,
+      "preview": [
+        {
+          "id": "prologue",
+          "renders": 0,
+          "sourceMap": null,
+          "error": null,
+          "usingLevelBuilder": false
+        },
+        {
+          "id": "reassembly",
+          "renders": 8,
+          "sourceMap": "void",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "superman",
+          "renders": 8,
+          "sourceMap": "range",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "deterrent",
+          "renders": 0,
+          "sourceMap": null,
+          "error": null,
+          "usingLevelBuilder": false
+        },
+        {
+          "id": "mars",
+          "renders": 7,
+          "sourceMap": "mars",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "karnak",
+          "renders": 7,
+          "sourceMap": "karnak",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "last_broadcast",
+          "renders": 7,
+          "sourceMap": "broadcast_roofs",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "ninth_minute",
+          "renders": 7,
+          "sourceMap": "ninth_platform",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "long_summer",
+          "renders": 7,
+          "sourceMap": "summer_avenue",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "am_dead_air",
+          "renders": 7,
+          "sourceMap": "am_rooftops",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "am_undertow",
+          "renders": 7,
+          "sourceMap": "am_harbour",
+          "error": null,
+          "usingLevelBuilder": true
+        },
+        {
+          "id": "am_glass_archive",
+          "renders": 7,
+          "sourceMap": "am_museum",
+          "error": null,
+          "usingLevelBuilder": true
+        }
+      ],
+      "writes": [],
+      "error": null,
+      "browserErrors": [],
+      "sourceScreenshot": "palace-36-fragments-source-live.png",
+      "rgbaSha256": "20f83488bfe39e145f578a06e3cb5c57742248ae42345b5b1747df6fbe74294e"
+    }
+  ],
+  "errors": [],
+  "failures": [],
+  "publishedEncoding": {
+    "format": "lossless WebP",
+    "decodedPixelsIdenticalToPNG": true,
+    "sceneOrPixelEdits": false
+  }
+}

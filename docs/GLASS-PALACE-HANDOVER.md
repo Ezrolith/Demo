@@ -1,7 +1,7 @@
 # The Glass Palace — Part B handover
 
 Branch: `codex/glass-palace`, from finished Part A `c206ae6` on
-`codex/watchmen-stories`. Draft review targets `codex/watchmen-stories`.
+`codex/watchmen-stories`. [Draft PR #7](https://github.com/Ezrolith/Demo/pull/7) targets `codex/watchmen-stories`.
 No merge, deployment or protected Claude-branch changes.
 
 [Player guide](GLASS-PALACE.md). Part A's four independent workflows passed
@@ -109,13 +109,75 @@ timing, reload and blocked/corrupt/future storage. Controlled completion fixture
 are distinguished from natural gameplay.
 
 <!-- GLASS_PALACE_SUITE_TABLES -->
-Final source and standalone eighteen-suite runs are in progress.
+All eighteen suites passed on source and standalone: 36 sequential processes,
+every exit zero. The new hub suite passes 76 checks per build. Additional WebKit
+hub runs pass 76 per build, and the actual keyboard tours pass 56 per build.
+
+### Source
+
+| Suite | Exit | Actual final line |
+| --- | --- | --- |
+| smoke | 0 | Smoke test passed. |
+| visual | 0 | All atmosphere checks passed. |
+| audio | 0 | All audio checks passed. |
+| powers | 0 | All mechanics checks passed. |
+| saves | 0 | All save & robustness checks passed. |
+| settings | 0 | All settings & accessibility checks passed. |
+| ledger | 0 | All ledger & combat-feel checks passed. |
+| encounters | 0 | All encounter checks passed. |
+| flows | 0 | All story flow checks passed. |
+| bonus | 0 | BONUS ACCEPTANCE PASSED: 42 checks (normal file loading). |
+| ninth-minute | 0 | NINTH MINUTE PASSED: 75 checks (normal file loading). |
+| long-summer | 0 | LONG SUMMER PASSED: 82 checks (normal file loading). |
+| vigilantes | 0 | VIGILANTES PASSED: 43 checks (chromium, index.html). |
+| after-midnight-cases | 0 | AFTER MIDNIGHT CASES PASSED: 75 checks (chromium, index.html). |
+| after-midnight-modes | 0 | AFTER MIDNIGHT MODES PASSED: 45 checks (index.html). |
+| after-midnight-integration | 0 | AFTER MIDNIGHT INTEGRATION PASSED: 36 checks (index.html). |
+| surveyor-gear | 0 | SURVEYOR GEAR PASSED: 5 checks (index.html). |
+| glass-palace | 0 | GLASS PALACE PASSED: 76 checks (chromium, index.html). |
+
+### Standalone
+
+| Suite | Exit | Actual final line |
+| --- | --- | --- |
+| smoke | 0 | Smoke test passed. |
+| visual | 0 | All atmosphere checks passed. |
+| audio | 0 | All audio checks passed. |
+| powers | 0 | All mechanics checks passed. |
+| saves | 0 | All save & robustness checks passed. |
+| settings | 0 | All settings & accessibility checks passed. |
+| ledger | 0 | All ledger & combat-feel checks passed. |
+| encounters | 0 | All encounter checks passed. |
+| flows | 0 | All story flow checks passed. |
+| bonus | 0 | BONUS ACCEPTANCE PASSED: 42 checks (normal file loading). |
+| ninth-minute | 0 | NINTH MINUTE PASSED: 75 checks (normal file loading). |
+| long-summer | 0 | LONG SUMMER PASSED: 82 checks (normal file loading). |
+| vigilantes | 0 | VIGILANTES PASSED: 43 checks (chromium, dist/dr-manhattan.html). |
+| after-midnight-cases | 0 | AFTER MIDNIGHT CASES PASSED: 75 checks (chromium, dist/dr-manhattan.html). |
+| after-midnight-modes | 0 | AFTER MIDNIGHT MODES PASSED: 45 checks (dist/dr-manhattan.html). |
+| after-midnight-integration | 0 | AFTER MIDNIGHT INTEGRATION PASSED: 36 checks (dist/dr-manhattan.html). |
+| surveyor-gear | 0 | SURVEYOR GEAR PASSED: 5 checks (dist/dr-manhattan.html). |
+| glass-palace | 0 | GLASS PALACE PASSED: 76 checks (chromium, dist/dr-manhattan.html). |
+
+[Machine-readable results](glass-palace-results.json) pin the tested code revision,
+source/build digests, suite outcomes, tours and protected-file hashes.
+The [independent CI run](https://github.com/Ezrolith/Demo/actions/runs/40532192903)
+is still in progress; these local results are not claimed as independent CI success.
 <!-- END_GLASS_PALACE_SUITE_TABLES -->
 
 ## Live views and limits
 
 <!-- GLASS_PALACE_CAPTURE_LINKS -->
-The hub's 0/18/36 live views and their pixel-integrity records are being packaged.
+| Fragments | Live view | Progress provenance |
+| --- | --- | --- |
+| 0 | [View](screenshots/glass-palace/palace-0-fragments-source-live.webp) | Fresh progress |
+| 18 | [View](screenshots/glass-palace/palace-18-fragments-source-live.webp) | Controlled completion-fixture save |
+| 36 | [View](screenshots/glass-palace/palace-36-fragments-source-live.webp) | Controlled completion-fixture save |
+
+[Capture metadata](screenshots/glass-palace/capture-source.json) and
+[pixel integrity](screenshots/glass-palace/pixel-integrity.json). Published WebPs
+are lossless and decode to the exact original PNG pixels. Original PNGs and
+manifests remain locally under `tests/out/glass-palace/raw-captures/`.
 <!-- END_GLASS_PALACE_CAPTURE_LINKS -->
 
 The zero-fragment view is fresh. Half/full progress was prepared through actual
