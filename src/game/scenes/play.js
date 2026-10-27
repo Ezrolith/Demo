@@ -206,7 +206,10 @@
       d.totals.spared += st.spared;
       d.totals.memories += st.memories;
       Save.chapterDone(ch.id);
-      Engine.push(new Scenes.ChapterComplete(this, st, next));
+      if (DM.GlassPalace) this.glassPalaceResult = DM.GlassPalace.observeCompletion(this);
+      const screen = new Scenes.ChapterComplete(this, st, next);
+      if (DM.GlassPalace) DM.GlassPalace.decorateCompletion(screen, this);
+      Engine.push(screen);
     }
 
     // The world (with its light layer and emissive pass), the weather, Temporal

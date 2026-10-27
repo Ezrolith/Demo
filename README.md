@@ -1,5 +1,9 @@
 # Dr. Manhattan: The Watchmaker's Son
 
+**The Glass Palace:** an optional walkable Mars hub for unlocked moments,
+combined saved outcomes, thirty-six replay challenges and a new reflection.
+[Player guide](docs/GLASS-PALACE.md) · [verification and handover](docs/GLASS-PALACE-HANDOVER.md).
+
 Bonus adventures: see [docs/BONUS.md](docs/BONUS.md); [backup/browser/performance notes](docs/PLATFORM-QA-HANDOVER.md).
 
 **After Midnight expansion:** choose Nite Owl, Silk Spectre or Rorschach for three new cases,

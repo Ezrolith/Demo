@@ -1,5 +1,11 @@
 # Changes
 
+## The Glass Palace — Part B (draft)
+- Added a noncombat Mars hub, actual map-code vignettes, moment Play/Resume/Challenges menus and a combined read-only source ledger.
+- Added thirty-six data-defined replay challenges in a separate hub save, fragment-driven architecture, four reflections and three timed epilogue variants.
+- Added a separate wind/glass/clock ambience and calm music arrangement; original music and campaign files remain intact.
+- See [the Glass Palace handover](docs/GLASS-PALACE-HANDOVER.md) for per-item verification, suite exits and capture provenance. Nothing merged or deployed.
+
 ## 0.2.0 — After Midnight (draft)
 - Part A review: isolated optional gear from campaign hot loops, strengthened hero visibility, cleared mode arrivals, added dense themed dressing and replay layouts, split the board into two screens, and reformatted the six expansion files. See [the Part A report](docs/AFTER-MIDNIGHT-PART-A.md).
 - Corrected Silk Spectre's guard movement slowdown from the first frame, including immediate release and low-stamina behavior; retained parry/damage timing and added five actual-movement regressions.

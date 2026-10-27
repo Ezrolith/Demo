@@ -1,5 +1,10 @@
 # Review entry point — 26 October 2026
 
+The user has now authorized Part B. Current work is `codex/glass-palace`, based
+on Part A `c206ae6`; review its [handover](GLASS-PALACE-HANDOVER.md) and
+[player guide](GLASS-PALACE.md). Its draft PR targets `codex/watchmen-stories`.
+The Part A stop and guard-only notes below are historical.
+
 The newer [Part A review response](AFTER-MIDNIGHT-PART-A.md) supersedes the
 guard-only check below. It records A1–A5, per-build suite exits and live evidence.
 Part B has not been started.

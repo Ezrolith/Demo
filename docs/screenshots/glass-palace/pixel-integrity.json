@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "lossless": true,
+  "sceneOrPixelEdits": false,
+  "imageCount": 3,
+  "files": [
+    {
+      "file": "palace-0-fragments-source-live.webp",
+      "sourceScreenshot": "palace-0-fragments-source-live.png",
+      "sourcePNGsha256": "50d432d8b19c324d61f8883e68af682020c448aeb93b56ca35b92cce6e7b28b7",
+      "webPsha256": "4d2d851fe6796a18b9502498f23d8e575e125ba849d76ab1944972828b85ced7",
+      "rgbaSha256": "2f7fdc6e2b0b13ea20917227a7d980429556d1b11478e0c9a0eefdf6a10021a6",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "file": "palace-18-fragments-source-live.webp",
+      "sourceScreenshot": "palace-18-fragments-source-live.png",
+      "sourcePNGsha256": "24e4d8c3045ec0891423d9084cb064514df355780120856bce4bd00ee6599cb4",
+      "webPsha256": "53e06e4925bc1f1875666fbc3925751ddd51f3b3ba61cccd7d7164c9e1f021b5",
+      "rgbaSha256": "4374bf42eb262e17f46a6dd4a8624367c0bd89b9333ec8e94146a41978e73089",
+      "width": 1280,
+      "height": 720
+    },
+    {
+      "file": "palace-36-fragments-source-live.webp",
+      "sourceScreenshot": "palace-36-fragments-source-live.png",
+      "sourcePNGsha256": "95bea2538e29e6379eb8c56666eaa831f7b12aedd9d6bf60454a55ccedb32abe",
+      "webPsha256": "36f89b35f6eadeb1dc0deb86a30bed2785bc02a72e5ec50aca6ed7c214e39ec6",
+      "rgbaSha256": "20f83488bfe39e145f578a06e3cb5c57742248ae42345b5b1747df6fbe74294e",
+      "width": 1280,
+      "height": 720
+    }
+  ]
+}

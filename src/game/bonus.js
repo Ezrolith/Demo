@@ -116,7 +116,12 @@
       delete this.data.checkpoints[play.chapter.id];
       this.write();
       DM.Challenge.clear(play.chapter.id);
-      E.push(play.chapter.bonusComplete ? new play.chapter.bonusComplete(play, record) : new BonusComplete(play, record));
+      if (DM.GlassPalace) play.glassPalaceResult = DM.GlassPalace.observeCompletion(play);
+      const screen = play.chapter.bonusComplete
+        ? new play.chapter.bonusComplete(play, record)
+        : new BonusComplete(play, record);
+      if (DM.GlassPalace) DM.GlassPalace.decorateCompletion(screen, play);
+      E.push(screen);
     },
   };
   function city(ctx, t, x = 0, y = 0, w = DM.W, h = DM.H) {
