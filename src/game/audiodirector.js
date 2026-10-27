@@ -76,7 +76,7 @@
       const E = DM.Engine;
       const Play = DM.Scenes && DM.Scenes.Play;
       if (!E || !Play) return null;
-      for (const s of E.stack) if (s instanceof Play) return s;
+      for (const s of E.stack) if (s instanceof Play || s.isGlassPalace) return s;
       return null;
     },
     stageKeyOf(play) {

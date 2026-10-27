@@ -232,7 +232,10 @@
       delete AM.data.checkpoints[AM.slot(play.chapter.amId, record.run)];
       AM.write();
       DM.Challenge.clear(play.chapter.id);
-      E.push(new Results(play, record));
+      if (DM.GlassPalace) play.glassPalaceResult = DM.GlassPalace.observeCompletion(play);
+      const screen = new Results(play, record);
+      if (DM.GlassPalace) DM.GlassPalace.decorateCompletion(screen, play);
+      E.push(screen);
     },
   };
   AM.registerCase = (def) => {

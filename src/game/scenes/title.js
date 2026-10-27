@@ -111,13 +111,16 @@
         items.push(chapters);
       }
       items.push({ label: 'NEW GAME', action: () => this.newGame() });
+      if (DM.GlassPalace) items.push({ label: 'THE GLASS PALACE', action: () => DM.GlassPalace.open() });
       if (!items.includes(chapters)) items.push(chapters);
       if (DM.Bonus) items.push({ label: 'BONUS LEVELS', action: () => Engine.set(new Scenes.BonusMenu()) });
       if (DM.AfterMidnight) items.push({ label: 'AFTER MIDNIGHT', sub: 'Choose Nite Owl, Silk Spectre or Rorschach.', action: () => Engine.set(new Scenes.AfterMidnightMenu()) });
       items.push({ label: 'SETTINGS', action: () => Engine.push(new Scenes.Settings()) });
       items.push({ label: 'CONTROLS', action: () => Engine.push(new Scenes.Controls()) });
       const keep = this.menu ? this.menu.sel : 0;
-      this.menu = new TitleMenu(items, { x: 84, y: 330, w: 400, itemH: 44, size: 24 });
+      this.menu = new TitleMenu(items, {
+        x: 84, y: DM.GlassPalace ? 304 : 330, w: 400, itemH: DM.GlassPalace ? 40 : 44, size: 24,
+      });
       this.menu.sel = Math.min(keep, items.length - 1);
     }
     continueGame() {
