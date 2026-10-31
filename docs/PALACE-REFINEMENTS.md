@@ -1,5 +1,9 @@
 # A clearer path through The Glass Palace
 
+The current follow-up adds [challenge tracking during play](CHALLENGE-TRACKING.md)
+to this same draft PR. The atlas/backup evidence below records the preceding
+twenty-suite baseline; the tracking report records fresh checks for the new code.
+
 This follow-up starts from finished Part B on `codex/glass-palace`.
 The original six campaign files, original music and engine presentation remain
 protected. No merge or deployment is part of this work.
@@ -26,7 +30,7 @@ is blocked. Closing the modal refreshes the palace structure.
 
 | Priority | Enhancement | What it adds | Bounded first version |
 | --- | --- | --- | --- |
-| 1 | Challenge tracking | Keep the chosen objective understandable during a replay | One pinned challenge, provisional progress and a clear completion breakdown |
+| Implemented follow-up | Challenge tracking | Keep the chosen objective understandable during a replay | One pinned challenge, provisional progress and a clear completion breakdown |
 | 2 | Natural challenge balance | Establish how the targets feel in actual play | Twelve normal-input completions recording time, deaths and missed objectives |
 | 3 | Branching detective case | Let the player interpret evidence and choose a conclusion | One district, three hypotheses, two evidence-supported resolutions |
 | 4 | Paired-hero mission | Make complementary equipment matter | Two selected heroes, simple companion instructions, two cooperative obstacles |

@@ -1,5 +1,9 @@
 # Review entry point — 26 October 2026
 
+The current task on `codex/glass-palace-refinements` adds optional challenge
+tracking during play. Read [the tracking report](CHALLENGE-TRACKING.md) first.
+The existing draft PR remains the review destination; no merge or deployment.
+
 The current follow-up is `codex/glass-palace-refinements`: a palace atlas,
 walking guide and palace-only progress backups. Read
 [the enhancement review](PALACE-REFINEMENTS.md) for scope and verification.

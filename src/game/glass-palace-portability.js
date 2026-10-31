@@ -19,13 +19,18 @@
   }
 
   function validated(raw) {
-    if (!only(raw, ['version', 'challenges', 'epilogueSeen', 'visits']) || raw.version !== 1)
+    if (!only(raw, ['version', 'challenges', 'epilogueSeen', 'visits', 'tracking']) || raw.version !== 1)
       throw new Error('Choose compatible Glass Palace progress.');
     if (!object(raw.challenges) || !object(raw.epilogueSeen))
       throw new Error('The palace progress records are invalid.');
     if (!Number.isInteger(raw.visits) || raw.visits < 0 || raw.visits > 1e9)
       throw new Error('The palace visit count is invalid.');
     const ids = GP.moments().map((moment) => moment.id);
+    if (raw.tracking !== undefined && raw.tracking !== null) {
+      if (!only(raw.tracking, ['momentId', 'challengeId']) || !ids.includes(raw.tracking.momentId) ||
+        !['mercy', 'swift', 'detail'].includes(raw.tracking.challengeId))
+        throw new Error('The backup contains an invalid tracked challenge.');
+    }
     for (const [id, values] of Object.entries(raw.challenges)) {
       if (!ids.includes(id) || !only(values, ['mercy', 'swift', 'detail']))
         throw new Error('The backup contains an unavailable moment or challenge.');
@@ -120,7 +125,7 @@
       title.textContent = 'GLASS PALACE BACKUP';
       const note = document.createElement('p');
       note.textContent =
-        'Export before restoring. Restore replaces palace fragments, reflection history and visits only. ' +
+        'Export before restoring. Restore replaces palace fragments, reflection history, tracked challenge and visits only. ' +
         'Campaign, bonus and After Midnight progress and settings stay unchanged.';
       const status = document.createElement('p');
       status.setAttribute('role', 'status');

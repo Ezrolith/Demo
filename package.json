@@ -30,7 +30,9 @@
     "test:glass-palace-capture": "node tests/capture-glass-palace.mjs",
     "test:palace-refinements": "node tools/verify-palace-refinements.mjs",
     "test:palace-navigation": "node tests/glass-palace-navigation.mjs",
-    "test:palace-backup": "node tests/glass-palace-backup.mjs"
+    "test:palace-backup": "node tests/glass-palace-backup.mjs",
+    "test:palace-tracking": "node tests/glass-palace-tracking.mjs",
+    "test:palace-tracking-capture": "node tests/capture-glass-palace-tracking.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

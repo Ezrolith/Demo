@@ -1,4 +1,4 @@
-/* All eighteen existing suites plus two palace refinements, one process at a time. */
+/* Every existing suite and live challenge tracking, one process at a time. */
 import { spawn } from 'node:child_process';
 import { createHash } from 'node:crypto';
 import { closeSync, mkdirSync, openSync, readFileSync, writeFileSync } from 'node:fs';
@@ -11,7 +11,7 @@ if (!['index.html', 'dist/dr-manhattan.html'].includes(target)) {
   throw new Error('Choose index.html or dist/dr-manhattan.html.');
 }
 const build = target.startsWith('dist/') ? 'standalone' : 'source';
-const out = path.join(root, 'tests/out/palace-refinements/final-' + build);
+const out = path.join(root, 'tests/out/challenge-tracking/final-' + build);
 mkdirSync(out, { recursive: true });
 const suites = [
   'smoke', 'visual', 'audio', 'powers', 'saves', 'settings', 'ledger',
@@ -19,6 +19,7 @@ const suites = [
   'vigilantes', 'after-midnight-cases', 'after-midnight-modes',
   'after-midnight-integration', 'surveyor-gear', 'glass-palace',
   'glass-palace-navigation', 'glass-palace-backup',
+  'glass-palace-tracking',
 ];
 const digest = file => createHash('sha256').update(readFileSync(path.join(root, file))).digest('hex');
 const scripts = [...readFileSync(path.join(root, 'index.html'), 'utf8')

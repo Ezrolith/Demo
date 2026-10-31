@@ -49,6 +49,24 @@ unlock their moments but do not silently award new challenges retroactively.
 End-of-level screens show **0–3 / 3 moments**. Each new challenge contributes a
 glass fragment, and the palace's central structure grows toward thirty-six.
 
+Choose **Track This** beside a challenge, either at its pane or under
+**Pause → Moment Challenges** during a level. One challenge can be tracked at a
+time. Its small field panel shows the current attempt's progress; timed challenges
+show elapsed time, the target and time left. Pause freezes the actual field timer.
+Retry and Resume use the level's existing carried stats, so they do not invent a
+fresh clock or erase an earlier outcome from that checkpoint.
+
+The tracker stays out of dialogue, captions, cutscenes and overlapping interaction
+prompts. Use Pause to inspect all three conditions or stop tracking. A provisional
+condition being met does not award a fragment. Already recovered fragments remain
+recovered, including when the current attempt misses them.
+
+At completion, choose **Challenge Details** or press **H** to see which fragments
+are new, were recovered earlier, or were missed this run, with the completion
+reason. Tracking applies to the twelve moments; Night Patrol and Rescue Clock keep
+their existing score and timer rules. The selected challenge is saved only with
+palace progress and is included in palace backups; older backups remain supported.
+
 Palace challenges and epilogue history have their own save slot. If saving is
 blocked or a newer palace save is protected, the hub displays a warning. Session
 progress can remain visible even when it has not been saved; enable browser

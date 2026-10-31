@@ -55,6 +55,7 @@
         });
       }
     };
+    GP.addCompletionDetails(screen, play, result);
     return screen;
   };
 })();

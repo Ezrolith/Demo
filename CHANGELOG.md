@@ -1,5 +1,10 @@
 # Changes
 
+## Challenge tracking (draft follow-up)
+- Added one optional tracked moment challenge, live progress and elapsed/target/remaining time using the actual level state.
+- Added pause inspection, clear tracking and completion explanations, with no provisional fragment awards.
+- Kept tracking in the palace slot, added it to palace backups and retained support for older backups.
+
 ## Palace refinements (draft)
 - Added an unlocked-moment atlas, missing-fragment and checkpoint filters, and a wall-aware walking guide.
 - Added palace-only export, preview and explicit restore, including blocked-storage and asynchronous file safeguards.

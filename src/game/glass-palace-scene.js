@@ -43,57 +43,9 @@
     if (subtitle) G.text(g, subtitle, 112, 162, { size: 15, color: '#b1c4ce', spacing: 1 });
   }
 
-  function challengeRows(moment) {
-    const status = GP.status(moment.id);
-    return (
-      status.challenges || GP.challengeDefs(moment.id).map((def) => ({ ...def, complete: false }))
-    );
-  }
-
-  class ChallengesPanel {
+  class ChallengesPanel extends GP.TrackingPanel {
     constructor(moment) {
-      this.moment = moment;
-      this.opaque = false;
-      this.cursor = 'pointer';
-    }
-    enter() {
-      I.clearAll();
-      this.status = GP.status(this.moment.id);
-      this.rows = challengeRows(this.moment);
-      this.menu = new DM.UI.Menu([{ label: 'RETURN TO THE MOMENT', action: closePanel }], {
-        x: 640,
-        y: 566,
-        w: 720,
-        align: 'center',
-        size: 20,
-        onBack: closePanel,
-      });
-    }
-    update(dt) {
-      this.menu.update(dt);
-    }
-    render(g) {
-      const status = this.status;
-      panel(
-        g,
-        'MOMENT CHALLENGES',
-        this.moment.title + ' · ' + status.earned + ' / 3 fragments recovered',
-      );
-      this.rows.forEach((challenge, index) => {
-        const y = 214 + index * 108;
-        const complete = !!(challenge.complete || challenge.earned);
-        G.panel(g, 110, y - 30, 1060, 91, { accent: complete ? '#9cdbbd' : '#8d9ca6' });
-        G.text(g, (complete ? '◆ ' : '◇ ') + (challenge.label || challenge.name), 132, y + 1, {
-          size: 23,
-          color: complete ? '#b3e4ca' : '#e6d9bc',
-        });
-        G.paragraph(g, challenge.description || '', 132, y + 17, 1008, 22, {
-          size: 16,
-          font: DM.FONTS.type,
-          color: '#b7c9d1',
-        });
-      });
-      this.menu.render(g);
+      super(moment, { returnLabel: 'RETURN TO THE MOMENT' });
     }
   }
 

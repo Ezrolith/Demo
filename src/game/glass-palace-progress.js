@@ -21,8 +21,9 @@
     typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1e9
       ? value
       : fallback;
-  const fresh = () => ({ version: 1, challenges: {}, epilogueSeen: {}, visits: 0 });
+  const fresh = () => ({ version: 1, challenges: {}, epilogueSeen: {}, visits: 0, tracking: null });
   const observed = new WeakSet();
+  const completionResults = new WeakMap();
   const stats = (source) => ({
     spared: number(source?.spared),
     unmade: number(source?.disintegrated ?? source?.unmade),
@@ -352,6 +353,137 @@
     ].map((definition) => ({ ...definition, name: definition.label }));
   };
 
+  function cleanTracking(value) {
+    if (!object(value) || Object.keys(value).length !== 2) return null;
+    if (!Object.keys(value).every((key) => ['momentId', 'challengeId'].includes(key))) return null;
+    const chapter = registry().find((entry) => entry.chapter.id === value.momentId)?.chapter;
+    if (!chapter || !['mercy', 'swift', 'detail'].includes(value.challengeId)) return null;
+    return { momentId: chapter.id, challengeId: value.challengeId };
+  }
+
+  GP.challengeSnapshot = (play) => {
+    const chapter = play?.chapter;
+    const ctx = play?.ctx;
+    const canonical = registry().find((entry) => entry.chapter === chapter);
+    if (!canonical || !ctx?.stats || !play.player || ctx.chapter !== chapter || ctx.scene !== play) return null;
+    if (chapter.afterMidnight && chapter.kind !== 'story') return null;
+    return {
+      chapter,
+      stats: stats(ctx.stats),
+      flags: { ...(ctx.persistedFlags?.() || {}), ...(ctx.flags || {}) },
+      refs: ctx.refs || {},
+      player: play.player,
+      failed: !!(play.failed || play.player.down),
+    };
+  };
+
+  const countBits = (value, mask) => {
+    let bits = Math.floor(number(value)) & mask;
+    let count = 0;
+    while (bits) {
+      count += bits & 1;
+      bits >>>= 1;
+    }
+    return count;
+  };
+  const timeText = (value) => DM.U.fmtTime(Math.max(0, value));
+  const doneText = (value) => value ? 'done' : 'needed';
+
+  function detailProgress(chapter, state) {
+    const flags = state.flags;
+    const stats = state.stats;
+    const player = state.player;
+    switch (chapter.id) {
+      case 'prologue':
+        return 'Watch ' + doneText(flags.repaired === true) + ' · Calibration ' + doneText(flags.calibrated === true);
+      case 'reassembly':
+        return 'Reassembly ' + doneText(flags.reassembled === true) + ' · Manhattan form ' +
+          doneText(player.form === 'manhattan');
+      case 'superman':
+        return Math.floor(stats.spared) + ' / 4 people spared';
+      case 'deterrent': {
+        const coherence = player.maxCoherence > 0 ? player.coherence / player.maxCoherence * 100 : 0;
+        return Math.floor(Math.max(0, coherence)) + '% coherence · Finish at 75% or more';
+      }
+      case 'mars':
+        return Math.floor(stats.memories) + ' / 6 memories found';
+      case 'karnak': {
+        const emitters = Array.isArray(state.refs.emitters) ? state.refs.emitters : [];
+        const silenced = emitters.filter((entity) => entity.dead || entity.neutralized).length;
+        return silenced + ' / 4 emitters shut down' + (emitters.length < 4 ? ' · Search the storm' : '');
+      }
+      case 'last_broadcast':
+        return countBits(flags.evidence, 7) + ' / 3 records · ' + countBits(flags.engineers, 7) + ' / 3 engineers';
+      case 'ninth_minute':
+        return Math.floor(number(flags.passengers)) + ' / 6 passengers safe';
+      case 'long_summer': {
+        const heat = typeof flags.heat === 'number' && Number.isFinite(flags.heat) ? Math.floor(flags.heat) : 'unknown';
+        return Math.floor(number(flags.rescued)) + ' / 6 residents · Heat ' + heat + ' (below 30)';
+      }
+      case 'am_dead_air':
+        return countBits(flags.clues, 7) + ' / 3 traces · Buyer list ' + doneText(flags.downloaded === true);
+      case 'am_undertow':
+        return Math.floor(number(flags.rescued)) + ' / 4 aboard · Cast off ' + doneText(flags.departed === true);
+      case 'am_glass_archive':
+        return 'Ledger ' + doneText(flags.ledger === true) + ' · Surveyor ' + doneText(flags.surveyorCaptured === true) +
+          ' · Archive ' + doneText(flags.archiveReturned === true);
+      default:
+        return '';
+    }
+  }
+
+  function liveRow(chapter, state, definition, earned) {
+    const metNow = !!definition.test(state);
+    const row = {
+      momentId: chapter.id,
+      challengeId: definition.id,
+      label: definition.label,
+      description: definition.description,
+      state: metNow ? 'ready' : 'pending',
+      earned: !!earned,
+      metNow,
+      progress: '',
+      reason: metNow ? 'Requirement met so far. Finish the moment to earn its fragment.' : definition.description,
+      current: null,
+      target: null,
+    };
+    if (definition.id === 'mercy') {
+      row.current = state.stats.unmade;
+      row.target = 0;
+      row.progress = Math.floor(state.stats.unmade) + ' people unmade this attempt';
+      row.state = metNow ? 'viable' : 'missed';
+      row.reason = metNow ? 'No one unmade so far. Finish without unmaking a person.'
+        : 'A person was unmade this attempt. Retry from a checkpoint without that outcome or start again.';
+    } else if (definition.id === 'swift') {
+      row.current = state.stats.time;
+      row.target = definition.targetSeconds;
+      row.progress = timeText(state.stats.time) + ' / ' + timeText(definition.targetSeconds) +
+        ' · ' + timeText(Math.max(0, definition.targetSeconds - state.stats.time)) + ' left';
+      row.state = state.stats.time < definition.targetSeconds ? 'viable' : 'missed';
+      row.reason = row.state === 'viable' ? 'Finish before the time target. Pausing stops the field timer.'
+        : 'The time target was reached. This attempt must finish strictly under ' + timeText(definition.targetSeconds) + '.';
+    } else row.progress = detailProgress(chapter, state);
+    if (state.failed) {
+      row.state = 'missed';
+      row.reason = 'This attempt ended before the challenge could be completed.';
+    }
+    if (earned) {
+      row.reason = 'This fragment was recovered in an earlier run. Live progress describes this attempt; ' +
+        'it cannot add another fragment.';
+      if (state.failed) row.reason += ' This attempt ended before completion.';
+    }
+    return row;
+  }
+
+  GP.liveChallenge = (play, challengeId) => {
+    const state = GP.challengeSnapshot(play);
+    if (!state) return null;
+    const definition = GP.challengeDefs(state.chapter.id).find((entry) => entry.id === challengeId);
+    if (!definition) return null;
+    const earned = GP.data?.challenges?.[state.chapter.id]?.[definition.id] === true;
+    return liveRow(state.chapter, state, definition, earned);
+  };
+
   GP.sanitize = (raw) => {
     if (!object(raw) || raw.version !== 1)
       throw new Error('Choose a compatible Glass Palace save.');
@@ -368,6 +500,7 @@
       if (raw.epilogueSeen?.[id] === true) out.epilogueSeen[id] = true;
     }
     out.visits = Math.floor(number(raw.visits));
+    out.tracking = cleanTracking(raw.tracking);
     return out;
   };
   GP.load = () => {
@@ -405,6 +538,24 @@
       return false;
     }
   };
+  GP.tracking = () => cleanTracking(GP.load().tracking);
+  GP.pinChallenge = (momentId, challengeId) => {
+    const moment = GP.find(momentId);
+    if (!moment?.unlocked || !GP.challengeDefs(moment.id).some((definition) => definition.id === challengeId)) return false;
+    const pin = { momentId: moment.id, challengeId };
+    const data = GP.load();
+    if (data.tracking?.momentId === pin.momentId && data.tracking?.challengeId === pin.challengeId) return true;
+    data.tracking = pin;
+    GP.write();
+    return true;
+  };
+  GP.clearTracking = () => {
+    const data = GP.load();
+    if (!data.tracking) return true;
+    data.tracking = null;
+    GP.write();
+    return true;
+  };
   GP.fragmentCount = () => {
     const saved = GP.load().challenges;
     return registry().reduce((sum, entry) => {
@@ -440,34 +591,49 @@
       return null;
     if (ctx.chapter !== chapter || ctx.scene !== play) return null;
     if (!play.player || (chapter.afterMidnight && chapter.kind !== 'story')) return null;
-    if (observed.has(ctx)) return { momentId: item.id, ...GP.status(item.id), newlyEarned: [] };
+    if (observed.has(ctx)) {
+      const previousResult = completionResults.get(ctx);
+      return { ...previousResult, momentId: item.id, ...GP.status(item.id), newlyEarned: [] };
+    }
     observed.add(ctx);
-    const state = {
-      stats: stats(ctx.stats),
-      flags: { ...(ctx.persistedFlags?.() || {}), ...(ctx.flags || {}) },
-      refs: ctx.refs || {},
-      player: play.player,
-    };
+    const state = GP.challengeSnapshot(play);
     const data = GP.load();
     const previous = data.challenges[item.id] || {};
     const next = { ...previous };
     const newlyEarned = [];
     const passed = [];
+    const breakdown = [];
     for (const definition of GP.challengeDefs(item.id)) {
-      if (!definition.test(state)) continue;
-      passed.push(definition.id);
-      if (!previous[definition.id]) newlyEarned.push(definition.id);
-      next[definition.id] = true;
+      const row = liveRow(chapter, state, definition, previous[definition.id]);
+      const outcome = previous[definition.id] ? 'already' : row.metNow ? 'new' : 'missed';
+      breakdown.push(Object.freeze({
+        id: definition.id,
+        label: definition.label,
+        description: definition.description,
+        outcome,
+        passed: row.metNow,
+        progress: row.progress,
+        reason: row.metNow ? previous[definition.id] ? 'Recovered in an earlier run.' : 'Requirement met at completion.'
+          : definition.id === 'detail' ? 'Requirement not met at completion: ' + row.progress + '.' : row.reason,
+      }));
+      if (row.metNow) {
+        passed.push(definition.id);
+        if (!previous[definition.id]) newlyEarned.push(definition.id);
+        next[definition.id] = true;
+      }
     }
     data.challenges[item.id] = next;
     if (newlyEarned.length) GP.write();
-    return {
+    const result = {
       momentId: item.id,
       ...GP.status(item.id),
       passed,
       newlyEarned,
       maxFragments: GP.maxFragments(),
+      breakdown: Object.freeze(breakdown),
     };
+    completionResults.set(ctx, result);
+    return result;
   };
   GP.epilogueReady = () => {
     const source = GP.sources();

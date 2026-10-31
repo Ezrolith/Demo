@@ -35,7 +35,7 @@ jobs:
           pulseaudio --start --exit-idle-time=-1
           pactl load-module module-null-sink sink_name=qa_audio
           pactl set-default-sink qa_audio
-      - name: Twenty suites on both builds, one child process at a time
+      - name: Twenty-one suites on both builds, one child process at a time
         shell: bash
         run: |
           mkdir -p tests/out/palace-refinements
@@ -66,13 +66,14 @@ jobs:
           }
           for browser in firefox webkit; do
             for target in index.html dist/dr-manhattan.html; do
-              for suite in glass-palace glass-palace-navigation glass-palace-backup; do
+              for suite in glass-palace glass-palace-navigation glass-palace-backup glass-palace-tracking; do
                 check "$browser-$suite-$(basename "$target")" env QA_BROWSER="$browser" node "tests/$suite.mjs" "$target"
               done
             done
           done
           check walk-source node tests/play-glass-palace.mjs index.html
           check walk-standalone node tests/play-glass-palace.mjs dist/dr-manhattan.html
+          check tracking-live node tests/capture-glass-palace-tracking.mjs index.html
           exit "$failed"
       - uses: actions/upload-artifact@v4
         if: always()

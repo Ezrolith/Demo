@@ -1,5 +1,12 @@
 # Handover: how to keep developing this game
 
+> **Current challenge tracking (31 October 2026):** Peter authorized optional live
+> challenge tracking on the existing `codex/glass-palace-refinements` draft PR.
+> [The current report](docs/CHALLENGE-TRACKING.md) records selection, provisional
+> progress and completion explanations. All older suite counts below belong to
+> their identified revisions. Original chapters, music and engine presentation
+> remain protected; no merge or deployment.
+
 > **Current follow-up (31 October 2026):** `codex/glass-palace-refinements` adds
 > palace navigation and palace-only backups after Peter authorized the next
 > enhancement pass. Read [the review and next steps](docs/PALACE-REFINEMENTS.md).
