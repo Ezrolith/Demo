@@ -1,0 +1,26 @@
+{
+  "name": "current-source",
+  "root": "/Users/peter/Documents/ChatGPT/Watchmen Game/game",
+  "target": "index.html",
+  "exitCode": 0,
+  "signal": null,
+  "seconds": 78.129,
+  "log": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/postfx-review/original-current-source.log",
+  "finalLine": "All atmosphere checks passed.",
+  "timings": [
+    {
+      "passed": true,
+      "dpr": 1,
+      "on": 2.18,
+      "off": 2.01,
+      "overheadPercent": 8.457711442786087
+    },
+    {
+      "passed": true,
+      "dpr": 2,
+      "on": 7.74,
+      "off": 7,
+      "overheadPercent": 10.571428571428566
+    }
+  ]
+}

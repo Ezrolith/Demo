@@ -1,0 +1,3164 @@
+{
+  "target": "index.html",
+  "startedAtUtc": "2026-10-31T22:23:25.281Z",
+  "runs": [
+    {
+      "momentId": "last_broadcast",
+      "fixture": {
+        "campaign": {
+          "version": 2,
+          "reached": 0,
+          "completed": {},
+          "checkpoints": {},
+          "checkpoint": null,
+          "seen": {
+            "unlocks": {}
+          },
+          "totals": {
+            "spared": 0,
+            "disintegrated": 0,
+            "memories": 0,
+            "decoherences": 0
+          },
+          "settings": {
+            "challenge": "normal",
+            "invulnerable": false,
+            "focusPause": false,
+            "textSpeed": "normal"
+          }
+        },
+        "bonus": {
+          "version": 1,
+          "completed": {},
+          "checkpoints": {},
+          "deaths": 0
+        },
+        "afterMidnight": {
+          "version": 1,
+          "selection": {
+            "hero": "niteowl",
+            "mode": "story",
+            "case": "dead_air",
+            "theme": "rooftops"
+          },
+          "checkpoints": {},
+          "records": {},
+          "deaths": 0
+        }
+      },
+      "status": "route-failed",
+      "startedAtUtc": "2026-10-31T22:23:25.547Z",
+      "sourceScriptsBefore": {
+        "scripts": 73,
+        "sha256": "9fd4fc95b30891912cc1391d1097ef7168fa9921a039829ed2b26f220c99e38d"
+      },
+      "standaloneBefore": "3a2c291531576f5abda7aa1f70f64fa9502827da4fa3285199ba47b5c24854e4",
+      "pilotSha256": "95e772f3a85374bf148da1d2998135631bea8f11d3f24baa6fb52cee3307aa0b",
+      "lastObserved": {
+        "scene": "Play",
+        "onTop": true,
+        "chapter": "last_broadcast",
+        "stage": 2,
+        "stageId": "carrier",
+        "map": "broadcast_tower",
+        "x": 1058.9777767867904,
+        "y": 677.2782396994583,
+        "r": 13,
+        "hp": 2.62020091447884,
+        "maxHp": 100,
+        "energy": 100,
+        "carry": 0,
+        "carryMax": 25,
+        "body": null,
+        "form": "manhattan",
+        "scale": 1,
+        "hero": null,
+        "locked": false,
+        "dialog": false,
+        "captionSkippable": false,
+        "failed": false,
+        "down": false,
+        "god": false,
+        "challenge": "normal",
+        "stats": {
+          "time": 95.45920000000339,
+          "disintegrated": 14,
+          "spared": 0,
+          "memories": 0
+        },
+        "flags": {
+          "enterRelay": true,
+          "engineers": 7,
+          "coils": 3,
+          "enterTower": true
+        },
+        "done": false,
+        "objective": "Break the three shield pylons · Disable the carrier",
+        "interaction": null,
+        "powers": {
+          "telekinesis": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 0,
+            "action": "telekinesis"
+          },
+          "disintegrate": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 20,
+            "action": "disintegrate"
+          },
+          "teleport": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 16,
+            "action": "teleport"
+          },
+          "duplicate": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 50,
+            "action": "duplicate"
+          },
+          "timesight": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 0,
+            "action": "timesight"
+          },
+          "expand": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 55,
+            "action": "expand"
+          }
+        },
+        "foes": [
+          {
+            "id": 97,
+            "x": 895,
+            "y": 480,
+            "hp": 700,
+            "human": false,
+            "boss": true,
+            "phase": 1,
+            "distance": 256.529559970884,
+            "los": true,
+            "screen": {
+              "x": 538.8987502485387,
+              "y": 267.2905535338042
+            }
+          },
+          {
+            "id": 100,
+            "x": 1034.6599184370564,
+            "y": 974.8120814239938,
+            "hp": 40,
+            "human": true,
+            "boss": false,
+            "distance": 298.5259539907355,
+            "los": true,
+            "screen": {
+              "x": 667.1042499628786,
+              "y": 721.5198762599706
+            }
+          }
+        ],
+        "completion": null,
+        "error": null
+      },
+      "timeTargetSecondsAtStart": 600,
+      "capture": {
+        "filename": "last_broadcast-natural-live.png",
+        "bytes": 1594301,
+        "sha256": "6c8c489115aaf8df54ee580359b1a8da82ce8726520a3b41fb0312eee8a4876c",
+        "elapsedWallSinceFirstPlay": 10.041,
+        "fieldTime": 10.188000000000036,
+        "worldTime": 10.188000000000036,
+        "x": 1041.294850441641,
+        "y": 820.8139659699635,
+        "health": 88,
+        "invulnerable": false,
+        "godMode": false,
+        "stage": 0,
+        "chapter": "last_broadcast",
+        "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging."
+      },
+      "error": "Error: Normal-damage actor was defeated: {\"scene\":\"Play\",\"onTop\":true,\"chapter\":\"last_broadcast\",\"stage\":2,\"stageId\":\"carrier\",\"map\":\"broadcast_tower\",\"x\":1058.7447078815853,\"y\":677.278141079791,\"r\":13,\"hp\":0,\"maxHp\":100,\"energy\":100,\"carry\":0,\"carryMax\":25,\"body\":null,\"form\":\"manhattan\",\"scale\":1,\"hero\":null,\"locked\":false,\"dialog\":false,\"captionSkippable\":false,\"failed\":true,\"down\":true,\"god\":false,\"challenge\":\"normal\",\"stats\":{\"time\":95.97630000000342,\"disintegrated\":14,\"spared\":0,\"memories\":0},\"flags\":{\"enterRelay\":true,\"engineers\":7,\"coils\":3,\"enterTower\":true},\"done\":false,\"objective\":\"Break the three shield pylons · Disable the carrier\",\"interaction\":null,\"powers\":{\"telekinesis\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"telekinesis\"},\"disintegrate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":20,\"action\":\"disintegrate\"},\"teleport\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":16,\"action\":\"teleport\"},\"duplicate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":50,\"action\":\"duplicate\"},\"timesight\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"timesight\"},\"expand\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":55,\"action\":\"expand\"}},\"foes\":[{\"id\":97,\"x\":895,\"y\":480,\"hp\":700,\"human\":false,\"boss\":true,\"phase\":1,\"distance\":256.3805653849832,\"los\":true,\"screen\":{\"x\":541.5685852297918,\"y\":267.29011733045024}},{\"id\":100,\"x\":1040.2621540442194,\"y\":975.3181472816259,\"hp\":40,\"human\":true,\"boss\":false,\"distance\":298.612541754597,\"los\":true,\"screen\":{\"x\":674.9187343565535,\"y\":721.9904433705663}}],\"completion\":null,\"error\":null}\n    at RealInputPilot.state (file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/tests/helpers/palace-real-input.mjs?revision=1793484642986.1714:171:62)\n    at async targetApproach (file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/tests/helpers/palace-real-input-bonus.mjs?revision=1793485340245.9832:86:17)\n    at async attack (file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/tests/helpers/palace-real-input-bonus.mjs?revision=1793485340245.9832:218:7)\n    at async group (file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/tests/helpers/palace-real-input-bonus.mjs?revision=1793485340245.9832:242:48)\n    at async Object.lastBroadcast [as last_broadcast] (file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/tests/helpers/palace-real-input-bonus.mjs?revision=1793485340245.9832:320:3)\n    at async file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/tests/play-palace-time-targets.mjs:173:7",
+      "lastState": {
+        "scene": "Play",
+        "onTop": true,
+        "chapter": "last_broadcast",
+        "stage": 2,
+        "stageId": "carrier",
+        "map": "broadcast_tower",
+        "x": 1058.7447078815853,
+        "y": 677.278141079791,
+        "r": 13,
+        "hp": 0,
+        "maxHp": 100,
+        "energy": 100,
+        "carry": 0,
+        "carryMax": 25,
+        "body": null,
+        "form": "manhattan",
+        "scale": 1,
+        "hero": null,
+        "locked": false,
+        "dialog": false,
+        "captionSkippable": false,
+        "failed": true,
+        "down": true,
+        "god": false,
+        "challenge": "normal",
+        "stats": {
+          "time": 95.97630000000342,
+          "disintegrated": 14,
+          "spared": 0,
+          "memories": 0
+        },
+        "flags": {
+          "enterRelay": true,
+          "engineers": 7,
+          "coils": 3,
+          "enterTower": true
+        },
+        "done": false,
+        "objective": "Break the three shield pylons · Disable the carrier",
+        "interaction": null,
+        "powers": {
+          "telekinesis": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 0,
+            "action": "telekinesis"
+          },
+          "disintegrate": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 20,
+            "action": "disintegrate"
+          },
+          "teleport": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 16,
+            "action": "teleport"
+          },
+          "duplicate": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 50,
+            "action": "duplicate"
+          },
+          "timesight": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 0,
+            "action": "timesight"
+          },
+          "expand": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 55,
+            "action": "expand"
+          }
+        },
+        "foes": [
+          {
+            "id": 97,
+            "x": 895,
+            "y": 480,
+            "hp": 700,
+            "human": false,
+            "boss": true,
+            "phase": 1,
+            "distance": 256.3805653849832,
+            "los": true,
+            "screen": {
+              "x": 541.5685852297918,
+              "y": 267.29011733045024
+            }
+          },
+          {
+            "id": 100,
+            "x": 1040.2621540442194,
+            "y": 975.3181472816259,
+            "hp": 40,
+            "human": true,
+            "boss": false,
+            "distance": 298.612541754597,
+            "los": true,
+            "screen": {
+              "x": 674.9187343565535,
+              "y": 721.9904433705663
+            }
+          }
+        ],
+        "completion": null,
+        "error": null
+      },
+      "minimumHealth": 0,
+      "wallSeconds": 98.767,
+      "errors": [],
+      "trace": [
+        {
+          "label": "normal menu/interlude enters last_broadcast",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 0,
+          "stageId": "arrival",
+          "map": "broadcast_roofs",
+          "x": 360,
+          "y": 890,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": true,
+          "dialog": true,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 0.18350000000000002,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [
+            {
+              "id": 14,
+              "x": 669.334671314902,
+              "y": 719.9271085123552,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 353.0052794172726,
+              "los": true,
+              "screen": {
+                "x": 749.6548318726905,
+                "y": 227.11836153383769
+              }
+            },
+            {
+              "id": 15,
+              "x": 639.9571834137315,
+              "y": 540.6679387457887,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 447.67054131924493,
+              "los": true,
+              "screen": {
+                "x": 716.7520454233794,
+                "y": 26.348091395283177
+              }
+            },
+            {
+              "id": 16,
+              "x": 1190,
+              "y": 660,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 861.2781200053789,
+              "los": false,
+              "screen": {
+                "x": 1332.8000000000002,
+                "y": 159.99999999999986
+              }
+            },
+            {
+              "id": 17,
+              "x": 1460,
+              "y": 710,
+              "hp": 60,
+              "human": true,
+              "boss": false,
+              "distance": 1114.6299834474219,
+              "los": false,
+              "screen": {
+                "x": 1635.2000000000003,
+                "y": 215.9999999999999
+              }
+            },
+            {
+              "id": 18,
+              "x": 1710,
+              "y": 420,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 1429.4754282603112,
+              "los": false,
+              "screen": {
+                "x": 1915.2000000000003,
+                "y": -108.80000000000018
+              }
+            },
+            {
+              "id": 19,
+              "x": 1580,
+              "y": 310,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 1350.8515832614628,
+              "los": true,
+              "screen": {
+                "x": 1769.6000000000001,
+                "y": -232.0000000000001
+              }
+            }
+          ],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "initialized arrival map and entities",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 0,
+          "stageId": "arrival",
+          "map": "broadcast_roofs",
+          "x": 360,
+          "y": 890,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 1.7507999999999997,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Reach the relay entrance",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [
+            {
+              "id": 14,
+              "x": 664.467490016118,
+              "y": 719.4094941911562,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 349.0008211291659,
+              "los": true,
+              "screen": {
+                "x": 744.2035888180523,
+                "y": 226.53863349409485
+              }
+            },
+            {
+              "id": 15,
+              "x": 639.6318572732195,
+              "y": 545.5517461874548,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 443.66493568523276,
+              "los": true,
+              "screen": {
+                "x": 716.3876801460059,
+                "y": 31.817955729949233
+              }
+            },
+            {
+              "id": 16,
+              "x": 1190,
+              "y": 660,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 861.2781200053789,
+              "los": false,
+              "screen": {
+                "x": 1332.8000000000002,
+                "y": 159.99999999999986
+              }
+            },
+            {
+              "id": 17,
+              "x": 1460,
+              "y": 710,
+              "hp": 60,
+              "human": true,
+              "boss": false,
+              "distance": 1114.6299834474219,
+              "los": false,
+              "screen": {
+                "x": 1635.2000000000003,
+                "y": 215.9999999999999
+              }
+            },
+            {
+              "id": 18,
+              "x": 1710,
+              "y": 420,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 1429.4754282603112,
+              "los": false,
+              "screen": {
+                "x": 1915.2000000000003,
+                "y": -108.80000000000018
+              }
+            },
+            {
+              "id": 19,
+              "x": 1580,
+              "y": 310,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 1350.8515832614628,
+              "los": true,
+              "screen": {
+                "x": 1769.6000000000001,
+                "y": -232.0000000000001
+              }
+            }
+          ],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "initialized combat group flags.roofGuards",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 0,
+          "stageId": "arrival",
+          "map": "broadcast_roofs",
+          "x": 360,
+          "y": 890,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 1.7507999999999997,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Reach the relay entrance",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [
+            {
+              "id": 14,
+              "x": 664.467490016118,
+              "y": 719.4094941911562,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 349.0008211291659,
+              "los": true,
+              "screen": {
+                "x": 744.2035888180523,
+                "y": 226.53863349409485
+              }
+            },
+            {
+              "id": 15,
+              "x": 639.6318572732195,
+              "y": 545.5517461874548,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 443.66493568523276,
+              "los": true,
+              "screen": {
+                "x": 716.3876801460059,
+                "y": 31.817955729949233
+              }
+            },
+            {
+              "id": 16,
+              "x": 1190,
+              "y": 660,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 861.2781200053789,
+              "los": false,
+              "screen": {
+                "x": 1332.8000000000002,
+                "y": 159.99999999999986
+              }
+            },
+            {
+              "id": 17,
+              "x": 1460,
+              "y": 710,
+              "hp": 60,
+              "human": true,
+              "boss": false,
+              "distance": 1114.6299834474219,
+              "los": false,
+              "screen": {
+                "x": 1635.2000000000003,
+                "y": 215.9999999999999
+              }
+            },
+            {
+              "id": 18,
+              "x": 1710,
+              "y": 420,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 1429.4754282603112,
+              "los": false,
+              "screen": {
+                "x": 1915.2000000000003,
+                "y": -108.80000000000018
+              }
+            },
+            {
+              "id": 19,
+              "x": 1580,
+              "y": 310,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 1350.8515832614628,
+              "los": true,
+              "screen": {
+                "x": 1769.6000000000001,
+                "y": -232.0000000000001
+              }
+            }
+          ],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "enabled interaction ENTER THE RELAY",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 0,
+          "stageId": "arrival",
+          "map": "broadcast_roofs",
+          "x": 1689.2447918623282,
+          "y": 721.2040838464085,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 75.33800000000011,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 18.908599999999915,
+            "disintegrated": 6,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Reach the relay entrance",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0.26670000000000077,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "initialized relay map and entities",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 230,
+          "y": 940,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 24.72799999999981,
+            "disintegrated": 6,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 0,
+            "coils": 0
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [
+            {
+              "id": 51,
+              "x": 596.6207908322804,
+              "y": 824.454309158268,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 384.397724944594,
+              "los": true,
+              "screen": {
+                "x": 644.3504540988628,
+                "y": 357.6106538909293
+              }
+            },
+            {
+              "id": 52,
+              "x": 845.3635003583158,
+              "y": 953.1245583209987,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 615.5034456478373,
+              "los": true,
+              "screen": {
+                "x": 912.9925803869811,
+                "y": 496.5745229866786
+              }
+            },
+            {
+              "id": 53,
+              "x": 1040,
+              "y": 420,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 962.5487000666512,
+              "los": true,
+              "screen": {
+                "x": 1123.2,
+                "y": -79.2000000000001
+              }
+            },
+            {
+              "id": 54,
+              "x": 1380,
+              "y": 560,
+              "hp": 60,
+              "human": true,
+              "boss": false,
+              "distance": 1211.156472137271,
+              "los": true,
+              "screen": {
+                "x": 1490.4,
+                "y": 71.99999999999989
+              }
+            },
+            {
+              "id": 55,
+              "x": 1480,
+              "y": 840,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 1253.9936203984453,
+              "los": true,
+              "screen": {
+                "x": 1598.4,
+                "y": 374.3999999999999
+              }
+            },
+            {
+              "id": 56,
+              "x": 364.11015902977874,
+              "y": 335.1524848584681,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 619.5369652634765,
+              "los": true,
+              "screen": {
+                "x": 393.238971752161,
+                "y": -170.83531635285453
+              }
+            }
+          ],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "initialized combat group flags.relayGuards",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 230,
+          "y": 940,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 24.72799999999981,
+            "disintegrated": 6,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 0,
+            "coils": 0
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [
+            {
+              "id": 51,
+              "x": 596.6207908322804,
+              "y": 824.454309158268,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 384.397724944594,
+              "los": true,
+              "screen": {
+                "x": 644.3504540988628,
+                "y": 357.6106538909293
+              }
+            },
+            {
+              "id": 52,
+              "x": 845.3635003583158,
+              "y": 953.1245583209987,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 615.5034456478373,
+              "los": true,
+              "screen": {
+                "x": 912.9925803869811,
+                "y": 496.5745229866786
+              }
+            },
+            {
+              "id": 53,
+              "x": 1040,
+              "y": 420,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 962.5487000666512,
+              "los": true,
+              "screen": {
+                "x": 1123.2,
+                "y": -79.2000000000001
+              }
+            },
+            {
+              "id": 54,
+              "x": 1380,
+              "y": 560,
+              "hp": 60,
+              "human": true,
+              "boss": false,
+              "distance": 1211.156472137271,
+              "los": true,
+              "screen": {
+                "x": 1490.4,
+                "y": 71.99999999999989
+              }
+            },
+            {
+              "id": 55,
+              "x": 1480,
+              "y": 840,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 1253.9936203984453,
+              "los": true,
+              "screen": {
+                "x": 1598.4,
+                "y": 374.3999999999999
+              }
+            },
+            {
+              "id": 56,
+              "x": 364.11015902977874,
+              "y": 335.1524848584681,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 619.5369652634765,
+              "los": true,
+              "screen": {
+                "x": 393.238971752161,
+                "y": -170.83531635285453
+              }
+            }
+          ],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "enabled interaction Free the engineer",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 737.4285339639921,
+          "y": 716.0630714096371,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 84.00000000000016,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 41.55230000000031,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 0,
+            "coils": 0
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0.2665999999999984,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "ordinary playable state",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 280.38194735078383,
+          "y": 325.65975482515597,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 48.27200000000071,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 1,
+            "coils": 0
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "enabled interaction Free the engineer",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 280.38194735078383,
+          "y": 325.65975482515597,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 48.27200000000071,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 1,
+            "coils": 0
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "ordinary playable state",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 958.5015500001371,
+          "y": 340.07717868764854,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 57.5259000000013,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 3,
+            "coils": 0
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "enabled interaction Free the engineer",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 958.5015500001371,
+          "y": 340.07717868764854,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 57.5259000000013,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 3,
+            "coils": 0
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "ordinary playable state",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 1486.0546003525342,
+          "y": 359.22254063341256,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 63.845800000001766,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 7,
+            "coils": 0
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "coil 0 collision-safe path",
+          "waypoints": [
+            {
+              "x": 840,
+              "y": 600
+            },
+            {
+              "x": 900,
+              "y": 490
+            }
+          ],
+          "initial": {
+            "id": 60,
+            "x": 600,
+            "y": 700,
+            "r": 22,
+            "speed": 0,
+            "held": false,
+            "docked": false,
+            "dock": {
+              "x": 900,
+              "y": 490
+            },
+            "player": {
+              "x": 756.8322621497795,
+              "y": 696.6089648288822
+            }
+          }
+        },
+        {
+          "label": "coil grabbed by normal C input",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 752.9502170725075,
+          "y": 696.6092407751912,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 73.58350000000249,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 7,
+            "coils": 0
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": true,
+              "targetId": 60,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "coil 0 mouse waypoint 0",
+          "point": {
+            "x": 840,
+            "y": 600
+          },
+          "observed": {
+            "id": 60,
+            "x": 838.4557395100543,
+            "y": 599.7337550475834,
+            "r": 22,
+            "speed": 63.081406246664514,
+            "held": true,
+            "docked": false,
+            "dock": {
+              "x": 900,
+              "y": 490
+            },
+            "player": {
+              "x": 752.5175080533152,
+              "y": 696.609271533324
+            }
+          }
+        },
+        {
+          "label": "coil 0 mouse waypoint 1",
+          "point": {
+            "x": 900,
+            "y": 490
+          },
+          "observed": {
+            "id": 60,
+            "x": 897.6432111632608,
+            "y": 491.81617244934324,
+            "r": 22,
+            "speed": 11.95474101350202,
+            "held": true,
+            "docked": false,
+            "dock": {
+              "x": 900,
+              "y": 490
+            },
+            "player": {
+              "x": 752.5175080528744,
+              "y": 696.609271533324
+            }
+          }
+        },
+        {
+          "label": "coil 0 actual pre-release",
+          "id": 60,
+          "x": 897.6432111632608,
+          "y": 491.81617244934324,
+          "r": 22,
+          "speed": 11.95474101350202,
+          "held": true,
+          "docked": false,
+          "dock": {
+            "x": 900,
+            "y": 490
+          },
+          "player": {
+            "x": 752.5175080528744,
+            "y": 696.609271533324
+          }
+        },
+        {
+          "label": "coil physically docked",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 752.5175080528744,
+          "y": 696.609271533324,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 75.45060000000247,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 7,
+            "coils": 1
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "coil 0 actual dock result",
+          "id": 60,
+          "x": 900,
+          "y": 490,
+          "r": 22,
+          "speed": 0,
+          "held": false,
+          "docked": true,
+          "dock": {
+            "x": 900,
+            "y": 490
+          },
+          "player": {
+            "x": 752.5175080528744,
+            "y": 696.609271533324
+          }
+        },
+        {
+          "label": "coil 1 collision-safe path",
+          "waypoints": [
+            {
+              "x": 900,
+              "y": 690
+            }
+          ],
+          "initial": {
+            "id": 61,
+            "x": 1290,
+            "y": 700,
+            "r": 22,
+            "speed": 0,
+            "held": false,
+            "docked": false,
+            "dock": {
+              "x": 900,
+              "y": 690
+            },
+            "player": {
+              "x": 1087.2168472555409,
+              "y": 793.6561982799036
+            }
+          }
+        },
+        {
+          "label": "coil grabbed by normal C input",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 1091.0983581496694,
+          "y": 793.6561982799036,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 78.7025000000027,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 7,
+            "coils": 1
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": true,
+              "targetId": 61,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "coil 1 mouse waypoint 0",
+          "point": {
+            "x": 900,
+            "y": 690
+          },
+          "observed": {
+            "id": 61,
+            "x": 902.3157917833105,
+            "y": 689.8190286360945,
+            "r": 22,
+            "speed": 19.825473391950528,
+            "held": true,
+            "docked": false,
+            "dock": {
+              "x": 900,
+              "y": 690
+            },
+            "player": {
+              "x": 1091.5302184561272,
+              "y": 793.6561982799036
+            }
+          }
+        },
+        {
+          "label": "coil 1 actual pre-release",
+          "id": 61,
+          "x": 902.3157917833105,
+          "y": 689.8190286360945,
+          "r": 22,
+          "speed": 19.825473391950528,
+          "held": true,
+          "docked": false,
+          "dock": {
+            "x": 900,
+            "y": 690
+          },
+          "player": {
+            "x": 1091.5302184561272,
+            "y": 793.6561982799036
+          }
+        },
+        {
+          "label": "coil physically docked",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 1091.5302184561272,
+          "y": 793.6561982799036,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 80.10320000000274,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 7,
+            "coils": 3
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "coil 1 actual dock result",
+          "id": 61,
+          "x": 900,
+          "y": 690,
+          "r": 22,
+          "speed": 0,
+          "held": false,
+          "docked": true,
+          "dock": {
+            "x": 900,
+            "y": 690
+          },
+          "player": {
+            "x": 1091.5302184561272,
+            "y": 793.6561982799036
+          }
+        },
+        {
+          "label": "enabled interaction ROOFTOP LIFT",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 1,
+          "stageId": "relay",
+          "map": "broadcast_relay",
+          "x": 1091.5302184561272,
+          "y": 793.6561982799036,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 80.10320000000274,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 7,
+            "coils": 3
+          },
+          "done": false,
+          "objective": "Rescue the engineers · Ground the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "initialized carrier map and entities",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 2,
+          "stageId": "carrier",
+          "map": "broadcast_tower",
+          "x": 290,
+          "y": 960,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 86.48910000000302,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 7,
+            "coils": 3,
+            "enterTower": true
+          },
+          "done": false,
+          "objective": "Break the three shield pylons · Disable the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [
+            {
+              "id": 97,
+              "x": 895,
+              "y": 480,
+              "hp": 700,
+              "human": false,
+              "boss": true,
+              "phase": 1,
+              "distance": 772.2855689445453,
+              "los": true,
+              "screen": {
+                "x": 650.62,
+                "y": 234.74
+              }
+            },
+            {
+              "id": 98,
+              "x": 405.57136797299313,
+              "y": 583.4136393462004,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 393.92134763886895,
+              "los": true,
+              "screen": {
+                "x": 304.1045285248792,
+                "y": 307.9568566571099
+              }
+            },
+            {
+              "id": 99,
+              "x": 1330,
+              "y": 610,
+              "hp": 60,
+              "human": true,
+              "boss": false,
+              "distance": 1097.3149046650192,
+              "los": true,
+              "screen": {
+                "x": 958.5999999999999,
+                "y": 326.78
+              }
+            },
+            {
+              "id": 100,
+              "x": 1160,
+              "y": 940,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 870.2298546935747,
+              "los": true,
+              "screen": {
+                "x": 838.24,
+                "y": 560.42
+              }
+            }
+          ],
+          "completion": null,
+          "error": null
+        },
+        {
+          "label": "initialized combat group flags.towerGuards",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "last_broadcast",
+          "stage": 2,
+          "stageId": "carrier",
+          "map": "broadcast_tower",
+          "x": 290,
+          "y": 960,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "body": null,
+          "form": "manhattan",
+          "scale": 1,
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 86.48910000000302,
+            "disintegrated": 12,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "enterRelay": true,
+            "engineers": 7,
+            "coils": 3,
+            "enterTower": true
+          },
+          "done": false,
+          "objective": "Break the three shield pylons · Disable the carrier",
+          "interaction": null,
+          "powers": {
+            "telekinesis": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            },
+            "disintegrate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 20,
+              "action": "disintegrate"
+            },
+            "teleport": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 16,
+              "action": "teleport"
+            },
+            "duplicate": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 50,
+              "action": "duplicate"
+            },
+            "timesight": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "timesight"
+            },
+            "expand": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 55,
+              "action": "expand"
+            }
+          },
+          "foes": [
+            {
+              "id": 97,
+              "x": 895,
+              "y": 480,
+              "hp": 700,
+              "human": false,
+              "boss": true,
+              "phase": 1,
+              "distance": 772.2855689445453,
+              "los": true,
+              "screen": {
+                "x": 650.62,
+                "y": 234.74
+              }
+            },
+            {
+              "id": 98,
+              "x": 405.57136797299313,
+              "y": 583.4136393462004,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 393.92134763886895,
+              "los": true,
+              "screen": {
+                "x": 304.1045285248792,
+                "y": 307.9568566571099
+              }
+            },
+            {
+              "id": 99,
+              "x": 1330,
+              "y": 610,
+              "hp": 60,
+              "human": true,
+              "boss": false,
+              "distance": 1097.3149046650192,
+              "los": true,
+              "screen": {
+                "x": 958.5999999999999,
+                "y": 326.78
+              }
+            },
+            {
+              "id": 100,
+              "x": 1160,
+              "y": 940,
+              "hp": 40,
+              "human": true,
+              "boss": false,
+              "distance": 870.2298546935747,
+              "los": true,
+              "screen": {
+                "x": 838.24,
+                "y": 560.42
+              }
+            }
+          ],
+          "completion": null,
+          "error": null
+        }
+      ],
+      "actions": [
+        {
+          "type": "menu",
+          "prefix": "BONUS LEVELS",
+          "point": {
+            "x": 284,
+            "y": 444
+          },
+          "at": 379
+        },
+        {
+          "type": "menu",
+          "prefix": "PLAY ",
+          "point": {
+            "x": 395,
+            "y": 496.5
+          },
+          "at": 589
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1071
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1245
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1424
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1597
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1777
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1956
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 2130
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 2309
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 2490
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 2663
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 2849
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 3025
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 3195
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 3366
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 3543
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 3723
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 3894
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 4065
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 4242
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 4434
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 5101
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 14439
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 15106
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 20592
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 21259
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "at": 24908
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 25119
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 25288
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 25459
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 25635
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 26184
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 26354
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 26526
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 26702
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 26872
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 27042
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 27219
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 27395
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 33547
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 34215
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 34882
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 39150
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 43902
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "at": 50038
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 50246
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 50417
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 50588
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 50764
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "at": 59304
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 59505
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 59681
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 59852
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 60021
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "at": 65611
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 65819
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 65989
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 66159
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 66336
+        },
+        {
+          "type": "hold-begin",
+          "key": "c",
+          "at": 76151
+        },
+        {
+          "type": "hold-end",
+          "key": "c",
+          "at": 78017
+        },
+        {
+          "type": "hold-begin",
+          "key": "c",
+          "at": 81270
+        },
+        {
+          "type": "hold-end",
+          "key": "c",
+          "at": 82675
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "at": 86334
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 86534
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 86713
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 86883
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 87054
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 87230
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 87401
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 87944
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 88115
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 88287
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 88464
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 88634
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 88804
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 88980
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 89156
+        },
+        {
+          "type": "key",
+          "key": "q",
+          "at": 96276
+        }
+      ],
+      "finishedAtUtc": "2026-10-31T22:25:04.314Z",
+      "sourceScriptsAfter": {
+        "scripts": 73,
+        "sha256": "9fd4fc95b30891912cc1391d1097ef7168fa9921a039829ed2b26f220c99e38d"
+      },
+      "standaloneAfter": "3a2c291531576f5abda7aa1f70f64fa9502827da4fa3285199ba47b5c24854e4",
+      "runtimeFilesUnchanged": true
+    }
+  ],
+  "sourceIndexSha256": "66d98e0d619f513b180b6949dd686b42d039d736296f6998d541dd5f5b87f703",
+  "standaloneSha256": "3a2c291531576f5abda7aa1f70f64fa9502827da4fa3285199ba47b5c24854e4",
+  "method": "Actual menus, keyboard/mouse, Normal damage, normal RAF and read-only telemetry. Only initial campaign unlock/settings and empty optional progress fixtures are written before boot.",
+  "limitations": "A known-route automation run is not an unfamiliar human playtest. Route failures are not proof of an unwinnable level.",
+  "browser": "151.0.7922.34",
+  "finishedAtUtc": "2026-10-31T22:25:04.347Z",
+  "allRequestedCompleted": false,
+  "allRequestedHave25PercentHeadroom": false,
+  "allControllersClean": false
+}

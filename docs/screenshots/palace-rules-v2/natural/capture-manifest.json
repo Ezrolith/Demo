@@ -1,0 +1,243 @@
+{
+  "schemaVersion": 1,
+  "scope": "Successful or actual-completion-observed Normal attempts only.",
+  "captures": [
+    {
+      "momentId": "superman",
+      "filename": "superman-natural-live.png",
+      "bytes": 1665462,
+      "sha256": "0a3526bdef1b1ac1fbe8e9cda826aaab048bc0e3d280fb0370d5fc26af556989",
+      "elapsedWallSinceFirstPlay": 10.899,
+      "fieldTime": 10.004600000000016,
+      "worldTime": 10.004600000000016,
+      "x": 1326.7777186563496,
+      "y": 475.281912903545,
+      "health": 100,
+      "invulnerable": false,
+      "godMode": false,
+      "stage": 0,
+      "chapter": "superman",
+      "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+      "localRawFile": "tests/out/palace-time-targets/source/final-campaign-bonus/superman-natural-live.png",
+      "file": "screenshots/palace-rules-v2/natural/superman-natural-live.png",
+      "dimensions": {
+        "width": 1280,
+        "height": 720
+      },
+      "publicationByteIdenticalToRawCapture": true,
+      "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+    },
+    {
+      "momentId": "deterrent",
+      "filename": "deterrent-natural-live.png",
+      "bytes": 1709765,
+      "sha256": "c841cc46eb63343fc4264f99b571bcc297148df9cce730cf399ed28ff82cb6d2",
+      "elapsedWallSinceFirstPlay": 10.914,
+      "fieldTime": 10.021300000000034,
+      "worldTime": 10.021300000000034,
+      "x": 1670.541242357544,
+      "y": 939.8063804557958,
+      "health": 100,
+      "invulnerable": false,
+      "godMode": false,
+      "stage": 1,
+      "chapter": "deterrent",
+      "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+      "localRawFile": "tests/out/palace-time-targets/source/final-four/deterrent-natural-live.png",
+      "file": "screenshots/palace-rules-v2/natural/deterrent-natural-live.png",
+      "dimensions": {
+        "width": 1280,
+        "height": 720
+      },
+      "publicationByteIdenticalToRawCapture": true,
+      "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+    },
+    {
+      "momentId": "mars",
+      "filename": "mars-natural-live.png",
+      "bytes": 1690586,
+      "sha256": "5adfbd0fa12d5156928790f74f5c5ff0b0d4e7d2e52773049a457b102c25d559",
+      "elapsedWallSinceFirstPlay": 14.769,
+      "fieldTime": 14.039500000000011,
+      "worldTime": 10.054300000000017,
+      "x": 1098.3535599126712,
+      "y": 1312.8164359241318,
+      "health": 92.93079303159946,
+      "invulnerable": false,
+      "godMode": false,
+      "stage": 1,
+      "chapter": "mars",
+      "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+      "localRawFile": "tests/out/palace-time-targets/source/final-campaign-bonus/mars-natural-live.png",
+      "file": "screenshots/palace-rules-v2/natural/mars-natural-live.png",
+      "dimensions": {
+        "width": 1280,
+        "height": 720
+      },
+      "publicationByteIdenticalToRawCapture": true,
+      "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+    },
+    {
+      "momentId": "karnak",
+      "filename": "karnak-natural-live.png",
+      "bytes": 1672590,
+      "sha256": "f77cba7e371feca9e3332f1c48b9c17b40064302d9b48d2fe3cc9e1543d8c408",
+      "elapsedWallSinceFirstPlay": 10.055,
+      "fieldTime": 10.204600000000017,
+      "worldTime": 10.204600000000017,
+      "x": 673.0495146625857,
+      "y": 367.70174396103135,
+      "health": 100,
+      "invulnerable": false,
+      "godMode": false,
+      "stage": 0,
+      "chapter": "karnak",
+      "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+      "localRawFile": "tests/out/palace-time-targets/source/final-four/karnak-natural-live.png",
+      "file": "screenshots/palace-rules-v2/natural/karnak-natural-live.png",
+      "dimensions": {
+        "width": 1280,
+        "height": 720
+      },
+      "publicationByteIdenticalToRawCapture": true,
+      "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+    },
+    {
+      "momentId": "ninth_minute",
+      "filename": "ninth_minute-natural-live.png",
+      "bytes": 1589041,
+      "sha256": "246608dd1690d5d29aad07413f95d470f2f8451a3cdee2cf61dfa5fa4029f8fb",
+      "elapsedWallSinceFirstPlay": 10.091,
+      "fieldTime": 10.238300000000004,
+      "worldTime": 10.238300000000004,
+      "x": 1107.1534938912482,
+      "y": 839.2248309247104,
+      "health": 100,
+      "invulnerable": false,
+      "godMode": false,
+      "stage": 0,
+      "chapter": "ninth_minute",
+      "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+      "localRawFile": "tests/out/palace-time-targets/source/final-four/ninth_minute-natural-live.png",
+      "file": "screenshots/palace-rules-v2/natural/ninth_minute-natural-live.png",
+      "dimensions": {
+        "width": 1280,
+        "height": 720
+      },
+      "publicationByteIdenticalToRawCapture": true,
+      "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+    },
+    {
+      "momentId": "long_summer",
+      "filename": "long_summer-natural-live.png",
+      "bytes": 1613763,
+      "sha256": "9f5b8bf891a1a0df3df286946168de4ae9df066098752763465197bafd0503ed",
+      "elapsedWallSinceFirstPlay": 10.921,
+      "fieldTime": 11.055000000000016,
+      "worldTime": 11.055000000000016,
+      "x": 780.5491916679827,
+      "y": 662.6513901507035,
+      "health": 100,
+      "invulnerable": false,
+      "godMode": false,
+      "stage": 0,
+      "chapter": "long_summer",
+      "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+      "localRawFile": "tests/out/palace-time-targets/source/remaining-initial/long_summer-natural-live.png",
+      "file": "screenshots/palace-rules-v2/natural/long_summer-natural-live.png",
+      "dimensions": {
+        "width": 1280,
+        "height": 720
+      },
+      "publicationByteIdenticalToRawCapture": true,
+      "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+    },
+    {
+      "momentId": "am_dead_air",
+      "filename": "am_dead_air-natural-live.png",
+      "bytes": 1559187,
+      "sha256": "f31e391f4a2d3ee47eac05e0d4ab9442d89a0f7b81221bc068278b0c2383de9d",
+      "elapsedWallSinceFirstPlay": 10.074,
+      "fieldTime": 10.220800000000008,
+      "worldTime": 10.220800000000008,
+      "x": 477.0186127452505,
+      "y": 416.8608199669221,
+      "health": 90,
+      "invulnerable": false,
+      "godMode": false,
+      "stage": 0,
+      "chapter": "am_dead_air",
+      "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+      "localRawFile": "tests/out/palace-time-targets/source/remaining-initial/am_dead_air-natural-live.png",
+      "file": "screenshots/palace-rules-v2/natural/am_dead_air-natural-live.png",
+      "dimensions": {
+        "width": 1280,
+        "height": 720
+      },
+      "publicationByteIdenticalToRawCapture": true,
+      "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+    },
+    {
+      "momentId": "am_undertow",
+      "filename": "am_undertow-natural-live.png",
+      "bytes": 1577245,
+      "sha256": "8f9b6a526e240100f7b5c4a5ac6e3bbfec1f4bb8f5b44a914f8603d1ab2e3ae8",
+      "elapsedWallSinceFirstPlay": 10.071,
+      "fieldTime": 10.222000000000019,
+      "worldTime": 10.222000000000019,
+      "x": 881.7281647269984,
+      "y": 360.5231911620459,
+      "health": 90,
+      "invulnerable": false,
+      "godMode": false,
+      "stage": 0,
+      "chapter": "am_undertow",
+      "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+      "localRawFile": "tests/out/palace-time-targets/source/remaining-initial/am_undertow-natural-live.png",
+      "file": "screenshots/palace-rules-v2/natural/am_undertow-natural-live.png",
+      "dimensions": {
+        "width": 1280,
+        "height": 720
+      },
+      "publicationByteIdenticalToRawCapture": true,
+      "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+    },
+    {
+      "momentId": "am_glass_archive",
+      "filename": "am_glass_archive-natural-live.png",
+      "bytes": 1581668,
+      "sha256": "917a247aa1d9cd6cc1db5aed79a0146e9ab0be81e7801fc695822c70d526ee12",
+      "elapsedWallSinceFirstPlay": 10.038,
+      "fieldTime": 10.187100000000012,
+      "worldTime": 10.187100000000012,
+      "x": 698.8419516972286,
+      "y": 360.41191781506143,
+      "health": 100,
+      "invulnerable": false,
+      "godMode": false,
+      "stage": 0,
+      "chapter": "am_glass_archive",
+      "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+      "localRawFile": "tests/out/palace-time-targets/source/remaining-initial/am_glass_archive-natural-live.png",
+      "file": "screenshots/palace-rules-v2/natural/am_glass_archive-natural-live.png",
+      "dimensions": {
+        "width": 1280,
+        "height": 720
+      },
+      "publicationByteIdenticalToRawCapture": true,
+      "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+    }
+  ],
+  "missing": [
+    {
+      "momentId": "prologue",
+      "reason": "The successful opening run did not record a raw capture. No older or controlled image is substituted."
+    },
+    {
+      "momentId": "reassembly",
+      "reason": "The successful opening run did not record a raw capture. No older or controlled image is substituted."
+    }
+  ],
+  "method": "Byte copies of raw canvas PNGs; timing/Normal-health/no-invulnerability metadata retained per image.",
+  "completionCaveat": "These are running-play views, not proof of completion by themselves; completion evidence is linked in palace-natural-play-results.json."
+}

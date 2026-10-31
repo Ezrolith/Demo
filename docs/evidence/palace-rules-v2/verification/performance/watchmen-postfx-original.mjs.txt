@@ -1,0 +1,39 @@
+import {spawn} from 'node:child_process';
+import fs from 'node:fs';
+import path from 'node:path';
+const root='/Users/peter/Documents/ChatGPT/Watchmen Game/game';
+const baseline='/private/tmp/watchmen-postfx-ed65bbf';
+const out=path.join(root,'tests/out/postfx-review');
+fs.mkdirSync(out,{recursive:true});
+const report={method:'Unmodified full tests/visual.mjs, sequential real child-process exits; original threshold and built-in one retry retained.',cases:[]};
+const cases=[
+ {name:'current-source',root,target:'index.html'},
+ {name:'current-standalone',root,target:'dist/dr-manhattan.html'},
+ {name:'baseline-source',root:baseline,target:'index.html'},
+];
+for(const item of cases){
+ const logfile=path.join(out,'original-'+item.name+'.log');
+ const fd=fs.openSync(logfile,'w');
+ const began=Date.now();
+ const result=await new Promise(resolve=>{
+  const child=spawn(process.execPath,[path.join(item.root,'tests/visual.mjs'),item.target],{
+   cwd:item.root,env:process.env,stdio:['ignore',fd,fd],
+  });
+  child.once('error',error=>resolve({exitCode:-1,error:String(error)}));
+  child.once('close',(code,signal)=>resolve({exitCode:code??-1,signal}));
+ });
+ fs.closeSync(fd);
+ const log=fs.readFileSync(logfile,'utf8');
+ const timings=[...log.matchAll(/([✓✗]).*?post effects cost.*?\(DPR ([12])\).*?([\d.]+) vs ([\d.]+) ms\/frame/g)]
+  .map(match=>({passed:match[1]==='✓',dpr:Number(match[2]),on:Number(match[3]),off:Number(match[4]),
+   overheadPercent:(Number(match[3])/Number(match[4])-1)*100}));
+ const row={...item,...result,seconds:(Date.now()-began)/1000,log:logfile,
+  finalLine:log.trimEnd().split('\n').at(-1),timings};
+ report.cases.push(row);
+ fs.writeFileSync(path.join(out,'original-acceptance-matrix.json'),JSON.stringify(report,null,2)+'\n');
+ console.log(JSON.stringify({case:item.name,exitCode:row.exitCode,finalLine:row.finalLine,timings}));
+}
+report.complete=report.cases.length===3;
+report.finishedAtUtc=new Date().toISOString();
+fs.writeFileSync(path.join(out,'original-acceptance-matrix.json'),JSON.stringify(report,null,2)+'\n');
+if(report.cases.some(row=>row.exitCode!==0))process.exitCode=1;

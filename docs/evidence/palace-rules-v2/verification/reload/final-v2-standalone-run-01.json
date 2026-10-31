@@ -1,0 +1,1439 @@
+{
+  "target": "dist/dr-manhattan.html",
+  "engine": "chromium",
+  "browser": "151.0.7922.34",
+  "checks": [
+    "older palace saves without a tracking field load with no pin",
+    "locked, unknown and mode destinations cannot be pinned",
+    "pinning a valid challenge writes only the palace slot and no fragment",
+    "the stored selection survives model reload and callers cannot mutate its detached snapshot",
+    "clearing the pin is palace-local and a repeated clear performs no extra write",
+    "the timer reports the actual carried time and exact target",
+    "the strict under-target challenge remains possible before its deadline and misses at equality",
+    "a zero-time live snapshot cannot claim the finishing condition is already met",
+    "mercy tracks people actually unmade and becomes missed after the first",
+    "live reads consume no source-slot or palace-storage reads and perform no writes",
+    "a provisionally ready detail challenge never grants a fragment or writes progress",
+    "fake chapter/context identities and unknown challenges are rejected",
+    "failed and downed attempts cannot display a still-viable challenge",
+    "prologue: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "reassembly: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "superman: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "deterrent: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "mars: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "karnak: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "last_broadcast: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "ninth_minute: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "long_summer: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "am_dead_air: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "am_undertow: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "am_glass_archive: a missing or missed detail is distinct from a provisionally satisfied optional condition",
+    "City Heat can become eligible again after cooling rather than being called permanently missed",
+    "mandatory emitter shutdown cannot invent missing or incomplete optional-segment evidence",
+    "am_patrol: replay modes do not claim canonical moment challenges",
+    "am_rescue_clock: replay modes do not claim canonical moment challenges",
+    "the actual pane action opens three selectable challenge rows",
+    "challenge actions and return controls stay inside the readable panel",
+    "keyboard selection pins the time challenge from the actual pane screen",
+    "the chosen row exposes a working Stop Tracking action",
+    "mouse Stop Tracking clears the selected challenge",
+    "pane pinning and clearing preserve other progress and award no fragment",
+    "normal level entry attaches a matching pin and reads the carried clock immediately",
+    "the resumed stage establishes its real checkpoint before the read-only sampling baseline",
+    "the tracked HUD samples at a bounded rate without reading progress slots every frame",
+    "ordinary HUD drawing explains tracked progress without claiming an earned fragment",
+    "an overlapping interaction prompt takes priority over the optional tracker",
+    "a prompt elsewhere on screen keeps both the interaction and tracker readable",
+    "dialogue and captions hide the optional tracker to keep their existing space clear",
+    "Pause preserves its existing actions and exposes Moment Challenges",
+    "pausing freezes both the actual field timer and the tracker samples",
+    "the pause challenge panel shows all three current attempt snapshots",
+    "choosing another challenge while paused replaces the live controller",
+    "clearing tracking restores the original HUD methods on that play instance",
+    "the named return action leaves gameplay paused until Resume",
+    "an unpinned play frame calls no live challenge reader and keeps normal HUD behavior",
+    "reading, pausing and changing tracked challenges preserve all non-palace progress",
+    "actual Retry keeps observed optional evidence while restoring the base checkpoint carry",
+    "a pin for another moment stays saved without attaching extra work to this level",
+    "After Midnight story entry attaches the selected case challenge to the real human hero",
+    "After Midnight replay modes never attach a story-case tracker",
+    "the real completion hook awards only fulfilled challenges and gives three frozen outcome rows",
+    "actual completion screens receive the same authoritative breakdown",
+    "real H opens completion details with new and missed outcomes",
+    "completion details return to the same result without advancing the chapter",
+    "the result Details click is consumed before the underlying generic Continue action",
+    "Escape from result details returns to the result screen",
+    "completion reasons remain frozen if live state changes afterward",
+    "later actual completion distinguishes two new fragments from the previously earned one",
+    "already earned fragments remain distinct from a later attempt that misses their conditions",
+    "repeated completion observation cannot duplicate fragments or invent newly earned rows",
+    "a prior award is reported separately from the current attempt’s failed condition",
+    "an already recovered fragment is labelled honestly without promising another reward",
+    "palace backup round-trips the selected challenge",
+    "an older palace backup clears the pin without altering earned fragments or other slots",
+    "portable pins for a currently locked canonical moment never unlock the level",
+    "malformed portable pin 1 is rejected without writes",
+    "malformed portable pin 2 is rejected without writes",
+    "malformed portable pin 3 is rejected without writes",
+    "malformed portable pin 4 is rejected without writes",
+    "malformed portable pin 5 is rejected without writes",
+    "malformed portable pin 6 is rejected without writes",
+    "malformed portable pin 7 is rejected without writes",
+    "blocked persistence retains an accepted session pin and warns without changing stored bytes",
+    "protected palace progress allows session tracking without overwriting its original bytes",
+    "protected palace progress allows session tracking without overwriting its original bytes",
+    "tracking storage failures never change campaign, bonus, After Midnight or settings bytes",
+    "the final reload fixture pin is accepted and persisted before navigation",
+    "reload reaches a different fully booted document",
+    "reload retains the exact stored palace packet before its lazy model read",
+    "the selected challenge survives an actual page reload",
+    "reload and tracked selection retain all protected progress and settings",
+    "tracking checks produce no browser or engine error"
+  ],
+  "errors": [],
+  "snapshots": [
+    {
+      "label": "timer-boundaries",
+      "rows": [
+        {
+          "time": 0,
+          "metNow": false,
+          "state": "viable",
+          "progress": "0:00 / 8:00 · 8:00 left",
+          "reason": "Finish below the target. Pause stops the field timer; checkpoint carry supplies resumed time.",
+          "current": 0,
+          "target": 480,
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "label": "Before the chamber seals",
+          "description": "Finish a fresh run in under 8 minutes.",
+          "earned": false,
+          "awardVersion": 0,
+          "legacy": false
+        },
+        {
+          "time": 1,
+          "metNow": true,
+          "state": "viable",
+          "progress": "0:01 / 8:00 · 7:59 left",
+          "reason": "Finish below the target. Pause stops the field timer; checkpoint carry supplies resumed time.",
+          "current": 1,
+          "target": 480,
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "label": "Before the chamber seals",
+          "description": "Finish a fresh run in under 8 minutes.",
+          "earned": false,
+          "awardVersion": 0,
+          "legacy": false
+        },
+        {
+          "time": 479.99,
+          "metNow": true,
+          "state": "viable",
+          "progress": "7:59 / 8:00 · 0:00 left",
+          "reason": "Finish below the target. Pause stops the field timer; checkpoint carry supplies resumed time.",
+          "current": 479.99,
+          "target": 480,
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "label": "Before the chamber seals",
+          "description": "Finish a fresh run in under 8 minutes.",
+          "earned": false,
+          "awardVersion": 0,
+          "legacy": false
+        },
+        {
+          "time": 480,
+          "metNow": false,
+          "state": "missed",
+          "progress": "8:00 / 8:00 · 0:00 left",
+          "reason": "This run reached the strict time target.",
+          "current": 480,
+          "target": 480,
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "label": "Before the chamber seals",
+          "description": "Finish a fresh run in under 8 minutes.",
+          "earned": false,
+          "awardVersion": 0,
+          "legacy": false
+        },
+        {
+          "time": 481,
+          "metNow": false,
+          "state": "missed",
+          "progress": "8:01 / 8:00 · 0:00 left",
+          "reason": "This run reached the strict time target.",
+          "current": 481,
+          "target": 480,
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "label": "Before the chamber seals",
+          "description": "Finish a fresh run in under 8 minutes.",
+          "earned": false,
+          "awardVersion": 0,
+          "legacy": false
+        }
+      ]
+    },
+    {
+      "label": "mercy-boundaries",
+      "rows": [
+        {
+          "unmade": 0,
+          "metNow": true,
+          "state": "viable",
+          "progress": "0 people unmade · Limit 0",
+          "reason": "Within the limit so far. Finish without exceeding it; Retry retains the total.",
+          "current": 0,
+          "target": 0,
+          "momentId": "superman",
+          "challengeId": "mercy",
+          "label": "A hand left open",
+          "description": "Fresh run: finish without unmaking a person; Retry retains outcomes.",
+          "earned": false,
+          "awardVersion": 0,
+          "legacy": false
+        },
+        {
+          "unmade": 1,
+          "metNow": false,
+          "state": "missed",
+          "progress": "1 people unmade · Limit 0",
+          "reason": "The run exceeded this limit. Retry retains the observed total.",
+          "current": 1,
+          "target": 0,
+          "momentId": "superman",
+          "challengeId": "mercy",
+          "label": "A hand left open",
+          "description": "Fresh run: finish without unmaking a person; Retry retains outcomes.",
+          "earned": false,
+          "awardVersion": 0,
+          "legacy": false
+        },
+        {
+          "unmade": 4,
+          "metNow": false,
+          "state": "missed",
+          "progress": "4 people unmade · Limit 0",
+          "reason": "The run exceeded this limit. Retry retains the observed total.",
+          "current": 4,
+          "target": 0,
+          "momentId": "superman",
+          "challengeId": "mercy",
+          "label": "A hand left open",
+          "description": "Fresh run: finish without unmaking a person; Retry retains outcomes.",
+          "earned": false,
+          "awardVersion": 0,
+          "legacy": false
+        }
+      ]
+    },
+    {
+      "label": "prologue-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "pending",
+        "progress": "2 / 3 optional observations",
+        "reason": "Read the chalkboard, listen to the canteen radio and check the records files.",
+        "current": 2,
+        "target": 3,
+        "momentId": "prologue",
+        "challengeId": "detail",
+        "label": "Beyond the assignment",
+        "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "ready",
+        "progress": "3 / 3 optional observations",
+        "reason": "Condition met so far. Finish the moment to recover its fragment.",
+        "current": 3,
+        "target": 3,
+        "momentId": "prologue",
+        "challengeId": "detail",
+        "label": "Beyond the assignment",
+        "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "reassembly-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "pending",
+        "progress": "29 / 30 passively gathered atoms",
+        "reason": "Absorb 30 atoms while Coalesce is not held, then finish the reconstruction.",
+        "current": 29,
+        "target": 30,
+        "momentId": "reassembly",
+        "challengeId": "detail",
+        "label": "A gentler pull",
+        "description": "Absorb 30 atoms while Coalesce is not held, then finish the reconstruction.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "ready",
+        "progress": "30 / 30 passively gathered atoms",
+        "reason": "Condition met so far. Finish the moment to recover its fragment.",
+        "current": 30,
+        "target": 30,
+        "momentId": "reassembly",
+        "challengeId": "detail",
+        "label": "A gentler pull",
+        "description": "Absorb 30 atoms while Coalesce is not held, then finish the reconstruction.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "superman-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "pending",
+        "progress": "0 / 1 badge inspected",
+        "reason": "Inspect the smiley-face badge in the pier office before finishing.",
+        "current": 0,
+        "target": 1,
+        "momentId": "superman",
+        "challengeId": "detail",
+        "label": "Someone's badge",
+        "description": "Inspect the smiley-face badge in the pier office before finishing.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "ready",
+        "progress": "1 / 1 badge inspected",
+        "reason": "Condition met so far. Finish the moment to recover its fragment.",
+        "current": 1,
+        "target": 1,
+        "momentId": "superman",
+        "challengeId": "detail",
+        "label": "Someone's badge",
+        "description": "Inspect the smiley-face badge in the pier office before finishing.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "deterrent-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "missed",
+        "progress": "74% coherence at combat end",
+        "reason": "This value was frozen before the safe outro; later healing does not change it.",
+        "current": 74.9,
+        "target": 75,
+        "momentId": "deterrent",
+        "challengeId": "detail",
+        "label": "A steady outline",
+        "description": "Have at least 75% coherence when the Behemoth falls, before the safe outro.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "ready",
+        "progress": "75% coherence at combat end",
+        "reason": "This value was frozen before the safe outro; later healing does not change it.",
+        "current": 75,
+        "target": 75,
+        "momentId": "deterrent",
+        "challengeId": "detail",
+        "label": "A steady outline",
+        "description": "Have at least 75% coherence when the Behemoth falls, before the safe outro.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "mars-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "pending",
+        "progress": "5 / 6 memories found",
+        "reason": "Recover all six optional memories in this run.",
+        "current": 5,
+        "target": 6,
+        "momentId": "mars",
+        "challengeId": "detail",
+        "label": "Every remembered year",
+        "description": "Recover all six optional memories in this run.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "ready",
+        "progress": "6 / 6 memories found",
+        "reason": "Condition met so far. Finish the moment to recover its fragment.",
+        "current": 6,
+        "target": 6,
+        "momentId": "mars",
+        "challengeId": "detail",
+        "label": "Every remembered year",
+        "description": "Recover all six optional memories in this run.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "karnak-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "missed",
+        "progress": "40.1 courtyard damage · Limit 40",
+        "reason": "The run exceeded this limit. Retry retains the observed total.",
+        "current": 40.1,
+        "target": 40,
+        "momentId": "karnak",
+        "challengeId": "detail",
+        "label": "A quiet approach",
+        "description": "Fresh run: take at most 40 coherence damage before the last courtyard emitter falls.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "viable",
+        "progress": "40 courtyard damage · Limit 40",
+        "reason": "Within the limit so far. Finish without exceeding it; Retry retains the total.",
+        "current": 40,
+        "target": 40,
+        "momentId": "karnak",
+        "challengeId": "detail",
+        "label": "A quiet approach",
+        "description": "Fresh run: take at most 40 coherence damage before the last courtyard emitter falls.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "last_broadcast-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "pending",
+        "progress": "2 / 3 records · Choice broadcast",
+        "reason": "Recover all three evidence records and choose to broadcast them.",
+        "current": 2,
+        "target": 3,
+        "momentId": "last_broadcast",
+        "challengeId": "detail",
+        "label": "Names on the air",
+        "description": "Recover all three evidence records and choose to broadcast them.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "ready",
+        "progress": "3 / 3 records · Choice broadcast",
+        "reason": "Condition met so far. Finish the moment to recover its fragment.",
+        "current": 3,
+        "target": 3,
+        "momentId": "last_broadcast",
+        "challengeId": "detail",
+        "label": "Names on the air",
+        "description": "Recover all three evidence records and choose to broadcast them.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "ninth_minute-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "pending",
+        "progress": "2 / 3 lost moments heard",
+        "reason": "Use Temporal Sight to find and hear all three optional gold echoes.",
+        "current": 2,
+        "target": 3,
+        "momentId": "ninth_minute",
+        "challengeId": "detail",
+        "label": "Three lost moments",
+        "description": "Use Temporal Sight to find and hear all three optional gold echoes.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "ready",
+        "progress": "3 / 3 lost moments heard",
+        "reason": "Condition met so far. Finish the moment to recover its fragment.",
+        "current": 3,
+        "target": 3,
+        "momentId": "ninth_minute",
+        "challengeId": "detail",
+        "label": "Three lost moments",
+        "description": "Use Temporal Sight to find and hear all three optional gold echoes.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "long_summer-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "pending",
+        "progress": "6 / 6 residents · Heat 30 (below 30)",
+        "reason": "Rescue all six residents and finish with City Heat below 30.",
+        "current": 6,
+        "target": 6,
+        "momentId": "long_summer",
+        "challengeId": "detail",
+        "label": "A cooler street",
+        "description": "Rescue all six residents and finish with City Heat below 30.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "ready",
+        "progress": "6 / 6 residents · Heat 29 (below 30)",
+        "reason": "Condition met so far. Finish the moment to recover its fragment.",
+        "current": 6,
+        "target": 6,
+        "momentId": "long_summer",
+        "challengeId": "detail",
+        "label": "A cooler street",
+        "description": "Rescue all six residents and finish with City Heat below 30.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "am_dead_air-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "pending",
+        "progress": "1 / 2 optional field notes",
+        "reason": "Read the optional tower-maintenance note and dispatch handover note on the roofs.",
+        "current": 1,
+        "target": 2,
+        "momentId": "am_dead_air",
+        "challengeId": "detail",
+        "label": "Off the call sheet",
+        "description": "Read the optional tower-maintenance note and dispatch handover note on the roofs.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "ready",
+        "progress": "2 / 2 optional field notes",
+        "reason": "Condition met so far. Finish the moment to recover its fragment.",
+        "current": 2,
+        "target": 2,
+        "momentId": "am_dead_air",
+        "challengeId": "detail",
+        "label": "Off the call sheet",
+        "description": "Read the optional tower-maintenance note and dispatch handover note on the roofs.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "am_undertow-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "pending",
+        "progress": "1 / 2 optional field notes",
+        "reason": "Read the optional pier lease and cargo tally beside the harbour stores.",
+        "current": 1,
+        "target": 2,
+        "momentId": "am_undertow",
+        "challengeId": "detail",
+        "label": "Not listed as cargo",
+        "description": "Read the optional pier lease and cargo tally beside the harbour stores.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "ready",
+        "progress": "2 / 2 optional field notes",
+        "reason": "Condition met so far. Finish the moment to recover its fragment.",
+        "current": 2,
+        "target": 2,
+        "momentId": "am_undertow",
+        "challengeId": "detail",
+        "label": "Not listed as cargo",
+        "description": "Read the optional pier lease and cargo tally beside the harbour stores.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "am_glass_archive-detail-boundary",
+      "first": {
+        "metNow": false,
+        "state": "pending",
+        "progress": "1 / 2 optional field notes",
+        "reason": "Read the optional loan register and private index in the museum side galleries.",
+        "current": 1,
+        "target": 2,
+        "momentId": "am_glass_archive",
+        "challengeId": "detail",
+        "label": "The missing catalogue",
+        "description": "Read the optional loan register and private index in the museum side galleries.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      },
+      "second": {
+        "metNow": true,
+        "state": "ready",
+        "progress": "2 / 2 optional field notes",
+        "reason": "Condition met so far. Finish the moment to recover its fragment.",
+        "current": 2,
+        "target": 2,
+        "momentId": "am_glass_archive",
+        "challengeId": "detail",
+        "label": "The missing catalogue",
+        "description": "Read the optional loan register and private index in the museum side galleries.",
+        "earned": false,
+        "awardVersion": 0,
+        "legacy": false
+      }
+    },
+    {
+      "label": "bounded-controller-sampling",
+      "liveCalls": 4,
+      "sourceCalls": 0,
+      "gets": [],
+      "writes": [],
+      "current": 120.99999999999994,
+      "time": 121.04999999999994
+    }
+  ],
+  "completionResults": [
+    {
+      "result": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 1,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "name": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "name": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 480,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "name": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          }
+        ],
+        "fragments": 1,
+        "passed": [
+          "swift"
+        ],
+        "newlyEarned": [
+          "swift"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "0 / 1 photograph inspected",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 0 / 1 photograph inspected. Look at the workshop photograph before leaving Gila Flats."
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "0:01 / 8:00 · 7:59 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "2 / 3 optional observations",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 2 / 3 optional observations. Read the chalkboard, listen to the canteen radio and check the records files."
+          }
+        ]
+      },
+      "screenSummary": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 1,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "name": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "name": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 480,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "name": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          }
+        ],
+        "fragments": 1,
+        "passed": [
+          "swift"
+        ],
+        "newlyEarned": [
+          "swift"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "0 / 1 photograph inspected",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 0 / 1 photograph inspected. Look at the workshop photograph before leaving Gila Flats."
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "0:01 / 8:00 · 7:59 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "2 / 3 optional observations",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 2 / 3 optional observations. Read the chalkboard, listen to the canteen radio and check the records files."
+          }
+        ]
+      },
+      "fragments": 1
+    },
+    {
+      "result": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 3,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "name": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "name": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 480,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "name": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          }
+        ],
+        "fragments": 3,
+        "passed": [
+          "mercy",
+          "swift",
+          "detail"
+        ],
+        "newlyEarned": [
+          "mercy",
+          "detail"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "1 / 1 photograph inspected",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "outcome": "already",
+            "passed": true,
+            "progress": "0:01 / 8:00 · 7:59 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Recovered in an earlier run. Current condition met."
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "3 / 3 optional observations",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          }
+        ]
+      },
+      "screenSummary": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 3,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "name": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "name": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 480,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "name": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          }
+        ],
+        "fragments": 3,
+        "passed": [
+          "mercy",
+          "swift",
+          "detail"
+        ],
+        "newlyEarned": [
+          "mercy",
+          "detail"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "1 / 1 photograph inspected",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "outcome": "already",
+            "passed": true,
+            "progress": "0:01 / 8:00 · 7:59 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Recovered in an earlier run. Current condition met."
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "3 / 3 optional observations",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          }
+        ]
+      },
+      "fragments": 3
+    },
+    {
+      "result": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 3,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "name": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "name": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 480,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "name": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          }
+        ],
+        "fragments": 3,
+        "passed": [],
+        "newlyEarned": [],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "0 / 1 photograph inspected",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Recovered in an earlier run. Current condition not met."
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "10:00 / 8:00 · 0:00 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Recovered in an earlier run. Current condition not met."
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "2 / 3 optional observations",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Recovered in an earlier run. Current condition not met."
+          }
+        ]
+      },
+      "screenSummary": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 3,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "name": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "name": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 480,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "name": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          }
+        ],
+        "fragments": 3,
+        "passed": [],
+        "newlyEarned": [],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "0 / 1 photograph inspected",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Recovered in an earlier run. Current condition not met."
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "10:00 / 8:00 · 0:00 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Recovered in an earlier run. Current condition not met."
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "2 / 3 optional observations",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Recovered in an earlier run. Current condition not met."
+          }
+        ]
+      },
+      "fragments": 3
+    }
+  ],
+  "reloadDiagnostics": {
+    "before": {
+      "accepted": true,
+      "documentNonce": "7512b017-8e1e-4f0b-8188-7150ca4d2e91",
+      "timeOrigin": 1793485273239.8,
+      "readyState": "complete",
+      "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/dist/dr-manhattan.html",
+      "booted": true,
+      "raw": "{\"version\":2,\"rulesVersion\":2,\"challenges\":{},\"awardVersions\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"},\"runs\":{}}",
+      "parsed": {
+        "version": 2,
+        "rulesVersion": 2,
+        "challenges": {},
+        "awardVersions": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        },
+        "runs": {}
+      },
+      "storageError": null,
+      "data": {
+        "version": 2,
+        "rulesVersion": 2,
+        "challenges": {},
+        "awardVersions": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        },
+        "runs": {}
+      },
+      "available": true,
+      "readOnly": false,
+      "warning": "",
+      "blocked": false,
+      "writes": [
+        {
+          "method": "setItem",
+          "key": "dr-manhattan.glass-palace.v1"
+        }
+      ],
+      "gets": [
+        "dr-manhattan.save",
+        "dr-manhattan.bonus.v1",
+        "dr-manhattan.after-midnight.v1",
+        "dr-manhattan.glass-palace.v1"
+      ],
+      "campaignIds": [
+        "prologue",
+        "reassembly",
+        "superman",
+        "deterrent",
+        "mars",
+        "karnak"
+      ],
+      "bonusIds": [
+        "last_broadcast",
+        "ninth_minute",
+        "long_summer"
+      ],
+      "caseIds": [
+        "am_dead_air",
+        "am_undertow",
+        "am_glass_archive",
+        "am_patrol",
+        "am_rescue_clock"
+      ]
+    },
+    "accepted": true,
+    "afterBoot": {
+      "documentNonce": "ea5c1105-a8aa-4183-9dae-991fe692d636",
+      "timeOrigin": 1793485273923.7,
+      "readyState": "complete",
+      "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/dist/dr-manhattan.html",
+      "booted": true,
+      "raw": "{\"version\":2,\"rulesVersion\":2,\"challenges\":{},\"awardVersions\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"},\"runs\":{}}",
+      "parsed": {
+        "version": 2,
+        "rulesVersion": 2,
+        "challenges": {},
+        "awardVersions": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        },
+        "runs": {}
+      },
+      "storageError": null,
+      "data": null,
+      "available": true,
+      "readOnly": false,
+      "warning": "",
+      "blocked": false,
+      "writes": [],
+      "gets": [
+        "dr-manhattan.save",
+        "dr-manhattan.glass-palace.v1"
+      ],
+      "campaignIds": [
+        "prologue",
+        "reassembly",
+        "superman",
+        "deterrent",
+        "mars",
+        "karnak"
+      ],
+      "bonusIds": [
+        "last_broadcast",
+        "ninth_minute",
+        "long_summer"
+      ],
+      "caseIds": [
+        "am_dead_air",
+        "am_undertow",
+        "am_glass_archive",
+        "am_patrol",
+        "am_rescue_clock"
+      ]
+    },
+    "afterInstall": {
+      "documentNonce": "ea5c1105-a8aa-4183-9dae-991fe692d636",
+      "timeOrigin": 1793485273923.7,
+      "readyState": "complete",
+      "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/dist/dr-manhattan.html",
+      "booted": true,
+      "raw": "{\"version\":2,\"rulesVersion\":2,\"challenges\":{},\"awardVersions\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"},\"runs\":{}}",
+      "parsed": {
+        "version": 2,
+        "rulesVersion": 2,
+        "challenges": {},
+        "awardVersions": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        },
+        "runs": {}
+      },
+      "storageError": null,
+      "data": null,
+      "available": true,
+      "readOnly": false,
+      "warning": "",
+      "blocked": false,
+      "writes": [],
+      "gets": [
+        "dr-manhattan.save",
+        "dr-manhattan.glass-palace.v1",
+        "dr-manhattan.glass-palace.v1"
+      ],
+      "campaignIds": [
+        "prologue",
+        "reassembly",
+        "superman",
+        "deterrent",
+        "mars",
+        "karnak"
+      ],
+      "bonusIds": [
+        "last_broadcast",
+        "ninth_minute",
+        "long_summer"
+      ],
+      "caseIds": [
+        "am_dead_air",
+        "am_undertow",
+        "am_glass_archive",
+        "am_patrol",
+        "am_rescue_clock"
+      ]
+    },
+    "afterRead": {
+      "documentNonce": "ea5c1105-a8aa-4183-9dae-991fe692d636",
+      "timeOrigin": 1793485273923.7,
+      "readyState": "complete",
+      "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/dist/dr-manhattan.html",
+      "booted": true,
+      "raw": "{\"version\":2,\"rulesVersion\":2,\"challenges\":{},\"awardVersions\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"},\"runs\":{}}",
+      "parsed": {
+        "version": 2,
+        "rulesVersion": 2,
+        "challenges": {},
+        "awardVersions": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        },
+        "runs": {}
+      },
+      "storageError": null,
+      "data": {
+        "version": 2,
+        "rulesVersion": 2,
+        "challenges": {},
+        "awardVersions": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        },
+        "runs": {}
+      },
+      "available": true,
+      "readOnly": false,
+      "warning": "",
+      "blocked": false,
+      "writes": [],
+      "gets": [
+        "dr-manhattan.save",
+        "dr-manhattan.glass-palace.v1",
+        "dr-manhattan.glass-palace.v1",
+        "dr-manhattan.glass-palace.v1",
+        "dr-manhattan.glass-palace.v1"
+      ],
+      "campaignIds": [
+        "prologue",
+        "reassembly",
+        "superman",
+        "deterrent",
+        "mars",
+        "karnak"
+      ],
+      "bonusIds": [
+        "last_broadcast",
+        "ninth_minute",
+        "long_summer"
+      ],
+      "caseIds": [
+        "am_dead_air",
+        "am_undertow",
+        "am_glass_archive",
+        "am_patrol",
+        "am_rescue_clock"
+      ]
+    }
+  },
+  "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+  "exitCode": 0,
+  "method": "Controlled canonical level/stat/flag fixtures, actual Play/completion/backup methods and real UI keys/mouse; stepped engine.",
+  "limits": "This proves state and integration contracts, not natural full-level challenge balance. No diagnostic image is live evidence."
+}

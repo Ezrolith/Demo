@@ -1,0 +1,1973 @@
+{
+  "target": "index.html",
+  "startedAtUtc": "2026-10-31T21:11:46.821Z",
+  "runs": [
+    {
+      "momentId": "prologue",
+      "fixture": {
+        "campaign": {
+          "version": 2,
+          "reached": 0,
+          "completed": {},
+          "checkpoints": {},
+          "checkpoint": null,
+          "seen": {
+            "unlocks": {}
+          },
+          "totals": {
+            "spared": 0,
+            "disintegrated": 0,
+            "memories": 0,
+            "decoherences": 0
+          },
+          "settings": {
+            "challenge": "normal",
+            "invulnerable": false,
+            "focusPause": false,
+            "textSpeed": "normal"
+          }
+        },
+        "bonus": {
+          "version": 1,
+          "completed": {},
+          "checkpoints": {},
+          "deaths": 0
+        },
+        "afterMidnight": {
+          "version": 1,
+          "selection": {
+            "hero": "niteowl",
+            "mode": "story",
+            "case": "dead_air",
+            "theme": "rooftops"
+          },
+          "checkpoints": {},
+          "records": {},
+          "deaths": 0
+        }
+      },
+      "status": "completed",
+      "startedAtUtc": "2026-10-31T21:11:47.508Z",
+      "completion": {
+        "scene": "ChapterComplete",
+        "record": {
+          "time": 107.5659000000044,
+          "disintegrated": 0,
+          "spared": 0,
+          "memories": 0,
+          "flags": {}
+        },
+        "summary": {
+          "momentId": "prologue",
+          "id": "prologue",
+          "unlocked": true,
+          "completed": true,
+          "earned": 1,
+          "total": 3,
+          "challenges": [
+            {
+              "id": "mercy",
+              "label": "Palisades Park",
+              "name": "Palisades Park",
+              "description": "Look at the workshop photograph before leaving Gila Flats.",
+              "type": "level",
+              "rulesVersion": 2,
+              "complete": false,
+              "earned": false,
+              "awardVersion": 0,
+              "legacy": false
+            },
+            {
+              "id": "swift",
+              "label": "Before the chamber seals",
+              "name": "Before the chamber seals",
+              "description": "Finish a fresh run in under 8 minutes.",
+              "type": "time",
+              "rulesVersion": 2,
+              "targetSeconds": 480,
+              "complete": true,
+              "earned": true,
+              "awardVersion": 2,
+              "legacy": false
+            },
+            {
+              "id": "detail",
+              "label": "Beyond the assignment",
+              "name": "Beyond the assignment",
+              "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+              "type": "level",
+              "rulesVersion": 2,
+              "complete": false,
+              "earned": false,
+              "awardVersion": 0,
+              "legacy": false
+            }
+          ],
+          "fragments": 1,
+          "passed": [
+            "swift"
+          ],
+          "newlyEarned": [
+            "swift"
+          ],
+          "maxFragments": 36,
+          "breakdown": [
+            {
+              "id": "mercy",
+              "label": "Palisades Park",
+              "description": "Look at the workshop photograph before leaving Gila Flats.",
+              "outcome": "missed",
+              "passed": false,
+              "progress": "0 / 1 photograph inspected",
+              "awardVersion": 0,
+              "legacy": false,
+              "reason": "Requirement not met at completion: 0 / 1 photograph inspected. Look at the workshop photograph before leaving Gila Flats."
+            },
+            {
+              "id": "swift",
+              "label": "Before the chamber seals",
+              "description": "Finish a fresh run in under 8 minutes.",
+              "outcome": "new",
+              "passed": true,
+              "progress": "1:47 / 8:00 · 6:12 left",
+              "awardVersion": 2,
+              "legacy": false,
+              "reason": "Requirement met at completion under rules version 2."
+            },
+            {
+              "id": "detail",
+              "label": "Beyond the assignment",
+              "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+              "outcome": "missed",
+              "passed": false,
+              "progress": "0 / 3 optional observations",
+              "awardVersion": 0,
+              "legacy": false,
+              "reason": "Requirement not met at completion: 0 / 3 optional observations. Read the chalkboard, listen to the canteen radio and check the records files."
+            }
+          ]
+        },
+        "stats": {
+          "time": 107.5659000000044,
+          "disintegrated": 0,
+          "spared": 0,
+          "memories": 0
+        },
+        "time": 107.5659000000044,
+        "targetSeconds": 480,
+        "settings": {
+          "challenge": "normal",
+          "invulnerable": false
+        },
+        "engineError": null
+      },
+      "headroomSeconds": 372.4340999999956,
+      "headroomPercent": 77.59043749999908,
+      "underTarget": true,
+      "atLeast25PercentHeadroom": true,
+      "minimumHealth": 100,
+      "wallSeconds": 118.185,
+      "errors": [],
+      "trace": [
+        {
+          "label": "normal menu/interlude enters prologue",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "prologue",
+          "stage": 0,
+          "stageId": "lunch",
+          "map": "gila",
+          "x": 120,
+          "y": 510,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 0.16760000000000036,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "",
+          "interaction": null,
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "Janey objective appears",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "prologue",
+          "stage": 0,
+          "stageId": "lunch",
+          "map": "gila",
+          "x": 120,
+          "y": 510,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 8.855000000000011,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Find Janey in the canteen",
+          "interaction": null,
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "Janey hands over the watch",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "prologue",
+          "stage": 0,
+          "stageId": "lunch",
+          "map": "gila",
+          "x": 327.3692281809557,
+          "y": 722.7588259525643,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 14.624399999999968,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "metJaney": true,
+            "hasWatch": true
+          },
+          "done": false,
+          "objective": "Find Janey in the canteen",
+          "interaction": {
+            "id": 8,
+            "label": "Talk to Janey"
+          },
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "workbench objective",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "prologue",
+          "stage": 0,
+          "stageId": "lunch",
+          "map": "gila",
+          "x": 327.3692281809557,
+          "y": 722.7588259525643,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 15.723999999999961,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "metJaney": true,
+            "hasWatch": true
+          },
+          "done": false,
+          "objective": "Repair the watch at your workbench",
+          "interaction": {
+            "id": 8,
+            "label": "Talk to Janey"
+          },
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "watch minigame opens",
+          "scene": "WatchRepair",
+          "onTop": false,
+          "chapter": "prologue",
+          "stage": 0,
+          "stageId": "lunch",
+          "map": "gila",
+          "x": 167.16321860928056,
+          "y": 157.32795718356851,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": true,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 24.14469999999978,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "metJaney": true,
+            "hasWatch": true
+          },
+          "done": false,
+          "objective": "Repair the watch at your workbench",
+          "interaction": {
+            "id": 3,
+            "label": "Repair Janey's watch"
+          },
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "watch repaired normally",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "prologue",
+          "stage": 0,
+          "stageId": "lunch",
+          "map": "gila",
+          "x": 167.16321860928056,
+          "y": 155.41851663286633,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 24.228099999999785,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "metJaney": true,
+            "hasWatch": true,
+            "repaired": true
+          },
+          "done": false,
+          "objective": "Repair the watch at your workbench",
+          "interaction": null,
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "generator calibration objective",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "prologue",
+          "stage": 1,
+          "stageId": "calibrate",
+          "map": "gila",
+          "x": 167.16321860928056,
+          "y": 155.0895121689444,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 31.297999999999593,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "metJaney": true,
+            "hasWatch": true,
+            "repaired": true
+          },
+          "done": false,
+          "objective": "Calibrate the generator in the Test Chamber",
+          "interaction": null,
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "generator calibrated",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "prologue",
+          "stage": 2,
+          "stageId": "coat",
+          "map": "gila",
+          "x": 1179.2770664268041,
+          "y": 249.26297213519805,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 48.821600000000466,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "metJaney": true,
+            "hasWatch": true,
+            "repaired": true,
+            "coatHung": true,
+            "calibrated": true
+          },
+          "done": false,
+          "objective": "Calibrate the generator in the Test Chamber",
+          "interaction": null,
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "return Janey objective",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "prologue",
+          "stage": 2,
+          "stageId": "coat",
+          "map": "gila",
+          "x": 1179.2770664268041,
+          "y": 249.26297213519805,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 49.83960000000052,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "metJaney": true,
+            "hasWatch": true,
+            "repaired": true,
+            "coatHung": true,
+            "calibrated": true
+          },
+          "done": false,
+          "objective": "Bring Janey her watch",
+          "interaction": null,
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "coat retrieval objective",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "prologue",
+          "stage": 2,
+          "stageId": "coat",
+          "map": "gila",
+          "x": 367.40279993043424,
+          "y": 765.0082898345208,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 66.54720000000151,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "metJaney": true,
+            "hasWatch": true,
+            "repaired": true,
+            "coatHung": true,
+            "calibrated": true,
+            "needCoat": true
+          },
+          "done": false,
+          "objective": "Fetch your coat from the Test Chamber",
+          "interaction": {
+            "id": 8,
+            "label": "Talk to Janey"
+          },
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "intrinsic-field ending completes naturally",
+          "scene": "ChapterComplete",
+          "onTop": false,
+          "chapter": "prologue",
+          "stage": 3,
+          "stageId": "accident",
+          "map": "gila",
+          "x": 1652.844707344447,
+          "y": 521.930163866037,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": true,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 107.5659000000044,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "metJaney": true,
+            "hasWatch": true,
+            "repaired": true,
+            "coatHung": true,
+            "calibrated": true,
+            "needCoat": true,
+            "gotCoat": true,
+            "lockdown": true,
+            "flashed": true
+          },
+          "done": true,
+          "objective": "",
+          "interaction": null,
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "actual completion result",
+          "scene": "ChapterComplete",
+          "onTop": false,
+          "chapter": "prologue",
+          "stage": 3,
+          "stageId": "accident",
+          "map": "gila",
+          "x": 1652.844707344447,
+          "y": 521.930163866037,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "human",
+          "hero": null,
+          "locked": true,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 107.5659000000044,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "metJaney": true,
+            "hasWatch": true,
+            "repaired": true,
+            "coatHung": true,
+            "calibrated": true,
+            "needCoat": true,
+            "gotCoat": true,
+            "lockdown": true,
+            "flashed": true
+          },
+          "done": true,
+          "objective": "",
+          "interaction": null,
+          "powers": {},
+          "foes": [],
+          "error": null
+        }
+      ],
+      "actions": [
+        {
+          "type": "menu",
+          "prefix": "NEW GAME",
+          "point": {
+            "x": 284,
+            "y": 324
+          },
+          "at": 431
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 905
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1075
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1246
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1416
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1586
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1758
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1929
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 2099
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 2269
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 2440
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "at": 15022
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 15203
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 15373
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 15542
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 15716
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 15886
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 16057
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 16227
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 16402
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 16574
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 16749
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 16920
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "at": 26594
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 29824
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 30140
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 31159
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 31859
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 40920
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 41095
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 41264
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "at": 57445
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 57636
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 57805
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 58254
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 58426
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 58604
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 58786
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "at": 74730
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 74912
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 75083
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 75254
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 75429
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 75599
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 75769
+        },
+        {
+          "type": "key",
+          "key": "e",
+          "at": 94160
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 95080
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 95254
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 95422
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 95592
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 95763
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 95937
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 96107
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 117031
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 117201
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 117371
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 117548
+        }
+      ],
+      "finishedAtUtc": "2026-10-31T21:13:45.692Z"
+    },
+    {
+      "momentId": "reassembly",
+      "fixture": {
+        "campaign": {
+          "version": 2,
+          "reached": 5,
+          "completed": {},
+          "checkpoints": {},
+          "checkpoint": null,
+          "seen": {
+            "unlocks": {}
+          },
+          "totals": {
+            "spared": 0,
+            "disintegrated": 0,
+            "memories": 0,
+            "decoherences": 0
+          },
+          "settings": {
+            "challenge": "normal",
+            "invulnerable": false,
+            "focusPause": false,
+            "textSpeed": "normal"
+          }
+        },
+        "bonus": {
+          "version": 1,
+          "completed": {},
+          "checkpoints": {},
+          "deaths": 0
+        },
+        "afterMidnight": {
+          "version": 1,
+          "selection": {
+            "hero": "niteowl",
+            "mode": "story",
+            "case": "dead_air",
+            "theme": "rooftops"
+          },
+          "checkpoints": {},
+          "records": {},
+          "deaths": 0
+        }
+      },
+      "status": "completed",
+      "startedAtUtc": "2026-10-31T21:13:45.736Z",
+      "completion": {
+        "scene": "ChapterComplete",
+        "record": {
+          "time": 192.92090000000897,
+          "disintegrated": 0,
+          "spared": 0,
+          "memories": 0,
+          "flags": {}
+        },
+        "summary": {
+          "momentId": "reassembly",
+          "id": "reassembly",
+          "unlocked": true,
+          "completed": true,
+          "earned": 3,
+          "total": 3,
+          "challenges": [
+            {
+              "id": "mercy",
+              "label": "Keep the pattern",
+              "name": "Keep the pattern",
+              "description": "Fresh run: lose no carried atoms to vortices; Retry retains losses.",
+              "type": "budget",
+              "rulesVersion": 2,
+              "complete": true,
+              "earned": true,
+              "awardVersion": 2,
+              "legacy": false
+            },
+            {
+              "id": "swift",
+              "label": "A quickened pattern",
+              "name": "A quickened pattern",
+              "description": "Finish a fresh run in under 6 minutes.",
+              "type": "time",
+              "rulesVersion": 2,
+              "targetSeconds": 360,
+              "complete": true,
+              "earned": true,
+              "awardVersion": 2,
+              "legacy": false
+            },
+            {
+              "id": "detail",
+              "label": "A gentler pull",
+              "name": "A gentler pull",
+              "description": "Absorb 30 atoms while Coalesce is not held, then finish the reconstruction.",
+              "type": "level",
+              "rulesVersion": 2,
+              "complete": true,
+              "earned": true,
+              "awardVersion": 2,
+              "legacy": false
+            }
+          ],
+          "fragments": 3,
+          "passed": [
+            "mercy",
+            "swift",
+            "detail"
+          ],
+          "newlyEarned": [
+            "mercy",
+            "swift",
+            "detail"
+          ],
+          "maxFragments": 36,
+          "breakdown": [
+            {
+              "id": "mercy",
+              "label": "Keep the pattern",
+              "description": "Fresh run: lose no carried atoms to vortices; Retry retains losses.",
+              "outcome": "new",
+              "passed": true,
+              "progress": "0 atoms lost · Limit 0",
+              "awardVersion": 2,
+              "legacy": false,
+              "reason": "Requirement met at completion under rules version 2."
+            },
+            {
+              "id": "swift",
+              "label": "A quickened pattern",
+              "description": "Finish a fresh run in under 6 minutes.",
+              "outcome": "new",
+              "passed": true,
+              "progress": "3:12 / 6:00 · 2:47 left",
+              "awardVersion": 2,
+              "legacy": false,
+              "reason": "Requirement met at completion under rules version 2."
+            },
+            {
+              "id": "detail",
+              "label": "A gentler pull",
+              "description": "Absorb 30 atoms while Coalesce is not held, then finish the reconstruction.",
+              "outcome": "new",
+              "passed": true,
+              "progress": "70 / 30 passively gathered atoms",
+              "awardVersion": 2,
+              "legacy": false,
+              "reason": "Requirement met at completion under rules version 2."
+            }
+          ]
+        },
+        "stats": {
+          "time": 192.92090000000897,
+          "disintegrated": 0,
+          "spared": 0,
+          "memories": 0
+        },
+        "time": 192.92090000000897,
+        "targetSeconds": 360,
+        "settings": {
+          "challenge": "normal",
+          "invulnerable": false
+        },
+        "engineError": null
+      },
+      "headroomSeconds": 167.07909999999103,
+      "headroomPercent": 46.41086111110862,
+      "underTarget": true,
+      "atLeast25PercentHeadroom": true,
+      "minimumHealth": 100,
+      "wallSeconds": 196.914,
+      "errors": [],
+      "trace": [
+        {
+          "label": "normal menu/interlude enters reassembly",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "reassembly",
+          "stage": 0,
+          "stageId": "gather",
+          "map": "void",
+          "x": 1200,
+          "y": 1460,
+          "r": 10,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "awareness",
+          "hero": null,
+          "locked": true,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 0.20000000000000004,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "",
+          "interaction": null,
+          "powers": {},
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "Coalesce unlock and first layer",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "reassembly",
+          "stage": 0,
+          "stageId": "gather",
+          "map": "void",
+          "x": 1200,
+          "y": 1460,
+          "r": 10,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 20,
+          "form": "awareness",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 2.150500000000001,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Rebuild your nervous system",
+          "interaction": null,
+          "powers": {
+            "coalesce": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            }
+          },
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "carried atoms deposited",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "reassembly",
+          "stage": 0,
+          "stageId": "gather",
+          "map": "void",
+          "x": 1228.9910947140058,
+          "y": 1266.1172689412144,
+          "r": 10,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 20,
+          "form": "awareness",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 17.49029999999998,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Rebuild your nervous system",
+          "interaction": null,
+          "powers": {
+            "coalesce": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            }
+          },
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "carried atoms deposited",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "reassembly",
+          "stage": 0,
+          "stageId": "gather",
+          "map": "void",
+          "x": 1202.9216871325154,
+          "y": 1235.9367604740053,
+          "r": 10,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "awareness",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 45.37050000000038,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Rebuild your circulatory system",
+          "interaction": null,
+          "powers": {
+            "coalesce": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            }
+          },
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "carried atoms deposited",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "reassembly",
+          "stage": 0,
+          "stageId": "gather",
+          "map": "void",
+          "x": 1171.68433835334,
+          "y": 1267.8802570629036,
+          "r": 10,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "awareness",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 63.91230000000137,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Rebuild your circulatory system",
+          "interaction": null,
+          "powers": {
+            "coalesce": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            }
+          },
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "carried atoms deposited",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "reassembly",
+          "stage": 0,
+          "stageId": "gather",
+          "map": "void",
+          "x": 1232.1111213592237,
+          "y": 1266.209128514607,
+          "r": 10,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 25,
+          "form": "awareness",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 77.96870000000212,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Rebuild your circulatory system",
+          "interaction": null,
+          "powers": {
+            "coalesce": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            }
+          },
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "carried atoms deposited",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "reassembly",
+          "stage": 0,
+          "stageId": "gather",
+          "map": "void",
+          "x": 1199.336128144413,
+          "y": 1232.3176046485673,
+          "r": 10,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 30,
+          "form": "awareness",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 107.86500000000429,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Rebuild your skeleton",
+          "interaction": null,
+          "powers": {
+            "coalesce": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            }
+          },
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "carried atoms deposited",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "reassembly",
+          "stage": 0,
+          "stageId": "gather",
+          "map": "void",
+          "x": 1171.3915337908713,
+          "y": 1267.8758909217381,
+          "r": 10,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 35,
+          "form": "awareness",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 122.739000000006,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Rebuild your musculature",
+          "interaction": null,
+          "powers": {
+            "coalesce": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            }
+          },
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "carried atoms deposited",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "reassembly",
+          "stage": 0,
+          "stageId": "gather",
+          "map": "void",
+          "x": 1202.640075585663,
+          "y": 1234.8221769629051,
+          "r": 10,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 0,
+          "carryMax": 35,
+          "form": "awareness",
+          "hero": null,
+          "locked": false,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 160.15570000000866,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {},
+          "done": false,
+          "objective": "Rebuild your musculature",
+          "interaction": null,
+          "powers": {
+            "coalesce": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            }
+          },
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "carried atoms deposited",
+          "scene": "Play",
+          "onTop": true,
+          "chapter": "reassembly",
+          "stage": 0,
+          "stageId": "gather",
+          "map": "void",
+          "x": 1170.8909919449354,
+          "y": 1267.687211397351,
+          "r": 10,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 1,
+          "carryMax": 35,
+          "form": "awareness",
+          "hero": null,
+          "locked": true,
+          "dialog": false,
+          "captionSkippable": true,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 181.4822000000087,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "reassembled": true
+          },
+          "done": false,
+          "objective": "",
+          "interaction": null,
+          "powers": {
+            "coalesce": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            }
+          },
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "real body reassembles and chapter ends",
+          "scene": "ChapterComplete",
+          "onTop": false,
+          "chapter": "reassembly",
+          "stage": 1,
+          "stageId": "naming",
+          "map": "void",
+          "x": 1200,
+          "y": 1200,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 1,
+          "carryMax": 35,
+          "form": "manhattan",
+          "hero": null,
+          "locked": true,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 192.92090000000897,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "reassembled": true
+          },
+          "done": true,
+          "objective": "",
+          "interaction": null,
+          "powers": {
+            "coalesce": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            }
+          },
+          "foes": [],
+          "error": null
+        },
+        {
+          "label": "actual completion result",
+          "scene": "ChapterComplete",
+          "onTop": false,
+          "chapter": "reassembly",
+          "stage": 1,
+          "stageId": "naming",
+          "map": "void",
+          "x": 1200,
+          "y": 1200,
+          "r": 13,
+          "hp": 100,
+          "maxHp": 100,
+          "energy": 100,
+          "carry": 1,
+          "carryMax": 35,
+          "form": "manhattan",
+          "hero": null,
+          "locked": true,
+          "dialog": false,
+          "captionSkippable": false,
+          "failed": false,
+          "down": false,
+          "god": false,
+          "challenge": "normal",
+          "stats": {
+            "time": 192.92090000000897,
+            "disintegrated": 0,
+            "spared": 0,
+            "memories": 0
+          },
+          "flags": {
+            "reassembled": true
+          },
+          "done": true,
+          "objective": "",
+          "interaction": null,
+          "powers": {
+            "coalesce": {
+              "cd": 0,
+              "active": false,
+              "targetId": null,
+              "cost": 0,
+              "action": "telekinesis"
+            }
+          },
+          "foes": [],
+          "error": null
+        }
+      ],
+      "actions": [
+        {
+          "type": "menu",
+          "prefix": "CHAPTERS",
+          "point": {
+            "x": 284,
+            "y": 466
+          },
+          "at": 290
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 869
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1041
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1218
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1392
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1572
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1745
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 1924
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 2099
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 2271
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 2444
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 3756
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 3928
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 4104
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 4275
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 4455
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 4625
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 4797
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 4971
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 5142
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 5314
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 5490
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 185006
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 185178
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 188789
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 188962
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 189141
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 189313
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 193672
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 193844
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 194016
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 194193
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 194363
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 194540
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 194712
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 194884
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 195059
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 195231
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 195408
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 195580
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 195751
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 195926
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 196097
+        },
+        {
+          "type": "key",
+          "key": "Space",
+          "at": 196268
+        }
+      ],
+      "finishedAtUtc": "2026-10-31T21:17:02.650Z"
+    }
+  ],
+  "sourceIndexSha256": "66d98e0d619f513b180b6949dd686b42d039d736296f6998d541dd5f5b87f703",
+  "standaloneSha256": "e45651b4947b936aacf1155bf2c7624c1e72d02804315fb85f5f14f60a21e2c9",
+  "method": "Actual menus, keyboard/mouse, Normal damage, normal RAF and read-only telemetry. Only initial campaign unlock/settings and empty optional progress fixtures are written before boot.",
+  "limitations": "A known-route automation run is not an unfamiliar human playtest. Route failures are not proof of an unwinnable level.",
+  "browser": "151.0.7922.34",
+  "finishedAtUtc": "2026-10-31T21:17:02.681Z",
+  "allRequestedCompleted": true,
+  "allRequestedHave25PercentHeadroom": true
+}

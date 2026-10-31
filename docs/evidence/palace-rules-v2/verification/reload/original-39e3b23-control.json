@@ -1,0 +1,230 @@
+{
+  "revision": "39e3b237040bbe2ec1d30a38bfbe3bf62cfd3118",
+  "method": "Exact unmodified committed full tracking test in an isolated checkout, ten sequential runs per build.",
+  "testSha256": "28d05eba6ed844e3df8e13edc53287d830608f996f6a1a356ef7c788827646e8",
+  "sourceScriptsSha256": "19ad614594d8737e3a701865e735c8436fcd493ad31649fbf7111f590ceae2ba",
+  "standaloneSha256": "4d3560157c6c21f027825e5255a0a53c3b2f083328d696bc3f348abe7147a08a",
+  "runs": [
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 1,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 1.197,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, index.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/source/run-01"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 2,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.969,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, index.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/source/run-02"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 3,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.902,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, index.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/source/run-03"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 4,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 1.029,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, index.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/source/run-04"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 5,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.938,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, index.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/source/run-05"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 6,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.924,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, index.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/source/run-06"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 7,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.9,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, index.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/source/run-07"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 8,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.908,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, index.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/source/run-08"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 9,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.925,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, index.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/source/run-09"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 10,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.9,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, index.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/source/run-10"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 1,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.903,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, dist/dr-manhattan.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/standalone/run-01"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 2,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 1.002,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, dist/dr-manhattan.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/standalone/run-02"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 3,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.961,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, dist/dr-manhattan.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/standalone/run-03"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 4,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.9,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, dist/dr-manhattan.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/standalone/run-04"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 5,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 1.001,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, dist/dr-manhattan.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/standalone/run-05"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 6,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 1.135,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, dist/dr-manhattan.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/standalone/run-06"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 7,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.933,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, dist/dr-manhattan.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/standalone/run-07"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 8,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.917,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, dist/dr-manhattan.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/standalone/run-08"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 9,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.916,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, dist/dr-manhattan.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/standalone/run-09"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 10,
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 0.917,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 82 checks (chromium, dist/dr-manhattan.html).",
+      "browser": "151.0.7922.34",
+      "evidence": "/private/tmp/watchmen-reload-control-39e-rOctV9/comparison-evidence/standalone/run-10"
+    }
+  ],
+  "passed": true
+}

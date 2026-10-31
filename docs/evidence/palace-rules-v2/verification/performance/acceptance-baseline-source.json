@@ -1,0 +1,26 @@
+{
+  "name": "baseline-source",
+  "root": "/private/tmp/watchmen-postfx-ed65bbf",
+  "target": "index.html",
+  "exitCode": 0,
+  "signal": null,
+  "seconds": 77.236,
+  "log": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/postfx-review/original-baseline-source.log",
+  "finalLine": "All atmosphere checks passed.",
+  "timings": [
+    {
+      "passed": true,
+      "dpr": 1,
+      "on": 2.13,
+      "off": 1.96,
+      "overheadPercent": 8.673469387755105
+    },
+    {
+      "passed": true,
+      "dpr": 2,
+      "on": 8.2,
+      "off": 7.43,
+      "overheadPercent": 10.36339165545086
+    }
+  ]
+}

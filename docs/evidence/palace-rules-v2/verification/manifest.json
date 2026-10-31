@@ -1,0 +1,350 @@
+{
+  "schemaVersion": 1,
+  "scope": "Reload verification and earlier frozen-revision post-effects investigation",
+  "rulesV2Reload": {
+    "perBuild": 10,
+    "checksPerRun": 86,
+    "allProcessExitsZero": true,
+    "testSha256": "4f8a2d20096c62b495b3faff56b1c7612e7b83c09e5cc5e4adad3facd91efc39",
+    "standaloneSha256": "3a2c291531576f5abda7aa1f70f64fa9502827da4fa3285199ba47b5c24854e4"
+  },
+  "initialInstrumentedReload": {
+    "perBuild": 10,
+    "checksPerRun": 85,
+    "allProcessExitsZero": true,
+    "testSha256": "e7696e13b574767ce4b6a87fc961d4440abc974fc6b55fe3f05359e2aaf2ec76",
+    "standaloneSha256": "4d3560157c6c21f027825e5255a0a53c3b2f083328d696bc3f348abe7147a08a"
+  },
+  "originalControlReload": {
+    "revision": "39e3b237040bbe2ec1d30a38bfbe3bf62cfd3118",
+    "perBuild": 10,
+    "checksPerRun": 82,
+    "allProcessExitsZero": true,
+    "testSha256": "28d05eba6ed844e3df8e13edc53287d830608f996f6a1a356ef7c788827646e8",
+    "sourceScriptsSha256": "19ad614594d8737e3a701865e735c8436fcd493ad31649fbf7111f590ceae2ba",
+    "standaloneSha256": "4d3560157c6c21f027825e5255a0a53c3b2f083328d696bc3f348abe7147a08a"
+  },
+  "performanceProvenance": {
+    "reviewedRevision": "39e3b237040bbe2ec1d30a38bfbe3bf62cfd3118",
+    "baselineRevision": "ed65bbfb0416f08e5aa507bf221bdcc7ca413dff",
+    "reviewedScriptCount": 71,
+    "baselineScriptCount": 57,
+    "finalRulesV2Profile": false
+  },
+  "qualification": "Neither the original reload failure nor the narrow performance regression was reproduced locally; no underlying cause or production fix is claimed.",
+  "files": [
+    {
+      "path": "README.md",
+      "bytes": 3152,
+      "sha256": "88e5bf349bba7092841b7cd8bae31e70ece4ecc1fbe7ccee26aa60fccedb1c78",
+      "byteIdenticalToSource": false,
+      "origin": {
+        "kind": "packaging-notes"
+      }
+    },
+    {
+      "path": "performance/acceptance-baseline-source.json",
+      "bytes": 607,
+      "sha256": "ec4d2c7411c49dee5d266cd7293801aa36822376bc81cda28879e3e90e93cd7b",
+      "byteIdenticalToSource": false,
+      "origin": {
+        "kind": "json-extraction",
+        "source": "performance/original-acceptance-matrix.json",
+        "jsonPointer": "/cases/2"
+      }
+    },
+    {
+      "path": "performance/acceptance-current-source.json",
+      "bytes": 617,
+      "sha256": "ce35ec4085a2339048fb43e0219ec7181bd738b191e3fc67531910188986d889",
+      "byteIdenticalToSource": false,
+      "origin": {
+        "kind": "json-extraction",
+        "source": "performance/original-acceptance-matrix.json",
+        "jsonPointer": "/cases/0"
+      }
+    },
+    {
+      "path": "performance/acceptance-current-standalone.json",
+      "bytes": 639,
+      "sha256": "f27c2a71ea71b04cd0d1bff7bd17110c256f67101ccce2999044ae9a1cbaebb6",
+      "byteIdenticalToSource": false,
+      "origin": {
+        "kind": "json-extraction",
+        "source": "performance/original-acceptance-matrix.json",
+        "jsonPointer": "/cases/1"
+      }
+    },
+    {
+      "path": "performance/advance-matrix.json",
+      "bytes": 586241,
+      "sha256": "30bed9e31fc900675f942f01496d70622b4121a1588ec34aac63aeedb2ab06f8",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/postfx-review/advance-matrix.json"
+      }
+    },
+    {
+      "path": "performance/original-acceptance-matrix.json",
+      "bytes": 2403,
+      "sha256": "0b1ebad16cbdd33c502f8f13165ca9d787ed0c8c13426d9991407c12bcaff698",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/postfx-review/original-acceptance-matrix.json"
+      }
+    },
+    {
+      "path": "performance/original-baseline-source.log",
+      "bytes": 4035,
+      "sha256": "5de40c97077d660cd9a91c502a5de5c2fd01f04d38600587f798c228b9767b16",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/postfx-review/original-baseline-source.log"
+      }
+    },
+    {
+      "path": "performance/original-current-source.log",
+      "bytes": 4036,
+      "sha256": "9dc026a51dc948ce8264d1ea304122e88fef4a74ee3c1cfbde47c03d575b6817",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/postfx-review/original-current-source.log"
+      }
+    },
+    {
+      "path": "performance/original-current-standalone.log",
+      "bytes": 4039,
+      "sha256": "302b78af2f6d5d1881dd2bad07e813e6dc663678c94e49c7de40153c85802d7e",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/postfx-review/original-current-standalone.log"
+      }
+    },
+    {
+      "path": "performance/summary.json",
+      "bytes": 10661,
+      "sha256": "4d8605c39da65aa54d95e9f52cbb221fb5456107bb1afb642b5ed3081d15d074",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/postfx-review/summary.json"
+      }
+    },
+    {
+      "path": "performance/unmodified-visual-test.mjs.txt",
+      "bytes": 30031,
+      "sha256": "4cbd24549012ea3cfbb6b1d14cdd8152a847868f579552a06a85a88c6a3105a6",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/visual.mjs"
+      }
+    },
+    {
+      "path": "performance/watchmen-postfx-original.mjs.txt",
+      "bytes": 2124,
+      "sha256": "f389216882bf8b46601dcdbd90c67f7429900341b30bca2c3e76b131b0a8ca59",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "diagnostic-harness",
+        "path": "watchmen-postfx-original.mjs",
+        "reviewedRevision": "39e3b237040bbe2ec1d30a38bfbe3bf62cfd3118"
+      }
+    },
+    {
+      "path": "performance/watchmen-postfx-profile.mjs.txt",
+      "bytes": 8038,
+      "sha256": "0f8d77e66668562dc10213f272f057b8459f6c492dfb277738524b2993018e24",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "diagnostic-harness",
+        "path": "watchmen-postfx-profile.mjs",
+        "reviewedRevision": "39e3b237040bbe2ec1d30a38bfbe3bf62cfd3118"
+      }
+    },
+    {
+      "path": "reload/final-v2-reload.json",
+      "bytes": 7988,
+      "sha256": "5bd032224b5e10d49f50e6fe9560f3158239b466cdd136197b7cf5b55728f27a",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/palace-rules-v2/final-reload.json"
+      }
+    },
+    {
+      "path": "reload/final-v2-source-reload-diagnostics.json",
+      "bytes": 6134,
+      "sha256": "7b4b2293b5c81b5053cde0663af234996551288a77a57d8ee3d21ac06117519f",
+      "byteIdenticalToSource": false,
+      "origin": {
+        "kind": "json-extraction",
+        "source": "reload/final-v2-source-run-01.json",
+        "jsonPointer": "/reloadDiagnostics"
+      }
+    },
+    {
+      "path": "reload/final-v2-source-run-01.json",
+      "bytes": 51191,
+      "sha256": "82e0c66653b59931e7f1572d876bc4ccccbeb383d64ebf14b9b18cb6139eec9b",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-01/results.json"
+      }
+    },
+    {
+      "path": "reload/final-v2-source-run-01.log",
+      "bytes": 7061,
+      "sha256": "aacfd04dbcc33ec5dd5a9e1f526031f75da6bbb545fcb3d9e50e9a302e07ace0",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-01/process.log"
+      }
+    },
+    {
+      "path": "reload/final-v2-standalone-reload-diagnostics.json",
+      "bytes": 6182,
+      "sha256": "51d120e6e44fbb334e973ff7157d10ba34c6ec2fbd19dde1a3dcb3b29eb5be88",
+      "byteIdenticalToSource": false,
+      "origin": {
+        "kind": "json-extraction",
+        "source": "reload/final-v2-standalone-run-01.json",
+        "jsonPointer": "/reloadDiagnostics"
+      }
+    },
+    {
+      "path": "reload/final-v2-standalone-run-01.json",
+      "bytes": 51263,
+      "sha256": "0ec94ade59fb2acc79e11526a2a0d5043d56c39ab1d7414711980fa7cfb7b80e",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-01/results.json"
+      }
+    },
+    {
+      "path": "reload/final-v2-standalone-run-01.log",
+      "bytes": 7073,
+      "sha256": "212a51ba4dd84922f6d0fb24e7d55348527c0c9805c6ff0810f6efcde99b4d58",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-01/process.log"
+      }
+    },
+    {
+      "path": "reload/final-v2-tracking-test.mjs.txt",
+      "bytes": 43185,
+      "sha256": "4f8a2d20096c62b495b3faff56b1c7612e7b83c09e5cc5e4adad3facd91efc39",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/glass-palace-tracking.mjs"
+      }
+    },
+    {
+      "path": "reload/initial-39e3b23-source-reload-diagnostics.json",
+      "bytes": 5506,
+      "sha256": "1683873f1d497fac69f8e04348cce3e403f990a1f472b8e629b48bdfc47d51d8",
+      "byteIdenticalToSource": false,
+      "origin": {
+        "kind": "json-extraction",
+        "source": "reload/initial-39e3b23-source-run-01.json",
+        "jsonPointer": "/reloadDiagnostics"
+      }
+    },
+    {
+      "path": "reload/initial-39e3b23-source-run-01.json",
+      "bytes": 44088,
+      "sha256": "9997281fababe4594064ed406b35bd7e8ac2500fb7ab5a8d442f69c23b0faca4",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/glass-palace-reload/chromium/2026-10-31T20-52-08-608Z/source/run-01/results.json"
+      }
+    },
+    {
+      "path": "reload/initial-39e3b23-standalone-reload-diagnostics.json",
+      "bytes": 5554,
+      "sha256": "315600dbe7f316fee67d479d5225fafcc93d6d4ca95704065de87876c7b667cb",
+      "byteIdenticalToSource": false,
+      "origin": {
+        "kind": "json-extraction",
+        "source": "reload/initial-39e3b23-standalone-run-01.json",
+        "jsonPointer": "/reloadDiagnostics"
+      }
+    },
+    {
+      "path": "reload/initial-39e3b23-standalone-run-01.json",
+      "bytes": 44160,
+      "sha256": "12357f53714bf862a95fbf74a888f8cb2e95ada8f174e8902bbc22af300c4c2f",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/glass-palace-reload/chromium/2026-10-31T20-52-08-608Z/standalone/run-01/results.json"
+      }
+    },
+    {
+      "path": "reload/initial-instrumented-39e3b23.json",
+      "bytes": 7980,
+      "sha256": "13f0ce2b1d699384a1c3ce25ceebb28a7aa2029de6699f41cbc65c310b65911c",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "workspace-file",
+        "path": "tests/out/glass-palace-reload/chromium/2026-10-31T20-52-08-608Z/results.json"
+      }
+    },
+    {
+      "path": "reload/original-39e3b23-control.json",
+      "bytes": 8255,
+      "sha256": "6045fc98fec78d8e64216fd5c5adcd587ca2d6c4e4a0451a54986eab5b94fd81",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "isolated-committed-checkout",
+        "revision": "39e3b237040bbe2ec1d30a38bfbe3bf62cfd3118",
+        "path": "comparison-evidence/results.json"
+      }
+    },
+    {
+      "path": "reload/original-39e3b23-source-run-01.log",
+      "bytes": 6765,
+      "sha256": "3787cdc83a4a6cf0aad1a9a570b4745265de73c77a80e2ece5ea4cdca9dc326c",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "isolated-committed-checkout",
+        "revision": "39e3b237040bbe2ec1d30a38bfbe3bf62cfd3118",
+        "path": "comparison-evidence/source/run-01/process.log"
+      }
+    },
+    {
+      "path": "reload/original-39e3b23-standalone-run-01.log",
+      "bytes": 6777,
+      "sha256": "c47371f6b8270cae44fc0406d5d8d472d5a3bd1dacc573b97c91b5ad2d0bf1bb",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "isolated-committed-checkout",
+        "revision": "39e3b237040bbe2ec1d30a38bfbe3bf62cfd3118",
+        "path": "comparison-evidence/standalone/run-01/process.log"
+      }
+    },
+    {
+      "path": "reload/original-tracking-test.mjs.txt",
+      "bytes": 38140,
+      "sha256": "28d05eba6ed844e3df8e13edc53287d830608f996f6a1a356ef7c788827646e8",
+      "byteIdenticalToSource": true,
+      "origin": {
+        "kind": "isolated-committed-checkout",
+        "revision": "39e3b237040bbe2ec1d30a38bfbe3bf62cfd3118",
+        "path": "tests/glass-palace-tracking.mjs",
+        "unmodifiedCommittedBytes": true
+      }
+    }
+  ]
+}

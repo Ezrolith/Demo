@@ -1,0 +1,83 @@
+PASS older palace saves without a tracking field load with no pin
+PASS locked, unknown and mode destinations cannot be pinned
+PASS pinning a valid challenge writes only the palace slot and no fragment
+PASS the stored selection survives model reload and callers cannot mutate its detached snapshot
+PASS clearing the pin is palace-local and a repeated clear performs no extra write
+PASS the timer reports the actual carried time and exact target
+PASS the strict under-target challenge remains possible before its deadline and misses at equality
+PASS a zero-time live snapshot cannot claim the finishing condition is already met
+PASS mercy tracks people actually unmade and becomes missed after the first
+PASS live reads consume no source-slot or palace-storage reads and perform no writes
+PASS a provisionally ready detail challenge never grants a fragment or writes progress
+PASS fake chapter/context identities and unknown challenges are rejected
+PASS failed and downed attempts cannot display a still-viable challenge
+PASS prologue: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS reassembly: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS superman: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS deterrent: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS mars: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS karnak: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS last_broadcast: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS ninth_minute: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS long_summer: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS am_dead_air: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS am_undertow: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS am_glass_archive: a missing detail stays pending and meeting its real condition is only provisionally ready
+PASS City Heat can become eligible again after cooling rather than being called permanently missed
+PASS a missing or truncated emitter reference never appears complete
+PASS am_patrol: replay modes do not claim canonical moment challenges
+PASS am_rescue_clock: replay modes do not claim canonical moment challenges
+PASS the actual pane action opens three selectable challenge rows
+PASS challenge actions and return controls stay inside the readable panel
+PASS keyboard selection pins the time challenge from the actual pane screen
+PASS the chosen row exposes a working Stop Tracking action
+PASS mouse Stop Tracking clears the selected challenge
+PASS pane pinning and clearing preserve other progress and award no fragment
+PASS normal level entry attaches a matching pin and reads the carried clock immediately
+PASS the tracked HUD samples at a bounded rate without reading progress slots every frame
+PASS ordinary HUD drawing explains tracked progress without claiming an earned fragment
+PASS an overlapping interaction prompt takes priority over the optional tracker
+PASS a prompt elsewhere on screen keeps both the interaction and tracker readable
+PASS dialogue and captions hide the optional tracker to keep their existing space clear
+PASS Pause preserves its existing actions and exposes Moment Challenges
+PASS pausing freezes both the actual field timer and the tracker samples
+PASS the pause challenge panel shows all three current attempt snapshots
+PASS choosing another challenge while paused replaces the live controller
+PASS clearing tracking restores the original HUD methods on that play instance
+PASS the named return action leaves gameplay paused until Resume
+PASS an unpinned play frame calls no live challenge reader and keeps normal HUD behavior
+PASS reading, pausing and changing tracked challenges preserve all non-palace progress
+PASS actual checkpoint retry rebuilds tracking from retained carry, discarding the failed attempt’s later stats
+PASS a pin for another moment stays saved without attaching extra work to this level
+PASS After Midnight story entry attaches the selected case challenge to the real human hero
+PASS After Midnight replay modes never attach a story-case tracker
+PASS the real completion hook awards only fulfilled challenges and gives three frozen outcome rows
+PASS actual completion screens receive the same authoritative breakdown
+PASS real H opens completion details with new and missed outcomes
+PASS completion details return to the same result without advancing the chapter
+PASS the result Details click is consumed before the underlying generic Continue action
+PASS Escape from result details returns to the result screen
+PASS completion reasons remain frozen if live state changes afterward
+PASS later actual completion distinguishes two new fragments from the previously earned one
+PASS already earned fragments remain distinct from a later attempt that misses their conditions
+PASS repeated completion observation cannot duplicate fragments or invent newly earned rows
+PASS a prior award is reported separately from the current attempt’s failed condition
+PASS an already recovered fragment is labelled honestly without promising another reward
+PASS palace backup round-trips the selected challenge
+PASS an older palace backup clears the pin without altering earned fragments or other slots
+PASS portable pins for a currently locked canonical moment never unlock the level
+PASS malformed portable pin 1 is rejected without writes
+PASS malformed portable pin 2 is rejected without writes
+PASS malformed portable pin 3 is rejected without writes
+PASS malformed portable pin 4 is rejected without writes
+PASS malformed portable pin 5 is rejected without writes
+PASS malformed portable pin 6 is rejected without writes
+PASS malformed portable pin 7 is rejected without writes
+PASS blocked persistence retains an accepted session pin and warns without changing stored bytes
+PASS protected palace progress allows session tracking without overwriting its original bytes
+PASS protected palace progress allows session tracking without overwriting its original bytes
+PASS tracking storage failures never change campaign, bonus, After Midnight or settings bytes
+PASS the selected challenge survives an actual page reload
+PASS reload and tracked selection retain all protected progress and settings
+PASS tracking checks produce no browser or engine error
+GLASS PALACE TRACKING PASSED: 82 checks (chromium, dist/dr-manhattan.html).

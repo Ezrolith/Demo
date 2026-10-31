@@ -1,0 +1,1257 @@
+{
+  "target": "dist/dr-manhattan.html",
+  "engine": "chromium",
+  "browser": "151.0.7922.34",
+  "checks": [
+    "older palace saves without a tracking field load with no pin",
+    "locked, unknown and mode destinations cannot be pinned",
+    "pinning a valid challenge writes only the palace slot and no fragment",
+    "the stored selection survives model reload and callers cannot mutate its detached snapshot",
+    "clearing the pin is palace-local and a repeated clear performs no extra write",
+    "the timer reports the actual carried time and exact target",
+    "the strict under-target challenge remains possible before its deadline and misses at equality",
+    "a zero-time live snapshot cannot claim the finishing condition is already met",
+    "mercy tracks people actually unmade and becomes missed after the first",
+    "live reads consume no source-slot or palace-storage reads and perform no writes",
+    "a provisionally ready detail challenge never grants a fragment or writes progress",
+    "fake chapter/context identities and unknown challenges are rejected",
+    "failed and downed attempts cannot display a still-viable challenge",
+    "prologue: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "reassembly: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "superman: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "deterrent: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "mars: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "karnak: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "last_broadcast: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "ninth_minute: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "long_summer: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "am_dead_air: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "am_undertow: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "am_glass_archive: a missing detail stays pending and meeting its real condition is only provisionally ready",
+    "City Heat can become eligible again after cooling rather than being called permanently missed",
+    "a missing or truncated emitter reference never appears complete",
+    "am_patrol: replay modes do not claim canonical moment challenges",
+    "am_rescue_clock: replay modes do not claim canonical moment challenges",
+    "the actual pane action opens three selectable challenge rows",
+    "challenge actions and return controls stay inside the readable panel",
+    "keyboard selection pins the time challenge from the actual pane screen",
+    "the chosen row exposes a working Stop Tracking action",
+    "mouse Stop Tracking clears the selected challenge",
+    "pane pinning and clearing preserve other progress and award no fragment",
+    "normal level entry attaches a matching pin and reads the carried clock immediately",
+    "the tracked HUD samples at a bounded rate without reading progress slots every frame",
+    "ordinary HUD drawing explains tracked progress without claiming an earned fragment",
+    "an overlapping interaction prompt takes priority over the optional tracker",
+    "a prompt elsewhere on screen keeps both the interaction and tracker readable",
+    "dialogue and captions hide the optional tracker to keep their existing space clear",
+    "Pause preserves its existing actions and exposes Moment Challenges",
+    "pausing freezes both the actual field timer and the tracker samples",
+    "the pause challenge panel shows all three current attempt snapshots",
+    "choosing another challenge while paused replaces the live controller",
+    "clearing tracking restores the original HUD methods on that play instance",
+    "the named return action leaves gameplay paused until Resume",
+    "an unpinned play frame calls no live challenge reader and keeps normal HUD behavior",
+    "reading, pausing and changing tracked challenges preserve all non-palace progress",
+    "actual checkpoint retry rebuilds tracking from retained carry, discarding the failed attempt’s later stats",
+    "a pin for another moment stays saved without attaching extra work to this level",
+    "After Midnight story entry attaches the selected case challenge to the real human hero",
+    "After Midnight replay modes never attach a story-case tracker",
+    "the real completion hook awards only fulfilled challenges and gives three frozen outcome rows",
+    "actual completion screens receive the same authoritative breakdown",
+    "real H opens completion details with new and missed outcomes",
+    "completion details return to the same result without advancing the chapter",
+    "the result Details click is consumed before the underlying generic Continue action",
+    "Escape from result details returns to the result screen",
+    "completion reasons remain frozen if live state changes afterward",
+    "later actual completion distinguishes two new fragments from the previously earned one",
+    "already earned fragments remain distinct from a later attempt that misses their conditions",
+    "repeated completion observation cannot duplicate fragments or invent newly earned rows",
+    "a prior award is reported separately from the current attempt’s failed condition",
+    "an already recovered fragment is labelled honestly without promising another reward",
+    "palace backup round-trips the selected challenge",
+    "an older palace backup clears the pin without altering earned fragments or other slots",
+    "portable pins for a currently locked canonical moment never unlock the level",
+    "malformed portable pin 1 is rejected without writes",
+    "malformed portable pin 2 is rejected without writes",
+    "malformed portable pin 3 is rejected without writes",
+    "malformed portable pin 4 is rejected without writes",
+    "malformed portable pin 5 is rejected without writes",
+    "malformed portable pin 6 is rejected without writes",
+    "malformed portable pin 7 is rejected without writes",
+    "blocked persistence retains an accepted session pin and warns without changing stored bytes",
+    "protected palace progress allows session tracking without overwriting its original bytes",
+    "protected palace progress allows session tracking without overwriting its original bytes",
+    "tracking storage failures never change campaign, bonus, After Midnight or settings bytes",
+    "the final reload fixture pin is accepted and persisted before navigation",
+    "reload reaches a different fully booted document",
+    "reload retains the exact stored palace packet before its lazy model read",
+    "the selected challenge survives an actual page reload",
+    "reload and tracked selection retain all protected progress and settings",
+    "tracking checks produce no browser or engine error"
+  ],
+  "errors": [],
+  "snapshots": [
+    {
+      "label": "timer-boundaries",
+      "rows": [
+        {
+          "time": 0,
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "label": "Before the hand moves",
+          "description": "Finish in under 8 minutes.",
+          "state": "viable",
+          "earned": false,
+          "metNow": false,
+          "progress": "0:00 / 8:00 · 8:00 left",
+          "reason": "Finish before the time target. Pausing stops the field timer.",
+          "current": 0,
+          "target": 480
+        },
+        {
+          "time": 1,
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "label": "Before the hand moves",
+          "description": "Finish in under 8 minutes.",
+          "state": "viable",
+          "earned": false,
+          "metNow": true,
+          "progress": "0:01 / 8:00 · 7:59 left",
+          "reason": "Finish before the time target. Pausing stops the field timer.",
+          "current": 1,
+          "target": 480
+        },
+        {
+          "time": 479.99,
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "label": "Before the hand moves",
+          "description": "Finish in under 8 minutes.",
+          "state": "viable",
+          "earned": false,
+          "metNow": true,
+          "progress": "7:59 / 8:00 · 0:00 left",
+          "reason": "Finish before the time target. Pausing stops the field timer.",
+          "current": 479.99,
+          "target": 480
+        },
+        {
+          "time": 480,
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "label": "Before the hand moves",
+          "description": "Finish in under 8 minutes.",
+          "state": "missed",
+          "earned": false,
+          "metNow": false,
+          "progress": "8:00 / 8:00 · 0:00 left",
+          "reason": "The time target was reached. This attempt must finish strictly under 8:00.",
+          "current": 480,
+          "target": 480
+        },
+        {
+          "time": 481,
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "label": "Before the hand moves",
+          "description": "Finish in under 8 minutes.",
+          "state": "missed",
+          "earned": false,
+          "metNow": false,
+          "progress": "8:01 / 8:00 · 0:00 left",
+          "reason": "The time target was reached. This attempt must finish strictly under 8:00.",
+          "current": 481,
+          "target": 480
+        }
+      ]
+    },
+    {
+      "label": "mercy-boundaries",
+      "rows": [
+        {
+          "unmade": 0,
+          "momentId": "prologue",
+          "challengeId": "mercy",
+          "label": "No one unmade",
+          "description": "Finish without unmaking a person.",
+          "state": "viable",
+          "earned": false,
+          "metNow": true,
+          "progress": "0 people unmade this attempt",
+          "reason": "No one unmade so far. Finish without unmaking a person.",
+          "current": 0,
+          "target": 0
+        },
+        {
+          "unmade": 1,
+          "momentId": "prologue",
+          "challengeId": "mercy",
+          "label": "No one unmade",
+          "description": "Finish without unmaking a person.",
+          "state": "missed",
+          "earned": false,
+          "metNow": false,
+          "progress": "1 people unmade this attempt",
+          "reason": "A person was unmade this attempt. Retry from a checkpoint without that outcome or start again.",
+          "current": 1,
+          "target": 0
+        },
+        {
+          "unmade": 4,
+          "momentId": "prologue",
+          "challengeId": "mercy",
+          "label": "No one unmade",
+          "description": "Finish without unmaking a person.",
+          "state": "missed",
+          "earned": false,
+          "metNow": false,
+          "progress": "4 people unmade this attempt",
+          "reason": "A person was unmade this attempt. Retry from a checkpoint without that outcome or start again.",
+          "current": 4,
+          "target": 0
+        }
+      ]
+    },
+    {
+      "label": "prologue-detail-boundary",
+      "first": {
+        "momentId": "prologue",
+        "challengeId": "detail",
+        "label": "A watch repaired",
+        "description": "Repair the watch and complete the chamber calibration.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "Watch done · Calibration needed",
+        "reason": "Repair the watch and complete the chamber calibration.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "prologue",
+        "challengeId": "detail",
+        "label": "A watch repaired",
+        "description": "Repair the watch and complete the chamber calibration.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "Watch done · Calibration done",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    },
+    {
+      "label": "reassembly-detail-boundary",
+      "first": {
+        "momentId": "reassembly",
+        "challengeId": "detail",
+        "label": "A form remembered",
+        "description": "Finish with your human form fully reassembled.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "Reassembly needed · Manhattan form done",
+        "reason": "Finish with your human form fully reassembled.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "reassembly",
+        "challengeId": "detail",
+        "label": "A form remembered",
+        "description": "Finish with your human form fully reassembled.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "Reassembly done · Manhattan form done",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    },
+    {
+      "label": "superman-detail-boundary",
+      "first": {
+        "momentId": "superman",
+        "challengeId": "detail",
+        "label": "Four lives kept",
+        "description": "Spare at least four people during the chapter.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "3 / 4 people spared",
+        "reason": "Spare at least four people during the chapter.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "superman",
+        "challengeId": "detail",
+        "label": "Four lives kept",
+        "description": "Spare at least four people during the chapter.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "4 / 4 people spared",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    },
+    {
+      "label": "deterrent-detail-boundary",
+      "first": {
+        "momentId": "deterrent",
+        "challengeId": "detail",
+        "label": "A steady outline",
+        "description": "Finish with at least three quarters of your coherence.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "74% coherence · Finish at 75% or more",
+        "reason": "Finish with at least three quarters of your coherence.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "deterrent",
+        "challengeId": "detail",
+        "label": "A steady outline",
+        "description": "Finish with at least three quarters of your coherence.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "75% coherence · Finish at 75% or more",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    },
+    {
+      "label": "mars-detail-boundary",
+      "first": {
+        "momentId": "mars",
+        "challengeId": "detail",
+        "label": "Every remembered year",
+        "description": "Recover all six memories.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "5 / 6 memories found",
+        "reason": "Recover all six memories.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "mars",
+        "challengeId": "detail",
+        "label": "Every remembered year",
+        "description": "Recover all six memories.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "6 / 6 memories found",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    },
+    {
+      "label": "karnak-detail-boundary",
+      "first": {
+        "momentId": "karnak",
+        "challengeId": "detail",
+        "label": "Silence in the storm",
+        "description": "Shut down every tachyon emitter.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "3 / 4 emitters shut down",
+        "reason": "Shut down every tachyon emitter.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "karnak",
+        "challengeId": "detail",
+        "label": "Silence in the storm",
+        "description": "Shut down every tachyon emitter.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "4 / 4 emitters shut down",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    },
+    {
+      "label": "last_broadcast-detail-boundary",
+      "first": {
+        "momentId": "last_broadcast",
+        "challengeId": "detail",
+        "label": "Names and voices",
+        "description": "Recover every evidence record and rescue all three engineers.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "2 / 3 records · 3 / 3 engineers",
+        "reason": "Recover every evidence record and rescue all three engineers.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "last_broadcast",
+        "challengeId": "detail",
+        "label": "Names and voices",
+        "description": "Recover every evidence record and rescue all three engineers.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "3 / 3 records · 3 / 3 engineers",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    },
+    {
+      "label": "ninth_minute-detail-boundary",
+      "first": {
+        "momentId": "ninth_minute",
+        "challengeId": "detail",
+        "label": "Six beyond the second",
+        "description": "Bring all six passengers to safety.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "5 / 6 passengers safe",
+        "reason": "Bring all six passengers to safety.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "ninth_minute",
+        "challengeId": "detail",
+        "label": "Six beyond the second",
+        "description": "Bring all six passengers to safety.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "6 / 6 passengers safe",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    },
+    {
+      "label": "long_summer-detail-boundary",
+      "first": {
+        "momentId": "long_summer",
+        "challengeId": "detail",
+        "label": "A cooler street",
+        "description": "Rescue all six residents and finish with City Heat below 30.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "6 / 6 residents · Heat 30 (below 30)",
+        "reason": "Rescue all six residents and finish with City Heat below 30.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "long_summer",
+        "challengeId": "detail",
+        "label": "A cooler street",
+        "description": "Rescue all six residents and finish with City Heat below 30.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "6 / 6 residents · Heat 29 (below 30)",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    },
+    {
+      "label": "am_dead_air-detail-boundary",
+      "first": {
+        "momentId": "am_dead_air",
+        "challengeId": "detail",
+        "label": "Every intercepted trace",
+        "description": "Recover all three traces and download the buyer list.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "2 / 3 traces · Buyer list done",
+        "reason": "Recover all three traces and download the buyer list.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "am_dead_air",
+        "challengeId": "detail",
+        "label": "Every intercepted trace",
+        "description": "Recover all three traces and download the buyer list.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "3 / 3 traces · Buyer list done",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    },
+    {
+      "label": "am_undertow-detail-boundary",
+      "first": {
+        "momentId": "am_undertow",
+        "challengeId": "detail",
+        "label": "Four names aboard",
+        "description": "Bring all four workers aboard and cast off.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "3 / 4 aboard · Cast off done",
+        "reason": "Bring all four workers aboard and cast off.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "am_undertow",
+        "challengeId": "detail",
+        "label": "Four names aboard",
+        "description": "Bring all four workers aboard and cast off.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "4 / 4 aboard · Cast off done",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    },
+    {
+      "label": "am_glass_archive-detail-boundary",
+      "first": {
+        "momentId": "am_glass_archive",
+        "challengeId": "detail",
+        "label": "The archive returned",
+        "description": "Recover the ledger, capture the Surveyor and return the archive.",
+        "state": "pending",
+        "earned": false,
+        "metNow": false,
+        "progress": "Ledger done · Surveyor done · Archive needed",
+        "reason": "Recover the ledger, capture the Surveyor and return the archive.",
+        "current": null,
+        "target": null
+      },
+      "second": {
+        "momentId": "am_glass_archive",
+        "challengeId": "detail",
+        "label": "The archive returned",
+        "description": "Recover the ledger, capture the Surveyor and return the archive.",
+        "state": "ready",
+        "earned": false,
+        "metNow": true,
+        "progress": "Ledger done · Surveyor done · Archive done",
+        "reason": "Requirement met so far. Finish the moment to earn its fragment.",
+        "current": null,
+        "target": null
+      }
+    }
+  ],
+  "completionResults": [
+    {
+      "result": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 1,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "type": "unmade",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "name": "No one unmade",
+            "complete": false,
+            "earned": false
+          },
+          {
+            "id": "swift",
+            "type": "time",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "targetSeconds": 480,
+            "name": "Before the hand moves",
+            "complete": true,
+            "earned": true
+          },
+          {
+            "id": "detail",
+            "type": "level",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "name": "A watch repaired",
+            "complete": false,
+            "earned": false
+          }
+        ],
+        "fragments": 1,
+        "passed": [
+          "swift"
+        ],
+        "newlyEarned": [
+          "swift"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "1 people unmade this attempt",
+            "reason": "A person was unmade this attempt. Retry from a checkpoint without that outcome or start again."
+          },
+          {
+            "id": "swift",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "0:01 / 8:00 · 7:59 left",
+            "reason": "Requirement met at completion."
+          },
+          {
+            "id": "detail",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "Watch needed · Calibration needed",
+            "reason": "Requirement not met at completion: Watch needed · Calibration needed."
+          }
+        ]
+      },
+      "screenSummary": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 1,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "type": "unmade",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "name": "No one unmade",
+            "complete": false,
+            "earned": false
+          },
+          {
+            "id": "swift",
+            "type": "time",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "targetSeconds": 480,
+            "name": "Before the hand moves",
+            "complete": true,
+            "earned": true
+          },
+          {
+            "id": "detail",
+            "type": "level",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "name": "A watch repaired",
+            "complete": false,
+            "earned": false
+          }
+        ],
+        "fragments": 1,
+        "passed": [
+          "swift"
+        ],
+        "newlyEarned": [
+          "swift"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "1 people unmade this attempt",
+            "reason": "A person was unmade this attempt. Retry from a checkpoint without that outcome or start again."
+          },
+          {
+            "id": "swift",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "0:01 / 8:00 · 7:59 left",
+            "reason": "Requirement met at completion."
+          },
+          {
+            "id": "detail",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "Watch needed · Calibration needed",
+            "reason": "Requirement not met at completion: Watch needed · Calibration needed."
+          }
+        ]
+      },
+      "fragments": 1
+    },
+    {
+      "result": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 3,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "type": "unmade",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "name": "No one unmade",
+            "complete": true,
+            "earned": true
+          },
+          {
+            "id": "swift",
+            "type": "time",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "targetSeconds": 480,
+            "name": "Before the hand moves",
+            "complete": true,
+            "earned": true
+          },
+          {
+            "id": "detail",
+            "type": "level",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "name": "A watch repaired",
+            "complete": true,
+            "earned": true
+          }
+        ],
+        "fragments": 3,
+        "passed": [
+          "mercy",
+          "swift",
+          "detail"
+        ],
+        "newlyEarned": [
+          "mercy",
+          "detail"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "0 people unmade this attempt",
+            "reason": "Requirement met at completion."
+          },
+          {
+            "id": "swift",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "outcome": "already",
+            "passed": true,
+            "progress": "0:01 / 8:00 · 7:59 left",
+            "reason": "Recovered in an earlier run."
+          },
+          {
+            "id": "detail",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "Watch done · Calibration done",
+            "reason": "Requirement met at completion."
+          }
+        ]
+      },
+      "screenSummary": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 3,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "type": "unmade",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "name": "No one unmade",
+            "complete": true,
+            "earned": true
+          },
+          {
+            "id": "swift",
+            "type": "time",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "targetSeconds": 480,
+            "name": "Before the hand moves",
+            "complete": true,
+            "earned": true
+          },
+          {
+            "id": "detail",
+            "type": "level",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "name": "A watch repaired",
+            "complete": true,
+            "earned": true
+          }
+        ],
+        "fragments": 3,
+        "passed": [
+          "mercy",
+          "swift",
+          "detail"
+        ],
+        "newlyEarned": [
+          "mercy",
+          "detail"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "0 people unmade this attempt",
+            "reason": "Requirement met at completion."
+          },
+          {
+            "id": "swift",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "outcome": "already",
+            "passed": true,
+            "progress": "0:01 / 8:00 · 7:59 left",
+            "reason": "Recovered in an earlier run."
+          },
+          {
+            "id": "detail",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "Watch done · Calibration done",
+            "reason": "Requirement met at completion."
+          }
+        ]
+      },
+      "fragments": 3
+    },
+    {
+      "result": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 3,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "type": "unmade",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "name": "No one unmade",
+            "complete": true,
+            "earned": true
+          },
+          {
+            "id": "swift",
+            "type": "time",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "targetSeconds": 480,
+            "name": "Before the hand moves",
+            "complete": true,
+            "earned": true
+          },
+          {
+            "id": "detail",
+            "type": "level",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "name": "A watch repaired",
+            "complete": true,
+            "earned": true
+          }
+        ],
+        "fragments": 3,
+        "passed": [],
+        "newlyEarned": [],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "1 people unmade this attempt",
+            "reason": "This fragment was recovered in an earlier run. Live progress describes this attempt; it cannot add another fragment."
+          },
+          {
+            "id": "swift",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "10:00 / 8:00 · 0:00 left",
+            "reason": "This fragment was recovered in an earlier run. Live progress describes this attempt; it cannot add another fragment."
+          },
+          {
+            "id": "detail",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "Watch needed · Calibration needed",
+            "reason": "Requirement not met at completion: Watch needed · Calibration needed."
+          }
+        ]
+      },
+      "screenSummary": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 3,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "type": "unmade",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "name": "No one unmade",
+            "complete": true,
+            "earned": true
+          },
+          {
+            "id": "swift",
+            "type": "time",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "targetSeconds": 480,
+            "name": "Before the hand moves",
+            "complete": true,
+            "earned": true
+          },
+          {
+            "id": "detail",
+            "type": "level",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "name": "A watch repaired",
+            "complete": true,
+            "earned": true
+          }
+        ],
+        "fragments": 3,
+        "passed": [],
+        "newlyEarned": [],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "No one unmade",
+            "description": "Finish without unmaking a person.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "1 people unmade this attempt",
+            "reason": "This fragment was recovered in an earlier run. Live progress describes this attempt; it cannot add another fragment."
+          },
+          {
+            "id": "swift",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "10:00 / 8:00 · 0:00 left",
+            "reason": "This fragment was recovered in an earlier run. Live progress describes this attempt; it cannot add another fragment."
+          },
+          {
+            "id": "detail",
+            "label": "A watch repaired",
+            "description": "Repair the watch and complete the chamber calibration.",
+            "outcome": "already",
+            "passed": false,
+            "progress": "Watch needed · Calibration needed",
+            "reason": "Requirement not met at completion: Watch needed · Calibration needed."
+          }
+        ]
+      },
+      "fragments": 3
+    }
+  ],
+  "reloadDiagnostics": {
+    "before": {
+      "accepted": true,
+      "documentNonce": "cdd97d9b-1712-4e27-96ce-700ddcbacc78",
+      "timeOrigin": 1793479938197.3,
+      "readyState": "complete",
+      "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/dist/dr-manhattan.html",
+      "booted": true,
+      "raw": "{\"version\":1,\"challenges\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"}}",
+      "parsed": {
+        "version": 1,
+        "challenges": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        }
+      },
+      "storageError": null,
+      "data": {
+        "version": 1,
+        "challenges": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        }
+      },
+      "available": true,
+      "readOnly": false,
+      "warning": "",
+      "blocked": false,
+      "writes": [
+        {
+          "method": "setItem",
+          "key": "dr-manhattan.glass-palace.v1"
+        }
+      ],
+      "gets": [
+        "dr-manhattan.save",
+        "dr-manhattan.bonus.v1",
+        "dr-manhattan.after-midnight.v1",
+        "dr-manhattan.glass-palace.v1"
+      ],
+      "campaignIds": [
+        "prologue",
+        "reassembly",
+        "superman",
+        "deterrent",
+        "mars",
+        "karnak"
+      ],
+      "bonusIds": [
+        "last_broadcast",
+        "ninth_minute",
+        "long_summer"
+      ],
+      "caseIds": [
+        "am_dead_air",
+        "am_undertow",
+        "am_glass_archive",
+        "am_patrol",
+        "am_rescue_clock"
+      ]
+    },
+    "accepted": true,
+    "afterBoot": {
+      "documentNonce": "51e4e3c0-d645-451f-8d0b-7e5c71cf81d2",
+      "timeOrigin": 1793479938865.5,
+      "readyState": "complete",
+      "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/dist/dr-manhattan.html",
+      "booted": true,
+      "raw": "{\"version\":1,\"challenges\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"}}",
+      "parsed": {
+        "version": 1,
+        "challenges": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        }
+      },
+      "storageError": null,
+      "data": null,
+      "available": true,
+      "readOnly": false,
+      "warning": "",
+      "blocked": false,
+      "writes": [],
+      "gets": [
+        "dr-manhattan.save",
+        "dr-manhattan.glass-palace.v1"
+      ],
+      "campaignIds": [
+        "prologue",
+        "reassembly",
+        "superman",
+        "deterrent",
+        "mars",
+        "karnak"
+      ],
+      "bonusIds": [
+        "last_broadcast",
+        "ninth_minute",
+        "long_summer"
+      ],
+      "caseIds": [
+        "am_dead_air",
+        "am_undertow",
+        "am_glass_archive",
+        "am_patrol",
+        "am_rescue_clock"
+      ]
+    },
+    "afterInstall": {
+      "documentNonce": "51e4e3c0-d645-451f-8d0b-7e5c71cf81d2",
+      "timeOrigin": 1793479938865.5,
+      "readyState": "complete",
+      "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/dist/dr-manhattan.html",
+      "booted": true,
+      "raw": "{\"version\":1,\"challenges\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"}}",
+      "parsed": {
+        "version": 1,
+        "challenges": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        }
+      },
+      "storageError": null,
+      "data": null,
+      "available": true,
+      "readOnly": false,
+      "warning": "",
+      "blocked": false,
+      "writes": [],
+      "gets": [
+        "dr-manhattan.save",
+        "dr-manhattan.glass-palace.v1",
+        "dr-manhattan.glass-palace.v1"
+      ],
+      "campaignIds": [
+        "prologue",
+        "reassembly",
+        "superman",
+        "deterrent",
+        "mars",
+        "karnak"
+      ],
+      "bonusIds": [
+        "last_broadcast",
+        "ninth_minute",
+        "long_summer"
+      ],
+      "caseIds": [
+        "am_dead_air",
+        "am_undertow",
+        "am_glass_archive",
+        "am_patrol",
+        "am_rescue_clock"
+      ]
+    },
+    "afterRead": {
+      "documentNonce": "51e4e3c0-d645-451f-8d0b-7e5c71cf81d2",
+      "timeOrigin": 1793479938865.5,
+      "readyState": "complete",
+      "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/dist/dr-manhattan.html",
+      "booted": true,
+      "raw": "{\"version\":1,\"challenges\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"}}",
+      "parsed": {
+        "version": 1,
+        "challenges": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        }
+      },
+      "storageError": null,
+      "data": {
+        "version": 1,
+        "challenges": {},
+        "epilogueSeen": {},
+        "visits": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        }
+      },
+      "available": true,
+      "readOnly": false,
+      "warning": "",
+      "blocked": false,
+      "writes": [],
+      "gets": [
+        "dr-manhattan.save",
+        "dr-manhattan.glass-palace.v1",
+        "dr-manhattan.glass-palace.v1",
+        "dr-manhattan.glass-palace.v1",
+        "dr-manhattan.glass-palace.v1"
+      ],
+      "campaignIds": [
+        "prologue",
+        "reassembly",
+        "superman",
+        "deterrent",
+        "mars",
+        "karnak"
+      ],
+      "bonusIds": [
+        "last_broadcast",
+        "ninth_minute",
+        "long_summer"
+      ],
+      "caseIds": [
+        "am_dead_air",
+        "am_undertow",
+        "am_glass_archive",
+        "am_patrol",
+        "am_rescue_clock"
+      ]
+    }
+  },
+  "finalLine": "GLASS PALACE TRACKING PASSED: 85 checks (chromium, dist/dr-manhattan.html).",
+  "exitCode": 0,
+  "method": "Controlled canonical level/stat/flag fixtures, actual Play/completion/backup methods and real UI keys/mouse; stepped engine.",
+  "limits": "This proves state and integration contracts, not natural full-level challenge balance. No diagnostic image is live evidence."
+}

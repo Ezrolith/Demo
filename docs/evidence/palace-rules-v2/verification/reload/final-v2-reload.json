@@ -1,0 +1,236 @@
+{
+  "startedAtUtc": "2026-10-31T22:21:03.526Z",
+  "engine": "chromium",
+  "targets": [
+    "index.html",
+    "dist/dr-manhattan.html"
+  ],
+  "runsPerBuild": 10,
+  "testSha256": "4f8a2d20096c62b495b3faff56b1c7612e7b83c09e5cc5e4adad3facd91efc39",
+  "standaloneSha256": "3a2c291531576f5abda7aa1f70f64fa9502827da4fa3285199ba47b5c24854e4",
+  "method": "One full tracking-suite child at a time, fresh browser per child, actual process exits and unique evidence paths.",
+  "runs": [
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 1,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 1.216,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, index.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-01"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 2,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.922,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, index.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-02"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 3,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.937,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, index.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-03"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 4,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.938,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, index.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-04"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 5,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.914,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, index.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-05"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 6,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.911,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, index.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-06"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 7,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.914,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, index.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-07"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 8,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.944,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, index.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-08"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 9,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.906,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, index.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-09"
+    },
+    {
+      "target": "index.html",
+      "build": "source",
+      "run": 10,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.914,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, index.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/source/run-10"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 1,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.919,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-01"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 2,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.908,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-02"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 3,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.934,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-03"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 4,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.923,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-04"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 5,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.927,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-05"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 6,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.917,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-06"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 7,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.914,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-07"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 8,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.919,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-08"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 9,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.925,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-09"
+    },
+    {
+      "target": "dist/dr-manhattan.html",
+      "build": "standalone",
+      "run": 10,
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.945,
+      "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+      "evidence": "tests/out/glass-palace-reload/chromium/2026-10-31T22-21-03-522Z/standalone/run-10"
+    }
+  ],
+  "finishedAtUtc": "2026-10-31T22:21:22.279Z",
+  "passed": true
+}
