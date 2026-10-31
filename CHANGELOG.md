@@ -1,5 +1,10 @@
 # Changes
 
+## Palace refinements (draft)
+- Added an unlocked-moment atlas, missing-fragment and checkpoint filters, and a wall-aware walking guide.
+- Added palace-only export, preview and explicit restore, including blocked-storage and asynchronous file safeguards.
+- Kept original campaign, music, engine presentation and source save slots intact; see the enhancement report for checks and next directions.
+
 ## The Glass Palace — Part B (draft)
 - Added a noncombat Mars hub, actual map-code vignettes, moment Play/Resume/Challenges menus and a combined read-only source ledger.
 - Added thirty-six data-defined replay challenges in a separate hub save, fragment-driven architecture, four reflections and three timed epilogue variants.

@@ -30569,6 +30569,506 @@
   };
 })();
 </script>
+<script>/* src/game/glass-palace-portability.js */
+/* Portable palace progress. Existing campaign, bonus and case slots are never written. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const GP = DM.GlassPalace;
+  const FORMAT = 'dr-manhattan.glass-palace.backup';
+  const LIMIT = 256 * 1024;
+  const object = (value) => !!value && typeof value === 'object' && !Array.isArray(value);
+  const bytes = (text) => new TextEncoder().encode(text).length;
+  const only = (value, keys) => object(value) && Object.keys(value).every((key) => keys.includes(key));
+
+  function summary(data) {
+    const countFragments = Object.values(data.challenges).reduce(
+      (count, values) => count + Object.values(values).filter((value) => value === true).length,
+      0,
+    );
+    const countEpilogues = Object.values(data.epilogueSeen).filter((value) => value === true).length;
+    return { data, countFragments, countEpilogues, visits: data.visits };
+  }
+
+  function validated(raw) {
+    if (!only(raw, ['version', 'challenges', 'epilogueSeen', 'visits']) || raw.version !== 1)
+      throw new Error('Choose compatible Glass Palace progress.');
+    if (!object(raw.challenges) || !object(raw.epilogueSeen))
+      throw new Error('The palace progress records are invalid.');
+    if (!Number.isInteger(raw.visits) || raw.visits < 0 || raw.visits > 1e9)
+      throw new Error('The palace visit count is invalid.');
+    const ids = GP.moments().map((moment) => moment.id);
+    for (const [id, values] of Object.entries(raw.challenges)) {
+      if (!ids.includes(id) || !only(values, ['mercy', 'swift', 'detail']))
+        throw new Error('The backup contains an unavailable moment or challenge.');
+      if (Object.values(values).some((value) => value !== true))
+        throw new Error('The backup contains an invalid challenge record.');
+    }
+    if (!only(raw.epilogueSeen, ['return', 'observe', 'depart']))
+      throw new Error('The backup contains an unavailable reflection.');
+    if (Object.values(raw.epilogueSeen).some((value) => value !== true))
+      throw new Error('The backup contains an invalid reflection record.');
+    return GP.sanitize(raw);
+  }
+
+  const Backup = (GP.Backup = {
+    encode() {
+      const data = GP.sanitize(GP.load());
+      const text = JSON.stringify({ format: FORMAT, version: 1, data }, null, 2);
+      if (bytes(text) > LIMIT) throw new Error('The palace backup is too large.');
+      return text;
+    },
+    decode(text) {
+      if (typeof text !== 'string' || bytes(text) > LIMIT)
+        throw new Error('Choose a palace backup smaller than 256 KiB.');
+      let packet;
+      try {
+        packet = JSON.parse(text, (key, value) => {
+          if (['__proto__', 'constructor', 'prototype'].includes(key))
+            throw new Error('Unsafe backup field.');
+          return value;
+        });
+      } catch (_) {
+        throw new Error('The palace backup could not be read.');
+      }
+      if (!only(packet, ['format', 'version', 'data']) || packet.format !== FORMAT || packet.version !== 1)
+        throw new Error('Choose a compatible Glass Palace backup.');
+      return summary(validated(packet.data));
+    },
+    restore(text) {
+      const result = Backup.decode(text);
+      if (GP.readOnly) throw new Error('The existing palace save is protected. Use a compatible game copy.');
+      let existing;
+      try {
+        existing = localStorage.getItem(GP.key);
+      } catch (_) {
+        throw new Error('Saving is blocked. Keep your backup and enable browser storage.');
+      }
+      if (existing) {
+        try {
+          GP.sanitize(JSON.parse(existing));
+        } catch (_) {
+          throw new Error('The existing palace save is protected. Keep it before using a compatible game copy.');
+        }
+      }
+      try {
+        localStorage.setItem(GP.key, JSON.stringify(result.data));
+      } catch (_) {
+        throw new Error('Saving is blocked. Keep your backup and enable browser storage.');
+      }
+      GP.data = result.data;
+      GP.available = true;
+      GP.readOnly = false;
+      GP.warning = '';
+      return result;
+    },
+  });
+
+  class BackupScreen {
+    constructor(hub) {
+      this.hub = hub;
+      this.opaque = false;
+      this.cursor = 'pointer';
+      this.closed = false;
+      this.selection = 0;
+    }
+    enter() {
+      DM.Input.clearAll();
+      this.closed = false;
+      const root = document.createElement('div');
+      this.root = root;
+      root.id = 'glass-palace-backup';
+      root.setAttribute('role', 'dialog');
+      root.setAttribute('aria-modal', 'true');
+      root.setAttribute('aria-labelledby', 'glass-palace-backup-title');
+      root.style.cssText =
+        'position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:' +
+        '#030810ef;color:#e8dfca;font:16px/1.6 system-ui;overflow:auto';
+      const card = document.createElement('section');
+      card.style.cssText =
+        'width:min(86vw,620px);box-sizing:border-box;padding:28px;background:#101f2c;border:1px solid #a38a5c';
+      const title = document.createElement('h2');
+      title.id = 'glass-palace-backup-title';
+      title.textContent = 'GLASS PALACE BACKUP';
+      const note = document.createElement('p');
+      note.textContent =
+        'Export before restoring. Restore replaces palace fragments, reflection history and visits only. ' +
+        'Campaign, bonus and After Midnight progress and settings stay unchanged.';
+      const status = document.createElement('p');
+      status.setAttribute('role', 'status');
+      status.setAttribute('aria-live', 'polite');
+      status.style.minHeight = '55px';
+      const button = (text, action) => {
+        const element = document.createElement('button');
+        element.type = 'button';
+        element.textContent = text;
+        element.style.cssText =
+          'display:block;width:100%;padding:13px;margin:12px 0;background:#203d50;' +
+          'border:1px solid #8196a2;color:#f1e4c8;font:600 15px system-ui;cursor:pointer';
+        element.onclick = action;
+        return element;
+      };
+      const exportButton = button('EXPORT PALACE PROGRESS', () => {
+        try {
+          const url = URL.createObjectURL(new Blob([Backup.encode()], { type: 'application/json' }));
+          const anchor = document.createElement('a');
+          anchor.href = url;
+          anchor.download = 'glass-palace-progress.json';
+          anchor.click();
+          setTimeout(() => URL.revokeObjectURL(url), 30000);
+          status.textContent = 'Keep the downloaded JSON file with your game. Session progress is included.';
+        } catch (error) {
+          status.textContent = error.message;
+        }
+      });
+      const label = document.createElement('label');
+      label.textContent = 'Choose a Glass Palace backup to preview: ';
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,application/json';
+      label.append(input);
+      let pending = null;
+      const restore = button('RESTORE THIS PALACE PROGRESS', () => {
+        if (!pending || this.closed) return;
+        try {
+          const result = Backup.restore(pending);
+          status.textContent =
+            'Restored ' + result.countFragments + ' fragment(s) and ' + result.countEpilogues + ' reflection(s).';
+          pending = null;
+          restore.disabled = true;
+          back.focus();
+        } catch (error) {
+          status.textContent = error.message;
+        }
+      });
+      restore.disabled = true;
+      input.onchange = async () => {
+        const request = ++this.selection;
+        pending = null;
+        restore.disabled = true;
+        const file = input.files[0];
+        if (!file) {
+          status.textContent = 'No backup is selected.';
+          return;
+        }
+        try {
+          if (file.size > LIMIT) throw new Error('Choose a palace backup smaller than 256 KiB.');
+          const text = await file.text();
+          if (this.closed || !root.isConnected || request !== this.selection) return;
+          const result = Backup.decode(text);
+          pending = text;
+          restore.disabled = false;
+          status.textContent =
+            result.countFragments + ' fragment(s) and ' + result.countEpilogues +
+            ' reflection(s) ready. Press Restore to replace palace progress only.';
+        } catch (error) {
+          if (!this.closed && root.isConnected && request === this.selection)
+            status.textContent = error.message;
+        }
+      };
+      const close = () => {
+        if (this.closed) return;
+        DM.Input.clearAll();
+        DM.Engine.pop();
+        DM.Engine.canvas.focus({ preventScroll: true });
+      };
+      const back = button('BACK TO THE PALACE', close);
+      this.keydown = (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          event.stopPropagation();
+          close();
+        } else if (event.key === 'Tab') {
+          const focusable = [...card.querySelectorAll('button,input')].filter((node) => !node.disabled);
+          const index = focusable.indexOf(document.activeElement);
+          if (event.shiftKey && index <= 0) {
+            event.preventDefault();
+            focusable.at(-1).focus();
+          } else if (!event.shiftKey && (index < 0 || index === focusable.length - 1)) {
+            event.preventDefault();
+            focusable[0].focus();
+          }
+          event.stopPropagation();
+        } else event.stopPropagation();
+      };
+      document.addEventListener('keydown', this.keydown, true);
+      card.append(title, note, exportButton, label, restore, status, back);
+      root.append(card);
+      document.body.append(root);
+      exportButton.focus();
+    }
+    exit() {
+      this.closed = true;
+      this.selection++;
+      document.removeEventListener('keydown', this.keydown, true);
+      this.root?.remove();
+    }
+    update() {}
+    render() {}
+  }
+
+  GP.BackupScreen = BackupScreen;
+})();
+</script>
+<script>/* src/game/glass-palace-navigation.js */
+/* Palace-local wayfinding. Selecting a pane never moves Jon or starts a level. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const GP = DM.GlassPalace;
+  const G = DM.Gfx;
+  const I = DM.Input;
+  const E = DM.Engine;
+  const BLUE = '#b9ecff';
+  const GOLD = '#e2c287';
+  const FILTERS = ['all', 'unfinished', 'checkpoints'];
+  const FILTER_LABELS = { all: 'ALL MOMENTS', unfinished: 'MISSING FRAGMENTS', checkpoints: 'CHECKPOINTS' };
+  const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+  function freePoint(world, x, y, radius) {
+    if (world.isFree(x, y, radius)) return true;
+    if (x < radius || y < radius || x > world.w - radius || y > world.h - radius) return false;
+    // Collision resolution can leave Jon exactly tangent to a wall. Zero-depth
+    // contact is a valid starting position, not a reason to discard his guide.
+    return world.walls.every((wall) => {
+      if (wall.noCollide) return true;
+      const hit = DM.U.circleRect(x, y, radius, wall);
+      return !hit || hit.depth <= 0.001;
+    });
+  }
+
+  function freeSegment(world, a, b, radius) {
+    const samples = Math.max(1, Math.ceil(distance(a, b) / 8));
+    for (let n = 0; n <= samples; n++) {
+      const t = n / samples;
+      if (!freePoint(world, a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, radius)) return false;
+    }
+    return true;
+  }
+
+  // A small, event-driven grid search includes wall clearance and diagonal corners.
+  // Render and ordinary walking never rebuild the grid.
+  GP.planPalaceRoute = (world, start, goal, radius) => {
+    if (!world || !freePoint(world, start.x, start.y, radius) || !freePoint(world, goal.x, goal.y, radius)) return [];
+    if (freeSegment(world, start, goal, radius)) return [{ x: start.x, y: start.y }, { x: goal.x, y: goal.y }];
+    const step = 60;
+    const nodes = [];
+    const grid = new Map();
+    for (let y = step; y < world.h; y += step) {
+      for (let x = step; x < world.w; x += step) {
+        if (!world.isFree(x, y, radius)) continue;
+        const node = { x, y, parent: null, cost: Infinity, score: Infinity };
+        nodes.push(node);
+        grid.set(x + ':' + y, node);
+      }
+    }
+    const open = new Set();
+    const closed = new Set();
+    for (const node of nodes) {
+      if (distance(start, node) > step * 2 || !freeSegment(world, start, node, radius)) continue;
+      node.cost = distance(start, node);
+      node.score = node.cost + distance(node, goal);
+      open.add(node);
+    }
+    let end = null;
+    while (open.size) {
+      let current = null;
+      for (const node of open) if (!current || node.score < current.score) current = node;
+      open.delete(current);
+      if (distance(current, goal) <= step * 2 && freeSegment(world, current, goal, radius)) {
+        end = current;
+        break;
+      }
+      closed.add(current);
+      for (let dy = -step; dy <= step; dy += step) {
+        for (let dx = -step; dx <= step; dx += step) {
+          if (!dx && !dy) continue;
+          const next = grid.get(current.x + dx + ':' + (current.y + dy));
+          if (!next || closed.has(next) || !freeSegment(world, current, next, radius)) continue;
+          const cost = current.cost + Math.hypot(dx, dy);
+          if (cost >= next.cost) continue;
+          next.parent = current;
+          next.cost = cost;
+          next.score = cost + distance(next, goal);
+          open.add(next);
+        }
+      }
+    }
+    if (!end) return [];
+    const path = [{ x: goal.x, y: goal.y }];
+    for (let node = end; node; node = node.parent) path.push({ x: node.x, y: node.y });
+    path.push({ x: start.x, y: start.y });
+    path.reverse();
+    const route = [path[0]];
+    for (let index = 0; index < path.length - 1;) {
+      let next = path.length - 1;
+      while (next > index + 1 && !freeSegment(world, path[index], path[next], radius)) next--;
+      route.push(path[next]);
+      index = next;
+    }
+    return route;
+  };
+
+  class WalkingGuide extends DM.Entity {
+    constructor(hub) {
+      super({
+        x: hub.world.w / 2,
+        y: hub.world.h / 2,
+        r: Math.hypot(hub.world.w, hub.world.h) / 2,
+        static: true,
+        body: false,
+        solid: false,
+        layer: 0,
+        disintegratable: false,
+      });
+      this.hub = hub;
+    }
+    render(g) {
+      const hub = this.hub;
+      if (!hub.navigationTargetId || !hub.navigationRoute.length) return;
+      const points = [hub.player, ...hub.navigationRoute.slice(1)];
+      g.save();
+      g.strokeStyle = 'rgba(211,239,245,0.6)';
+      g.lineWidth = 2;
+      g.setLineDash([4, 12]);
+      g.beginPath();
+      points.forEach((point, index) => {
+        if (index) g.lineTo(point.x, point.y);
+        else g.moveTo(point.x, point.y);
+      });
+      g.stroke();
+      g.setLineDash([]);
+      const goal = points.at(-1);
+      g.strokeStyle = GOLD;
+      g.beginPath();
+      g.arc(goal.x, goal.y, 24, 0, Math.PI * 2);
+      g.stroke();
+      g.restore();
+    }
+  }
+
+  class AtlasPanel {
+    constructor(hub) {
+      this.hub = hub;
+      this.opaque = false;
+      this.cursor = 'pointer';
+      this.filter = 'all';
+      this.page = 0;
+      this.pageSize = 5;
+    }
+    enter() {
+      I.clearAll();
+      this.refresh();
+    }
+    close() {
+      I.clearAll();
+      E.pop();
+    }
+    refresh() {
+      this.destinations = this.hub.destinations();
+      this.entries = this.destinations.filter((entry) => {
+        if (this.filter === 'unfinished') return entry.kind === 'moment' && entry.earned < entry.total;
+        if (this.filter === 'checkpoints') return entry.kind === 'moment' && !!entry.checkpoint;
+        return true;
+      });
+      this.pageCount = Math.max(1, Math.ceil(this.entries.length / this.pageSize));
+      this.page = DM.U.clamp(this.page, 0, this.pageCount - 1);
+      const items = [{
+        label: 'SHOW',
+        value: () => FILTER_LABELS[this.filter],
+        adjust: (direction) => {
+          this.filter = FILTERS[(FILTERS.indexOf(this.filter) + direction + FILTERS.length) % FILTERS.length];
+          this.page = 0;
+          this.refresh();
+        },
+      }];
+      for (const entry of this.entries.slice(this.page * this.pageSize, (this.page + 1) * this.pageSize)) {
+        items.push({
+          label: entry.title.toUpperCase(),
+          destinationId: entry.id,
+          value: () => entry.kind === 'moment'
+            ? (entry.checkpoint ? 'RESUME · ' : '') + entry.earned + ' / ' + entry.total
+            : 'READ',
+          action: () => {
+            if (this.hub.setDestination(entry.id)) this.close();
+          },
+        });
+      }
+      if (!this.entries.length) items.push({ label: 'NO MOMENTS MATCH THIS VIEW', disabled: true });
+      if (this.pageCount > 1) {
+        items.push({
+          label: 'PAGE',
+          value: () => (this.page + 1) + ' / ' + this.pageCount,
+          adjust: (direction) => {
+            this.page = (this.page + direction + this.pageCount) % this.pageCount;
+            this.refresh();
+            this.menu.sel = this.menu.items.findIndex((item) => item.label === 'PAGE');
+          },
+        });
+      }
+      items.push({
+        label: 'CLEAR WALKING GUIDE',
+        disabled: !this.hub.navigationTargetId,
+        action: () => {
+          this.hub.clearDestination();
+          this.close();
+        },
+      });
+      items.push({ label: 'RETURN TO THE PALACE', action: () => this.close() });
+      this.menu = new DM.UI.Menu(items, {
+        x: 112, y: 196, w: 660, itemH: 42, size: 18, valueW: 210, onBack: () => this.close(),
+      });
+    }
+    update(dt) {
+      this.menu.update(dt);
+    }
+    render(g) {
+      G.panel(g, 72, 68, 1136, 584, { fill: 'rgba(2,7,14,0.96)', accent: BLUE });
+      G.text(g, 'MOMENT ATLAS', 112, 126, { size: 34, color: BLUE, spacing: 3, weight: 700 });
+      G.text(g, 'Choose a destination, then follow the glass trail. You remain in control.', 112, 162, {
+        size: 15, color: '#b1c4ce',
+      });
+      this.menu.render(g);
+      const x = 858;
+      const y = 236;
+      const width = 300;
+      const height = 258;
+      const sx = width / this.hub.world.w;
+      const sy = height / this.hub.world.h;
+      const selectedId = this.menu.items[this.menu.sel]?.destinationId || this.hub.navigationTargetId;
+      g.fillStyle = '#241f25';
+      g.fillRect(x, y, width, height);
+      g.strokeStyle = 'rgba(185,231,245,0.5)';
+      g.strokeRect(x + 110 * sx, y + 180 * sy, 1880 * sx, 1470 * sy);
+      for (const entry of this.destinations) {
+        const selected = entry.id === selectedId;
+        g.fillStyle = selected ? GOLD : entry.kind === 'moment' ? '#99cada' : '#b0d6b3';
+        g.beginPath();
+        g.arc(x + entry.x * sx, y + entry.y * sy, selected ? 6 : 3.5, 0, Math.PI * 2);
+        g.fill();
+      }
+      g.fillStyle = '#ffffff';
+      g.beginPath();
+      g.arc(x + this.hub.player.x * sx, y + this.hub.player.y * sy, 4, 0, Math.PI * 2);
+      g.fill();
+      G.text(g, 'WHITE · YOU    GOLD · DESTINATION', x + width / 2, 522, {
+        size: 13, align: 'center', color: '#bed4df',
+      });
+      G.text(g, 'Arrows / WASD · Choose', x + width / 2, 554, {
+        size: 14, align: 'center', color: '#bed4df',
+      });
+      G.text(g, 'Left / Right · Filter or page', x + width / 2, 578, {
+        size: 14, align: 'center', color: '#bed4df',
+      });
+      G.text(g, 'Enter · Guide     Esc · Return', x + width / 2, 602, {
+        size: 14, align: 'center', color: '#bed4df',
+      });
+    }
+  }
+
+  Object.assign(GP, { AtlasPanel, WalkingGuide });
+})();
+</script>
 <script>/* src/data/glass-palace-atmosphere.js */
 /* A separate Mars room and score. Original arrangements are not replaced. */
 (function () {
@@ -30852,7 +31352,8 @@
   }
 
   class LeavePanel {
-    constructor() {
+    constructor(hub) {
+      this.hub = hub;
       this.opaque = false;
       this.cursor = 'pointer';
     }
@@ -30862,11 +31363,25 @@
         [
           { label: 'KEEP WALKING', action: closePanel },
           {
+            label: 'MOMENT ATLAS',
+            action: () => {
+              closePanel();
+              this.hub.openAtlas();
+            },
+          },
+          {
+            label: 'BACK UP / RESTORE PALACE',
+            action: () => {
+              closePanel();
+              E.push(new GP.BackupScreen(this.hub));
+            },
+          },
+          {
             label: 'RETURN TO THE MAIN GAME',
             action: () => E.fadeTo(() => E.set(new DM.Scenes.Title())),
           },
         ],
-        { x: 640, y: 326, w: 760, align: 'center', size: 23, itemH: 53, onBack: closePanel },
+        { x: 640, y: 274, w: 760, align: 'center', size: 23, itemH: 53, onBack: closePanel },
       );
     }
     update(dt) {
@@ -31242,6 +31757,9 @@
       this.chapter = { id: 'glass_palace', music: 'glass_palace', stages: [{ id: 'hall' }] };
       this.ctx = { mapName: 'gp_palace', stageIndex: 0, locked: false };
       this.hud = { captions: [] };
+      this.navigationTargetId = null;
+      this.navigationRoute = [];
+      this.navigationTimer = 0;
     }
     enter() {
       GP.load();
@@ -31317,6 +31835,7 @@
       });
       this.slab = world.add(new LedgerSlab(this));
       this.epilogueTerminal = this.epilogueReadySnapshot ? world.add(new EarthMoment(this)) : null;
+      world.add(new GP.WalkingGuide(this));
       if (!world.isFree(this.player.x, this.player.y, this.player.r)) {
         this.player.x = world.spawn.x;
         this.player.y = world.spawn.y;
@@ -31324,6 +31843,7 @@
       world.camera.snap(this.player.x, this.player.y - 180);
       this.previewCursor = 0;
       this.previewT = 0;
+      if (this.navigationTargetId) this.setDestination(this.navigationTargetId);
     }
     resume() {
       const moments = GP.moments();
@@ -31338,7 +31858,74 @@
         this.maximumFragmentsSnapshot !== maximumFragments();
       if (changed) this.rebuild(moments);
       else this.refreshSnapshots(moments);
+      if (this.navigationTargetId) this.setDestination(this.navigationTargetId);
       I.clearAll();
+    }
+    destinations() {
+      const entries = this.panes.map((pane) => {
+        const status = this.statusSnapshots[pane.moment.id];
+        return {
+          id: pane.moment.id,
+          kind: 'moment',
+          title: pane.moment.title,
+          x: pane.x,
+          y: pane.y + 100,
+          earned: status.earned,
+          total: status.total,
+          checkpoint: !!pane.moment.checkpoint,
+        };
+      });
+      entries.push({ id: 'ledger', kind: 'ledger', title: 'The glass ledger', x: 1050, y: 1230 });
+      if (this.epilogueTerminal) {
+        entries.push({ id: 'earth', kind: 'earth', title: 'The question of Earth', x: 1510, y: 1260 });
+      }
+      return entries;
+    }
+    navigationTarget() {
+      return this.destinations().find((entry) => entry.id === this.navigationTargetId) || null;
+    }
+    setDestination(id) {
+      const target = this.destinations().find((entry) => entry.id === id);
+      if (!target) {
+        this.clearDestination();
+        return false;
+      }
+      const route = GP.planPalaceRoute(this.world, this.player, target, this.player.r);
+      if (!route.length) {
+        this.clearDestination();
+        return false;
+      }
+      this.navigationTargetId = id;
+      this.navigationRoute = route;
+      this.navigationTimer = 0.5;
+      this.navigationFrom = { x: this.player.x, y: this.player.y };
+      return true;
+    }
+    clearDestination() {
+      this.navigationTargetId = null;
+      this.navigationRoute = [];
+      this.navigationFrom = null;
+    }
+    openAtlas() {
+      E.push(new GP.AtlasPanel(this));
+    }
+    updateNavigation(dt) {
+      if (!this.navigationTargetId) return;
+      const target = this.navigationTarget();
+      if (!target) return this.clearDestination();
+      if (U.dist(this.player.x, this.player.y, target.x, target.y) < 55) {
+        const entity = this.player.interactTarget;
+        const arrived = target.kind === 'moment' ? entity?.moment?.id === target.id
+          : target.kind === 'ledger' ? entity === this.slab : entity === this.epilogueTerminal;
+        if (arrived) return this.clearDestination();
+      }
+      this.navigationTimer -= dt;
+      if (this.navigationTimer > 0) return;
+      this.navigationTimer = 0.5;
+      if (this.navigationFrom && U.dist(
+        this.player.x, this.player.y, this.navigationFrom.x, this.navigationFrom.y,
+      ) < 36) return;
+      this.setDestination(target.id);
     }
     exit() {
       for (const pane of this.panes || []) pane.preview.dispose();
@@ -31346,16 +31933,27 @@
     }
     update(dt) {
       this.t += dt;
+      const atlasButton = { x: 1020, y: 63, w: 235, h: 33 };
+      const mouse = I.mouse;
+      const atlasClick = I.clicked() && mouse.x >= atlasButton.x && mouse.x <= atlasButton.x + atlasButton.w &&
+        mouse.y >= atlasButton.y && mouse.y <= atlasButton.y + atlasButton.h;
+      if (I.pressed('hint') || atlasClick) {
+        I.consume('hint');
+        I.consume('confirm');
+        this.openAtlas();
+        return;
+      }
       if (I.pressed('back') || I.pressed('pause')) {
         I.consume('back');
         I.consume('pause');
-        E.push(new LeavePanel());
+        E.push(new LeavePanel(this));
         return;
       }
       const world = this.world;
       world.mouse = world.camera.toWorld(I.mouse.x, I.mouse.y);
       world.ceasefire = true;
       world.update(dt);
+      this.updateNavigation(dt);
       world.camera.follow(this.player.x, this.player.y - 180, dt, 5);
       this.previewT -= dt;
       if (this.previewT <= 0 && this.panes.length) {
@@ -31393,6 +31991,11 @@
           spacing: 2,
         },
       );
+      G.panel(g, 1020, 63, 235, 33, { fill: 'rgba(4,12,21,0.9)', accent: BLUE });
+      G.text(g, 'H · MOMENT ATLAS', 1137, 85, {
+        size: 15, align: 'center', color: '#e2f5fb', spacing: 1,
+      });
+      this.renderNavigation(g);
       const warning =
         GP.warning ||
         (GP.available === false ? 'Palace progress is session only. Keep this window open.' : '');
@@ -31408,9 +32011,35 @@
       const target = this.player.interactTarget;
       const hint = target
         ? target.interact.label
-        : 'WASD / ARROWS · WALK     E · READ / ENTER     ESC · LEAVE';
+        : 'WASD / ARROWS · WALK     E · READ / ENTER     H · ATLAS     ESC · LEAVE';
       G.panel(g, 205, DM.H - 57, 870, 36, { fill: 'rgba(3,10,19,0.9)', accent: '#84b9d0' });
       G.text(g, hint, 640, DM.H - 33, { size: 15, align: 'center', color: '#e4eadc', spacing: 1 });
+    }
+    renderNavigation(g) {
+      if (!this.navigationTargetId) return;
+      const target = this.navigationTarget();
+      if (!target) return;
+      G.panel(g, 240, 545, 800, 43, { fill: 'rgba(3,10,19,0.94)', accent: GOLD });
+      G.text(g, 'FOLLOW THE GLASS · ' + target.title.toUpperCase(), 640, 573, {
+        size: 16, align: 'center', color: '#f0dfbd', spacing: 1,
+      });
+      const point = this.world.camera.toScreen(target.x, target.y);
+      if (point.x >= 55 && point.x <= DM.W - 55 && point.y >= 120 && point.y <= 510) return;
+      const dx = point.x - DM.W / 2;
+      const dy = point.y - DM.H / 2;
+      const scale = Math.min(540 / Math.max(1, Math.abs(dx)), 165 / Math.max(1, Math.abs(dy)), 1);
+      g.save();
+      g.translate(DM.W / 2 + dx * scale, DM.H / 2 + dy * scale);
+      g.rotate(Math.atan2(dy, dx));
+      g.fillStyle = GOLD;
+      g.beginPath();
+      g.moveTo(12, 0);
+      g.lineTo(-8, -8);
+      g.lineTo(-4, 0);
+      g.lineTo(-8, 8);
+      g.closePath();
+      g.fill();
+      g.restore();
     }
   }
 

@@ -1,5 +1,11 @@
 # Handover: how to keep developing this game
 
+> **Current follow-up (31 October 2026):** `codex/glass-palace-refinements` adds
+> palace navigation and palace-only backups after Peter authorized the next
+> enhancement pass. Read [the review and next steps](docs/PALACE-REFINEMENTS.md).
+> Part B's independent validation passed. Keep this follow-up isolated; no merge,
+> deployment or edits to the protected campaign, music and engine presentation.
+
 > **Current Part B (26 October 2026):** the user authorized The Glass Palace after the Part A report. Work is now on `codex/glass-palace`, based on finished Part A `c206ae6`, with a draft PR into `codex/watchmen-stories`. Read [the Glass Palace handover](docs/GLASS-PALACE-HANDOVER.md) and [player guide](docs/GLASS-PALACE.md). No merge or deployment; the six campaign chapter files and original music remain protected. The Part A stop notes below are historical.
 
 > **Part A review response (26 October 2026):** [Part A report](docs/AFTER-MIDNIGHT-PART-A.md) covers performance isolation, hero visibility, density/variants, the two-step board, style and fresh sequential verification. Work stays on `codex/watchmen-stories` / draft PR #6. Stop after Part A; The Glass Palace / Part B has not been started. Preserve the six campaign chapter files, original music and original engine presentation.

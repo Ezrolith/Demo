@@ -1,5 +1,12 @@
 # Review entry point — 26 October 2026
 
+The current follow-up is `codex/glass-palace-refinements`: a palace atlas,
+walking guide and palace-only progress backups. Read
+[the enhancement review](PALACE-REFINEMENTS.md) for scope and verification.
+The finished Part B code's independent validation has now
+[passed](https://github.com/Ezrolith/Demo/actions/runs/40532192903).
+That success belongs to Part B, not to the follow-up changes.
+
 The user has now authorized Part B. Current work is `codex/glass-palace`, based
 on Part A `c206ae6`; review its [handover](GLASS-PALACE-HANDOVER.md) and
 [player guide](GLASS-PALACE.md). Its draft PR targets `codex/watchmen-stories`.
@@ -7,7 +14,7 @@ The Part A stop and guard-only notes below are historical.
 
 The newer [Part A review response](AFTER-MIDNIGHT-PART-A.md) supersedes the
 guard-only check below. It records A1–A5, per-build suite exits and live evidence.
-Part B has not been started.
+The earlier Part A report predates Part B.
 
 Review `codex/watchmen-stories` in [draft PR #6](https://github.com/Ezrolith/Demo/pull/6),
 targeting `codex/bonus-three`. Keep it in draft: no merge or deployment.

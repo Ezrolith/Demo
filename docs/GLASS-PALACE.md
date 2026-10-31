@@ -4,6 +4,12 @@ Choose **THE GLASS PALACE** after New Game on the title screen. Jon can walk
 through the palace on Mars without combat. Use **WASD / arrows** to move,
 **E** to read or enter a nearby moment, and **Esc / P** to leave.
 
+Press **H** or click **MOMENT ATLAS** for an overview of unlocked moments. Filter
+it to missing fragments or saved checkpoints, then select a destination. A glass
+trail and edge pointer guide your walk; selecting a moment does not start it or
+move Jon. Use E at the pane when you arrive. The ledger and unlocked Earth scene
+also appear in the atlas. Clear the guide from the atlas whenever you wish.
+
 ## Moments
 
 The six campaign chapters, three bonus adventures and three After Midnight
@@ -47,6 +53,13 @@ Palace challenges and epilogue history have their own save slot. If saving is
 blocked or a newer palace save is protected, the hub displays a warning. Session
 progress can remain visible even when it has not been saved; enable browser
 storage before relying on it after closing the game.
+
+Open **Esc / P → BACK UP / RESTORE PALACE** to export fragments and reflection
+history as a JSON file. Export works for unsaved session progress too. Selecting
+a file previews its counts; **Restore** is a separate action that replaces palace
+progress only. Export your current progress first. Campaign, bonus, After Midnight
+and settings are excluded. A failed restore leaves the current progress intact;
+an unreadable or newer existing palace save stays protected.
 
 ## Earth
 
