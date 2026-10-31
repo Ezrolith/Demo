@@ -6,6 +6,14 @@ A separate browser profile lets you try a fresh campaign without replacing your
 usual Continue point. These checks sample two time targets and the Long Summer
 opening; they cannot establish fairness for every level.
 
+**Priority unresolved check:** automated Last Broadcast attempts did not complete
+its Carrier encounter on Normal, so its ten-minute target remains unverified.
+If you know the controls, replace the Prologue/Reassembly windows below with
+roughly ten minutes of Last Broadcast, then spend two minutes on Long Summer's
+opening and the final minute recording results. Use movement, cover and the
+available defensive tools during the Carrier fight. Record a defeat or unfinished
+run honestly; do not enable invulnerability to complete this timing check.
+
 ## 0–1 minute: understand the goal
 
 - Open The Glass Palace, choose the Prologue pane and read its three goals.

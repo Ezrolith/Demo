@@ -154,6 +154,9 @@ export class RealInputPilot {
           los: play.world.los(player.x, player.y, entity.x, entity.y),
           screen: play.world.camera.toScreen(entity.x, entity.y),
         })),
+        completion: ['ChapterComplete', 'BonusComplete', 'NinthComplete', 'SummerComplete', 'Results']
+          .includes(top?.constructor.name) ? { summary: top.glassPalaceSummary || play.glassPalaceResult || null,
+            record: top.record || null, stats: top.stats || top.record?.stats || { ...play.ctx.stats } } : null,
         error: DM.Engine.error ? String(DM.Engine.error.stack || DM.Engine.error) : null,
       };
     });
@@ -266,7 +269,8 @@ export class RealInputPilot {
         walls: play.world.walls.map(wall => ({ x: wall.x, y: wall.y, w: wall.w, h: wall.h, noCollide: !!wall.noCollide })),
         bodies: play.world.entities.filter(entity => entity !== play.player && entity.static && entity.body &&
           !entity.dead && !entity.heldBy && entity.flying === play.player.flying)
-          .map(entity => ({ x: entity.x, y: entity.y, r: entity.r })) };
+          .map(entity => ({ x: entity.x, y: entity.y,
+            r: entity.shieldR && !entity.inside?.has(play.player.id) ? Math.max(entity.r, entity.shieldR) : entity.r })) };
     });
   }
   async objectPath(start, goal, radius) {
@@ -279,6 +283,10 @@ export class RealInputPilot {
     let refreshAt = 0;
     while (Date.now() - began < (options.timeout || 60000)) {
       const state = await this.state();
+      if (state.done) {
+        await this.movement([]);
+        return state;
+      }
       if (!state.onTop || state.locked) {
         await this.auto(state);
         await this.page.waitForTimeout(80);
@@ -461,8 +469,13 @@ export class RealInputPilot {
     if (value.powers.duplicate?.cd <= 0 && value.energy >= value.powers.duplicate.cost) await this.press('r');
     if (value.powers.expand?.cd <= 0 && value.energy >= value.powers.expand.cost && foe.distance < 240) await this.press('g');
     if (value.powers.disintegrate?.cd <= 0 && value.energy >= value.powers.disintegrate.cost) {
-      if (foe.boss && value.powers.timesight && value.energy > 40) await this.page.keyboard.down('f');
+      const sight = foe.boss && value.powers.timesight && value.energy > 40;
+      if (sight) {
+        await this.page.keyboard.down('f');
+        await this.sleep(150);
+      }
       await this.press('q');
+      if (sight) await this.sleep(180);
       await this.page.keyboard.up('f');
     } else if (value.powers.telekinesis?.cd <= 0 && value.energy >= 10 && foe.distance < 380) {
       await this.page.keyboard.down('c');

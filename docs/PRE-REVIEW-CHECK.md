@@ -1,62 +1,71 @@
-# Review entry point — 26 October 2026
+# Current review entry point
 
-The current task on `codex/glass-palace-refinements` adds optional challenge
-tracking during play. Read [the tracking report](CHALLENGE-TRACKING.md) first.
-The existing draft PR remains the review destination; no merge or deployment.
+Review `codex/glass-palace-refinements` in the existing
+[draft PR](https://github.com/Ezrolith/Demo/pull/8), targeting
+`codex/glass-palace`. No merges, deployments or pushes to
+`claude/dr-manhattan-game` are authorized. Preserve the six original campaign
+chapter files, original music and engine presentation. Procedural canvas and
+WebAudio only.
 
-The current follow-up is `codex/glass-palace-refinements`: a palace atlas,
-walking guide and palace-only progress backups. Read
-[the enhancement review](PALACE-REFINEMENTS.md) for scope and verification.
-The finished Part B code's independent validation has now
-[passed](https://github.com/Ezrolith/Demo/actions/runs/40532192903).
-That success belongs to Part B, not to the follow-up changes.
+## Current work
 
-The user has now authorized Part B. Current work is `codex/glass-palace`, based
-on Part A `c206ae6`; review its [handover](GLASS-PALACE-HANDOVER.md) and
-[player guide](GLASS-PALACE.md). Its draft PR targets `codex/watchmen-stories`.
-The Part A stop and guard-only notes below are historical.
+The current pass responds to the independent review with **optional challenge
+rules v2**. The [36-row old/new matrix](CHALLENGE-RULES-V2-MATRIX.md) was committed
+before implementation (`ce90d308`). Runtime implementation is `4ab7710`;
+subsequent controller/evidence changes are identified in the final report.
 
-The newer [Part A review response](AFTER-MIDNIGHT-PART-A.md) supersedes the
-guard-only check below. It records A1–A5, per-build suite exits and live evidence.
-The earlier Part A report predates Part B.
+Read these in order:
 
-Review `codex/watchmen-stories` in [draft PR #6](https://github.com/Ezrolith/Demo/pull/6),
-targeting `codex/bonus-three`. Keep it in draft: no merge or deployment.
+1. [Review response and per-item status](PALACE-REVIEW-RESPONSE.md).
+2. [Challenge matrix and evidence rules](CHALLENGE-RULES-V2-MATRIX.md).
+3. [Peter's 10–15 minute checklist](PLAYTEST-CHECKLIST.md).
+4. [Glass Palace player guide](GLASS-PALACE.md).
+5. [After Midnight player guide](AFTER-MIDNIGHT.md).
 
-## Latest correction
+The palace keeps all earlier fragments as legacy awards and records new awards
+under rules v2. It stores run evidence in its own slot; the three original save
+formats remain unchanged. Missing clean-run evidence is unknown, not zero.
+Actual completion remains the only award point.
 
-Silk Spectre's intended 28% guard movement penalty was bypassed because movement
-was calculated before the guard ability refreshed its state. Movement now reads
-live eligible F input. Damage reduction and parry timing retain their existing
-path. The original code failed the new movement regression before the fix.
+## Verification and limits
 
-Five added checks cover first-frame/held slowdown, immediate release and speed
-recovery, insufficient stamina, and unchanged Nite Owl/Rorschach focus movement.
-The actor suite now has 42 checks, including the existing guard damage checks.
+Run suites sequentially and record real exit codes. Never weaken an assertion,
+performance threshold or visual quality to get a pass. The full wrapper now has
+22 suites:
 
-## Fresh local checks
+```sh
+node tools/build.mjs
+node tools/verify-palace-refinements.mjs index.html
+node tools/verify-palace-refinements.mjs dist/dr-manhattan.html
+node tests/glass-palace-reload.mjs
+```
 
-- All JavaScript syntax checks and the reproducible 63-script standalone build.
-- Chromium: all five expansion suites on source and standalone, 186 checks per build.
-- WebKit: the 42 actor/gear checks on both builds.
-- Full ordinary-input Undertow and Rescue Clock routes as Silk Spectre on both
-  builds: 16 and 12 checks respectively. All four civilians physically reach safety.
-- Independent bounded code review of save/menu/case/mode integration and the fix;
-  no further concrete blocker found. Main handover/guide links resolve.
+The response report records final suite lines/exits, the bounded baseline/source/
+standalone performance comparison, exact-original and instrumented reload
+controls, and natural-input target results. Distinguish these evidence types:
 
-These focused results supplement the earlier full CI baseline. The baseline
-revision is `e6f6b5f`, whose four workflows passed, including 43 regression
-commands, the three-engine matrix, native Safari and slowdown/audio probes.
-New CI is triggered by the guard-fix branch update; use the PR's current checks
-for its outcome. Do not attribute the older full run to the new code revision.
+- Controlled fixtures prove each of 36 goals has a valid completion that misses
+  it and one that earns it. They are not natural playthroughs.
+- Real-input routes use Normal damage, actual menus/powers/movement and ordinary
+  RAF. Initial campaign-unlock fixtures do not prove natural campaign history.
+- Failed or interrupted controllers remain failures. Mars's actual completion
+  has a controller teardown qualification; Last Broadcast remains unverified.
+- The reported reload race did not reproduce locally. Do not call diagnostics
+  a demonstrated persistence fix. Check the report for exact environment/results.
+- Live captures require at least ten active seconds of normal play, with no
+  tester actor/camera placement, health/clock edits or staged rendering.
+- Known-route target headroom does not establish unfamiliar-human fairness.
+  Physical devices and assistive technology remain unverified; touch is unsupported.
 
-## Further reading
+## Historical reports
 
-- [Player guide](AFTER-MIDNIGHT.md) and [expansion technical handover](AFTER-MIDNIGHT-HANDOVER.md).
-- [Results](after-midnight-results.json): historical full baseline plus the guard follow-up's source/build digests and focused verification.
-- [Earlier QA corrections](QA-POLISH-HANDOVER.md), [Summer review](SUMMER-REVIEW-HANDOVER.md), and [platform QA](PLATFORM-QA-HANDOVER.md).
+These describe their own revisions; their older branch, suite-count and CI
+snapshots are not current instructions:
 
-Review first-time discovery/pacing and later-wave balance critically. Guided
-automated routes, synthetic slowdown and loopback Safari checks have the limits
-recorded in the handover. Subjective listening, physical devices, assistive
-technology and Safari direct-file opening remain unverified; touch is unsupported.
+- [Tracking implementation and 21-suite baseline](CHALLENGE-TRACKING.md).
+- [Atlas/backups and 20-suite baseline](PALACE-REFINEMENTS.md).
+- [Glass Palace Part B](GLASS-PALACE-HANDOVER.md).
+- [After Midnight Part A review response](AFTER-MIDNIGHT-PART-A.md).
+- [After Midnight expansion](AFTER-MIDNIGHT-HANDOVER.md).
+- [Earlier gameplay QA](QA-POLISH-HANDOVER.md).
+- [Platform QA](PLATFORM-QA-HANDOVER.md).

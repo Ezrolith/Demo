@@ -168,6 +168,8 @@ try {
     }, fixture);
     try {
       await entry(pilot, id);
+      row.timeTargetSecondsAtStart = await pilot.data(id => DM.GlassPalace.challengeDefs(id)
+        .find(definition => definition.id === 'swift' || definition.type === 'time')?.targetSeconds, id);
       await routes[id](pilot);
       await pilot.until('actual completion result', state =>
         ['ChapterComplete', 'BonusComplete', 'NinthComplete', 'SummerComplete', 'Results'].includes(state.scene), 20000);
@@ -175,6 +177,8 @@ try {
         const top = DM.Engine.top();
         const play = DM.Engine.stack.find(scene => scene instanceof DM.Scenes.Play);
         const record = top.record || (DM.Bonus?.data?.completed?.[id]) || DM.Save.data.completed[id];
+        if (!play?.ctx.done || play.failed || play.player.down || play.player.coherence <= 0 || record?.completed === false)
+          return null;
         const summary = top.glassPalaceSummary || play?.glassPalaceResult || null;
         const stats = record?.stats || top.stats || play?.ctx.stats || record;
         const time = stats?.time ?? record?.time;
@@ -183,7 +187,7 @@ try {
           targetSeconds: definition?.targetSeconds, settings: { challenge: DM.Save.settings.challenge,
             invulnerable: DM.Save.settings.invulnerable }, engineError: DM.Engine.error ? String(DM.Engine.error) : null };
       }, id);
-      if (!(completed.time > 0 && completed.targetSeconds > 0)) throw Error('Completion lacks an authoritative field time/target.');
+      if (!(completed?.time > 0 && completed.targetSeconds > 0)) throw Error('Completion lacks an authoritative success/time.');
       row.status = 'completed';
       row.completion = completed;
       row.headroomSeconds = completed.targetSeconds - completed.time;
@@ -196,6 +200,30 @@ try {
       row.status = 'route-failed';
       row.error = String(error.stack || error);
       row.lastState = await pilot.state().catch(failure => pilot.lastState || ({ readError: String(failure) }));
+      const observed = await pilot.data(id => {
+        const top = DM.Engine.top();
+        if (!['ChapterComplete', 'BonusComplete', 'NinthComplete', 'SummerComplete', 'Results']
+          .includes(top?.constructor.name)) return null;
+        const play = DM.Engine.stack.find(scene => scene instanceof DM.Scenes.Play);
+        const record = top.record || DM.Bonus?.data?.completed?.[id] || DM.Save.data.completed[id];
+        if (!play?.ctx.done || play.failed || play.player.down || play.player.coherence <= 0 || record?.completed === false)
+          return null;
+        const stats = record?.stats || top.stats || play?.ctx.stats || record;
+        const definition = DM.GlassPalace.challengeDefs(id)
+          .find(value => value.id === 'swift' || value.type === 'time');
+        return { scene: top.constructor.name, record, stats, time: stats?.time ?? record?.time,
+          summary: top.glassPalaceSummary || play?.glassPalaceResult || null,
+          targetSeconds: definition?.targetSeconds };
+      }, id).catch(() => null);
+      if (observed?.time > 0 && observed.targetSeconds > 0) {
+        row.status = 'completed-with-controller-error';
+        row.completion = observed;
+        row.controllerError = row.error;
+        row.headroomSeconds = observed.targetSeconds - observed.time;
+        row.headroomPercent = row.headroomSeconds / observed.targetSeconds * 100;
+        row.underTarget = observed.time < observed.targetSeconds;
+        row.atLeast25PercentHeadroom = row.headroomPercent >= 25;
+      }
       if (row.lastState?.stats?.time >= 10) {
         await page.screenshot({ path: path.join(out, id + '-diagnostic-failure.png') });
       }
@@ -218,9 +246,10 @@ try {
   }
 } finally { await browser.close(); }
 report.finishedAtUtc = new Date().toISOString();
-report.allRequestedCompleted = report.runs.every(row => row.status === 'completed');
+report.allRequestedCompleted = report.runs.every(row => row.status.startsWith('completed'));
 report.allRequestedHave25PercentHeadroom = report.runs.every(row => row.atLeast25PercentHeadroom);
+report.allControllersClean = report.runs.every(row => row.status === 'completed');
 save();
 console.log('TIME TARGET REAL INPUT: ' + report.runs.filter(row => row.status === 'completed').length +
-  ' / ' + report.runs.length + ' completed. Unsupported or failed routes remain explicit.');
-if (!report.allRequestedCompleted || !report.allRequestedHave25PercentHeadroom) process.exitCode = 1;
+  ' / ' + report.runs.length + ' clean controller completions. Any observed results after controller errors stay explicit.');
+if (!report.allRequestedCompleted || !report.allRequestedHave25PercentHeadroom || !report.allControllersClean) process.exitCode = 1;

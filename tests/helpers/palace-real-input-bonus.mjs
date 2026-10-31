@@ -16,7 +16,7 @@ async function object(p, path, index = null) {
     if (!value) return null;
     return { id: value.id, x: value.x, y: value.y, r: value.r, hp: value.hp,
       dead: !!value.dead, ko: !!value.ko, neutralized: !!value.neutralized,
-      open: !!value.open, cycle: value.cycle, exposed: value.exposed,
+      open: !!value.open, cycle: value.cycle, exposed: value.exposed, beamT: value.beamT,
       range: value.interact?.range || 60, label: value.interact?.label || null };
   }, { path, index });
 }
@@ -88,60 +88,132 @@ async function targetApproach(p, target, radius = 300) {
   await p.moveTo(points[0].x, points[0].y, { tolerance: 30, combat: false });
 }
 
-async function bossMove(p, boss, goal) {
-  let state = await p.state();
-  const body = await object(p, boss.path, boss.index);
-  if (!body) throw new Error('Boss movement target disappeared');
-  const clearance = body.r + 80;
-  if (gap(state, body) < clearance) {
-    const angle = Math.atan2(state.y - body.y, state.x - body.x);
-    const retreat = await p.data(({ body, angle }) => {
-      const play = DM.Engine.stack.find(scene => scene instanceof DM.Scenes.Play);
-      return [0, -0.35, 0.35, -0.7, 0.7].map(offset => ({
-        x: body.x + Math.cos(angle + offset) * 220,
-        y: body.y + Math.sin(angle + offset) * 220,
-      })).find(point => play.world.isFree(point.x, point.y, play.player.r));
-    }, { body, angle });
-    if (!retreat) throw new Error('No ordinary radial retreat from the boss body');
-    await p.moveTo(retreat.x, retreat.y, { tolerance: 6, combat: false, timeout: 12000 });
-    state = await p.state();
-  }
+function safePoint(world, point, radius) {
+  if (point.x < radius || point.y < radius || point.x > world.w - radius || point.y > world.h - radius) return false;
+  if (!world.walls.every(wall => {
+    if (wall.noCollide) return true;
+    const x = Math.max(wall.x, Math.min(point.x, wall.x + wall.w));
+    const y = Math.max(wall.y, Math.min(point.y, wall.y + wall.h));
+    return Math.hypot(point.x - x, point.y - y) >= radius - 0.01;
+  })) return false;
+  return (world.bodies || []).every(body => gap(point, body) >= radius + body.r - 0.01);
+}
+
+function walkKeys(state, goal) {
+  const keys = [];
+  if (goal.x - state.x > 5) keys.push('d');
+  else if (goal.x - state.x < -5) keys.push('a');
+  if (goal.y - state.y > 5) keys.push('s');
+  else if (goal.y - state.y < -5) keys.push('w');
+  return keys;
+}
+
+async function circlingAttack(p, path, index, options) {
+  const started = Date.now();
   const geometry = await p.world();
-  const margin = body.r + 12;
-  geometry.walls = [...geometry.walls, {
-    x: body.x - margin, y: body.y - margin, w: margin * 2, h: margin * 2,
-  }];
-  const route = planRealInputPath(geometry, state, goal, state.r + 1);
-  if (!route.length) throw new Error('No physical route around the solid boss body');
-  p.trace.push({ label: 'boss-body collision-safe movement', boss: body.id, goal, route });
-  for (const point of route) await p.moveTo(point.x, point.y, {
-    tolerance: 5, combat: false, timeout: 15000,
-  });
+  const radius = options.openWindow ? 508 : 580;
+  let direction = 1;
+  let sight = false;
+  let lastRecord = 0;
+  try {
+    while (Date.now() - started < (options.timeout || 180000)) {
+      const state = await p.state();
+      if (await p.auto(state)) continue;
+      const target = await object(p, path, index);
+      if (!alive(target) || target.hp <= 0) return;
+      let firingTarget = target;
+      if (options.pylons) {
+        const remaining = await p.data(() => {
+          const play = DM.Engine.stack.find(scene => scene instanceof DM.Scenes.Play);
+          return play.ctx.flags.pylons.filter(entity => !entity.dead).map(entity => ({
+            id: entity.id, x: entity.x, y: entity.y, hp: entity.hp,
+          }));
+        });
+        if (!remaining.length) return;
+        remaining.sort((a, b) => gap(a, state) - gap(b, state));
+        firingTarget = remaining[0];
+      }
+      if (options.pylons && state.powers.expand?.cd <= 0.01 && state.energy >= 70) await p.press('g');
+      const radial = gap(state, target);
+      const angle = Math.atan2(state.y - target.y, state.x - target.x);
+      if (radial < 440) {
+        const goal = { x: target.x + Math.cos(angle) * radius, y: target.y + Math.sin(angle) * radius };
+        const tp = state.powers.teleport;
+        if (safePoint(geometry, goal, state.r) && tp?.cd <= 0.01 && state.energy >= tp.cost && await p.aim(goal.x, goal.y)) {
+          await p.movement([]);
+          await p.press('Space');
+        } else await p.movement(walkKeys(state, goal));
+        await p.sleep(80);
+        continue;
+      }
+      if (angle < 0.22 || angle > Math.PI - 0.22) direction = angle < Math.PI / 2 ? 1 : -1;
+      let goal = null;
+      for (const sign of [direction, -direction]) {
+        const nextAngle = angle + sign * 0.22;
+        const point = { x: target.x + Math.cos(nextAngle) * radius, y: target.y + Math.sin(nextAngle) * radius };
+        let clear = true;
+        for (let n = 0; n <= 8; n++) {
+          const probe = { x: state.x + (point.x - state.x) * n / 8, y: state.y + (point.y - state.y) * n / 8 };
+          if (gap(probe, target) < 430 || !safePoint(geometry, probe, state.r)) clear = false;
+        }
+        if (clear) { goal = point; direction = sign; break; }
+      }
+      if (!goal) throw new Error('No hazard-safe small-angle boss arc: ' + JSON.stringify({ state, target }));
+      // A short circular chord stays outside the clock hands. No A* movement
+      // may shortcut through the hazard circle, and movement never blocks Q/F.
+      await p.movement(walkKeys(state, goal));
+      const open = !options.openWindow || target.open && target.cycle >= 6 && target.cycle < 8.85 || target.exposed > 0.3;
+      const beamActive = path === 'flags.carrier' && target.beamT >= 0.65 && target.beamT <= 3.5;
+      const wantSight = !!state.powers.timesight && state.energy > 26 &&
+        (options.openWindow ? open : beamActive);
+      if (beamActive && state.powers.teleport?.cd <= 0.01 && state.energy >= 36) {
+        const crossing = await p.data(() => {
+          const play = DM.Engine.stack.find(scene => scene instanceof DM.Scenes.Play);
+          const boss = play.ctx.flags.carrier;
+          return boss.beamHit(play.player, Math.max(1, boss.beamT), Math.min(3.5, boss.beamT + 0.3));
+        });
+        const jumpAngle = angle + direction * 0.55;
+        const jump = { x: target.x + Math.cos(jumpAngle) * radius, y: target.y + Math.sin(jumpAngle) * radius };
+        if (crossing && safePoint(geometry, jump, state.r) && await p.aim(jump.x, jump.y)) await p.press('Space');
+      }
+      if (wantSight !== sight) {
+        sight = wantSight;
+        p.actions.push({ type: sight ? 'hold-begin' : 'hold-end', key: 'f', at: Date.now() - p.beganAt });
+        if (sight) await p.page.keyboard.down('f');
+        else await p.page.keyboard.up('f');
+      }
+      const q = state.powers.disintegrate;
+      if (open && q?.cd <= 0.01 && state.energy >= q.cost && await p.aim(firingTarget.x, firingTarget.y)) await p.press('q');
+      else if (!open) {
+        const other = state.foes?.filter(foe => !foe.boss && foe.los && foe.distance < 480)
+          .sort((a, b) => a.distance - b.distance)[0];
+        if (other && q?.cd <= 0.01 && state.energy >= q.cost && await p.aim(other.x, other.y)) await p.press('q');
+        else if (state.powers.duplicate?.cd <= 0.01 && state.energy >= 86) await p.press('r');
+      }
+      if (Date.now() - lastRecord > 1200) {
+        p.trace.push({ label: 'actual circular boss combat', hp: state.hp, energy: state.energy,
+          bossHp: target.hp, cycle: target.cycle, open: target.open, radius: radial, goal, sight,
+          firingTarget: firingTarget.id, beamT: target.beamT });
+        lastRecord = Date.now();
+      }
+      await p.sleep(80);
+    }
+    throw new Error('Normal-input circular boss combat exceeded its route budget');
+  } finally {
+    await p.page.keyboard.up('f');
+    await p.movement([]);
+  }
 }
 
 async function attack(p, path, index = null, options = {}) {
+  if (options.orbit) return circlingAttack(p, path, index, options);
   const started = Date.now();
   const limit = options.timeout || 100000;
-  let orbit = 0;
-  let nextOrbit = 0;
   while (Date.now() - started < limit) {
     const state = await p.state();
     if (await p.auto(state)) continue;
     const target = await object(p, path, index);
     if (!alive(target) || target.hp <= 0) return;
-    if (options.orbit && Date.now() >= nextOrbit) {
-      const places = await p.data(target => {
-        const play = DM.Engine.stack.find(scene => scene instanceof DM.Scenes.Play);
-        return [[-380, 300], [380, 300], [0, 500], [-430, 0], [430, 0]]
-          .map(([dx, dy]) => ({ x: target.x + dx, y: target.y + dy }))
-          .filter(point => play.world.isFree(point.x, point.y, play.player.r));
-      }, target);
-      if (!places.length) throw new Error('No ordinary boss orbit remains');
-      const point = places[orbit++ % places.length];
-      await bossMove(p, { path, index }, point);
-      nextOrbit = Date.now() + 600;
-      continue;
-    }
     if (gap(state, target) > 540 || !await p.aim(target.x, target.y)) {
       await targetApproach(p, target);
       continue;
@@ -195,7 +267,7 @@ async function coil(p, index) {
   if (!value.length) throw new Error('Coil has no ordinary carrying position');
   await p.moveTo(value[0].x, value[0].y, { tolerance: 12, combat: false });
   const current = await sample();
-  const waypoints = planRealInputPath(await p.world(), current, current.dock, current.r + 4);
+  const waypoints = planRealInputPath(await p.world(), current, current.dock, current.r);
   if (!waypoints.length) throw new Error('No collision-safe object route to the coil dock');
   p.trace.push({ label: 'coil ' + index + ' collision-safe path', waypoints, initial: current });
   if (!await p.aim(current.x, current.y)) throw new Error('Coil is outside the actual viewport');
@@ -246,7 +318,7 @@ async function lastBroadcast(p) {
   await use(p, 'ROOFTOP LIFT');
   await ready(p, 'carrier', 'broadcast_tower', ['flags.towerGuards', 'flags.pylons', 'flags.carrier']);
   await group(p, 'flags.towerGuards');
-  await group(p, 'flags.pylons');
+  await circlingAttack(p, 'flags.carrier', null, { pylons: true, timeout: 120000 });
   await attack(p, 'flags.carrier', null, { orbit: true, timeout: 120000 });
   await p.until('real carrier defeat reveals decision', state => state.stageId === 'choice', 45000);
   await clearDialog(p);

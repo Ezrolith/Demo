@@ -160,9 +160,17 @@ async function karnak(p) {
     while (emitter && !emitter.dead) {
       const state = await p.state();
       if (await p.auto(state)) continue;
-      await p.moveTo(emitter.x, emitter.y + 170, { tolerance: 25, combat: false });
-      await p.until('energy for shield entry', value => value.energy >= 36, 20000);
-      await p.teleport(emitter.x, emitter.y + 40);
+      if (dist(state, emitter) > 120) {
+        const length = dist(state, emitter);
+        const nx = (state.x - emitter.x) / length;
+        const ny = (state.y - emitter.y) / length;
+        await p.moveTo(emitter.x + nx * 185, emitter.y + ny * 185, {
+          tolerance: 15, combat: false,
+        });
+        await p.until('energy for shield entry', value => value.energy >= 56, 20000);
+        await p.teleport(emitter.x + nx * 45, emitter.y + ny * 45);
+      }
+      await p.until('energy for actual emitter attack', value => value.energy >= 20, 12000);
       await p.aim(emitter.x, emitter.y);
       await p.press('q');
       await p.sleep(500);
