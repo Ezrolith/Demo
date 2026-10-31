@@ -214,7 +214,8 @@ try {
   await page.goto(pathToFileURL(path.resolve(root, target)).href, { waitUntil: 'domcontentloaded' });
   await page.waitForFunction(() => DM.GlassPalace?.AtlasPanel && DM.Scenes.GlassPalace && DM.Engine.top());
   await page.mouse.click(640, 360);
-  await page.waitForFunction(() => DM.Engine.top().menu?.items.some(item => item.label === 'THE GLASS PALACE'));
+  await page.waitForFunction(() => DM.Engine.top().gate === false &&
+    DM.Engine.top().menu?.items.some(item => item.label === 'THE GLASS PALACE'));
   baseline = await slots();
   await ev(() => { window.__navigationSourceWrites = []; });
   await action('THE GLASS PALACE');
