@@ -1,0 +1,293 @@
+{
+  "target": "index.html",
+  "engine": "chromium",
+  "browser": "151.0.7922.34",
+  "checks": [
+    "actual title New Game and interlude inputs start the fresh prologue",
+    "the actual run starts on normal challenge without invulnerability or synthetic frames",
+    "real Pause menu input pins the time challenge without touching other progress or settings",
+    "the actual stage runs at least ten active seconds before capture",
+    "the unobscured live HUD shows the pinned challenge on an ordinary healthy player",
+    "real keyboard movement changes the player position without actor placement",
+    "live tracking grants no provisional fragment",
+    "the pause view contains three real challenge snapshots and freezes the field timer",
+    "reading the actual pause panel leaves source slots and settings unchanged",
+    "both views retain normal health, no artificial completion and zero earned fragments",
+    "source and standalone files remain identical throughout capture",
+    "no browser or engine error occurred"
+  ],
+  "errors": [],
+  "views": [
+    {
+      "name": "tracking-hud",
+      "filename": "tracking-hud-source-live.png",
+      "sha256": "a5cdbc5a86a0159e00f612b70ad0a1a4cfd5d221ab6d957ce76c6f847f90e656",
+      "bytes": 1630298,
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "kind": "running-gameplay",
+      "stageWallSeconds": 10.7,
+      "activeWallSeconds": 10.03,
+      "activeWorldSeconds": 10.036300000000013,
+      "state": {
+        "scene": "Play",
+        "playOnTop": true,
+        "chapter": "prologue",
+        "stage": 0,
+        "fieldTime": 10.803900000000015,
+        "worldTime": 10.803900000000015,
+        "worldRealTime": 10.803900000000015,
+        "player": {
+          "x": 177.117214484904,
+          "y": 510,
+          "health": 100,
+          "maximum": 100
+        },
+        "down": false,
+        "failed": false,
+        "godMode": false,
+        "invulnerable": false,
+        "challenge": "normal",
+        "fragments": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        },
+        "controller": {
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "updates": 40,
+          "snapshot": {
+            "momentId": "prologue",
+            "challengeId": "swift",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "state": "viable",
+            "earned": false,
+            "metNow": true,
+            "progress": "0:10 / 8:00 \u00b7 7:49 left",
+            "reason": "Finish before the time target. Pausing stops the field timer.",
+            "current": 10.635900000000015,
+            "target": 480
+          }
+        },
+        "hudVisible": true,
+        "captions": 0,
+        "banners": 0,
+        "interaction": null,
+        "originalRaf": true,
+        "error": null
+      },
+      "publicationByteIdenticalToRawCapture": true
+    },
+    {
+      "name": "tracking-pause-panel",
+      "filename": "tracking-pause-panel-source-live.png",
+      "sha256": "9fe420883ad7fcd3921a2682c180878005cda122fc7cb44945817c02d117eb35",
+      "bytes": 447902,
+      "canvas": {
+        "width": 1280,
+        "height": 720
+      },
+      "kind": "actual-pause-overview",
+      "stageWallSeconds": 11.353,
+      "precedingActiveWorldSeconds": 10.036300000000013,
+      "state": {
+        "scene": "TrackingPanel",
+        "playOnTop": false,
+        "chapter": "prologue",
+        "stage": 0,
+        "fieldTime": 10.803900000000015,
+        "worldTime": 10.803900000000015,
+        "worldRealTime": 10.803900000000015,
+        "player": {
+          "x": 177.117214484904,
+          "y": 510,
+          "health": 100,
+          "maximum": 100
+        },
+        "down": false,
+        "failed": false,
+        "godMode": false,
+        "invulnerable": false,
+        "challenge": "normal",
+        "fragments": 0,
+        "tracking": {
+          "momentId": "prologue",
+          "challengeId": "swift"
+        },
+        "controller": {
+          "momentId": "prologue",
+          "challengeId": "swift",
+          "updates": 40,
+          "snapshot": {
+            "momentId": "prologue",
+            "challengeId": "swift",
+            "label": "Before the hand moves",
+            "description": "Finish in under 8 minutes.",
+            "state": "viable",
+            "earned": false,
+            "metNow": true,
+            "progress": "0:10 / 8:00 \u00b7 7:49 left",
+            "reason": "Finish before the time target. Pausing stops the field timer.",
+            "current": 10.635900000000015,
+            "target": 480
+          }
+        },
+        "hudVisible": true,
+        "captions": 0,
+        "banners": 0,
+        "interaction": null,
+        "originalRaf": true,
+        "error": null
+      },
+      "publicationByteIdenticalToRawCapture": true
+    }
+  ],
+  "phases": [
+    {
+      "name": "pin-from-pause",
+      "unchanged": true,
+      "sourceHashesBefore": {
+        "dr-manhattan.save": "5768f82520bdf5152900ceeec61e395782710909fbc6bafccb104e0f832e9aca",
+        "dr-manhattan.bonus.v1": "31d99ca42c9b791439b8eea0be4c675cc21b969b452836872f0f424bba714d5d",
+        "dr-manhattan.after-midnight.v1": "f104015ab9fef4d0ed80ac81e7c72d984755dfd6dccafdc2d4a5cb4fc838b355"
+      },
+      "sourceHashesAfter": {
+        "dr-manhattan.save": "5768f82520bdf5152900ceeec61e395782710909fbc6bafccb104e0f832e9aca",
+        "dr-manhattan.bonus.v1": "31d99ca42c9b791439b8eea0be4c675cc21b969b452836872f0f424bba714d5d",
+        "dr-manhattan.after-midnight.v1": "f104015ab9fef4d0ed80ac81e7c72d984755dfd6dccafdc2d4a5cb4fc838b355"
+      },
+      "settingsUnchanged": true,
+      "writes": [
+        {
+          "method": "setItem",
+          "key": "dr-manhattan.glass-palace.v1",
+          "time": 3350.399999976158
+        }
+      ]
+    },
+    {
+      "name": "read-pause-panel",
+      "unchanged": true,
+      "sourceHashesBefore": {
+        "dr-manhattan.save": "5768f82520bdf5152900ceeec61e395782710909fbc6bafccb104e0f832e9aca",
+        "dr-manhattan.bonus.v1": "31d99ca42c9b791439b8eea0be4c675cc21b969b452836872f0f424bba714d5d",
+        "dr-manhattan.after-midnight.v1": "f104015ab9fef4d0ed80ac81e7c72d984755dfd6dccafdc2d4a5cb4fc838b355"
+      },
+      "sourceHashesAfter": {
+        "dr-manhattan.save": "5768f82520bdf5152900ceeec61e395782710909fbc6bafccb104e0f832e9aca",
+        "dr-manhattan.bonus.v1": "31d99ca42c9b791439b8eea0be4c675cc21b969b452836872f0f424bba714d5d",
+        "dr-manhattan.after-midnight.v1": "f104015ab9fef4d0ed80ac81e7c72d984755dfd6dccafdc2d4a5cb4fc838b355"
+      },
+      "settingsUnchanged": true,
+      "writes": []
+    }
+  ],
+  "inputTrace": [
+    {
+      "type": "title-gate-click",
+      "point": {
+        "x": 640,
+        "y": 360
+      }
+    },
+    {
+      "type": "menu-click",
+      "label": "NEW GAME",
+      "point": {
+        "x": 284,
+        "y": 324
+      }
+    },
+    {
+      "type": "key",
+      "key": "Space"
+    },
+    {
+      "type": "key",
+      "key": "Space"
+    },
+    {
+      "type": "key",
+      "key": "Escape"
+    },
+    {
+      "type": "menu-click",
+      "label": "MOMENT CHALLENGES",
+      "point": {
+        "x": 640,
+        "y": 636
+      }
+    },
+    {
+      "type": "challenge-click",
+      "id": "swift",
+      "point": {
+        "x": 1050,
+        "y": 320.5
+      }
+    },
+    {
+      "type": "menu-click",
+      "label": "RETURN TO PAUSE",
+      "point": {
+        "x": 640,
+        "y": 586
+      }
+    },
+    {
+      "type": "menu-click",
+      "label": "RESUME",
+      "point": {
+        "x": 640,
+        "y": 388
+      }
+    },
+    {
+      "type": "held-key",
+      "key": "d",
+      "milliseconds": 600
+    },
+    {
+      "type": "key",
+      "key": "Escape"
+    },
+    {
+      "type": "menu-click",
+      "label": "MOMENT CHALLENGES",
+      "point": {
+        "x": 640,
+        "y": 636
+      }
+    }
+  ],
+  "sourceScripts": {
+    "scripts": 71,
+    "sha256": "19ad614594d8737e3a701865e735c8436fcd493ad31649fbf7111f590ceae2ba"
+  },
+  "standaloneSha256": "4d3560157c6c21f027825e5255a0a53c3b2f083328d696bc3f348abe7147a08a",
+  "gameplayWrites": [
+    {
+      "method": "setItem",
+      "key": "dr-manhattan.save",
+      "time": 348.89999997615814
+    },
+    {
+      "method": "setItem",
+      "key": "dr-manhattan.save",
+      "time": 2405.5
+    },
+    {
+      "method": "setItem",
+      "key": "dr-manhattan.glass-palace.v1",
+      "time": 3350.399999976158
+    }
+  ],
+  "initialProgress": "Fresh normal save; no reached chapters, completion records, fragments or tracking selection.",
+  "method": "Actual title New Game, interlude inputs, Pause pinning, Resume and real D movement; at least ten active seconds of ordinary RAF before raw canvas pixels. No actor/camera/health/flags/stats/clock/renderer overrides.",
+  "naturalCompletion": false,
+  "limits": "Two live views of the opening stage, not a natural completion or challenge-balance proof. The second image is the actual paused overview after the first running gameplay capture."
+}
