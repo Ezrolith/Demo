@@ -6,6 +6,8 @@ The moment atlas guides you to unlocked levels and missing fragments; palace
 progress has its own backup and restore. [Enhancements and next steps](docs/PALACE-REFINEMENTS.md).
 Pin one moment challenge for live field progress, or inspect all three from Pause.
 Completion details explain new, previously recovered and missed fragments.
+Rules v2 replace automatic story rewards with optional goals while retaining all
+legacy fragments. [Review response and validation](docs/PALACE-REVIEW-RESPONSE.md).
 [Player guide](docs/GLASS-PALACE.md) · [verification and handover](docs/GLASS-PALACE-HANDOVER.md).
 
 Bonus adventures: see [docs/BONUS.md](docs/BONUS.md); [backup/browser/performance notes](docs/PLATFORM-QA-HANDOVER.md).

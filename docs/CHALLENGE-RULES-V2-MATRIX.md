@@ -4,12 +4,14 @@ Design recorded before implementation on `codex/glass-palace-refinements`.
 There are still twelve moments and thirty-six fragment slots. This proposal does
 not edit the six campaign chapter files, original music or engine presentation.
 
-**Status:** implementation and natural-input calibration pending. Time limits
-below are proposed gameplay goals, not relaxed test assertions. The existing
-visual-performance threshold and every existing assertion remain unchanged.
-Reassembly's proposed six-minute limit replaces the unvalidated four-minute
-limit; a real-input run must establish its reachable pace and headroom before it
-is reported as validated. The other eleven initial time limits are unchanged.
+**Status:** rules v2 are implemented after the design-first commit. The final
+[review response](PALACE-REVIEW-RESPONSE.md) records 44 passing suite processes,
+143 optionality checks per build and the qualified natural-input evidence.
+These are gameplay targets, not relaxed test assertions; the existing visual
+threshold remains unchanged. Reassembly's six-minute target replaces the earlier
+uncalibrated four-minute target and has a 192.92-second Normal input completion.
+Eleven of twelve time targets have observed completions with headroom; Last
+Broadcast remains unverified. The other eleven initial time limits are unchanged.
 
 ## Award and evidence rules
 

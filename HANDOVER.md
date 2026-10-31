@@ -1,5 +1,12 @@
 # Handover: how to keep developing this game
 
+> **Current rules-v2 review response:** start with the single current
+> [review entry point](docs/PRE-REVIEW-CHECK.md). The
+> [response report](docs/PALACE-REVIEW-RESPONSE.md) records the 36-goal redesign,
+> retained legacy awards, all 44 final suite exits, bounded verification and
+> the 11/12 qualified natural time-target results. Older banners below are
+> historical. No merges, deployments or protected-content edits.
+
 > **Current challenge tracking (31 October 2026):** Peter authorized optional live
 > challenge tracking on the existing `codex/glass-palace-refinements` draft PR.
 > [The current report](docs/CHALLENGE-TRACKING.md) records selection, provisional
