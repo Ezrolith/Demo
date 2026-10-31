@@ -1,0 +1,83 @@
+name: Palace refinements validation
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [codex/glass-palace]
+    types: [opened, synchronize, reopened, ready_for_review]
+permissions:
+  contents: read
+concurrency:
+  group: palace-refinements-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  sequential:
+    runs-on: ubuntu-latest
+    timeout-minutes: 100
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Syntax and reproducible standalone
+        run: |
+          find src tests tools -type f \( -name '*.js' -o -name '*.mjs' \) -print0 | xargs -0 -n1 node --check
+          node tools/build.mjs
+          git diff --exit-code -- dist/dr-manhattan.html
+      - run: npm install --ignore-scripts
+      - run: npx playwright install --with-deps chromium firefox webkit
+      - name: Virtual audio output for Firefox
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y pulseaudio
+          pulseaudio --start --exit-idle-time=-1
+          pactl load-module module-null-sink sink_name=qa_audio
+          pactl set-default-sink qa_audio
+      - name: Twenty-two suites on both builds, one child process at a time
+        shell: bash
+        run: |
+          mkdir -p tests/out/palace-refinements
+          failed=0
+          for target in index.html dist/dr-manhattan.html; do
+            set +e
+            node tools/verify-palace-refinements.mjs "$target"
+            result=$?
+            set -e
+            printf 'all-suites-%s exit=%s\n' "$target" "$result"
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          done
+          exit "$failed"
+      - name: Palace checks in the other engines, then the existing actual walking tour
+        if: always()
+        shell: bash
+        run: |
+          failed=0
+          check() {
+            name="$1"; shift
+            set +e
+            "$@" > "tests/out/palace-refinements/$name.log" 2>&1
+            result=$?
+            set -e
+            printf '%s exit=%s\n' "$name" "$result"
+            cat "tests/out/palace-refinements/$name.log"
+            if [ "$result" -ne 0 ]; then failed=1; fi
+          }
+          for browser in firefox webkit; do
+            for target in index.html dist/dr-manhattan.html; do
+              for suite in glass-palace glass-palace-navigation glass-palace-backup glass-palace-tracking glass-palace-optionality; do
+                check "$browser-$suite-$(basename "$target")" env QA_BROWSER="$browser" node "tests/$suite.mjs" "$target"
+              done
+            done
+          done
+          check walk-source node tests/play-glass-palace.mjs index.html
+          check walk-standalone node tests/play-glass-palace.mjs dist/dr-manhattan.html
+          check tracking-live node tests/capture-glass-palace-tracking.mjs index.html
+          exit "$failed"
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: palace-refinements-validation
+          path: tests/out/
+          retention-days: 14

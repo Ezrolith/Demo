@@ -43,57 +43,9 @@
     if (subtitle) G.text(g, subtitle, 112, 162, { size: 15, color: '#b1c4ce', spacing: 1 });
   }
 
-  function challengeRows(moment) {
-    const status = GP.status(moment.id);
-    return (
-      status.challenges || GP.challengeDefs(moment.id).map((def) => ({ ...def, complete: false }))
-    );
-  }
-
-  class ChallengesPanel {
+  class ChallengesPanel extends GP.TrackingPanel {
     constructor(moment) {
-      this.moment = moment;
-      this.opaque = false;
-      this.cursor = 'pointer';
-    }
-    enter() {
-      I.clearAll();
-      this.status = GP.status(this.moment.id);
-      this.rows = challengeRows(this.moment);
-      this.menu = new DM.UI.Menu([{ label: 'RETURN TO THE MOMENT', action: closePanel }], {
-        x: 640,
-        y: 566,
-        w: 720,
-        align: 'center',
-        size: 20,
-        onBack: closePanel,
-      });
-    }
-    update(dt) {
-      this.menu.update(dt);
-    }
-    render(g) {
-      const status = this.status;
-      panel(
-        g,
-        'MOMENT CHALLENGES',
-        this.moment.title + ' · ' + status.earned + ' / 3 fragments recovered',
-      );
-      this.rows.forEach((challenge, index) => {
-        const y = 214 + index * 108;
-        const complete = !!(challenge.complete || challenge.earned);
-        G.panel(g, 110, y - 30, 1060, 91, { accent: complete ? '#9cdbbd' : '#8d9ca6' });
-        G.text(g, (complete ? '◆ ' : '◇ ') + (challenge.label || challenge.name), 132, y + 1, {
-          size: 23,
-          color: complete ? '#b3e4ca' : '#e6d9bc',
-        });
-        G.paragraph(g, challenge.description || '', 132, y + 17, 1008, 22, {
-          size: 16,
-          font: DM.FONTS.type,
-          color: '#b7c9d1',
-        });
-      });
-      this.menu.render(g);
+      super(moment, { returnLabel: 'RETURN TO THE MOMENT' });
     }
   }
 
@@ -214,7 +166,8 @@
   }
 
   class LeavePanel {
-    constructor() {
+    constructor(hub) {
+      this.hub = hub;
       this.opaque = false;
       this.cursor = 'pointer';
     }
@@ -224,11 +177,25 @@
         [
           { label: 'KEEP WALKING', action: closePanel },
           {
+            label: 'MOMENT ATLAS',
+            action: () => {
+              closePanel();
+              this.hub.openAtlas();
+            },
+          },
+          {
+            label: 'BACK UP / RESTORE PALACE',
+            action: () => {
+              closePanel();
+              E.push(new GP.BackupScreen(this.hub));
+            },
+          },
+          {
             label: 'RETURN TO THE MAIN GAME',
             action: () => E.fadeTo(() => E.set(new DM.Scenes.Title())),
           },
         ],
-        { x: 640, y: 326, w: 760, align: 'center', size: 23, itemH: 53, onBack: closePanel },
+        { x: 640, y: 274, w: 760, align: 'center', size: 23, itemH: 53, onBack: closePanel },
       );
     }
     update(dt) {
@@ -604,6 +571,9 @@
       this.chapter = { id: 'glass_palace', music: 'glass_palace', stages: [{ id: 'hall' }] };
       this.ctx = { mapName: 'gp_palace', stageIndex: 0, locked: false };
       this.hud = { captions: [] };
+      this.navigationTargetId = null;
+      this.navigationRoute = [];
+      this.navigationTimer = 0;
     }
     enter() {
       GP.load();
@@ -679,6 +649,7 @@
       });
       this.slab = world.add(new LedgerSlab(this));
       this.epilogueTerminal = this.epilogueReadySnapshot ? world.add(new EarthMoment(this)) : null;
+      world.add(new GP.WalkingGuide(this));
       if (!world.isFree(this.player.x, this.player.y, this.player.r)) {
         this.player.x = world.spawn.x;
         this.player.y = world.spawn.y;
@@ -686,6 +657,7 @@
       world.camera.snap(this.player.x, this.player.y - 180);
       this.previewCursor = 0;
       this.previewT = 0;
+      if (this.navigationTargetId) this.setDestination(this.navigationTargetId);
     }
     resume() {
       const moments = GP.moments();
@@ -700,7 +672,74 @@
         this.maximumFragmentsSnapshot !== maximumFragments();
       if (changed) this.rebuild(moments);
       else this.refreshSnapshots(moments);
+      if (this.navigationTargetId) this.setDestination(this.navigationTargetId);
       I.clearAll();
+    }
+    destinations() {
+      const entries = this.panes.map((pane) => {
+        const status = this.statusSnapshots[pane.moment.id];
+        return {
+          id: pane.moment.id,
+          kind: 'moment',
+          title: pane.moment.title,
+          x: pane.x,
+          y: pane.y + 100,
+          earned: status.earned,
+          total: status.total,
+          checkpoint: !!pane.moment.checkpoint,
+        };
+      });
+      entries.push({ id: 'ledger', kind: 'ledger', title: 'The glass ledger', x: 1050, y: 1230 });
+      if (this.epilogueTerminal) {
+        entries.push({ id: 'earth', kind: 'earth', title: 'The question of Earth', x: 1510, y: 1260 });
+      }
+      return entries;
+    }
+    navigationTarget() {
+      return this.destinations().find((entry) => entry.id === this.navigationTargetId) || null;
+    }
+    setDestination(id) {
+      const target = this.destinations().find((entry) => entry.id === id);
+      if (!target) {
+        this.clearDestination();
+        return false;
+      }
+      const route = GP.planPalaceRoute(this.world, this.player, target, this.player.r);
+      if (!route.length) {
+        this.clearDestination();
+        return false;
+      }
+      this.navigationTargetId = id;
+      this.navigationRoute = route;
+      this.navigationTimer = 0.5;
+      this.navigationFrom = { x: this.player.x, y: this.player.y };
+      return true;
+    }
+    clearDestination() {
+      this.navigationTargetId = null;
+      this.navigationRoute = [];
+      this.navigationFrom = null;
+    }
+    openAtlas() {
+      E.push(new GP.AtlasPanel(this));
+    }
+    updateNavigation(dt) {
+      if (!this.navigationTargetId) return;
+      const target = this.navigationTarget();
+      if (!target) return this.clearDestination();
+      if (U.dist(this.player.x, this.player.y, target.x, target.y) < 55) {
+        const entity = this.player.interactTarget;
+        const arrived = target.kind === 'moment' ? entity?.moment?.id === target.id
+          : target.kind === 'ledger' ? entity === this.slab : entity === this.epilogueTerminal;
+        if (arrived) return this.clearDestination();
+      }
+      this.navigationTimer -= dt;
+      if (this.navigationTimer > 0) return;
+      this.navigationTimer = 0.5;
+      if (this.navigationFrom && U.dist(
+        this.player.x, this.player.y, this.navigationFrom.x, this.navigationFrom.y,
+      ) < 36) return;
+      this.setDestination(target.id);
     }
     exit() {
       for (const pane of this.panes || []) pane.preview.dispose();
@@ -708,16 +747,27 @@
     }
     update(dt) {
       this.t += dt;
+      const atlasButton = { x: 1020, y: 63, w: 235, h: 33 };
+      const mouse = I.mouse;
+      const atlasClick = I.clicked() && mouse.x >= atlasButton.x && mouse.x <= atlasButton.x + atlasButton.w &&
+        mouse.y >= atlasButton.y && mouse.y <= atlasButton.y + atlasButton.h;
+      if (I.pressed('hint') || atlasClick) {
+        I.consume('hint');
+        I.consume('confirm');
+        this.openAtlas();
+        return;
+      }
       if (I.pressed('back') || I.pressed('pause')) {
         I.consume('back');
         I.consume('pause');
-        E.push(new LeavePanel());
+        E.push(new LeavePanel(this));
         return;
       }
       const world = this.world;
       world.mouse = world.camera.toWorld(I.mouse.x, I.mouse.y);
       world.ceasefire = true;
       world.update(dt);
+      this.updateNavigation(dt);
       world.camera.follow(this.player.x, this.player.y - 180, dt, 5);
       this.previewT -= dt;
       if (this.previewT <= 0 && this.panes.length) {
@@ -755,6 +805,11 @@
           spacing: 2,
         },
       );
+      G.panel(g, 1020, 63, 235, 33, { fill: 'rgba(4,12,21,0.9)', accent: BLUE });
+      G.text(g, 'H · MOMENT ATLAS', 1137, 85, {
+        size: 15, align: 'center', color: '#e2f5fb', spacing: 1,
+      });
+      this.renderNavigation(g);
       const warning =
         GP.warning ||
         (GP.available === false ? 'Palace progress is session only. Keep this window open.' : '');
@@ -770,9 +825,35 @@
       const target = this.player.interactTarget;
       const hint = target
         ? target.interact.label
-        : 'WASD / ARROWS · WALK     E · READ / ENTER     ESC · LEAVE';
+        : 'WASD / ARROWS · WALK     E · READ / ENTER     H · ATLAS     ESC · LEAVE';
       G.panel(g, 205, DM.H - 57, 870, 36, { fill: 'rgba(3,10,19,0.9)', accent: '#84b9d0' });
       G.text(g, hint, 640, DM.H - 33, { size: 15, align: 'center', color: '#e4eadc', spacing: 1 });
+    }
+    renderNavigation(g) {
+      if (!this.navigationTargetId) return;
+      const target = this.navigationTarget();
+      if (!target) return;
+      G.panel(g, 240, 545, 800, 43, { fill: 'rgba(3,10,19,0.94)', accent: GOLD });
+      G.text(g, 'FOLLOW THE GLASS · ' + target.title.toUpperCase(), 640, 573, {
+        size: 16, align: 'center', color: '#f0dfbd', spacing: 1,
+      });
+      const point = this.world.camera.toScreen(target.x, target.y);
+      if (point.x >= 55 && point.x <= DM.W - 55 && point.y >= 120 && point.y <= 510) return;
+      const dx = point.x - DM.W / 2;
+      const dy = point.y - DM.H / 2;
+      const scale = Math.min(540 / Math.max(1, Math.abs(dx)), 165 / Math.max(1, Math.abs(dy)), 1);
+      g.save();
+      g.translate(DM.W / 2 + dx * scale, DM.H / 2 + dy * scale);
+      g.rotate(Math.atan2(dy, dx));
+      g.fillStyle = GOLD;
+      g.beginPath();
+      g.moveTo(12, 0);
+      g.lineTo(-8, -8);
+      g.lineTo(-4, 0);
+      g.lineTo(-8, 8);
+      g.closePath();
+      g.fill();
+      g.restore();
     }
   }
 

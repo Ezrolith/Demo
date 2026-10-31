@@ -6258,6 +6258,7 @@
       if (best && Input.pressed('interact')) {
         Input.consume('interact');
         Input.consume('confirm');
+        DM.Events.emit('player:interact', { player: this, world, entity: best, label: best.interact.label });
         best.interact.onInteract(best, this);
       }
     }
@@ -6270,7 +6271,11 @@
       if (this.locked || this.invuln > 0 || this.down || this.godMode || this.form === 'human') return false;
       if (this.scale > 1.4 && (kind === 'bullet' || kind === 'pulse')) amount *= 0.15;
       amount *= this.damageMul == null ? 1 : this.damageMul;
+      const beforeDamage = this.coherence;
       this.coherence -= amount;
+      DM.Events.emit('player:damage-accepted', {
+        player: this, world: this.world, amount: Math.min(beforeDamage, amount), source, kind,
+      });
       this.regenDelay = this.regenDelayBase == null ? 2.6 : this.regenDelayBase;
       this.hurtT = 0.25;
       this.invuln = Math.max(this.invuln, 0.08);
@@ -6857,6 +6862,7 @@
     fire(p, s, world) {
       p.spend(this.cost);
       s.cd = this.cooldown;
+      DM.Events.emit('power:cast-start', { player: p, world, power: 'disintegrate' });
       const pt = reach(p, world.mouse.x, world.mouse.y, this.range * p.scale);
       const b = { x: pt.x, y: pt.y, t: 0.16, r: p.scale > 1.3 ? 80 : 50 };
       s.pending.push(b);
@@ -10848,6 +10854,8 @@
           this.checkpoint = i;
           this.checkpointCarry = this.snapshot();
           DM.Save.checkpointAt(this.chapter.id, i, this.checkpointCarry);
+          if (DM.GlassPalace?.saveRunCheckpoint)
+            DM.GlassPalace.saveRunCheckpoint(this.scene, i, this.checkpointCarry);
         }
         yield* this.runStage(st);
       }
@@ -11018,7 +11026,9 @@
       return n;
     }
     add(e) {
-      return this.world.add(e);
+      const entity = this.world.add(e);
+      if (DM.GlassPalace?.observeRuleEntity) DM.GlassPalace.observeRuleEntity(this.scene, entity);
+      return entity;
     }
     objective(text, progress) {
       this.hud.setObjective(text, progress);
@@ -12733,6 +12743,7 @@
     }
 
     exit() {
+      if (DM.GlassPalace?.endRuleRun) DM.GlassPalace.endRuleRun(this);
       clearTimeout(this.blurTimer);
       for (const off of this.offs || []) off();
       if (this.ctx) this.ctx.dispose();
@@ -12757,6 +12768,7 @@
       this.ctx = new DM.ChapterContext(this, ch);
       this.ctx.memo = this.memo;
       this.ctx.applyCarry(carry);
+      if (DM.GlassPalace?.beginRuleRun) DM.GlassPalace.beginRuleRun(this, { stage, carry, retry: !!retry });
       this.ctx.start(stage);
       this.ctx.step(0);
       DM.Audio.stopHums();
@@ -12790,6 +12802,7 @@
       if (s.facing != null) p.facing = s.facing;
       world.add(p);
       world.camera.snap(p.x, p.y);
+      if (DM.GlassPalace?.observeRuleWorld) DM.GlassPalace.observeRuleWorld(this);
       DM.Audio.stopHums();
     }
 
@@ -13045,6 +13058,7 @@
         { label: 'CONTROLS', action: () => Engine.push(new Controls()) },
         { label: 'QUIT TO TITLE', action: () => toTitle() },
       ], { x: DM.W / 2, y: 364, w: 420, align: 'center', itemH: 48, size: 24, onBack: () => this.close() });
+      if (DM.GlassPalace?.addTrackingPauseAction) DM.GlassPalace.addTrackingPauseAction(this);
     }
     close() {
       DM.Audio.setMusicFilter(this.play.world.timesight ? 650 : 18000);
@@ -30075,6 +30089,217 @@
   AM.BackupScreen = BackupScreen;
 })();
 </script>
+<script>/* src/data/palace-challenges-v2.js */
+/* Thirty-six optional palace goals. Published matrix precedes these rules. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const VERSION = 2;
+  const finite = (value) => typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1e9;
+  const count = (value) => finite(value) ? Math.floor(value) : null;
+  const clock = (value) => DM.U.fmtTime(Math.max(0, finite(value) ? value : 0));
+  const bits = (value) => [1, 2, 4].filter((bit) => (value || 0) & bit).length;
+  const runFor = (state, id) => state.run?.rulesVersion === VERSION && state.run.chapterId === id ? state.run : null;
+  const full = (state, id) => runFor(state, id)?.eligible === true;
+  const needsFresh = 'Start a fresh run, or resume its matching rules-v2 checkpoint, to establish this condition.';
+  const targets = {
+    prologue: 480, reassembly: 360, superman: 480, deterrent: 540, mars: 600, karnak: 600,
+    last_broadcast: 600, ninth_minute: 720, long_summer: 720,
+    am_dead_air: 480, am_undertow: 600, am_glass_archive: 480,
+  };
+  const speedNames = {
+    prologue: 'Before the chamber seals', reassembly: 'A quickened pattern', superman: 'Before the pier sleeps',
+    deterrent: 'Before the next warhead', mars: 'Before the red dust settles', karnak: 'Before the last hand turns',
+    last_broadcast: 'Before the carrier signs off', ninth_minute: 'Beyond the ninth minute',
+    long_summer: 'Before the street burns out', am_dead_air: 'Before the channel closes',
+    am_undertow: 'Before the tide turns', am_glass_archive: 'Before the gallery goes dark',
+  };
+
+  function definition(id, label, description, predicate, describe, type = 'level') {
+    return {
+      id, label, name: label, description, type, rulesVersion: VERSION,
+      test: (state) => !state.failed && !!predicate(state),
+      live(state) {
+        const metNow = !state.failed && !!predicate(state);
+        return {
+          metNow,
+          state: metNow ? 'ready' : 'pending',
+          progress: '',
+          reason: metNow ? 'Condition met so far. Finish the moment to recover its fragment.' : description,
+          current: null,
+          target: null,
+          ...describe(state, metNow),
+        };
+      },
+    };
+  }
+
+  function cleanBudget(id, slot, label, description, field, target, coverage, unit, complete = () => true) {
+    const observed = (state) => {
+      const run = runFor(state, id);
+      return full(state, id) && run && coverage(run) && finite(run[field]);
+    };
+    return definition(slot, label, description,
+      (state) => observed(state) && complete(runFor(state, id)) && runFor(state, id)[field] <= target,
+      (state) => {
+        const run = runFor(state, id);
+        const value = run && finite(run[field]) ? run[field] : null;
+        const known = observed(state);
+        return {
+          current: value, target,
+          progress: !known ? 'Fresh-run evidence required' : Math.ceil(value * 10) / 10 + ' ' + unit + ' · Limit ' + target,
+          state: !known ? 'pending' : value > target ? 'missed' : 'viable',
+          reason: !known ? needsFresh : value > target ? 'The run exceeded this limit. Retry retains the observed total.'
+            : 'Within the limit so far. Finish without exceeding it; Retry retains the total.',
+        };
+      }, 'budget');
+  }
+
+  function interaction(id, slot, label, description, field, target, text) {
+    return definition(slot, label, description,
+      (state) => {
+        const value = runFor(state, id)?.[field];
+        return target === true ? value === true : finite(value) && value >= target;
+      },
+      (state) => {
+        const value = runFor(state, id)?.[field];
+        const current = target === true ? value === true ? 1 : 0 : count(value) || 0;
+        return { current, target: target === true ? 1 : target, progress: current + ' / ' +
+          (target === true ? 1 : target) + ' ' + text };
+      });
+  }
+
+  function cleanFight(id, label, description, prefix) {
+    const known = (state) => {
+      const run = runFor(state, id);
+      return full(state, id) && run?.[prefix + 'Seen'] === true && finite(run[prefix + 'Disintegrations']);
+    };
+    return definition('mercy', label, description,
+      (state) => known(state) && runFor(state, id)[prefix + 'Defeated'] === true &&
+        runFor(state, id)[prefix + 'Disintegrations'] === 0,
+      (state) => {
+        const run = runFor(state, id);
+        const value = run && finite(run[prefix + 'Disintegrations']) ? run[prefix + 'Disintegrations'] : null;
+        return {
+          current: value, target: 0,
+          progress: !known(state) ? 'Fight evidence not available' : value + ' Disintegrate casts during this fight',
+          state: !known(state) ? 'pending' : value > 0 ? 'missed' : run[prefix + 'Defeated'] ? 'ready' : 'viable',
+          reason: !known(state) ? needsFresh : value > 0 ? 'Disintegrate was fired during the fight. Retry retains that cast.'
+            : 'Use the other powers to finish this fight. The killing cast counts too.',
+        };
+      }, 'restraint');
+  }
+
+  function mercy(id, label) {
+    return cleanBudget(id, 'mercy', label,
+      'Fresh run: finish without unmaking a person; Retry retains outcomes.', 'unmade', 0, () => true, 'people unmade');
+  }
+
+  function primary(id) {
+    if (id === 'prologue') return interaction(id, 'mercy', 'Palisades Park',
+      'Look at the workshop photograph before leaving Gila Flats.', 'photoSeen', true, 'photograph inspected');
+    if (id === 'reassembly') return cleanBudget(id, 'mercy', 'Keep the pattern',
+      'Fresh run: lose no carried atoms to vortices; Retry retains losses.', 'vortexAtomsLost', 0, () => true, 'atoms lost');
+    if (id === 'superman') return mercy(id, 'A hand left open');
+    if (id === 'deterrent') return cleanFight(id, 'Return fire',
+      'Fresh run: defeat the Behemoth without firing Disintegrate during its fight.', 'behemoth');
+    if (id === 'mars') return cleanBudget(id, 'mercy', 'Weather the red sky',
+      'Fresh run: take no meteor damage on Mars; Retry retains hits.', 'marsDamage', 0,
+      (run) => run.marsSeen === true, 'meteor damage');
+    if (id === 'karnak') return cleanFight(id, 'Hands, not light',
+      'Fresh run: defeat Veidt without firing Disintegrate during his fight.', 'veidt');
+    if (id === 'last_broadcast') return mercy(id, 'Bring them home');
+    if (id === 'ninth_minute') return mercy(id, 'A second chance');
+    if (id === 'long_summer') return mercy(id, 'A city left standing');
+    const budget = { am_dead_air: 80, am_undertow: 100, am_glass_archive: 120 }[id];
+    const label = { am_dead_air: 'A clean frequency', am_undertow: 'A steady crossing', am_glass_archive: 'An unbroken line' }[id];
+    return cleanBudget(id, 'mercy', label,
+      'Fresh run: take at most ' + budget + ' total health damage; healing and Retry do not reset it.',
+      'damageTaken', budget, () => true, 'total health damage');
+  }
+
+  function detail(id) {
+    if (id === 'prologue') return definition('detail', 'Beyond the assignment',
+      'Read the chalkboard, listen to the canteen radio and check the records files.',
+      (state) => runFor(state, id)?.researchMask === 7,
+      (state) => ({ current: bits(runFor(state, id)?.researchMask), target: 3,
+        progress: bits(runFor(state, id)?.researchMask) + ' / 3 optional observations' }));
+    if (id === 'reassembly') return interaction(id, 'detail', 'A gentler pull',
+      'Absorb 30 atoms while Coalesce is not held, then finish the reconstruction.', 'passiveAtoms', 30, 'passively gathered atoms');
+    if (id === 'superman') return interaction(id, 'detail', "Someone's badge",
+      'Inspect the smiley-face badge in the pier office before finishing.', 'badgeSeen', true, 'badge inspected');
+    if (id === 'deterrent') return definition('detail', 'A steady outline',
+      'Have at least 75% coherence when the Behemoth falls, before the safe outro.',
+      (state) => {
+        const run = runFor(state, id);
+        return full(state, id) && run?.behemothSeen === true && run.behemothDefeated === true &&
+          finite(run.behemothCoherence) && finite(run.behemothMaxCoherence) && run.behemothMaxCoherence > 0 &&
+          run.behemothCoherence >= run.behemothMaxCoherence * 0.75;
+      },
+      (state, metNow) => {
+        const run = runFor(state, id);
+        const frozen = full(state, id) && run?.behemothSeen === true && run.behemothDefeated === true &&
+          finite(run.behemothCoherence) && finite(run.behemothMaxCoherence) && run.behemothMaxCoherence > 0;
+        const value = frozen ? run.behemothCoherence / run.behemothMaxCoherence * 100 : null;
+        return { current: value, target: 75, state: frozen ? metNow ? 'ready' : 'missed' : 'pending',
+          progress: value === null ? 'Measured when the Behemoth falls' : Math.floor(value) + '% coherence at combat end',
+          reason: frozen ? 'This value was frozen before the safe outro; later healing does not change it.' : needsFresh };
+      });
+    if (id === 'mars') return definition('detail', 'Every remembered year',
+      'Recover all six optional memories in this run.', (state) => state.stats.memories >= 6,
+      (state) => ({ current: state.stats.memories, target: 6, progress: Math.floor(state.stats.memories) + ' / 6 memories found' }));
+    if (id === 'karnak') return cleanBudget(id, 'detail', 'A quiet approach',
+      'Fresh run: take at most 40 coherence damage before the last courtyard emitter falls.',
+      'emittersDamage', 40, (run) => run.emittersSeen === true, 'courtyard damage', (run) => run.emittersComplete === true);
+    if (id === 'last_broadcast') return definition('detail', 'Names on the air',
+      'Recover all three evidence records and choose to broadcast them.',
+      (state) => state.flags.evidence === 7 && state.flags.choice === 'broadcast',
+      (state) => ({ current: bits(state.flags.evidence), target: 3,
+        progress: bits(state.flags.evidence) + ' / 3 records · Choice ' + (state.flags.choice || 'not yet made') }));
+    if (id === 'ninth_minute') return definition('detail', 'Three lost moments',
+      'Use Temporal Sight to find and hear all three optional gold echoes.', (state) => state.flags.moments === 7,
+      (state) => ({ current: bits(state.flags.moments), target: 3, progress: bits(state.flags.moments) + ' / 3 lost moments heard' }));
+    if (id === 'long_summer') return definition('detail', 'A cooler street',
+      'Rescue all six residents and finish with City Heat below 30.',
+      (state) => finite(state.flags.rescued) && state.flags.rescued >= 6 && finite(state.flags.heat) && state.flags.heat < 30,
+      (state) => ({ current: finite(state.flags.rescued) ? state.flags.rescued : 0, target: 6,
+        progress: (count(state.flags.rescued) || 0) + ' / 6 residents · Heat ' +
+          (finite(state.flags.heat) ? Math.floor(state.flags.heat) : 'unknown') + ' (below 30)' }));
+    const label = { am_dead_air: 'Off the call sheet', am_undertow: 'Not listed as cargo',
+      am_glass_archive: 'The missing catalogue' }[id];
+    const description = {
+      am_dead_air: 'Read the optional tower-maintenance note and dispatch handover note on the roofs.',
+      am_undertow: 'Read the optional pier lease and cargo tally beside the harbour stores.',
+      am_glass_archive: 'Read the optional loan register and private index in the museum side galleries.',
+    }[id];
+    return definition('detail', label, description, (state) => runFor(state, id)?.fieldNotesMask === 3,
+      (state) => ({ current: [1, 2].filter((bit) => (runFor(state, id)?.fieldNotesMask || 0) & bit).length, target: 2,
+        progress: [1, 2].filter((bit) => (runFor(state, id)?.fieldNotesMask || 0) & bit).length + ' / 2 optional field notes' }));
+  }
+
+  function swift(id, target) {
+    const known = (state) => full(state, id) && finite(state.stats.time);
+    const rule = definition('swift', speedNames[id], 'Finish a fresh run in under ' + Math.round(target / 60) + ' minutes.',
+      (state) => known(state) && state.stats.time > 0 && state.stats.time < target,
+      (state) => ({ current: state.stats.time, target,
+        progress: clock(state.stats.time) + ' / ' + clock(target) + ' · ' + clock(Math.max(0, target - state.stats.time)) + ' left',
+        state: !known(state) ? 'pending' : state.stats.time >= target ? 'missed' : 'viable',
+        reason: !known(state) ? needsFresh : state.stats.time >= target ? 'This run reached the strict time target.'
+          : 'Finish below the target. Pause stops the field timer; checkpoint carry supplies resumed time.' }), 'time');
+    rule.targetSeconds = target;
+    return rule;
+  }
+
+  DM.PalaceChallengeRulesV2 = {
+    version: VERSION,
+    targets,
+    forMoment(id, target = targets[id]) {
+      if (!Object.hasOwn(targets, id)) return [];
+      return [primary(id), swift(id, target), detail(id)];
+    },
+  };
+})();
+</script>
 <script>/* src/game/glass-palace-progress.js */
 /* The Glass Palace reads the three existing progress slots and owns only its
  * own challenge/epilogue slot. It never migrates, loads or writes another save.
@@ -30099,8 +30324,12 @@
     typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1e9
       ? value
       : fallback;
-  const fresh = () => ({ version: 1, challenges: {}, epilogueSeen: {}, visits: 0 });
+  const fresh = () => ({
+    version: 2, rulesVersion: 2, challenges: {}, awardVersions: {},
+    epilogueSeen: {}, visits: 0, tracking: null, runs: {},
+  });
   const observed = new WeakSet();
+  const completionResults = new WeakMap();
   const stats = (source) => ({
     spared: number(source?.spared),
     unmade: number(source?.disintegrated ?? source?.unmade),
@@ -30109,6 +30338,7 @@
   });
   const campaignNumber = (value, fallback = 0) =>
     number(typeof value === 'string' && value.trim() !== '' ? Number(value) : value, fallback);
+  GP.rulesVersion = 2;
   GP.key = KEY;
   GP.sourceKeys = { ...SOURCE_KEYS };
   GP.data = null;
@@ -30117,7 +30347,7 @@
   GP.warning = '';
   GP.timeTargets = {
     prologue: 480,
-    reassembly: 240,
+    reassembly: 360,
     superman: 480,
     deterrent: 540,
     mars: 600,
@@ -30333,105 +30563,82 @@
     return tier === 'mercy' ? 'return' : tier === 'detached' ? 'depart' : 'observe';
   };
 
-  const details = {
-    prologue: {
-      label: 'A watch repaired',
-      description: 'Repair the watch and complete the chamber calibration.',
-      test: (state) => state.flags.repaired === true && state.flags.calibrated === true,
-    },
-    reassembly: {
-      label: 'A form remembered',
-      description: 'Finish with your human form fully reassembled.',
-      test: (state) => state.flags.reassembled === true && state.player.form === 'manhattan',
-    },
-    superman: {
-      label: 'Four lives kept',
-      description: 'Spare at least four people during the chapter.',
-      test: (state) => state.stats.spared >= 4,
-    },
-    deterrent: {
-      label: 'A steady outline',
-      description: 'Finish with at least three quarters of your coherence.',
-      test: (state) =>
-        state.player.maxCoherence > 0 && state.player.coherence >= state.player.maxCoherence * 0.75,
-    },
-    mars: {
-      label: 'Every remembered year',
-      description: 'Recover all six memories.',
-      test: (state) => state.stats.memories >= 6,
-    },
-    karnak: {
-      label: 'Silence in the storm',
-      description: 'Shut down every tachyon emitter.',
-      test: (state) =>
-        Array.isArray(state.refs.emitters) &&
-        state.refs.emitters.length >= 4 &&
-        state.refs.emitters.every((entity) => entity.dead || entity.neutralized),
-    },
-    last_broadcast: {
-      label: 'Names and voices',
-      description: 'Recover every evidence record and rescue all three engineers.',
-      test: (state) => state.flags.evidence === 7 && state.flags.engineers === 7,
-    },
-    ninth_minute: {
-      label: 'Six beyond the second',
-      description: 'Bring all six passengers to safety.',
-      test: (state) => number(state.flags.passengers) >= 6,
-    },
-    long_summer: {
-      label: 'A cooler street',
-      description: 'Rescue all six residents and finish with City Heat below 30.',
-      test: (state) => number(state.flags.rescued) >= 6 && number(state.flags.heat, Infinity) < 30,
-    },
-    am_dead_air: {
-      label: 'Every intercepted trace',
-      description: 'Recover all three traces and download the buyer list.',
-      test: (state) => state.flags.clues === 7 && state.flags.downloaded === true,
-    },
-    am_undertow: {
-      label: 'Four names aboard',
-      description: 'Bring all four workers aboard and cast off.',
-      test: (state) => number(state.flags.rescued) >= 4 && state.flags.departed === true,
-    },
-    am_glass_archive: {
-      label: 'The archive returned',
-      description: 'Recover the ledger, capture the Surveyor and return the archive.',
-      test: (state) =>
-        state.flags.ledger === true &&
-        state.flags.surveyorCaptured === true &&
-        state.flags.archiveReturned === true,
-    },
-  };
-
   GP.challengeDefs = (id) => {
     const chapter = registry().find(
       (entry) => entry.chapter.id === id || entry.chapter.amId === id,
     )?.chapter;
     if (!chapter) return [];
     const target = number(GP.timeTargets[chapter.id], 600);
-    const detail = details[chapter.id];
-    return [
-      {
-        id: 'mercy',
-        type: 'unmade',
-        label: 'No one unmade',
-        description: 'Finish without unmaking a person.',
-        test: (state) => state.stats.unmade === 0,
-      },
-      {
-        id: 'swift',
-        type: 'time',
-        label: 'Before the hand moves',
-        description: 'Finish in under ' + Math.round(target / 60) + ' minutes.',
-        targetSeconds: target,
-        test: (state) => state.stats.time > 0 && state.stats.time < target,
-      },
-      { id: 'detail', type: 'level', ...detail },
-    ].map((definition) => ({ ...definition, name: definition.label }));
+    return DM.PalaceChallengeRulesV2?.forMoment(chapter.id, target) || [];
+  };
+
+  function cleanTracking(value) {
+    if (!object(value) || Object.keys(value).length !== 2) return null;
+    if (!Object.keys(value).every((key) => ['momentId', 'challengeId'].includes(key))) return null;
+    const chapter = registry().find((entry) => entry.chapter.id === value.momentId)?.chapter;
+    if (!chapter || !['mercy', 'swift', 'detail'].includes(value.challengeId)) return null;
+    return { momentId: chapter.id, challengeId: value.challengeId };
+  }
+
+  GP.challengeSnapshot = (play) => {
+    const chapter = play?.chapter;
+    const ctx = play?.ctx;
+    const canonical = registry().find((entry) => entry.chapter === chapter);
+    if (!canonical || !ctx?.stats || !play.player || ctx.chapter !== chapter || ctx.scene !== play) return null;
+    if (chapter.afterMidnight && chapter.kind !== 'story') return null;
+    return {
+      chapter,
+      stats: stats(ctx.stats),
+      flags: { ...(ctx.persistedFlags?.() || {}), ...(ctx.flags || {}) },
+      refs: ctx.refs || {},
+      player: play.player,
+      failed: !!(play.failed || play.player.down),
+      run: GP.runEvidence?.(play) || null,
+    };
+  };
+
+  function liveRow(chapter, state, definition, earned, awardVersion = 0) {
+    const metNow = !!definition.test(state);
+    const display = definition.live(state);
+    const legacy = !!earned && awardVersion < GP.rulesVersion;
+    const row = {
+      ...display,
+      momentId: chapter.id,
+      challengeId: definition.id,
+      label: definition.label,
+      description: definition.description,
+      earned: !!earned,
+      awardVersion,
+      legacy,
+      metNow,
+    };
+    if (state.failed) {
+      row.state = 'missed';
+      row.reason = 'This attempt ended before the challenge could be completed.';
+    }
+    if (earned) {
+      row.reason = legacy ? 'This fragment is retained from earlier challenge rules. ' +
+        'The displayed condition describes the new rules; it cannot add another fragment.'
+        : 'This fragment was recovered in an earlier run. Live progress describes this attempt; ' +
+          'it cannot add another fragment.';
+      if (state.failed) row.reason += ' This attempt ended before completion.';
+    }
+    return row;
+  }
+
+  GP.liveChallenge = (play, challengeId) => {
+    const state = GP.challengeSnapshot(play);
+    if (!state) return null;
+    const definition = GP.challengeDefs(state.chapter.id).find((entry) => entry.id === challengeId);
+    if (!definition) return null;
+    const earned = GP.data?.challenges?.[state.chapter.id]?.[definition.id] === true;
+    const awardVersion = GP.data?.awardVersions?.[state.chapter.id]?.[definition.id] || (earned ? 1 : 0);
+    return liveRow(state.chapter, state, definition, earned, awardVersion);
   };
 
   GP.sanitize = (raw) => {
-    if (!object(raw) || raw.version !== 1)
+    if (!object(raw) || ![1, 2].includes(raw.version) ||
+      (raw.rulesVersion !== undefined && ![1, 2].includes(raw.rulesVersion)))
       throw new Error('Choose a compatible Glass Palace save.');
     const out = fresh();
     for (const entry of registry()) {
@@ -30440,12 +30647,25 @@
       if (!object(values)) continue;
       const kept = {};
       for (const key of ['mercy', 'swift', 'detail']) if (values[key] === true) kept[key] = true;
-      if (Object.keys(kept).length) out.challenges[id] = kept;
+      if (Object.keys(kept).length) {
+        out.challenges[id] = kept;
+        out.awardVersions[id] = {};
+        for (const key of Object.keys(kept)) {
+          out.awardVersions[id][key] = raw.version === 2 && raw.awardVersions?.[id]?.[key] === 2 ? 2 : 1;
+        }
+      }
     }
     for (const id of ['return', 'observe', 'depart']) {
       if (raw.epilogueSeen?.[id] === true) out.epilogueSeen[id] = true;
     }
     out.visits = Math.floor(number(raw.visits));
+    out.tracking = cleanTracking(raw.tracking);
+    if (raw.version === 2 && object(raw.runs) && GP.cleanRunCheckpoint) {
+      for (const [key, value] of Object.entries(raw.runs)) {
+        const clean = GP.cleanRunCheckpoint(value, key);
+        if (clean) out.runs[key] = clean;
+      }
+    }
     return out;
   };
   GP.load = () => {
@@ -30456,7 +30676,7 @@
       if (!text) return GP.data;
       if (text.length > 256 * 1024) throw new Error('The saved palace is too large.');
       const raw = JSON.parse(text);
-      if (raw?.version > 1) {
+      if (raw?.version > 2 || raw?.rulesVersion > 2) {
         GP.readOnly = true;
         GP.available = false;
         GP.warning = 'A newer palace save is protected. This visit is session only.';
@@ -30483,6 +30703,24 @@
       return false;
     }
   };
+  GP.tracking = () => cleanTracking(GP.load().tracking);
+  GP.pinChallenge = (momentId, challengeId) => {
+    const moment = GP.find(momentId);
+    if (!moment?.unlocked || !GP.challengeDefs(moment.id).some((definition) => definition.id === challengeId)) return false;
+    const pin = { momentId: moment.id, challengeId };
+    const data = GP.load();
+    if (data.tracking?.momentId === pin.momentId && data.tracking?.challengeId === pin.challengeId) return true;
+    data.tracking = pin;
+    GP.write();
+    return true;
+  };
+  GP.clearTracking = () => {
+    const data = GP.load();
+    if (!data.tracking) return true;
+    data.tracking = null;
+    GP.write();
+    return true;
+  };
   GP.fragmentCount = () => {
     const saved = GP.load().challenges;
     return registry().reduce((sum, entry) => {
@@ -30494,11 +30732,15 @@
   GP.status = (id) => {
     const item = GP.find(id);
     if (!item) return null;
-    const values = GP.load().challenges[item.id] || {};
+    const data = GP.load();
+    const values = data.challenges[item.id] || {};
+    const versions = data.awardVersions?.[item.id] || {};
     const challenges = GP.challengeDefs(item.id).map((definition) => ({
       ...definition,
       complete: values[definition.id] === true,
       earned: values[definition.id] === true,
+      awardVersion: values[definition.id] === true ? versions[definition.id] || 1 : 0,
+      legacy: values[definition.id] === true && (versions[definition.id] || 1) < GP.rulesVersion,
     }));
     return {
       id: item.id,
@@ -30518,34 +30760,61 @@
       return null;
     if (ctx.chapter !== chapter || ctx.scene !== play) return null;
     if (!play.player || (chapter.afterMidnight && chapter.kind !== 'story')) return null;
-    if (observed.has(ctx)) return { momentId: item.id, ...GP.status(item.id), newlyEarned: [] };
+    if (observed.has(ctx)) {
+      const previousResult = completionResults.get(ctx);
+      return { ...previousResult, momentId: item.id, ...GP.status(item.id), newlyEarned: [] };
+    }
     observed.add(ctx);
-    const state = {
-      stats: stats(ctx.stats),
-      flags: { ...(ctx.persistedFlags?.() || {}), ...(ctx.flags || {}) },
-      refs: ctx.refs || {},
-      player: play.player,
-    };
+    const state = GP.challengeSnapshot(play);
     const data = GP.load();
     const previous = data.challenges[item.id] || {};
+    if (!object(data.awardVersions)) data.awardVersions = {};
+    const versions = { ...(data.awardVersions[item.id] || {}) };
+    for (const key of Object.keys(previous)) if (previous[key] && !versions[key]) versions[key] = 1;
     const next = { ...previous };
     const newlyEarned = [];
     const passed = [];
+    const breakdown = [];
     for (const definition of GP.challengeDefs(item.id)) {
-      if (!definition.test(state)) continue;
-      passed.push(definition.id);
-      if (!previous[definition.id]) newlyEarned.push(definition.id);
-      next[definition.id] = true;
+      const row = liveRow(chapter, state, definition, previous[definition.id], versions[definition.id] || 0);
+      const outcome = previous[definition.id] ? 'already' : row.metNow ? 'new' : 'missed';
+      breakdown.push(Object.freeze({
+        id: definition.id,
+        label: definition.label,
+        description: definition.description,
+        outcome,
+        passed: row.metNow,
+        progress: row.progress,
+        awardVersion: previous[definition.id] ? versions[definition.id] || 1 : row.metNow ? 2 : 0,
+        legacy: !!previous[definition.id] && (versions[definition.id] || 1) < GP.rulesVersion,
+        reason: previous[definition.id] ? (versions[definition.id] || 1) < GP.rulesVersion
+          ? 'Fragment retained from earlier rules. New condition ' + (row.metNow ? 'met' : 'not met') + ' this run.'
+          : 'Recovered in an earlier run. Current condition ' + (row.metNow ? 'met' : 'not met') + '.'
+          : row.metNow ? 'Requirement met at completion under rules version 2.'
+            : 'Requirement not met at completion: ' + row.progress + '. ' + row.reason,
+      }));
+      if (row.metNow) {
+        passed.push(definition.id);
+        if (!previous[definition.id]) {
+          newlyEarned.push(definition.id);
+          versions[definition.id] = GP.rulesVersion;
+        }
+        next[definition.id] = true;
+      }
     }
     data.challenges[item.id] = next;
+    data.awardVersions[item.id] = versions;
     if (newlyEarned.length) GP.write();
-    return {
+    const result = {
       momentId: item.id,
       ...GP.status(item.id),
       passed,
       newlyEarned,
       maxFragments: GP.maxFragments(),
+      breakdown: Object.freeze(breakdown),
     };
+    completionResults.set(ctx, result);
+    return result;
   };
   GP.epilogueReady = () => {
     const source = GP.sources();
@@ -30567,6 +30836,1102 @@
     GP.load().visits++;
     return GP.write();
   };
+})();
+</script>
+<script>/* src/game/glass-palace-run.js */
+/* Rules-v2 observations. Gameplay writes its original saves normally; this
+ * module keeps optional evidence and checkpoint provenance in the palace slot. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const GP = DM.GlassPalace;
+  const E = DM.Engine;
+  const IDS = [
+    'prologue', 'reassembly', 'superman', 'deterrent', 'mars', 'karnak',
+    'last_broadcast', 'ninth_minute', 'long_summer', 'am_dead_air', 'am_undertow', 'am_glass_archive',
+  ];
+  const COUNTERS = [
+    'researchMask', 'vortexAtomsLost', 'passiveAtoms', 'unmade', 'behemothDisintegrations',
+    'behemothCoherence', 'behemothMaxCoherence', 'marsDamage', 'emittersDamage',
+    'veidtDisintegrations', 'damageTaken', 'fieldNotesMask',
+  ];
+  const FLAGS = [
+    'eligible', 'photoSeen', 'badgeSeen', 'behemothSeen', 'behemothDefeated', 'marsSeen',
+    'emittersSeen', 'emittersComplete', 'veidtSeen', 'veidtDefeated',
+  ];
+  const plain = value => !!value && typeof value === 'object' && !Array.isArray(value);
+  const clone = value => JSON.parse(JSON.stringify(value));
+  const heroId = play => play.player?.profile?.id || 'manhattan';
+  const runKey = play => play.chapter.id + ':' + heroId(play);
+  const signature = (carry, chapter) => {
+    if (!carry) return 'null';
+    const source = chapter.afterMidnight ? DM.AfterMidnight.cleanCarry(carry, chapter) : carry;
+    if (!source) return 'null';
+    const stats = {};
+    for (const name of ['time', 'spared', 'disintegrated', 'memories']) {
+      const value = chapter.bonus || chapter.afterMidnight ? source.stats?.[name] : Number(source.stats?.[name]);
+      stats[name] = Number.isFinite(value) ? Math.max(0, value) : 0;
+    }
+    const allowed = chapter.bonus || chapter.afterMidnight ? chapter.persistFlags || [] : Object.keys(source.flags || {});
+    const flags = {};
+    for (const name of [...allowed].sort()) {
+      const value = source.flags?.[name];
+      if (typeof value === 'boolean' || typeof value === 'string' || typeof value === 'number' && Number.isFinite(value)) {
+        flags[name] = value;
+      }
+    }
+    const found = chapter.bonus || chapter.afterMidnight ? [] : (source.found || []).filter(Number.isFinite);
+    return JSON.stringify({ stats, found, flags });
+  };
+  let serial = 0;
+  let active = null;
+
+  function cleanRun(value, chapterId) {
+    if (!plain(value) || value.rulesVersion !== 2 || value.chapterId !== chapterId) return null;
+    if (typeof value.runId !== 'string' || value.runId.length > 96 || !value.runId) return null;
+    const out = { rulesVersion: 2, chapterId, runId: value.runId };
+    for (const name of COUNTERS) {
+      const number = value[name];
+      if (typeof number !== 'number' || !Number.isFinite(number) || number < 0 || number > 1e9) return null;
+      out[name] = number;
+    }
+    for (const name of FLAGS) {
+      if (typeof value[name] !== 'boolean') return null;
+      out[name] = value[name];
+    }
+    return out;
+  }
+
+  GP.cleanRunCheckpoint = (value, key) => {
+    if (!plain(value) || value.rulesVersion !== 2 || !IDS.includes(value.chapterId)) return null;
+    const chapter = DM.Chapters.get(value.chapterId);
+    if (!chapter || !Number.isInteger(value.stage) || value.stage < 0 || value.stage >= chapter.stages.length) return null;
+    const hero = value.heroId;
+    const validHero = chapter.afterMidnight
+      ? DM.AfterMidnight.heroes.some(entry => entry.id === hero) : hero === 'manhattan';
+    if (!validHero || key !== value.chapterId + ':' + hero) return null;
+    if (typeof value.signature !== 'string' || value.signature.length > 65536) return null;
+    const run = cleanRun(value.run, value.chapterId);
+    if (!run) return null;
+    return {
+      rulesVersion: 2, chapterId: value.chapterId, heroId: hero,
+      stage: value.stage, signature: value.signature, run,
+    };
+  };
+
+  function canonical(play) {
+    return !!play && IDS.includes(play.chapter?.id) && DM.Chapters.get(play.chapter.id) === play.chapter &&
+      play.ctx?.scene === play && play.ctx.chapter === play.chapter && !!play.player;
+  }
+  GP.runEvidence = play => canonical(play) ? play.glassPalaceRun || null : null;
+
+  GP.beginRuleRun = (play, options = {}) => {
+    if (!canonical(play)) {
+      play.glassPalaceRun = null;
+      return null;
+    }
+    const data = GP.load();
+    const old = options.retry && cleanRun(play.memo?.palaceRuleRun, play.chapter.id);
+    const checkpoint = GP.cleanRunCheckpoint(data.runs?.[runKey(play)], runKey(play));
+    const match = checkpoint && checkpoint.stage === options.stage &&
+      checkpoint.signature === signature(options.carry, play.chapter);
+    const run = old || (options.carry && match ? clone(checkpoint.run) : null) || {
+      rulesVersion: 2, chapterId: play.chapter.id, runId: 'v2-' + Date.now().toString(36) + '-' + (++serial),
+      ...Object.fromEntries(COUNTERS.map(name => [name, 0])),
+      ...Object.fromEntries(FLAGS.map(name => [name, false])),
+      eligible: options.stage === 0 && !options.carry,
+    };
+    play.glassPalaceRun = run;
+    play.memo.palaceRuleRun = run;
+    active = play;
+    if (options.stage === 0 && !options.retry) GP.saveRunCheckpoint(play, 0, options.carry);
+    return run;
+  };
+
+  GP.saveRunCheckpoint = (play, stage, carry) => {
+    const run = GP.runEvidence(play);
+    if (!run) return false;
+    const entry = {
+      rulesVersion: 2, chapterId: play.chapter.id, heroId: heroId(play),
+      stage, signature: signature(carry, play.chapter), run: clone(run),
+    };
+    const clean = GP.cleanRunCheckpoint(entry, runKey(play));
+    if (!clean) return false;
+    const data = GP.load();
+    data.runs = data.runs || {};
+    data.runs[runKey(play)] = clean;
+    return GP.write();
+  };
+  function persist(play) {
+    const saved = GP.data?.runs?.[runKey(play)];
+    if (!saved || !GP.runEvidence(play)) return;
+    saved.run = clone(play.glassPalaceRun);
+    GP.write();
+  }
+  GP.endRuleRun = play => {
+    if (active !== play) return;
+    if (play.ctx?.done && GP.data?.runs) {
+      delete GP.data.runs[runKey(play)];
+      GP.write();
+    } else persist(play);
+    active = null;
+  };
+
+  GP.fieldNoteDefinitions = [
+    { chapterId: 'am_dead_air', id: 'roof-maintenance', bit: 1, x: 320, y: 260,
+      label: 'Read tower maintenance note', text: 'A replaced relay. The old receiver was never disconnected.' },
+    { chapterId: 'am_dead_air', id: 'dispatch-handover', bit: 2, x: 1510, y: 1010,
+      label: 'Read dispatch handover note', text: 'The night shift logged every call. Someone copied the log twice.' },
+    { chapterId: 'am_undertow', id: 'pier-lease', bit: 1, x: 310, y: 230,
+      label: 'Read the pier lease', text: 'The lease names a shipping office. Its forwarding address belongs to a gallery.' },
+    { chapterId: 'am_undertow', id: 'cargo-tally', bit: 2, x: 1510, y: 980,
+      label: 'Read the cargo tally', text: 'Four names were crossed out and replaced with crate numbers.' },
+    { chapterId: 'am_glass_archive', id: 'loan-register', bit: 1, x: 310, y: 260,
+      label: 'Read the loan register', text: 'The lenders signed initials. The people in the recordings signed nothing.' },
+    { chapterId: 'am_glass_archive', id: 'private-index', bit: 2, x: 1530, y: 1010,
+      label: 'Read the private index', text: 'The catalogue sorts lives by price. The margin contains a list of unanswered calls.' },
+  ];
+
+  class FieldNote extends DM.Entity {
+    constructor(play, definition, point) {
+      super({ x: point.x, y: point.y, r: 12, body: false, solid: false, static: true, disintegratable: false });
+      this.glassPalaceNoteId = definition.id;
+      this.definition = definition;
+      this.interact = {
+        label: definition.label, range: 62,
+        onInteract: () => {
+          GP.ruleEvent(play, 'field-note', { id: definition.id, bit: definition.bit });
+          play.dialog.open([[play.player.profile?.look || 'jon', definition.text, { name: 'FIELD NOTE' }]]);
+        },
+      };
+    }
+    render(g, world) {
+      const selected = world.player?.interactTarget === this;
+      g.save();
+      g.translate(this.x, this.y);
+      g.fillStyle = selected ? '#eee4c7' : '#c3b99c';
+      g.fillRect(-10, -13, 20, 26);
+      g.strokeStyle = '#293c47';
+      g.lineWidth = 1.5;
+      g.strokeRect(-10, -13, 20, 26);
+      for (let n = 0; n < 3; n++) DM.Gfx.line(g, -6, -6 + n * 6, 6, -6 + n * 6);
+      g.restore();
+      if (!world.lit) this.renderEmissive(g, world);
+    }
+    renderEmissive(g, world) {
+      const player = world.player;
+      if (!player || DM.U.dist(this.x, this.y, player.x, player.y) > 260) return;
+      DM.Gfx.glow(g, this.x, this.y, 25, '#e1c68c', 0.2);
+      DM.Gfx.text(g, 'FIELD NOTE', this.x, this.y - 23, {
+        size: 13, align: 'center', color: '#e8d7ae', spacing: 1,
+      });
+    }
+  }
+  GP.FieldNote = FieldNote;
+
+  function findNoteFloor(world, definition) {
+    const candidates = [];
+    for (let dy = -240; dy <= 240; dy += 40) {
+      for (let dx = -240; dx <= 240; dx += 40) {
+        const point = { x: definition.x + dx, y: definition.y + dy };
+        const bounds = world.amPlayableBounds;
+        if (bounds && (point.x < bounds.x + 34 || point.x > bounds.x + bounds.w - 34 ||
+          point.y < bounds.y + 34 || point.y > bounds.y + bounds.h - 34)) continue;
+        if (!world.isFree(point.x, point.y, 18)) continue;
+        if (world.entities.some(entity => {
+          const distance = DM.U.dist(point.x, point.y, entity.x, entity.y);
+          return entity.interact && distance < 160 || entity.solid && entity.body !== false && distance < entity.r + 26;
+        })) continue;
+        candidates.push(point);
+      }
+    }
+    candidates.sort((a, b) => DM.U.dist(a.x, a.y, definition.x, definition.y) -
+      DM.U.dist(b.x, b.y, definition.x, definition.y));
+    return candidates[0] || null;
+  }
+
+  GP.observeRuleWorld = play => {
+    const run = GP.runEvidence(play);
+    if (!run) return;
+    const world = play.world;
+    if (play.chapter.id === 'mars' && world.mapId === 'mars') run.marsSeen = true;
+    if (play.chapter.id === 'karnak' && play.ctx.refs.emitters?.length >= 4 &&
+      play.ctx.refs.emitters.some(entity => !entity.dead && !entity.neutralized)) run.emittersSeen = true;
+    for (const definition of GP.fieldNoteDefinitions.filter(note => note.chapterId === play.chapter.id)) {
+      if (world.entities.some(entity => entity.glassPalaceNoteId === definition.id)) continue;
+      const point = findNoteFloor(world, definition);
+      if (point) world.add(new FieldNote(play, definition, point));
+    }
+  };
+
+  GP.observeRuleEntity = (play, entity) => {
+    const run = GP.runEvidence(play);
+    if (!run || entity.world !== play.world) return;
+    if (play.chapter.id === 'deterrent' && entity instanceof DM.Enemies.Behemoth) run.behemothSeen = true;
+    if (play.chapter.id === 'karnak' && entity instanceof DM.Enemies.Veidt) run.veidtSeen = true;
+  };
+
+  GP.ruleEvent = (play, name, data = {}) => {
+    const run = GP.runEvidence(play);
+    if (!run) return;
+    if (name === 'damage') {
+      if (!Number.isFinite(data.amount) || data.amount <= 0) return;
+      run.damageTaken += data.amount;
+      if (play.chapter.id === 'mars' && play.world.mapId === 'mars') {
+        run.marsSeen = true;
+        run.marsDamage += data.amount;
+      }
+      if (play.chapter.id === 'karnak' && !run.emittersComplete && play.ctx.refs.emitters?.length >= 4) {
+        run.emittersSeen = true;
+        run.emittersDamage += data.amount;
+      }
+    } else if (name === 'interaction') {
+      if (play.chapter.id === 'prologue') {
+        if (data.label === 'Look at the photograph') run.photoSeen = true;
+        if (data.label === 'Read the chalkboard') run.researchMask |= 1;
+        if (data.label === 'Listen to the radio') run.researchMask |= 2;
+        if (data.label === 'Check the files') run.researchMask |= 4;
+      }
+      if (play.chapter.id === 'superman' && data.label === 'Look at the badge') run.badgeSeen = true;
+    } else if (name === 'field-note') {
+      const note = GP.fieldNoteDefinitions.find(entry => entry.chapterId === play.chapter.id && entry.id === data.id);
+      if (note) run.fieldNotesMask |= note.bit;
+    } else if (name === 'cast' && data.power === 'disintegrate') {
+      const boss = play.world.boss;
+      if (boss instanceof DM.Enemies.Behemoth && !boss.dead) {
+        run.behemothSeen = true;
+        run.behemothDisintegrations++;
+      }
+      if (boss instanceof DM.Enemies.Veidt && !boss.yielded) {
+        run.veidtSeen = true;
+        run.veidtDisintegrations++;
+      }
+    } else if (name === 'behemoth') {
+      run.behemothSeen = true;
+      run.behemothDefeated = true;
+      run.behemothCoherence = play.player.coherence;
+      run.behemothMaxCoherence = play.player.maxCoherence;
+    } else if (name === 'veidt') {
+      run.veidtSeen = true;
+      run.veidtDefeated = true;
+    } else if (name === 'emitter') {
+      run.emittersSeen = true;
+      const emitters = play.ctx.refs.emitters;
+      if (emitters?.length >= 4 && emitters.every(entity => entity.dead || entity.neutralized)) run.emittersComplete = true;
+    } else if (name === 'atom' && play.chapter.id === 'reassembly' && !DM.Input.down('telekinesis')) run.passiveAtoms++;
+    else if (name === 'vortex' && play.chapter.id === 'reassembly') run.vortexAtomsLost += Math.max(0, data.lost || 0);
+    else if (name === 'unmade') run.unmade++;
+  };
+
+  function current(player, world) {
+    if (!active || !E.stack.includes(active) || !GP.runEvidence(active)) return null;
+    if (player && active.player !== player) return null;
+    if (world && active.world !== world) return null;
+    return active;
+  }
+  DM.Events.on('player:damage-accepted', data => {
+    const play = current(data.player, data.world);
+    if (play) GP.ruleEvent(play, 'damage', data);
+  });
+  DM.Events.on('player:interact', data => {
+    const play = current(data.player, data.world);
+    if (play) GP.ruleEvent(play, 'interaction', data);
+  });
+  DM.Events.on('power:cast-start', data => {
+    const play = current(data.player, data.world);
+    if (play) GP.ruleEvent(play, 'cast', data);
+  });
+  DM.Events.on('enemy:down', data => {
+    const play = current(null, data.enemy?.world);
+    if (!play) return;
+    if (data.human && data.lethal) GP.ruleEvent(play, 'unmade', data);
+    if (data.enemy instanceof DM.Enemies.Behemoth) GP.ruleEvent(play, 'behemoth', data);
+  });
+  DM.Events.on('emitter:down', entity => {
+    const play = current(null, entity.world);
+    if (play) GP.ruleEvent(play, 'emitter', entity);
+  });
+  DM.Events.on('veidt:yield', entity => {
+    const play = current(null, entity.world);
+    if (play) GP.ruleEvent(play, 'veidt', entity);
+  });
+  DM.Events.on('atom:absorbed', () => {
+    const play = current();
+    if (play) GP.ruleEvent(play, 'atom');
+  });
+  DM.Events.on('vortex:hit', lost => {
+    const play = current();
+    if (play) GP.ruleEvent(play, 'vortex', { lost });
+  });
+  DM.Events.on('player:down', player => {
+    const play = current(player);
+    if (play) persist(play);
+  });
+  window.addEventListener('pagehide', () => { if (active) persist(active); });
+})();
+</script>
+<script>/* src/game/glass-palace-tracking.js */
+/* Optional palace challenge notes. Untracked play keeps its original HUD methods. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const GP = DM.GlassPalace;
+  const G = DM.Gfx;
+  const I = DM.Input;
+  const E = DM.Engine;
+  const BLUE = '#b9ecff';
+  const GOLD = '#e2c287';
+  const GREEN = '#b3e4ca';
+  const RED = '#e6b4a1';
+  const hudOriginals = new WeakMap();
+  const inside = (point, rect) => point.x >= rect.x && point.x <= rect.x + rect.w &&
+    point.y >= rect.y && point.y <= rect.y + rect.h;
+  const matching = (pin, momentId, challengeId) => pin?.momentId === momentId && pin.challengeId === challengeId;
+
+  function actualMoment(play) {
+    if (!play?.chapter || play.ctx?.scene !== play || play.ctx.chapter !== play.chapter) return false;
+    return DM.Chapters.get(play.chapter.id) === play.chapter && GP.challengeDefs(play.chapter.id).length === 3;
+  }
+
+  class TrackingMenu extends DM.UI.Menu {
+    rowRect(index) {
+      if (index < 3) return { x: 940, y: 194 + index * 105, w: 220, h: 43 };
+      const clear = this.items[index].clearTracking;
+      return { x: 360, y: clear ? 511 : 565, w: 560, h: 42 };
+    }
+  }
+
+  class TrackingPanel {
+    constructor(value, options = {}) {
+      this.play = value?.ctx ? value : null;
+      this.moment = GP.find(this.play ? this.play.chapter.id : value?.id);
+      this.result = options.result || null;
+      this.returnLabel = options.returnLabel || 'RETURN TO PAUSE';
+      this.opaque = false;
+      this.cursor = 'pointer';
+      this.t = 0;
+    }
+    enter() {
+      I.clearAll();
+      this.refresh();
+    }
+    refresh() {
+      if (!this.moment) return;
+      this.status = GP.status(this.moment.id);
+      this.pin = GP.tracking();
+      this.rows = this.status.challenges.map((definition) => ({
+        ...definition,
+        live: this.play && !this.result ? GP.liveChallenge(this.play, definition.id) : null,
+        result: this.result?.breakdown?.find((row) => row.id === definition.id) || null,
+      }));
+      const items = this.rows.map((row) => ({
+        challengeId: row.id,
+        label: matching(this.pin, this.moment.id, row.id) ? 'STOP TRACKING' : 'TRACK THIS',
+        action: () => {
+          if (matching(GP.tracking(), this.moment.id, row.id)) GP.clearTracking();
+          else GP.pinChallenge(this.moment.id, row.id);
+          if (this.play && !this.result) GP.attachTracking(this.play);
+          this.refresh();
+          this.menu.sel = this.rows.findIndex((entry) => entry.id === row.id);
+        },
+      }));
+      if (this.pin) items.push({
+        label: 'CLEAR TRACKED CHALLENGE',
+        clearTracking: true,
+        action: () => {
+          GP.clearTracking();
+          if (this.play && !this.result) GP.attachTracking(this.play);
+          this.refresh();
+          this.menu.sel = this.menu.items.length - 1;
+        },
+      });
+      items.push({ label: this.returnLabel, action: () => this.close() });
+      this.menu = new TrackingMenu(items, { size: 17, align: 'center', onBack: () => this.close() });
+    }
+    close() {
+      I.clearAll();
+      E.pop();
+    }
+    update(dt) {
+      this.t += dt;
+      this.menu?.update(dt);
+    }
+    render(g) {
+      if (!this.moment) return;
+      g.fillStyle = 'rgba(2,7,14,0.98)';
+      g.fillRect(72, 68, 1136, 584);
+      g.strokeStyle = 'rgba(169,225,247,0.65)';
+      g.strokeRect(72.5, 68.5, 1135, 583);
+      G.text(g, this.result ? 'MOMENT RESULTS' : 'MOMENT CHALLENGES', 112, 126, {
+        size: 34, color: BLUE, spacing: 3, weight: 700,
+      });
+      G.text(g, this.moment.title + ' · ' + this.status.earned + ' / 3 fragments recovered', 112, 161, {
+        size: 15, color: '#b1c4ce',
+      });
+      this.rows.forEach((row, index) => {
+        const y = 188 + index * 105;
+        const tracked = matching(this.pin, this.moment.id, row.id);
+        G.panel(g, 110, y, 1060, 97, { fill: '#0b1723', accent: tracked ? GOLD : row.complete ? GREEN : '#8d9ca6' });
+        G.text(g, row.label.toUpperCase(), 132, y + 27, {
+          size: 21, color: row.complete ? GREEN : '#e6d9bc',
+        });
+        G.paragraph(g, row.description, 132, y + 38, 780, 19, {
+          size: 15, font: DM.FONTS.type, color: '#b7c9d1',
+        });
+        const result = row.result;
+        let line;
+        if (result) {
+          const outcome = result.outcome === 'new' ? 'NEW FRAGMENT' : result.outcome === 'already'
+            ? result.legacy ? 'LEGACY FRAGMENT RETAINED' : 'PREVIOUSLY RECOVERED' : 'MISSED THIS RUN';
+          line = outcome + ' · ' + result.progress;
+        } else if (row.live) line = (row.legacy ? 'LEGACY FRAGMENT RETAINED · ' : row.complete ? 'RECOVERED BEFORE · ' : '') +
+          row.live.progress;
+        else line = row.legacy ? 'Fragment retained from earlier rules.' : row.complete
+          ? 'Recovered in an earlier run.' : 'Awarded only when this moment finishes.';
+        G.paragraph(g, line, 132, y + 71, 1008, 18, {
+          size: 13, font: DM.FONTS.type, color: result?.outcome === 'missed' ? RED : tracked ? GOLD : '#abc5cd',
+        });
+      });
+      const selected = this.menu.items[this.menu.sel];
+      const row = this.rows.find((entry) => entry.id === selected?.challengeId);
+      const warning = GP.warning || (GP.available === false ? 'Palace progress is session only.' : '');
+      const explanation = warning || row?.result?.reason || row?.live?.reason ||
+        'Track one challenge. Live progress is provisional; fragments are awarded at completion.';
+      G.paragraph(g, explanation, 640, 616, 1040, 17, {
+        size: 13, font: DM.FONTS.type, color: warning ? GOLD : '#adc5cf', align: 'center',
+      });
+      this.menu.render(g);
+    }
+  }
+
+  function renderTracking(g, play, controller) {
+    const hud = play.hud;
+    if (E.top() !== play || !hud.gameHudVisible() || play.failed || play.ctx.done || hud.flashAlpha > 0.05) return;
+    if (hud.captions.length || hud.banners.length) return;
+    const prompt = play.player.interactTarget;
+    if (prompt) {
+      const point = play.world.camera.toScreen(prompt.x, prompt.y - prompt.r - 30);
+      const width = G.measure(g, prompt.interact.label, { size: 15 }) + 44;
+      const y = point.y + Math.sin(hud.t * 4) * 2;
+      if (point.x + width / 2 >= 20 && point.x - width / 2 <= 320 && y + 12 >= 148 && y - 16 <= 260) return;
+    }
+    const row = controller.snapshot;
+    if (!row) return;
+    const color = row.state === 'missed' ? RED : row.earned ? GREEN : GOLD;
+    G.panel(g, 20, 148, 300, 112, { fill: 'rgba(3,10,19,0.94)', accent: color });
+    G.text(g, row.legacy ? 'TRACKED · LEGACY FRAGMENT' : row.earned ? 'TRACKED · RECOVERED BEFORE'
+      : 'TRACKED MOMENT CHALLENGE', 32, 168, {
+      size: 13, color,
+    });
+    G.text(g, row.label.toUpperCase(), 32, 190, { size: 16, color: '#e6eef0' });
+    G.paragraph(g, row.progress, 32, 202, 276, 18, {
+      size: 13, font: DM.FONTS.type, color: '#c0d1d8',
+    });
+    const state = row.legacy ? 'LEGACY FRAGMENT RETAINED' : row.earned ? 'FRAGMENT ALREADY RECOVERED'
+      : row.state === 'missed' ? 'MISSED THIS ATTEMPT' : row.state === 'ready'
+      ? 'CONDITION MET · FINISH TO CLAIM' : 'IN PROGRESS · FINISH TO CLAIM';
+    G.text(g, GP.available === false ? 'SESSION ONLY · BACK UP IN THE PALACE' : state, 32, 248, {
+      size: 13, color,
+    });
+  }
+
+  GP.attachTracking = (play) => {
+    if (!play?.hud) return null;
+    const hud = play.hud;
+    const old = hudOriginals.get(hud);
+    if (old) {
+      hud.update = old.update;
+      hud.render = old.render;
+      hudOriginals.delete(hud);
+    }
+    play.glassPalaceTracking = null;
+    const pin = GP.tracking();
+    if (!pin || pin.momentId !== play.chapter?.id || !actualMoment(play)) return null;
+    const controller = {
+      ...pin, snapshot: GP.liveChallenge(play, pin.challengeId), updates: 1, timer: 0.25,
+    };
+    if (!controller.snapshot) return null;
+    play.glassPalaceTracking = controller;
+    const original = { update: hud.update, render: hud.render };
+    hudOriginals.set(hud, original);
+    hud.update = function (dt) {
+      original.update.call(this, dt);
+      controller.timer -= dt;
+      if (controller.timer > 0) return;
+      controller.timer = 0.25;
+      controller.snapshot = GP.liveChallenge(play, controller.challengeId);
+      controller.updates++;
+    };
+    hud.render = function (g) {
+      renderTracking(g, play, controller);
+      original.render.call(this, g);
+    };
+    return controller;
+  };
+
+  GP.addTrackingPauseAction = (pause) => {
+    if (!actualMoment(pause.play)) return;
+    const menu = pause.menu;
+    const index = menu.items.length;
+    menu.items.push({ label: 'MOMENT CHALLENGES', action: () => E.push(new TrackingPanel(pause.play)) });
+    const rowRect = menu.rowRect;
+    menu.rowRect = function (row) {
+      return row === index ? { x: 430, y: 615, w: 420, h: 42 } : rowRect.call(this, row);
+    };
+  };
+
+  GP.addCompletionDetails = (screen, play, result) => {
+    if (!result?.breakdown || screen.glassPalaceDetailsRect) return;
+    screen.glassPalaceDetailsRect = { x: 24, y: 58, w: 282, h: 36 };
+    const update = screen.update;
+    const render = screen.render;
+    screen.update = function (dt) {
+      if (I.pressed('hint') || I.clicked() && inside(I.mouse, this.glassPalaceDetailsRect)) {
+        I.clearAll();
+        E.push(new TrackingPanel(play, { result, returnLabel: 'RETURN TO RESULTS' }));
+        return;
+      }
+      update.call(this, dt);
+    };
+    screen.render = function (g) {
+      render.call(this, g);
+      const rect = this.glassPalaceDetailsRect;
+      G.panel(g, rect.x, rect.y, rect.w, rect.h, { fill: '#07141e', accent: BLUE });
+      G.text(g, 'CHALLENGE DETAILS · H', rect.x + rect.w / 2, rect.y + 24, {
+        size: 15, color: '#d5eef0', align: 'center',
+      });
+    };
+  };
+
+  GP.TrackingPanel = TrackingPanel;
+  DM.Events.on('play:begin', ({ scene }) => GP.attachTracking(scene));
+})();
+</script>
+<script>/* src/game/glass-palace-portability.js */
+/* Portable palace progress. Existing campaign, bonus and case slots are never written. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const GP = DM.GlassPalace;
+  const FORMAT = 'dr-manhattan.glass-palace.backup';
+  const LIMIT = 256 * 1024;
+  const object = (value) => !!value && typeof value === 'object' && !Array.isArray(value);
+  const bytes = (text) => new TextEncoder().encode(text).length;
+  const only = (value, keys) => object(value) && Object.keys(value).every((key) => keys.includes(key));
+
+  function summary(data) {
+    const countFragments = Object.values(data.challenges).reduce(
+      (count, values) => count + Object.values(values).filter((value) => value === true).length,
+      0,
+    );
+    const countEpilogues = Object.values(data.epilogueSeen).filter((value) => value === true).length;
+    return { data, countFragments, countEpilogues, visits: data.visits };
+  }
+
+  function validated(raw) {
+    const fields = ['version', 'challenges', 'epilogueSeen', 'visits', 'tracking'];
+    if (raw?.version === 2) fields.push('rulesVersion', 'awardVersions', 'runs');
+    if (!only(raw, fields) || ![1, 2].includes(raw.version))
+      throw new Error('Choose compatible Glass Palace progress.');
+    if (raw.rulesVersion !== undefined && ![1, 2].includes(raw.rulesVersion))
+      throw new Error('The backup uses incompatible palace challenge rules.');
+    if (!object(raw.challenges) || !object(raw.epilogueSeen))
+      throw new Error('The palace progress records are invalid.');
+    if (!Number.isInteger(raw.visits) || raw.visits < 0 || raw.visits > 1e9)
+      throw new Error('The palace visit count is invalid.');
+    const ids = GP.moments().map((moment) => moment.id);
+    if (raw.tracking !== undefined && raw.tracking !== null) {
+      if (!only(raw.tracking, ['momentId', 'challengeId']) || !ids.includes(raw.tracking.momentId) ||
+        !['mercy', 'swift', 'detail'].includes(raw.tracking.challengeId))
+        throw new Error('The backup contains an invalid tracked challenge.');
+    }
+    for (const [id, values] of Object.entries(raw.challenges)) {
+      if (!ids.includes(id) || !only(values, ['mercy', 'swift', 'detail']))
+        throw new Error('The backup contains an unavailable moment or challenge.');
+      if (Object.values(values).some((value) => value !== true))
+        throw new Error('The backup contains an invalid challenge record.');
+    }
+    if (!only(raw.epilogueSeen, ['return', 'observe', 'depart']))
+      throw new Error('The backup contains an unavailable reflection.');
+    if (Object.values(raw.epilogueSeen).some((value) => value !== true))
+      throw new Error('The backup contains an invalid reflection record.');
+    if (raw.awardVersions !== undefined) {
+      if (!object(raw.awardVersions)) throw new Error('The award rule records are invalid.');
+      for (const [id, versions] of Object.entries(raw.awardVersions)) {
+        if (!ids.includes(id) || !only(versions, ['mercy', 'swift', 'detail']))
+          throw new Error('The backup contains an unavailable award rule.');
+        for (const [slot, version] of Object.entries(versions)) {
+          if (![1, 2].includes(version) || raw.challenges[id]?.[slot] !== true)
+            throw new Error('The backup contains an invalid award rule record.');
+        }
+      }
+    }
+    if (raw.runs !== undefined) {
+      if (!object(raw.runs)) throw new Error('The palace run checkpoints are invalid.');
+      for (const [key, value] of Object.entries(raw.runs)) {
+        if (!GP.cleanRunCheckpoint?.(value, key)) throw new Error('The backup contains an invalid run checkpoint.');
+      }
+    }
+    return GP.sanitize(raw);
+  }
+
+  const Backup = (GP.Backup = {
+    encode() {
+      const data = GP.sanitize(GP.load());
+      const text = JSON.stringify({ format: FORMAT, version: 1, data }, null, 2);
+      if (bytes(text) > LIMIT) throw new Error('The palace backup is too large.');
+      return text;
+    },
+    decode(text) {
+      if (typeof text !== 'string' || bytes(text) > LIMIT)
+        throw new Error('Choose a palace backup smaller than 256 KiB.');
+      let packet;
+      try {
+        packet = JSON.parse(text, (key, value) => {
+          if (['__proto__', 'constructor', 'prototype'].includes(key))
+            throw new Error('Unsafe backup field.');
+          return value;
+        });
+      } catch (_) {
+        throw new Error('The palace backup could not be read.');
+      }
+      if (!only(packet, ['format', 'version', 'data']) || packet.format !== FORMAT || packet.version !== 1)
+        throw new Error('Choose a compatible Glass Palace backup.');
+      return summary(validated(packet.data));
+    },
+    restore(text) {
+      const result = Backup.decode(text);
+      if (GP.readOnly) throw new Error('The existing palace save is protected. Use a compatible game copy.');
+      let existing;
+      try {
+        existing = localStorage.getItem(GP.key);
+      } catch (_) {
+        throw new Error('Saving is blocked. Keep your backup and enable browser storage.');
+      }
+      if (existing) {
+        try {
+          GP.sanitize(JSON.parse(existing));
+        } catch (_) {
+          throw new Error('The existing palace save is protected. Keep it before using a compatible game copy.');
+        }
+      }
+      try {
+        localStorage.setItem(GP.key, JSON.stringify(result.data));
+      } catch (_) {
+        throw new Error('Saving is blocked. Keep your backup and enable browser storage.');
+      }
+      GP.data = result.data;
+      GP.available = true;
+      GP.readOnly = false;
+      GP.warning = '';
+      return result;
+    },
+  });
+
+  class BackupScreen {
+    constructor(hub) {
+      this.hub = hub;
+      this.opaque = false;
+      this.cursor = 'pointer';
+      this.closed = false;
+      this.selection = 0;
+    }
+    enter() {
+      DM.Input.clearAll();
+      this.closed = false;
+      const root = document.createElement('div');
+      this.root = root;
+      root.id = 'glass-palace-backup';
+      root.setAttribute('role', 'dialog');
+      root.setAttribute('aria-modal', 'true');
+      root.setAttribute('aria-labelledby', 'glass-palace-backup-title');
+      root.style.cssText =
+        'position:fixed;inset:0;z-index:10;display:grid;place-items:center;background:' +
+        '#030810ef;color:#e8dfca;font:16px/1.6 system-ui;overflow:auto';
+      const card = document.createElement('section');
+      card.style.cssText =
+        'width:min(86vw,620px);box-sizing:border-box;padding:28px;background:#101f2c;border:1px solid #a38a5c';
+      const title = document.createElement('h2');
+      title.id = 'glass-palace-backup-title';
+      title.textContent = 'GLASS PALACE BACKUP';
+      const note = document.createElement('p');
+      note.textContent =
+        'Export before restoring. Restore replaces palace fragments, reflection history, ' +
+        'tracked challenge, run evidence and visits only. ' +
+        'Campaign, bonus and After Midnight progress and settings stay unchanged.';
+      const status = document.createElement('p');
+      status.setAttribute('role', 'status');
+      status.setAttribute('aria-live', 'polite');
+      status.style.minHeight = '55px';
+      const button = (text, action) => {
+        const element = document.createElement('button');
+        element.type = 'button';
+        element.textContent = text;
+        element.style.cssText =
+          'display:block;width:100%;padding:13px;margin:12px 0;background:#203d50;' +
+          'border:1px solid #8196a2;color:#f1e4c8;font:600 15px system-ui;cursor:pointer';
+        element.onclick = action;
+        return element;
+      };
+      const exportButton = button('EXPORT PALACE PROGRESS', () => {
+        try {
+          const url = URL.createObjectURL(new Blob([Backup.encode()], { type: 'application/json' }));
+          const anchor = document.createElement('a');
+          anchor.href = url;
+          anchor.download = 'glass-palace-progress.json';
+          anchor.click();
+          setTimeout(() => URL.revokeObjectURL(url), 30000);
+          status.textContent = 'Keep the downloaded JSON file with your game. Session progress is included.';
+        } catch (error) {
+          status.textContent = error.message;
+        }
+      });
+      const label = document.createElement('label');
+      label.textContent = 'Choose a Glass Palace backup to preview: ';
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.json,application/json';
+      label.append(input);
+      let pending = null;
+      const restore = button('RESTORE THIS PALACE PROGRESS', () => {
+        if (!pending || this.closed) return;
+        try {
+          const result = Backup.restore(pending);
+          status.textContent =
+            'Restored ' + result.countFragments + ' fragment(s) and ' + result.countEpilogues + ' reflection(s).';
+          pending = null;
+          restore.disabled = true;
+          back.focus();
+        } catch (error) {
+          status.textContent = error.message;
+        }
+      });
+      restore.disabled = true;
+      input.onchange = async () => {
+        const request = ++this.selection;
+        pending = null;
+        restore.disabled = true;
+        const file = input.files[0];
+        if (!file) {
+          status.textContent = 'No backup is selected.';
+          return;
+        }
+        try {
+          if (file.size > LIMIT) throw new Error('Choose a palace backup smaller than 256 KiB.');
+          const text = await file.text();
+          if (this.closed || !root.isConnected || request !== this.selection) return;
+          const result = Backup.decode(text);
+          pending = text;
+          restore.disabled = false;
+          status.textContent =
+            result.countFragments + ' fragment(s) and ' + result.countEpilogues +
+            ' reflection(s) ready. Press Restore to replace palace progress only.';
+        } catch (error) {
+          if (!this.closed && root.isConnected && request === this.selection)
+            status.textContent = error.message;
+        }
+      };
+      const close = () => {
+        if (this.closed) return;
+        DM.Input.clearAll();
+        DM.Engine.pop();
+        DM.Engine.canvas.focus({ preventScroll: true });
+      };
+      const back = button('BACK TO THE PALACE', close);
+      this.keydown = (event) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          event.stopPropagation();
+          close();
+        } else if (event.key === 'Tab') {
+          const focusable = [...card.querySelectorAll('button,input')].filter((node) => !node.disabled);
+          const index = focusable.indexOf(document.activeElement);
+          if (event.shiftKey && index <= 0) {
+            event.preventDefault();
+            focusable.at(-1).focus();
+          } else if (!event.shiftKey && (index < 0 || index === focusable.length - 1)) {
+            event.preventDefault();
+            focusable[0].focus();
+          }
+          event.stopPropagation();
+        } else event.stopPropagation();
+      };
+      document.addEventListener('keydown', this.keydown, true);
+      card.append(title, note, exportButton, label, restore, status, back);
+      root.append(card);
+      document.body.append(root);
+      exportButton.focus();
+    }
+    exit() {
+      this.closed = true;
+      this.selection++;
+      document.removeEventListener('keydown', this.keydown, true);
+      this.root?.remove();
+    }
+    update() {}
+    render() {}
+  }
+
+  GP.BackupScreen = BackupScreen;
+})();
+</script>
+<script>/* src/game/glass-palace-navigation.js */
+/* Palace-local wayfinding. Selecting a pane never moves Jon or starts a level. */
+(function () {
+  'use strict';
+  const DM = window.DM;
+  const GP = DM.GlassPalace;
+  const G = DM.Gfx;
+  const I = DM.Input;
+  const E = DM.Engine;
+  const BLUE = '#b9ecff';
+  const GOLD = '#e2c287';
+  const FILTERS = ['all', 'unfinished', 'checkpoints'];
+  const FILTER_LABELS = { all: 'ALL MOMENTS', unfinished: 'MISSING FRAGMENTS', checkpoints: 'CHECKPOINTS' };
+  const distance = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+
+  function freePoint(world, x, y, radius) {
+    if (world.isFree(x, y, radius)) return true;
+    if (x < radius || y < radius || x > world.w - radius || y > world.h - radius) return false;
+    // Collision resolution can leave Jon exactly tangent to a wall. Zero-depth
+    // contact is a valid starting position, not a reason to discard his guide.
+    return world.walls.every((wall) => {
+      if (wall.noCollide) return true;
+      const hit = DM.U.circleRect(x, y, radius, wall);
+      return !hit || hit.depth <= 0.001;
+    });
+  }
+
+  function freeSegment(world, a, b, radius) {
+    const samples = Math.max(1, Math.ceil(distance(a, b) / 8));
+    for (let n = 0; n <= samples; n++) {
+      const t = n / samples;
+      if (!freePoint(world, a.x + (b.x - a.x) * t, a.y + (b.y - a.y) * t, radius)) return false;
+    }
+    return true;
+  }
+
+  // A small, event-driven grid search includes wall clearance and diagonal corners.
+  // Render and ordinary walking never rebuild the grid.
+  GP.planPalaceRoute = (world, start, goal, radius) => {
+    if (!world || !freePoint(world, start.x, start.y, radius) || !freePoint(world, goal.x, goal.y, radius)) return [];
+    if (freeSegment(world, start, goal, radius)) return [{ x: start.x, y: start.y }, { x: goal.x, y: goal.y }];
+    const step = 60;
+    const nodes = [];
+    const grid = new Map();
+    for (let y = step; y < world.h; y += step) {
+      for (let x = step; x < world.w; x += step) {
+        if (!world.isFree(x, y, radius)) continue;
+        const node = { x, y, parent: null, cost: Infinity, score: Infinity };
+        nodes.push(node);
+        grid.set(x + ':' + y, node);
+      }
+    }
+    const open = new Set();
+    const closed = new Set();
+    for (const node of nodes) {
+      if (distance(start, node) > step * 2 || !freeSegment(world, start, node, radius)) continue;
+      node.cost = distance(start, node);
+      node.score = node.cost + distance(node, goal);
+      open.add(node);
+    }
+    let end = null;
+    while (open.size) {
+      let current = null;
+      for (const node of open) if (!current || node.score < current.score) current = node;
+      open.delete(current);
+      if (distance(current, goal) <= step * 2 && freeSegment(world, current, goal, radius)) {
+        end = current;
+        break;
+      }
+      closed.add(current);
+      for (let dy = -step; dy <= step; dy += step) {
+        for (let dx = -step; dx <= step; dx += step) {
+          if (!dx && !dy) continue;
+          const next = grid.get(current.x + dx + ':' + (current.y + dy));
+          if (!next || closed.has(next) || !freeSegment(world, current, next, radius)) continue;
+          const cost = current.cost + Math.hypot(dx, dy);
+          if (cost >= next.cost) continue;
+          next.parent = current;
+          next.cost = cost;
+          next.score = cost + distance(next, goal);
+          open.add(next);
+        }
+      }
+    }
+    if (!end) return [];
+    const path = [{ x: goal.x, y: goal.y }];
+    for (let node = end; node; node = node.parent) path.push({ x: node.x, y: node.y });
+    path.push({ x: start.x, y: start.y });
+    path.reverse();
+    const route = [path[0]];
+    for (let index = 0; index < path.length - 1;) {
+      let next = path.length - 1;
+      while (next > index + 1 && !freeSegment(world, path[index], path[next], radius)) next--;
+      route.push(path[next]);
+      index = next;
+    }
+    return route;
+  };
+
+  class WalkingGuide extends DM.Entity {
+    constructor(hub) {
+      super({
+        x: hub.world.w / 2,
+        y: hub.world.h / 2,
+        r: Math.hypot(hub.world.w, hub.world.h) / 2,
+        static: true,
+        body: false,
+        solid: false,
+        layer: 0,
+        disintegratable: false,
+      });
+      this.hub = hub;
+    }
+    render(g) {
+      const hub = this.hub;
+      if (!hub.navigationTargetId || !hub.navigationRoute.length) return;
+      const points = [hub.player, ...hub.navigationRoute.slice(1)];
+      g.save();
+      g.strokeStyle = 'rgba(211,239,245,0.6)';
+      g.lineWidth = 2;
+      g.setLineDash([4, 12]);
+      g.beginPath();
+      points.forEach((point, index) => {
+        if (index) g.lineTo(point.x, point.y);
+        else g.moveTo(point.x, point.y);
+      });
+      g.stroke();
+      g.setLineDash([]);
+      const goal = points.at(-1);
+      g.strokeStyle = GOLD;
+      g.beginPath();
+      g.arc(goal.x, goal.y, 24, 0, Math.PI * 2);
+      g.stroke();
+      g.restore();
+    }
+  }
+
+  class AtlasPanel {
+    constructor(hub) {
+      this.hub = hub;
+      this.opaque = false;
+      this.cursor = 'pointer';
+      this.filter = 'all';
+      this.page = 0;
+      this.pageSize = 5;
+    }
+    enter() {
+      I.clearAll();
+      this.refresh();
+    }
+    close() {
+      I.clearAll();
+      E.pop();
+    }
+    refresh() {
+      this.destinations = this.hub.destinations();
+      this.entries = this.destinations.filter((entry) => {
+        if (this.filter === 'unfinished') return entry.kind === 'moment' && entry.earned < entry.total;
+        if (this.filter === 'checkpoints') return entry.kind === 'moment' && !!entry.checkpoint;
+        return true;
+      });
+      this.pageCount = Math.max(1, Math.ceil(this.entries.length / this.pageSize));
+      this.page = DM.U.clamp(this.page, 0, this.pageCount - 1);
+      const items = [{
+        label: 'SHOW',
+        value: () => FILTER_LABELS[this.filter],
+        adjust: (direction) => {
+          this.filter = FILTERS[(FILTERS.indexOf(this.filter) + direction + FILTERS.length) % FILTERS.length];
+          this.page = 0;
+          this.refresh();
+        },
+      }];
+      for (const entry of this.entries.slice(this.page * this.pageSize, (this.page + 1) * this.pageSize)) {
+        items.push({
+          label: entry.title.toUpperCase(),
+          destinationId: entry.id,
+          value: () => entry.kind === 'moment'
+            ? (entry.checkpoint ? 'RESUME · ' : '') + entry.earned + ' / ' + entry.total
+            : 'READ',
+          action: () => {
+            if (this.hub.setDestination(entry.id)) this.close();
+          },
+        });
+      }
+      if (!this.entries.length) items.push({ label: 'NO MOMENTS MATCH THIS VIEW', disabled: true });
+      if (this.pageCount > 1) {
+        items.push({
+          label: 'PAGE',
+          value: () => (this.page + 1) + ' / ' + this.pageCount,
+          adjust: (direction) => {
+            this.page = (this.page + direction + this.pageCount) % this.pageCount;
+            this.refresh();
+            this.menu.sel = this.menu.items.findIndex((item) => item.label === 'PAGE');
+          },
+        });
+      }
+      items.push({
+        label: 'CLEAR WALKING GUIDE',
+        disabled: !this.hub.navigationTargetId,
+        action: () => {
+          this.hub.clearDestination();
+          this.close();
+        },
+      });
+      items.push({ label: 'RETURN TO THE PALACE', action: () => this.close() });
+      this.menu = new DM.UI.Menu(items, {
+        x: 112, y: 196, w: 660, itemH: 42, size: 18, valueW: 210, onBack: () => this.close(),
+      });
+    }
+    update(dt) {
+      this.menu.update(dt);
+    }
+    render(g) {
+      G.panel(g, 72, 68, 1136, 584, { fill: 'rgba(2,7,14,0.96)', accent: BLUE });
+      G.text(g, 'MOMENT ATLAS', 112, 126, { size: 34, color: BLUE, spacing: 3, weight: 700 });
+      G.text(g, 'Choose a destination, then follow the glass trail. You remain in control.', 112, 162, {
+        size: 15, color: '#b1c4ce',
+      });
+      this.menu.render(g);
+      const x = 858;
+      const y = 236;
+      const width = 300;
+      const height = 258;
+      const sx = width / this.hub.world.w;
+      const sy = height / this.hub.world.h;
+      const selectedId = this.menu.items[this.menu.sel]?.destinationId || this.hub.navigationTargetId;
+      g.fillStyle = '#241f25';
+      g.fillRect(x, y, width, height);
+      g.strokeStyle = 'rgba(185,231,245,0.5)';
+      g.strokeRect(x + 110 * sx, y + 180 * sy, 1880 * sx, 1470 * sy);
+      for (const entry of this.destinations) {
+        const selected = entry.id === selectedId;
+        g.fillStyle = selected ? GOLD : entry.kind === 'moment' ? '#99cada' : '#b0d6b3';
+        g.beginPath();
+        g.arc(x + entry.x * sx, y + entry.y * sy, selected ? 6 : 3.5, 0, Math.PI * 2);
+        g.fill();
+      }
+      g.fillStyle = '#ffffff';
+      g.beginPath();
+      g.arc(x + this.hub.player.x * sx, y + this.hub.player.y * sy, 4, 0, Math.PI * 2);
+      g.fill();
+      G.text(g, 'WHITE · YOU    GOLD · DESTINATION', x + width / 2, 522, {
+        size: 13, align: 'center', color: '#bed4df',
+      });
+      G.text(g, 'Arrows / WASD · Choose', x + width / 2, 554, {
+        size: 14, align: 'center', color: '#bed4df',
+      });
+      G.text(g, 'Left / Right · Filter or page', x + width / 2, 578, {
+        size: 14, align: 'center', color: '#bed4df',
+      });
+      G.text(g, 'Enter · Guide     Esc · Return', x + width / 2, 602, {
+        size: 14, align: 'center', color: '#bed4df',
+      });
+    }
+  }
+
+  Object.assign(GP, { AtlasPanel, WalkingGuide });
 })();
 </script>
 <script>/* src/data/glass-palace-atmosphere.js */
@@ -30681,57 +32046,9 @@
     if (subtitle) G.text(g, subtitle, 112, 162, { size: 15, color: '#b1c4ce', spacing: 1 });
   }
 
-  function challengeRows(moment) {
-    const status = GP.status(moment.id);
-    return (
-      status.challenges || GP.challengeDefs(moment.id).map((def) => ({ ...def, complete: false }))
-    );
-  }
-
-  class ChallengesPanel {
+  class ChallengesPanel extends GP.TrackingPanel {
     constructor(moment) {
-      this.moment = moment;
-      this.opaque = false;
-      this.cursor = 'pointer';
-    }
-    enter() {
-      I.clearAll();
-      this.status = GP.status(this.moment.id);
-      this.rows = challengeRows(this.moment);
-      this.menu = new DM.UI.Menu([{ label: 'RETURN TO THE MOMENT', action: closePanel }], {
-        x: 640,
-        y: 566,
-        w: 720,
-        align: 'center',
-        size: 20,
-        onBack: closePanel,
-      });
-    }
-    update(dt) {
-      this.menu.update(dt);
-    }
-    render(g) {
-      const status = this.status;
-      panel(
-        g,
-        'MOMENT CHALLENGES',
-        this.moment.title + ' · ' + status.earned + ' / 3 fragments recovered',
-      );
-      this.rows.forEach((challenge, index) => {
-        const y = 214 + index * 108;
-        const complete = !!(challenge.complete || challenge.earned);
-        G.panel(g, 110, y - 30, 1060, 91, { accent: complete ? '#9cdbbd' : '#8d9ca6' });
-        G.text(g, (complete ? '◆ ' : '◇ ') + (challenge.label || challenge.name), 132, y + 1, {
-          size: 23,
-          color: complete ? '#b3e4ca' : '#e6d9bc',
-        });
-        G.paragraph(g, challenge.description || '', 132, y + 17, 1008, 22, {
-          size: 16,
-          font: DM.FONTS.type,
-          color: '#b7c9d1',
-        });
-      });
-      this.menu.render(g);
+      super(moment, { returnLabel: 'RETURN TO THE MOMENT' });
     }
   }
 
@@ -30852,7 +32169,8 @@
   }
 
   class LeavePanel {
-    constructor() {
+    constructor(hub) {
+      this.hub = hub;
       this.opaque = false;
       this.cursor = 'pointer';
     }
@@ -30862,11 +32180,25 @@
         [
           { label: 'KEEP WALKING', action: closePanel },
           {
+            label: 'MOMENT ATLAS',
+            action: () => {
+              closePanel();
+              this.hub.openAtlas();
+            },
+          },
+          {
+            label: 'BACK UP / RESTORE PALACE',
+            action: () => {
+              closePanel();
+              E.push(new GP.BackupScreen(this.hub));
+            },
+          },
+          {
             label: 'RETURN TO THE MAIN GAME',
             action: () => E.fadeTo(() => E.set(new DM.Scenes.Title())),
           },
         ],
-        { x: 640, y: 326, w: 760, align: 'center', size: 23, itemH: 53, onBack: closePanel },
+        { x: 640, y: 274, w: 760, align: 'center', size: 23, itemH: 53, onBack: closePanel },
       );
     }
     update(dt) {
@@ -31242,6 +32574,9 @@
       this.chapter = { id: 'glass_palace', music: 'glass_palace', stages: [{ id: 'hall' }] };
       this.ctx = { mapName: 'gp_palace', stageIndex: 0, locked: false };
       this.hud = { captions: [] };
+      this.navigationTargetId = null;
+      this.navigationRoute = [];
+      this.navigationTimer = 0;
     }
     enter() {
       GP.load();
@@ -31317,6 +32652,7 @@
       });
       this.slab = world.add(new LedgerSlab(this));
       this.epilogueTerminal = this.epilogueReadySnapshot ? world.add(new EarthMoment(this)) : null;
+      world.add(new GP.WalkingGuide(this));
       if (!world.isFree(this.player.x, this.player.y, this.player.r)) {
         this.player.x = world.spawn.x;
         this.player.y = world.spawn.y;
@@ -31324,6 +32660,7 @@
       world.camera.snap(this.player.x, this.player.y - 180);
       this.previewCursor = 0;
       this.previewT = 0;
+      if (this.navigationTargetId) this.setDestination(this.navigationTargetId);
     }
     resume() {
       const moments = GP.moments();
@@ -31338,7 +32675,74 @@
         this.maximumFragmentsSnapshot !== maximumFragments();
       if (changed) this.rebuild(moments);
       else this.refreshSnapshots(moments);
+      if (this.navigationTargetId) this.setDestination(this.navigationTargetId);
       I.clearAll();
+    }
+    destinations() {
+      const entries = this.panes.map((pane) => {
+        const status = this.statusSnapshots[pane.moment.id];
+        return {
+          id: pane.moment.id,
+          kind: 'moment',
+          title: pane.moment.title,
+          x: pane.x,
+          y: pane.y + 100,
+          earned: status.earned,
+          total: status.total,
+          checkpoint: !!pane.moment.checkpoint,
+        };
+      });
+      entries.push({ id: 'ledger', kind: 'ledger', title: 'The glass ledger', x: 1050, y: 1230 });
+      if (this.epilogueTerminal) {
+        entries.push({ id: 'earth', kind: 'earth', title: 'The question of Earth', x: 1510, y: 1260 });
+      }
+      return entries;
+    }
+    navigationTarget() {
+      return this.destinations().find((entry) => entry.id === this.navigationTargetId) || null;
+    }
+    setDestination(id) {
+      const target = this.destinations().find((entry) => entry.id === id);
+      if (!target) {
+        this.clearDestination();
+        return false;
+      }
+      const route = GP.planPalaceRoute(this.world, this.player, target, this.player.r);
+      if (!route.length) {
+        this.clearDestination();
+        return false;
+      }
+      this.navigationTargetId = id;
+      this.navigationRoute = route;
+      this.navigationTimer = 0.5;
+      this.navigationFrom = { x: this.player.x, y: this.player.y };
+      return true;
+    }
+    clearDestination() {
+      this.navigationTargetId = null;
+      this.navigationRoute = [];
+      this.navigationFrom = null;
+    }
+    openAtlas() {
+      E.push(new GP.AtlasPanel(this));
+    }
+    updateNavigation(dt) {
+      if (!this.navigationTargetId) return;
+      const target = this.navigationTarget();
+      if (!target) return this.clearDestination();
+      if (U.dist(this.player.x, this.player.y, target.x, target.y) < 55) {
+        const entity = this.player.interactTarget;
+        const arrived = target.kind === 'moment' ? entity?.moment?.id === target.id
+          : target.kind === 'ledger' ? entity === this.slab : entity === this.epilogueTerminal;
+        if (arrived) return this.clearDestination();
+      }
+      this.navigationTimer -= dt;
+      if (this.navigationTimer > 0) return;
+      this.navigationTimer = 0.5;
+      if (this.navigationFrom && U.dist(
+        this.player.x, this.player.y, this.navigationFrom.x, this.navigationFrom.y,
+      ) < 36) return;
+      this.setDestination(target.id);
     }
     exit() {
       for (const pane of this.panes || []) pane.preview.dispose();
@@ -31346,16 +32750,27 @@
     }
     update(dt) {
       this.t += dt;
+      const atlasButton = { x: 1020, y: 63, w: 235, h: 33 };
+      const mouse = I.mouse;
+      const atlasClick = I.clicked() && mouse.x >= atlasButton.x && mouse.x <= atlasButton.x + atlasButton.w &&
+        mouse.y >= atlasButton.y && mouse.y <= atlasButton.y + atlasButton.h;
+      if (I.pressed('hint') || atlasClick) {
+        I.consume('hint');
+        I.consume('confirm');
+        this.openAtlas();
+        return;
+      }
       if (I.pressed('back') || I.pressed('pause')) {
         I.consume('back');
         I.consume('pause');
-        E.push(new LeavePanel());
+        E.push(new LeavePanel(this));
         return;
       }
       const world = this.world;
       world.mouse = world.camera.toWorld(I.mouse.x, I.mouse.y);
       world.ceasefire = true;
       world.update(dt);
+      this.updateNavigation(dt);
       world.camera.follow(this.player.x, this.player.y - 180, dt, 5);
       this.previewT -= dt;
       if (this.previewT <= 0 && this.panes.length) {
@@ -31393,6 +32808,11 @@
           spacing: 2,
         },
       );
+      G.panel(g, 1020, 63, 235, 33, { fill: 'rgba(4,12,21,0.9)', accent: BLUE });
+      G.text(g, 'H · MOMENT ATLAS', 1137, 85, {
+        size: 15, align: 'center', color: '#e2f5fb', spacing: 1,
+      });
+      this.renderNavigation(g);
       const warning =
         GP.warning ||
         (GP.available === false ? 'Palace progress is session only. Keep this window open.' : '');
@@ -31408,9 +32828,35 @@
       const target = this.player.interactTarget;
       const hint = target
         ? target.interact.label
-        : 'WASD / ARROWS · WALK     E · READ / ENTER     ESC · LEAVE';
+        : 'WASD / ARROWS · WALK     E · READ / ENTER     H · ATLAS     ESC · LEAVE';
       G.panel(g, 205, DM.H - 57, 870, 36, { fill: 'rgba(3,10,19,0.9)', accent: '#84b9d0' });
       G.text(g, hint, 640, DM.H - 33, { size: 15, align: 'center', color: '#e4eadc', spacing: 1 });
+    }
+    renderNavigation(g) {
+      if (!this.navigationTargetId) return;
+      const target = this.navigationTarget();
+      if (!target) return;
+      G.panel(g, 240, 545, 800, 43, { fill: 'rgba(3,10,19,0.94)', accent: GOLD });
+      G.text(g, 'FOLLOW THE GLASS · ' + target.title.toUpperCase(), 640, 573, {
+        size: 16, align: 'center', color: '#f0dfbd', spacing: 1,
+      });
+      const point = this.world.camera.toScreen(target.x, target.y);
+      if (point.x >= 55 && point.x <= DM.W - 55 && point.y >= 120 && point.y <= 510) return;
+      const dx = point.x - DM.W / 2;
+      const dy = point.y - DM.H / 2;
+      const scale = Math.min(540 / Math.max(1, Math.abs(dx)), 165 / Math.max(1, Math.abs(dy)), 1);
+      g.save();
+      g.translate(DM.W / 2 + dx * scale, DM.H / 2 + dy * scale);
+      g.rotate(Math.atan2(dy, dx));
+      g.fillStyle = GOLD;
+      g.beginPath();
+      g.moveTo(12, 0);
+      g.lineTo(-8, -8);
+      g.lineTo(-4, 0);
+      g.lineTo(-8, 8);
+      g.closePath();
+      g.fill();
+      g.restore();
     }
   }
 
@@ -31702,6 +33148,7 @@
         });
       }
     };
+    GP.addCompletionDetails(screen, play, result);
     return screen;
   };
 })();

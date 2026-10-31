@@ -1,0 +1,72 @@
+{
+  "target": "index.html",
+  "engine": "chromium",
+  "browser": "151.0.7922.34",
+  "captures": [
+    {
+      "view": "atlas",
+      "path": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/glass-palace-navigation/chromium/source/atlas-fresh-live.png",
+      "navigation": {
+        "onTop": false,
+        "id": null,
+        "target": null,
+        "route": [],
+        "x": 1050,
+        "y": 1310,
+        "interactId": null,
+        "error": null,
+        "down": false,
+        "god": false,
+        "combat": false
+      },
+      "sourceUnchanged": true
+    },
+    {
+      "view": "guide",
+      "path": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/glass-palace-navigation/chromium/source/guide-fresh-live.png",
+      "navigation": {
+        "onTop": true,
+        "id": "prologue",
+        "target": {
+          "id": "prologue",
+          "kind": "moment",
+          "x": 420,
+          "y": 450
+        },
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 420,
+            "y": 450
+          }
+        ],
+        "x": 1050,
+        "y": 1310,
+        "interactId": null,
+        "error": null,
+        "down": false,
+        "god": false,
+        "combat": false
+      },
+      "sourceUnchanged": true
+    }
+  ],
+  "method": "Fresh initial saves; open the hub from its actual title menu, leave normal RAF running at least ten seconds, open the atlas and choose a destination through real input. No actor/camera positioning, god mode, simulation clock changes or frame replacement. Trail view is taken before movement.",
+  "publicationCopies": [
+    {
+      "file": "atlas-fresh-live.png",
+      "sha256": "1400c2fb3190e1af7ab7cfeece1f625576481e9efe78f2a982dc109af7449d53",
+      "bytes": 595265,
+      "byteIdenticalToRawCapture": true
+    },
+    {
+      "file": "guide-fresh-live.png",
+      "sha256": "ee863e0f77f6a09252a52bbc3f26d3de0d9d719000ed10eafab997f7ba7f99ce",
+      "bytes": 1148592,
+      "byteIdenticalToRawCapture": true
+    }
+  ]
+}

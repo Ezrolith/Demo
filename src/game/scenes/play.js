@@ -57,6 +57,7 @@
     }
 
     exit() {
+      if (DM.GlassPalace?.endRuleRun) DM.GlassPalace.endRuleRun(this);
       clearTimeout(this.blurTimer);
       for (const off of this.offs || []) off();
       if (this.ctx) this.ctx.dispose();
@@ -81,6 +82,7 @@
       this.ctx = new DM.ChapterContext(this, ch);
       this.ctx.memo = this.memo;
       this.ctx.applyCarry(carry);
+      if (DM.GlassPalace?.beginRuleRun) DM.GlassPalace.beginRuleRun(this, { stage, carry, retry: !!retry });
       this.ctx.start(stage);
       this.ctx.step(0);
       DM.Audio.stopHums();
@@ -114,6 +116,7 @@
       if (s.facing != null) p.facing = s.facing;
       world.add(p);
       world.camera.snap(p.x, p.y);
+      if (DM.GlassPalace?.observeRuleWorld) DM.GlassPalace.observeRuleWorld(this);
       DM.Audio.stopHums();
     }
 
