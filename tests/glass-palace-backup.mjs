@@ -137,7 +137,7 @@ try {
     ['future wrapper versions are rejected', encoded.replace('"version": 1', '"version": 2')],
     ['unexpected envelope fields are rejected', JSON.stringify({ ...JSON.parse(encoded), campaign: {} })],
     ['missing progress data is rejected', JSON.stringify({ format: 'dr-manhattan.glass-palace.backup', version: 1 })],
-    ['future palace data versions are rejected', packet({ ...progress(), version: 2 })],
+    ['future palace data versions are rejected', packet({ ...progress(), version: 3 })],
     ['unknown progress fields are rejected', packet({ ...progress(), sourceSlots: {} })],
     ['unknown moments are rejected', packet({ ...progress(), challenges: { imaginary: { mercy: true } } })],
     ['unknown challenge names are rejected', packet({ ...progress(), challenges: { prologue: { invented: true } } })],

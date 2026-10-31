@@ -21,7 +21,10 @@
     typeof value === 'number' && Number.isFinite(value) && value >= 0 && value <= 1e9
       ? value
       : fallback;
-  const fresh = () => ({ version: 1, challenges: {}, epilogueSeen: {}, visits: 0, tracking: null });
+  const fresh = () => ({
+    version: 2, rulesVersion: 2, challenges: {}, awardVersions: {},
+    epilogueSeen: {}, visits: 0, tracking: null, runs: {},
+  });
   const observed = new WeakSet();
   const completionResults = new WeakMap();
   const stats = (source) => ({
@@ -32,6 +35,7 @@
   });
   const campaignNumber = (value, fallback = 0) =>
     number(typeof value === 'string' && value.trim() !== '' ? Number(value) : value, fallback);
+  GP.rulesVersion = 2;
   GP.key = KEY;
   GP.sourceKeys = { ...SOURCE_KEYS };
   GP.data = null;
@@ -40,7 +44,7 @@
   GP.warning = '';
   GP.timeTargets = {
     prologue: 480,
-    reassembly: 240,
+    reassembly: 360,
     superman: 480,
     deterrent: 540,
     mars: 600,
@@ -256,101 +260,13 @@
     return tier === 'mercy' ? 'return' : tier === 'detached' ? 'depart' : 'observe';
   };
 
-  const details = {
-    prologue: {
-      label: 'A watch repaired',
-      description: 'Repair the watch and complete the chamber calibration.',
-      test: (state) => state.flags.repaired === true && state.flags.calibrated === true,
-    },
-    reassembly: {
-      label: 'A form remembered',
-      description: 'Finish with your human form fully reassembled.',
-      test: (state) => state.flags.reassembled === true && state.player.form === 'manhattan',
-    },
-    superman: {
-      label: 'Four lives kept',
-      description: 'Spare at least four people during the chapter.',
-      test: (state) => state.stats.spared >= 4,
-    },
-    deterrent: {
-      label: 'A steady outline',
-      description: 'Finish with at least three quarters of your coherence.',
-      test: (state) =>
-        state.player.maxCoherence > 0 && state.player.coherence >= state.player.maxCoherence * 0.75,
-    },
-    mars: {
-      label: 'Every remembered year',
-      description: 'Recover all six memories.',
-      test: (state) => state.stats.memories >= 6,
-    },
-    karnak: {
-      label: 'Silence in the storm',
-      description: 'Shut down every tachyon emitter.',
-      test: (state) =>
-        Array.isArray(state.refs.emitters) &&
-        state.refs.emitters.length >= 4 &&
-        state.refs.emitters.every((entity) => entity.dead || entity.neutralized),
-    },
-    last_broadcast: {
-      label: 'Names and voices',
-      description: 'Recover every evidence record and rescue all three engineers.',
-      test: (state) => state.flags.evidence === 7 && state.flags.engineers === 7,
-    },
-    ninth_minute: {
-      label: 'Six beyond the second',
-      description: 'Bring all six passengers to safety.',
-      test: (state) => number(state.flags.passengers) >= 6,
-    },
-    long_summer: {
-      label: 'A cooler street',
-      description: 'Rescue all six residents and finish with City Heat below 30.',
-      test: (state) => number(state.flags.rescued) >= 6 && number(state.flags.heat, Infinity) < 30,
-    },
-    am_dead_air: {
-      label: 'Every intercepted trace',
-      description: 'Recover all three traces and download the buyer list.',
-      test: (state) => state.flags.clues === 7 && state.flags.downloaded === true,
-    },
-    am_undertow: {
-      label: 'Four names aboard',
-      description: 'Bring all four workers aboard and cast off.',
-      test: (state) => number(state.flags.rescued) >= 4 && state.flags.departed === true,
-    },
-    am_glass_archive: {
-      label: 'The archive returned',
-      description: 'Recover the ledger, capture the Surveyor and return the archive.',
-      test: (state) =>
-        state.flags.ledger === true &&
-        state.flags.surveyorCaptured === true &&
-        state.flags.archiveReturned === true,
-    },
-  };
-
   GP.challengeDefs = (id) => {
     const chapter = registry().find(
       (entry) => entry.chapter.id === id || entry.chapter.amId === id,
     )?.chapter;
     if (!chapter) return [];
     const target = number(GP.timeTargets[chapter.id], 600);
-    const detail = details[chapter.id];
-    return [
-      {
-        id: 'mercy',
-        type: 'unmade',
-        label: 'No one unmade',
-        description: 'Finish without unmaking a person.',
-        test: (state) => state.stats.unmade === 0,
-      },
-      {
-        id: 'swift',
-        type: 'time',
-        label: 'Before the hand moves',
-        description: 'Finish in under ' + Math.round(target / 60) + ' minutes.',
-        targetSeconds: target,
-        test: (state) => state.stats.time > 0 && state.stats.time < target,
-      },
-      { id: 'detail', type: 'level', ...detail },
-    ].map((definition) => ({ ...definition, name: definition.label }));
+    return DM.PalaceChallengeRulesV2?.forMoment(chapter.id, target) || [];
   };
 
   function cleanTracking(value) {
@@ -374,102 +290,34 @@
       refs: ctx.refs || {},
       player: play.player,
       failed: !!(play.failed || play.player.down),
+      run: GP.runEvidence?.(play) || null,
     };
   };
 
-  const countBits = (value, mask) => {
-    let bits = Math.floor(number(value)) & mask;
-    let count = 0;
-    while (bits) {
-      count += bits & 1;
-      bits >>>= 1;
-    }
-    return count;
-  };
-  const timeText = (value) => DM.U.fmtTime(Math.max(0, value));
-  const doneText = (value) => value ? 'done' : 'needed';
-
-  function detailProgress(chapter, state) {
-    const flags = state.flags;
-    const stats = state.stats;
-    const player = state.player;
-    switch (chapter.id) {
-      case 'prologue':
-        return 'Watch ' + doneText(flags.repaired === true) + ' · Calibration ' + doneText(flags.calibrated === true);
-      case 'reassembly':
-        return 'Reassembly ' + doneText(flags.reassembled === true) + ' · Manhattan form ' +
-          doneText(player.form === 'manhattan');
-      case 'superman':
-        return Math.floor(stats.spared) + ' / 4 people spared';
-      case 'deterrent': {
-        const coherence = player.maxCoherence > 0 ? player.coherence / player.maxCoherence * 100 : 0;
-        return Math.floor(Math.max(0, coherence)) + '% coherence · Finish at 75% or more';
-      }
-      case 'mars':
-        return Math.floor(stats.memories) + ' / 6 memories found';
-      case 'karnak': {
-        const emitters = Array.isArray(state.refs.emitters) ? state.refs.emitters : [];
-        const silenced = emitters.filter((entity) => entity.dead || entity.neutralized).length;
-        return silenced + ' / 4 emitters shut down' + (emitters.length < 4 ? ' · Search the storm' : '');
-      }
-      case 'last_broadcast':
-        return countBits(flags.evidence, 7) + ' / 3 records · ' + countBits(flags.engineers, 7) + ' / 3 engineers';
-      case 'ninth_minute':
-        return Math.floor(number(flags.passengers)) + ' / 6 passengers safe';
-      case 'long_summer': {
-        const heat = typeof flags.heat === 'number' && Number.isFinite(flags.heat) ? Math.floor(flags.heat) : 'unknown';
-        return Math.floor(number(flags.rescued)) + ' / 6 residents · Heat ' + heat + ' (below 30)';
-      }
-      case 'am_dead_air':
-        return countBits(flags.clues, 7) + ' / 3 traces · Buyer list ' + doneText(flags.downloaded === true);
-      case 'am_undertow':
-        return Math.floor(number(flags.rescued)) + ' / 4 aboard · Cast off ' + doneText(flags.departed === true);
-      case 'am_glass_archive':
-        return 'Ledger ' + doneText(flags.ledger === true) + ' · Surveyor ' + doneText(flags.surveyorCaptured === true) +
-          ' · Archive ' + doneText(flags.archiveReturned === true);
-      default:
-        return '';
-    }
-  }
-
-  function liveRow(chapter, state, definition, earned) {
+  function liveRow(chapter, state, definition, earned, awardVersion = 0) {
     const metNow = !!definition.test(state);
+    const display = definition.live(state);
+    const legacy = !!earned && awardVersion < GP.rulesVersion;
     const row = {
+      ...display,
       momentId: chapter.id,
       challengeId: definition.id,
       label: definition.label,
       description: definition.description,
-      state: metNow ? 'ready' : 'pending',
       earned: !!earned,
+      awardVersion,
+      legacy,
       metNow,
-      progress: '',
-      reason: metNow ? 'Requirement met so far. Finish the moment to earn its fragment.' : definition.description,
-      current: null,
-      target: null,
     };
-    if (definition.id === 'mercy') {
-      row.current = state.stats.unmade;
-      row.target = 0;
-      row.progress = Math.floor(state.stats.unmade) + ' people unmade this attempt';
-      row.state = metNow ? 'viable' : 'missed';
-      row.reason = metNow ? 'No one unmade so far. Finish without unmaking a person.'
-        : 'A person was unmade this attempt. Retry from a checkpoint without that outcome or start again.';
-    } else if (definition.id === 'swift') {
-      row.current = state.stats.time;
-      row.target = definition.targetSeconds;
-      row.progress = timeText(state.stats.time) + ' / ' + timeText(definition.targetSeconds) +
-        ' · ' + timeText(Math.max(0, definition.targetSeconds - state.stats.time)) + ' left';
-      row.state = state.stats.time < definition.targetSeconds ? 'viable' : 'missed';
-      row.reason = row.state === 'viable' ? 'Finish before the time target. Pausing stops the field timer.'
-        : 'The time target was reached. This attempt must finish strictly under ' + timeText(definition.targetSeconds) + '.';
-    } else row.progress = detailProgress(chapter, state);
     if (state.failed) {
       row.state = 'missed';
       row.reason = 'This attempt ended before the challenge could be completed.';
     }
     if (earned) {
-      row.reason = 'This fragment was recovered in an earlier run. Live progress describes this attempt; ' +
-        'it cannot add another fragment.';
+      row.reason = legacy ? 'This fragment is retained from earlier challenge rules. ' +
+        'The displayed condition describes the new rules; it cannot add another fragment.'
+        : 'This fragment was recovered in an earlier run. Live progress describes this attempt; ' +
+          'it cannot add another fragment.';
       if (state.failed) row.reason += ' This attempt ended before completion.';
     }
     return row;
@@ -481,11 +329,13 @@
     const definition = GP.challengeDefs(state.chapter.id).find((entry) => entry.id === challengeId);
     if (!definition) return null;
     const earned = GP.data?.challenges?.[state.chapter.id]?.[definition.id] === true;
-    return liveRow(state.chapter, state, definition, earned);
+    const awardVersion = GP.data?.awardVersions?.[state.chapter.id]?.[definition.id] || (earned ? 1 : 0);
+    return liveRow(state.chapter, state, definition, earned, awardVersion);
   };
 
   GP.sanitize = (raw) => {
-    if (!object(raw) || raw.version !== 1)
+    if (!object(raw) || ![1, 2].includes(raw.version) ||
+      (raw.rulesVersion !== undefined && ![1, 2].includes(raw.rulesVersion)))
       throw new Error('Choose a compatible Glass Palace save.');
     const out = fresh();
     for (const entry of registry()) {
@@ -494,13 +344,25 @@
       if (!object(values)) continue;
       const kept = {};
       for (const key of ['mercy', 'swift', 'detail']) if (values[key] === true) kept[key] = true;
-      if (Object.keys(kept).length) out.challenges[id] = kept;
+      if (Object.keys(kept).length) {
+        out.challenges[id] = kept;
+        out.awardVersions[id] = {};
+        for (const key of Object.keys(kept)) {
+          out.awardVersions[id][key] = raw.version === 2 && raw.awardVersions?.[id]?.[key] === 2 ? 2 : 1;
+        }
+      }
     }
     for (const id of ['return', 'observe', 'depart']) {
       if (raw.epilogueSeen?.[id] === true) out.epilogueSeen[id] = true;
     }
     out.visits = Math.floor(number(raw.visits));
     out.tracking = cleanTracking(raw.tracking);
+    if (raw.version === 2 && object(raw.runs) && GP.cleanRunCheckpoint) {
+      for (const [key, value] of Object.entries(raw.runs)) {
+        const clean = GP.cleanRunCheckpoint(value, key);
+        if (clean) out.runs[key] = clean;
+      }
+    }
     return out;
   };
   GP.load = () => {
@@ -511,7 +373,7 @@
       if (!text) return GP.data;
       if (text.length > 256 * 1024) throw new Error('The saved palace is too large.');
       const raw = JSON.parse(text);
-      if (raw?.version > 1) {
+      if (raw?.version > 2 || raw?.rulesVersion > 2) {
         GP.readOnly = true;
         GP.available = false;
         GP.warning = 'A newer palace save is protected. This visit is session only.';
@@ -567,11 +429,15 @@
   GP.status = (id) => {
     const item = GP.find(id);
     if (!item) return null;
-    const values = GP.load().challenges[item.id] || {};
+    const data = GP.load();
+    const values = data.challenges[item.id] || {};
+    const versions = data.awardVersions?.[item.id] || {};
     const challenges = GP.challengeDefs(item.id).map((definition) => ({
       ...definition,
       complete: values[definition.id] === true,
       earned: values[definition.id] === true,
+      awardVersion: values[definition.id] === true ? versions[definition.id] || 1 : 0,
+      legacy: values[definition.id] === true && (versions[definition.id] || 1) < GP.rulesVersion,
     }));
     return {
       id: item.id,
@@ -599,12 +465,15 @@
     const state = GP.challengeSnapshot(play);
     const data = GP.load();
     const previous = data.challenges[item.id] || {};
+    if (!object(data.awardVersions)) data.awardVersions = {};
+    const versions = { ...(data.awardVersions[item.id] || {}) };
+    for (const key of Object.keys(previous)) if (previous[key] && !versions[key]) versions[key] = 1;
     const next = { ...previous };
     const newlyEarned = [];
     const passed = [];
     const breakdown = [];
     for (const definition of GP.challengeDefs(item.id)) {
-      const row = liveRow(chapter, state, definition, previous[definition.id]);
+      const row = liveRow(chapter, state, definition, previous[definition.id], versions[definition.id] || 0);
       const outcome = previous[definition.id] ? 'already' : row.metNow ? 'new' : 'missed';
       breakdown.push(Object.freeze({
         id: definition.id,
@@ -613,16 +482,25 @@
         outcome,
         passed: row.metNow,
         progress: row.progress,
-        reason: row.metNow ? previous[definition.id] ? 'Recovered in an earlier run.' : 'Requirement met at completion.'
-          : definition.id === 'detail' ? 'Requirement not met at completion: ' + row.progress + '.' : row.reason,
+        awardVersion: previous[definition.id] ? versions[definition.id] || 1 : row.metNow ? 2 : 0,
+        legacy: !!previous[definition.id] && (versions[definition.id] || 1) < GP.rulesVersion,
+        reason: previous[definition.id] ? (versions[definition.id] || 1) < GP.rulesVersion
+          ? 'Fragment retained from earlier rules. New condition ' + (row.metNow ? 'met' : 'not met') + ' this run.'
+          : 'Recovered in an earlier run. Current condition ' + (row.metNow ? 'met' : 'not met') + '.'
+          : row.metNow ? 'Requirement met at completion under rules version 2.'
+            : 'Requirement not met at completion: ' + row.progress + '. ' + row.reason,
       }));
       if (row.metNow) {
         passed.push(definition.id);
-        if (!previous[definition.id]) newlyEarned.push(definition.id);
+        if (!previous[definition.id]) {
+          newlyEarned.push(definition.id);
+          versions[definition.id] = GP.rulesVersion;
+        }
         next[definition.id] = true;
       }
     }
     data.challenges[item.id] = next;
+    data.awardVersions[item.id] = versions;
     if (newlyEarned.length) GP.write();
     const result = {
       momentId: item.id,

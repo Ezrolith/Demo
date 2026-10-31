@@ -19,8 +19,12 @@
   }
 
   function validated(raw) {
-    if (!only(raw, ['version', 'challenges', 'epilogueSeen', 'visits', 'tracking']) || raw.version !== 1)
+    const fields = ['version', 'challenges', 'epilogueSeen', 'visits', 'tracking'];
+    if (raw?.version === 2) fields.push('rulesVersion', 'awardVersions', 'runs');
+    if (!only(raw, fields) || ![1, 2].includes(raw.version))
       throw new Error('Choose compatible Glass Palace progress.');
+    if (raw.rulesVersion !== undefined && ![1, 2].includes(raw.rulesVersion))
+      throw new Error('The backup uses incompatible palace challenge rules.');
     if (!object(raw.challenges) || !object(raw.epilogueSeen))
       throw new Error('The palace progress records are invalid.');
     if (!Number.isInteger(raw.visits) || raw.visits < 0 || raw.visits > 1e9)
@@ -41,6 +45,23 @@
       throw new Error('The backup contains an unavailable reflection.');
     if (Object.values(raw.epilogueSeen).some((value) => value !== true))
       throw new Error('The backup contains an invalid reflection record.');
+    if (raw.awardVersions !== undefined) {
+      if (!object(raw.awardVersions)) throw new Error('The award rule records are invalid.');
+      for (const [id, versions] of Object.entries(raw.awardVersions)) {
+        if (!ids.includes(id) || !only(versions, ['mercy', 'swift', 'detail']))
+          throw new Error('The backup contains an unavailable award rule.');
+        for (const [slot, version] of Object.entries(versions)) {
+          if (![1, 2].includes(version) || raw.challenges[id]?.[slot] !== true)
+            throw new Error('The backup contains an invalid award rule record.');
+        }
+      }
+    }
+    if (raw.runs !== undefined) {
+      if (!object(raw.runs)) throw new Error('The palace run checkpoints are invalid.');
+      for (const [key, value] of Object.entries(raw.runs)) {
+        if (!GP.cleanRunCheckpoint?.(value, key)) throw new Error('The backup contains an invalid run checkpoint.');
+      }
+    }
     return GP.sanitize(raw);
   }
 
@@ -125,7 +146,8 @@
       title.textContent = 'GLASS PALACE BACKUP';
       const note = document.createElement('p');
       note.textContent =
-        'Export before restoring. Restore replaces palace fragments, reflection history, tracked challenge and visits only. ' +
+        'Export before restoring. Restore replaces palace fragments, reflection history, ' +
+        'tracked challenge, run evidence and visits only. ' +
         'Campaign, bonus and After Midnight progress and settings stay unchanged.';
       const status = document.createElement('p');
       status.setAttribute('role', 'status');

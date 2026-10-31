@@ -509,6 +509,7 @@
     fire(p, s, world) {
       p.spend(this.cost);
       s.cd = this.cooldown;
+      DM.Events.emit('power:cast-start', { player: p, world, power: 'disintegrate' });
       const pt = reach(p, world.mouse.x, world.mouse.y, this.range * p.scale);
       const b = { x: pt.x, y: pt.y, t: 0.16, r: p.scale > 1.3 ? 80 : 50 };
       s.pending.push(b);

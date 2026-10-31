@@ -109,10 +109,12 @@
         let line;
         if (result) {
           const outcome = result.outcome === 'new' ? 'NEW FRAGMENT' : result.outcome === 'already'
-            ? 'PREVIOUSLY RECOVERED' : 'MISSED THIS RUN';
+            ? result.legacy ? 'LEGACY FRAGMENT RETAINED' : 'PREVIOUSLY RECOVERED' : 'MISSED THIS RUN';
           line = outcome + ' · ' + result.progress;
-        } else if (row.live) line = (row.complete ? 'RECOVERED BEFORE · ' : '') + row.live.progress;
-        else line = row.complete ? 'Recovered in an earlier run.' : 'Awarded only when this moment finishes.';
+        } else if (row.live) line = (row.legacy ? 'LEGACY FRAGMENT RETAINED · ' : row.complete ? 'RECOVERED BEFORE · ' : '') +
+          row.live.progress;
+        else line = row.legacy ? 'Fragment retained from earlier rules.' : row.complete
+          ? 'Recovered in an earlier run.' : 'Awarded only when this moment finishes.';
         G.paragraph(g, line, 132, y + 71, 1008, 18, {
           size: 13, font: DM.FONTS.type, color: result?.outcome === 'missed' ? RED : tracked ? GOLD : '#abc5cd',
         });
@@ -144,14 +146,16 @@
     if (!row) return;
     const color = row.state === 'missed' ? RED : row.earned ? GREEN : GOLD;
     G.panel(g, 20, 148, 300, 112, { fill: 'rgba(3,10,19,0.94)', accent: color });
-    G.text(g, row.earned ? 'TRACKED · RECOVERED BEFORE' : 'TRACKED MOMENT CHALLENGE', 32, 168, {
+    G.text(g, row.legacy ? 'TRACKED · LEGACY FRAGMENT' : row.earned ? 'TRACKED · RECOVERED BEFORE'
+      : 'TRACKED MOMENT CHALLENGE', 32, 168, {
       size: 13, color,
     });
     G.text(g, row.label.toUpperCase(), 32, 190, { size: 16, color: '#e6eef0' });
     G.paragraph(g, row.progress, 32, 202, 276, 18, {
       size: 13, font: DM.FONTS.type, color: '#c0d1d8',
     });
-    const state = row.earned ? 'FRAGMENT ALREADY RECOVERED' : row.state === 'missed' ? 'MISSED THIS ATTEMPT' : row.state === 'ready'
+    const state = row.legacy ? 'LEGACY FRAGMENT RETAINED' : row.earned ? 'FRAGMENT ALREADY RECOVERED'
+      : row.state === 'missed' ? 'MISSED THIS ATTEMPT' : row.state === 'ready'
       ? 'CONDITION MET · FINISH TO CLAIM' : 'IN PROGRESS · FINISH TO CLAIM';
     G.text(g, GP.available === false ? 'SESSION ONLY · BACK UP IN THE PALACE' : state, 32, 248, {
       size: 13, color,

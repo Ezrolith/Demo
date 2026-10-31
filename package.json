@@ -32,7 +32,10 @@
     "test:palace-navigation": "node tests/glass-palace-navigation.mjs",
     "test:palace-backup": "node tests/glass-palace-backup.mjs",
     "test:palace-tracking": "node tests/glass-palace-tracking.mjs",
-    "test:palace-tracking-capture": "node tests/capture-glass-palace-tracking.mjs"
+    "test:palace-tracking-capture": "node tests/capture-glass-palace-tracking.mjs",
+    "test:palace-optionality": "node tests/glass-palace-optionality.mjs",
+    "test:palace-reload": "node tests/glass-palace-reload.mjs",
+    "test:palace-time-targets": "node tests/play-palace-time-targets.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

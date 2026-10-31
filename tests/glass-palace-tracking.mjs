@@ -17,7 +17,7 @@ const target = process.argv.find(value => value.endsWith('.html')) || 'index.htm
 const engine = process.env.QA_BROWSER || 'chromium';
 assert.ok(['chromium', 'firefox', 'webkit'].includes(engine), 'known browser engine');
 const build = target.includes('dist/') ? 'standalone' : 'source';
-const out = path.join(root, 'tests/out/glass-palace-tracking', engine, build);
+const out = path.resolve(process.env.TRACKING_OUT || path.join(root, 'tests/out/glass-palace-tracking', engine, build));
 mkdirSync(out, { recursive: true });
 const browser = await pw[engine].launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
@@ -25,6 +25,7 @@ const checks = [];
 const errors = [];
 const snapshots = [];
 const completionResults = [];
+const reloadDiagnostics = {};
 page.on('pageerror', error => errors.push(String(error)));
 const ev = (fn, value) => page.evaluate(fn, value);
 const wait = fn => page.waitForFunction(fn, null, { polling: 100 });
@@ -74,6 +75,38 @@ const protectedNow = () => ev(() => T.protected());
 const unchanged = before => ev(before => JSON.stringify(T.protected()) === JSON.stringify(before) &&
   window.__trackingWrites.every(entry => entry.key === DM.GlassPalace.key), before);
 const live = challengeId => ev(challengeId => DM.GlassPalace.liveChallenge(DM.dev.play(), challengeId), challengeId);
+const reloadState = pinSelection => {
+  const GP = window.DM?.GlassPalace;
+  const accepted = pinSelection ? GP.pinChallenge('prologue', 'swift') : undefined;
+  let raw = null;
+  let storageError = null;
+  try { raw = localStorage.getItem(GP?.key || 'dr-manhattan.glass-palace.v1'); }
+  catch (error) { storageError = String(error); }
+  let parsed = null;
+  try { parsed = raw === null ? null : JSON.parse(raw); }
+  catch (_) { parsed = { invalidJSON: true }; }
+  return {
+    accepted,
+    documentNonce: window.__trackingDocumentNonce,
+    timeOrigin: performance.timeOrigin,
+    readyState: document.readyState,
+    url: location.href,
+    booted: !!window.DM?.dev,
+    raw,
+    parsed,
+    storageError,
+    data: GP?.data ? JSON.parse(JSON.stringify(GP.data)) : null,
+    available: GP?.available,
+    readOnly: GP?.readOnly,
+    warning: GP?.warning,
+    blocked: window.__trackingBlock,
+    writes: window.__trackingWrites,
+    gets: window.__trackingGets,
+    campaignIds: window.DM?.Chapters?.list.map(chapter => chapter.id),
+    bonusIds: window.DM?.Bonus?.list.map(chapter => chapter.id),
+    caseIds: window.DM?.AfterMidnight?.cases.map(chapter => chapter.id),
+  };
+};
 const install = () => {
   DM.Save.settings.focusPause = false;
   DM.Save.settings.textSpeed = 'instant';
@@ -119,6 +152,36 @@ const install = () => {
       window.__trackingRawSet.call(localStorage, key, JSON.stringify(data));
       window.__trackingWrites = [];
     },
+    ruleFixture(play, options = {}) {
+      const run = play.glassPalaceRun;
+      if (!run) throw new Error('Fresh Play did not establish rules-v2 evidence.');
+      // Explicit controlled evidence, independent of the genuine event tests in
+      // glass-palace-optionality. Mandatory story flags remain valid.
+      Object.assign(run, {
+        photoSeen: options.mercy !== false,
+        researchMask: options.detail === false ? 3 : 7,
+        badgeSeen: true,
+        vortexAtomsLost: 0,
+        passiveAtoms: 30,
+        unmade: options.unmade ?? 0,
+        behemothSeen: true,
+        behemothDefeated: true,
+        behemothDisintegrations: 0,
+        behemothCoherence: 100,
+        behemothMaxCoherence: 100,
+        marsSeen: true,
+        marsDamage: 0,
+        emittersSeen: true,
+        emittersComplete: true,
+        emittersDamage: 0,
+        veidtSeen: true,
+        veidtDefeated: true,
+        veidtDisintegrations: 0,
+        damageTaken: 0,
+        fieldNotesMask: 3,
+      });
+      return run;
+    },
     start(id, stage = 0, carry = null) {
       const AM = DM.AfterMidnight;
       const chapter = DM.Chapters.get(id);
@@ -151,8 +214,8 @@ const install = () => {
         memories: 6,
       });
       Object.assign(play.ctx.flags, {
-        repaired: options.detail !== false,
-        calibrated: options.detail !== false,
+        repaired: true,
+        calibrated: true,
         reassembled: true,
         evidence: 7,
         engineers: 7,
@@ -165,7 +228,10 @@ const install = () => {
         ledger: true,
         surveyorCaptured: true,
         archiveReturned: true,
+        choice: 'broadcast',
+        moments: 7,
       });
+      this.ruleFixture(play, options);
       play.ctx.refs.emitters = [{ dead: true }, { neutralized: true }, { dead: true }, { dead: true }];
       if (id === 'reassembly') play.player.setForm('manhattan');
       play.player.coherence = play.player.maxCoherence;
@@ -182,6 +248,8 @@ const install = () => {
 
 try {
   await page.addInitScript(() => {
+    window.__trackingDocumentNonce = typeof crypto.randomUUID === 'function'
+      ? crypto.randomUUID() : performance.timeOrigin + ':' + Date.now();
     window.requestAnimationFrame = () => 0;
     window.__trackingGets = [];
     window.__trackingWrites = [];
@@ -278,10 +346,12 @@ try {
     timer[1].state === 'viable' && timer[2].state === 'viable' &&
     timer[3].state === 'missed' && timer[4].state === 'missed');
   check('a zero-time live snapshot cannot claim the finishing condition is already met', !timer[0].metNow);
+  await start('superman');
   const mercy = await ev(() => {
     const play = DM.dev.play();
     return [0, 1, 4].map(unmade => {
       play.ctx.stats.disintegrated = unmade;
+      play.glassPalaceRun.unmade = unmade;
       return { unmade, ...DM.GlassPalace.liveChallenge(play, 'mercy') };
     });
   });
@@ -289,10 +359,12 @@ try {
   check('mercy tracks people actually unmade and becomes missed after the first',
     mercy[0].state === 'viable' && mercy[0].current === 0 &&
     mercy[1].state === 'missed' && mercy[1].current === 1 && mercy[2].state === 'missed');
+  await start('prologue');
   await ev(() => {
     const play = DM.dev.play();
     Object.assign(play.ctx.stats, { time: 60, disintegrated: 0 });
     Object.assign(play.ctx.flags, { repaired: true, calibrated: true });
+    T.ruleFixture(play);
   });
   const provisional = await pure();
   check('live reads consume no source-slot or palace-storage reads and perform no writes', await ev(() => {
@@ -317,50 +389,58 @@ try {
     const failed = DM.GlassPalace.liveChallenge(play, 'detail');
     play.failed = false;
     play.player.down = true;
-    const downed = DM.GlassPalace.liveChallenge(play, 'mercy');
+    const downed = DM.GlassPalace.liveChallenge(play, 'swift');
     play.player.down = false;
     return failed.state === 'missed' && downed.state === 'missed';
   }));
 
   const boundaries = [
-    ['prologue', { repaired: true, calibrated: false }, { repaired: true, calibrated: true }],
-    ['reassembly', { reassembled: false }, { reassembled: true }],
+    ['prologue', { repaired: true, calibrated: true }, {}],
+    ['reassembly', { reassembled: true }, {}],
     ['superman', {}, {}],
     ['deterrent', {}, {}],
     ['mars', {}, {}],
     ['karnak', {}, {}],
-    ['last_broadcast', { evidence: 3, engineers: 7 }, { evidence: 7, engineers: 7 }],
-    ['ninth_minute', { passengers: 5 }, { passengers: 6 }],
+    ['last_broadcast', { evidence: 3, engineers: 7, choice: 'broadcast' }, { evidence: 7 }],
+    ['ninth_minute', { passengers: 6, moments: 3 }, { moments: 7 }],
     ['long_summer', { rescued: 6, heat: 30 }, { rescued: 6, heat: 29.99 }],
-    ['am_dead_air', { clues: 3, downloaded: true }, { clues: 7, downloaded: true }],
-    ['am_undertow', { rescued: 3, departed: true }, { rescued: 4, departed: true }],
-    ['am_glass_archive', { ledger: true, surveyorCaptured: true, archiveReturned: false },
-      { ledger: true, surveyorCaptured: true, archiveReturned: true }],
+    ['am_dead_air', { clues: 7, downloaded: true }, {}],
+    ['am_undertow', { rescued: 4, departed: true }, {}],
+    ['am_glass_archive', { ledger: true, surveyorCaptured: true, archiveReturned: true }, {}],
   ];
   for (const [id, pending, ready] of boundaries) {
     await start(id);
     const result = await ev(({ id, pending, ready }) => {
       const play = DM.dev.play();
       const GP = DM.GlassPalace;
+      const run = T.ruleFixture(play);
       Object.assign(play.ctx.flags, pending);
       if (id === 'reassembly') play.player.setForm('manhattan');
-      if (id === 'superman') play.ctx.stats.spared = 3;
-      if (id === 'deterrent') play.player.coherence = play.player.maxCoherence * 0.749;
+      if (id === 'prologue') run.researchMask = 3;
+      if (id === 'reassembly') run.passiveAtoms = 29;
+      if (id === 'superman') run.badgeSeen = false;
+      if (id === 'deterrent') run.behemothCoherence = 74.9;
       if (id === 'mars') play.ctx.stats.memories = 5;
-      if (id === 'karnak') play.ctx.refs.emitters = [{ dead: true }, { dead: true }, { dead: true }, { dead: false }];
+      if (id === 'karnak') run.emittersDamage = 40.1;
+      if (id.startsWith('am_')) run.fieldNotesMask = 1;
       const first = GP.liveChallenge(play, 'detail');
       Object.assign(play.ctx.flags, ready);
-      if (id === 'superman') play.ctx.stats.spared = 4;
-      if (id === 'deterrent') play.player.coherence = play.player.maxCoherence * 0.75;
+      if (id === 'prologue') run.researchMask = 7;
+      if (id === 'reassembly') run.passiveAtoms = 30;
+      if (id === 'superman') run.badgeSeen = true;
+      if (id === 'deterrent') run.behemothCoherence = 75;
       if (id === 'mars') play.ctx.stats.memories = 6;
-      if (id === 'karnak') play.ctx.refs.emitters[3].neutralized = true;
+      if (id === 'karnak') run.emittersDamage = 40;
+      if (id.startsWith('am_')) run.fieldNotesMask = 3;
       const second = GP.liveChallenge(play, 'detail');
       return { first, second };
     }, { id, pending, ready });
     snapshots.push({ label: id + '-detail-boundary', ...result });
-    check(id + ': a missing detail stays pending and meeting its real condition is only provisionally ready',
-      result.first.state === 'pending' && !result.first.metNow &&
-      result.second.state === 'ready' && result.second.metNow && !result.second.earned &&
+    const firstState = ['deterrent', 'karnak'].includes(id) ? 'missed' : 'pending';
+    const secondState = id === 'karnak' ? 'viable' : 'ready';
+    check(id + ': a missing or missed detail is distinct from a provisionally satisfied optional condition',
+      result.first.state === firstState && !result.first.metNow &&
+      result.second.state === secondState && result.second.metNow && !result.second.earned &&
       !!result.first.reason && !!result.second.reason && !!result.second.progress);
   }
   await start('long_summer');
@@ -374,13 +454,16 @@ try {
     return hot.state === 'pending' && cool.state === 'ready';
   }));
   await start('karnak');
-  check('a missing or truncated emitter reference never appears complete', await ev(() => {
+  check('mandatory emitter shutdown cannot invent missing or incomplete optional-segment evidence', await ev(() => {
     const play = DM.dev.play();
-    play.ctx.refs.emitters = [];
+    const run = T.ruleFixture(play);
+    play.ctx.refs.emitters = [{ dead: true }, { dead: true }, { dead: true }, { dead: true }];
+    run.emittersSeen = false;
+    run.emittersComplete = false;
     const empty = DM.GlassPalace.liveChallenge(play, 'detail');
-    play.ctx.refs.emitters = [{ dead: true }, { dead: true }, { dead: true }];
+    run.emittersSeen = true;
     const truncated = DM.GlassPalace.liveChallenge(play, 'detail');
-    return !empty.metNow && empty.state === 'pending' && !truncated.metNow && truncated.state === 'pending';
+    return !empty.metNow && empty.state === 'pending' && !truncated.metNow && truncated.state === 'viable';
   }));
   for (const id of ['am_patrol', 'am_rescue_clock']) {
     await start(id);
@@ -427,14 +510,25 @@ try {
     stats: { time: 120, spared: 1, disintegrated: 0, memories: 0 },
     found: [], flags: {},
   };
-  await start('prologue', 0, carry);
+  await start('prologue');
+  await ev(carry => {
+    const play = DM.dev.play();
+    Object.assign(play.ctx.stats, carry.stats);
+    DM.GlassPalace.saveRunCheckpoint(play, 1, carry);
+  }, carry);
+  await start('prologue', 1, carry);
   check('normal level entry attaches a matching pin and reads the carried clock immediately', await ev(() => {
     const controller = DM.dev.play().glassPalaceTracking;
     return controller?.momentId === 'prologue' && controller.challengeId === 'swift' &&
       controller.snapshot.current === 120 && controller.snapshot.target === 480;
   }));
+  // Instant map construction still yields one script frame before the stage's
+  // normal checkpoint write. Complete that lifecycle before measuring HUD work.
+  await ev(() => T.step(0.05));
+  check('the resumed stage establishes its real checkpoint before the read-only sampling baseline', await ev(() =>
+    DM.dev.play().ctx.checkpoint === 1));
   const controllerBefore = await protectedNow();
-  check('the tracked HUD samples at a bounded rate without reading progress slots every frame', await ev(() => {
+  const sampling = await ev(() => {
     const GP = DM.GlassPalace;
     const originalLive = GP.liveChallenge;
     const originalFind = GP.find;
@@ -449,10 +543,14 @@ try {
     try { T.step(1); }
     finally { GP.liveChallenge = originalLive; GP.find = originalFind; GP.status = originalStatus; }
     const play = DM.dev.play();
-    return liveCalls >= 3 && liveCalls <= 5 && sourceCalls === 0 && window.__trackingGets.length === 0 &&
-      window.__trackingWrites.length === 0 && play.glassPalaceTracking.snapshot.current > 120 &&
-      play.glassPalaceTracking.snapshot.current <= play.ctx.stats.time;
-  }) && await unchanged(controllerBefore));
+    return { liveCalls, sourceCalls, gets: window.__trackingGets, writes: window.__trackingWrites,
+      current: play.glassPalaceTracking.snapshot.current, time: play.ctx.stats.time };
+  });
+  snapshots.push({ label: 'bounded-controller-sampling', ...sampling });
+  check('the tracked HUD samples at a bounded rate without reading progress slots every frame',
+    sampling.liveCalls >= 3 && sampling.liveCalls <= 5 && sampling.sourceCalls === 0 && sampling.gets.length === 0 &&
+    sampling.writes.length === 0 && sampling.current > 120 && sampling.current <= sampling.time &&
+    await unchanged(controllerBefore));
   check('ordinary HUD drawing explains tracked progress without claiming an earned fragment', await ev(() => {
     const play = DM.dev.play();
     play.dialog.close();
@@ -520,7 +618,7 @@ try {
   check('choosing another challenge while paused replaces the live controller', await ev(() => {
     const controller = DM.dev.play().glassPalaceTracking;
     return DM.GlassPalace.tracking().challengeId === 'mercy' && controller.challengeId === 'mercy' &&
-      controller.snapshot.state === 'viable';
+      controller.snapshot.state === 'pending';
   }));
   await action('CLEAR TRACKED CHALLENGE');
   check('clearing tracking restores the original HUD methods on that play instance', await ev(() => {
@@ -552,6 +650,7 @@ try {
     const play = DM.dev.play();
     GP.pinChallenge('prologue', 'mercy');
     GP.attachTracking(play);
+    play.glassPalaceRun.photoSeen = true;
     play.ctx.checkpoint = 0;
     play.ctx.checkpointCarry = {
       stats: { time: 75, spared: 1, disintegrated: 0, memories: 0 }, found: [], flags: {},
@@ -562,11 +661,11 @@ try {
     play.retry();
     T.step(1.2);
   });
-  check('actual checkpoint retry rebuilds tracking from retained carry, discarding the failed attempt’s later stats', await ev(() => {
+  check('actual Retry keeps observed optional evidence while restoring the base checkpoint carry', await ev(() => {
     const play = DM.dev.play();
     return play.ctx !== window.__trackingPriorContext && play.ctx.stats.time >= 75 && play.ctx.stats.time < 77 &&
       play.ctx.stats.disintegrated === 0 && play.glassPalaceTracking?.challengeId === 'mercy' &&
-      play.glassPalaceTracking.snapshot.state === 'viable';
+      play.glassPalaceRun.photoSeen === true && play.glassPalaceTracking.snapshot.state === 'ready';
   }));
   await start('last_broadcast');
   check('a pin for another moment stays saved without attaching extra work to this level', await ev(() => {
@@ -586,7 +685,7 @@ try {
     DM.dev.play().glassPalaceTracking === null));
 
   await seedPalace();
-  const first = await ev(() => T.finish('prologue', { unmade: 1, detail: false }));
+  const first = await ev(() => T.finish('prologue', { mercy: false, detail: false }));
   completionResults.push(first);
   check('the real completion hook awards only fulfilled challenges and gives three frozen outcome rows',
     first.fragments === 1 && first.result.breakdown.length === 3 &&
@@ -632,7 +731,7 @@ try {
   check('later actual completion distinguishes two new fragments from the previously earned one',
     second.fragments === 3 && second.result.breakdown.filter(row => row.outcome === 'new').length === 2 &&
     second.result.breakdown.find(row => row.id === 'swift').outcome === 'already');
-  const third = await ev(() => T.finish('prologue', { time: 600, unmade: 1, detail: false }));
+  const third = await ev(() => T.finish('prologue', { time: 600, mercy: false, detail: false }));
   completionResults.push(third);
   check('already earned fragments remain distinct from a later attempt that misses their conditions',
     third.fragments === 3 && third.result.breakdown.every(row => row.outcome === 'already' && row.passed === false));
@@ -646,15 +745,15 @@ try {
   await start('prologue');
   check('a prior award is reported separately from the current attempt’s failed condition', await ev(() => {
     const play = DM.dev.play();
-    play.ctx.stats.disintegrated = 1;
-    const value = DM.GlassPalace.liveChallenge(play, 'mercy');
+    play.ctx.stats.time = 600;
+    const value = DM.GlassPalace.liveChallenge(play, 'swift');
     return value.earned === true && value.state === 'missed' && value.metNow === false;
   }));
   check('an already recovered fragment is labelled honestly without promising another reward', await ev(() => {
     const GP = DM.GlassPalace;
     const play = DM.dev.play();
     const before = GP.fragmentCount();
-    GP.pinChallenge('prologue', 'mercy');
+    GP.pinChallenge('prologue', 'swift');
     GP.attachTracking(play);
     play.dialog.close();
     play.hud.clearTransient();
@@ -734,26 +833,43 @@ try {
   check('tracking storage failures never change campaign, bonus, After Midnight or settings bytes',
     await unchanged(storageBefore));
   await seedPalace();
-  await ev(() => DM.GlassPalace.pinChallenge('prologue', 'swift'));
+  reloadDiagnostics.before = await ev(reloadState, true);
+  reloadDiagnostics.accepted = reloadDiagnostics.before.accepted;
+  check('the final reload fixture pin is accepted and persisted before navigation',
+    reloadDiagnostics.accepted === true && reloadDiagnostics.before.available === true &&
+    reloadDiagnostics.before.readOnly === false && reloadDiagnostics.before.blocked === false &&
+    reloadDiagnostics.before.parsed?.tracking?.momentId === 'prologue' &&
+    reloadDiagnostics.before.parsed?.tracking?.challengeId === 'swift');
   const reloadBefore = await protectedNow();
   await page.reload({ waitUntil: 'domcontentloaded' });
-  await wait(() => window.DM?.dev && DM.GlassPalace?.tracking);
+  await page.waitForFunction(previousNonce => window.__trackingDocumentNonce !== previousNonce &&
+    window.DM?.dev && DM.GlassPalace?.tracking, reloadDiagnostics.before.documentNonce, { polling: 100 });
+  reloadDiagnostics.afterBoot = await ev(reloadState);
+  check('reload reaches a different fully booted document', reloadDiagnostics.afterBoot.booted &&
+    reloadDiagnostics.afterBoot.documentNonce !== reloadDiagnostics.before.documentNonce);
   await ev(install);
+  reloadDiagnostics.afterInstall = await ev(reloadState);
+  check('reload retains the exact stored palace packet before its lazy model read',
+    reloadDiagnostics.afterInstall.raw === reloadDiagnostics.before.raw);
   check('the selected challenge survives an actual page reload', await ev(() =>
     DM.GlassPalace.tracking()?.momentId === 'prologue' && DM.GlassPalace.tracking()?.challengeId === 'swift'));
+  reloadDiagnostics.afterRead = await ev(reloadState);
   check('reload and tracked selection retain all protected progress and settings', await unchanged(reloadBefore));
   check('tracking checks produce no browser or engine error', errors.length === 0 && await ev(() => !DM.Engine.error));
   const finalLine = `GLASS PALACE TRACKING PASSED: ${checks.length} checks (${engine}, ${target}).`;
   writeFileSync(path.join(out, 'results.json'), JSON.stringify({
-    target, engine, browser: browser.version(), checks, errors, snapshots, completionResults, finalLine, exitCode: 0,
+    target, engine, browser: browser.version(), checks, errors, snapshots, completionResults,
+    reloadDiagnostics, finalLine, exitCode: 0,
     method: 'Controlled canonical level/stat/flag fixtures, actual Play/completion/backup methods and real UI keys/mouse; stepped engine.',
     limits: 'This proves state and integration contracts, not natural full-level challenge balance. No diagnostic image is live evidence.',
   }, null, 2));
   console.log(finalLine);
 } catch (error) {
+  reloadDiagnostics.onFailure = await ev(reloadState).catch(error => ({ diagnosticError: String(error) }));
   await page.screenshot({ path: path.join(out, 'failure-diagnostic.png') });
   writeFileSync(path.join(out, 'failure.json'), JSON.stringify({
-    target, engine, checks, errors, snapshots, completionResults, error: String(error.stack || error), exitCode: 1,
+    target, engine, checks, errors, snapshots, completionResults, reloadDiagnostics,
+    error: String(error.stack || error), exitCode: 1,
   }, null, 2));
   console.error(error);
   process.exitCode = 1;
