@@ -28229,12 +28229,16 @@
             true,
           );
           ctx.objective('Isolate both live cable feeds', () => `${bits(ctx.flags.power)} / 2`);
-          ctx.marker(630, 360, 'WEST BREAKER');
           ctx.tutorial(
             'E isolates each live feed. The east winch lowers the gangway when both are safe.',
             16,
           );
-          yield ctx.until(() => ctx.flags.power === 3);
+          while (ctx.flags.power !== 3) {
+            const power = ctx.flags.power || 0;
+            const westLive = !(power & 1);
+            ctx.marker(westLive ? 630 : 1450, 360, westLive ? 'WEST BREAKER' : 'EAST BREAKER');
+            yield ctx.until(() => (ctx.flags.power || 0) !== power);
+          }
           ctx.objectiveDone();
           ctx.marker(null);
         },

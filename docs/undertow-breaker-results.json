@@ -1,0 +1,917 @@
+{
+  "scope": "Undertow remaining-live-breaker guidance only",
+  "branch": "codex/glass-palace-refinements",
+  "pullRequest": "https://github.com/Ezrolith/Demo/pull/8",
+  "previousRevision": "6e29b4c774fe123d66ed094c60f9dda4d4ff3d75",
+  "beforeFix": {
+    "exitCode": 1,
+    "failedAssertion": "undertow/niteowl: E on breaker 0 directs guidance to the remaining live feed"
+  },
+  "source": {
+    "startedAtUtc": "2026-10-31T23:35:04.236Z",
+    "target": "index.html",
+    "method": "One child process at a time; stdout/stderr retained together; real process exit codes.",
+    "sourceScriptsSha256": "caac085a995ae2c786bbd7a8ca683809bbc14279e517f8ca54762caa7b396182",
+    "standaloneSha256": "7bfa4156f3c7d0cfd238394f5bcabdc465e94c75054269d763f952d8b08443a3",
+    "suites": [
+      {
+        "suite": "smoke",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 98.44,
+        "finalLine": "Smoke test passed.",
+        "log": "tests/out/palace-rules-v2/final-source/smoke.log"
+      },
+      {
+        "suite": "visual",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 76.97,
+        "finalLine": "All atmosphere checks passed.",
+        "log": "tests/out/palace-rules-v2/final-source/visual.log"
+      },
+      {
+        "suite": "audio",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 243.55,
+        "finalLine": "All audio checks passed.",
+        "log": "tests/out/palace-rules-v2/final-source/audio.log"
+      },
+      {
+        "suite": "powers",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 54.07,
+        "finalLine": "All mechanics checks passed.",
+        "log": "tests/out/palace-rules-v2/final-source/powers.log"
+      },
+      {
+        "suite": "saves",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 119.9,
+        "finalLine": "All save & robustness checks passed.",
+        "log": "tests/out/palace-rules-v2/final-source/saves.log"
+      },
+      {
+        "suite": "settings",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 71.31,
+        "finalLine": "All settings & accessibility checks passed.",
+        "log": "tests/out/palace-rules-v2/final-source/settings.log"
+      },
+      {
+        "suite": "ledger",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 34.03,
+        "finalLine": "All ledger & combat-feel checks passed.",
+        "log": "tests/out/palace-rules-v2/final-source/ledger.log"
+      },
+      {
+        "suite": "encounters",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.1,
+        "finalLine": "All encounter checks passed.",
+        "log": "tests/out/palace-rules-v2/final-source/encounters.log"
+      },
+      {
+        "suite": "flows",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 128.05,
+        "finalLine": "All story flow checks passed.",
+        "log": "tests/out/palace-rules-v2/final-source/flows.log"
+      },
+      {
+        "suite": "bonus",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 2.74,
+        "finalLine": "BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).",
+        "log": "tests/out/palace-rules-v2/final-source/bonus.log"
+      },
+      {
+        "suite": "ninth-minute",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 5.82,
+        "finalLine": "NINTH MINUTE PASSED: 75 checks (normal file loading).",
+        "log": "tests/out/palace-rules-v2/final-source/ninth-minute.log"
+      },
+      {
+        "suite": "long-summer",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 9.27,
+        "finalLine": "LONG SUMMER PASSED: 82 checks (normal file loading).",
+        "log": "tests/out/palace-rules-v2/final-source/long-summer.log"
+      },
+      {
+        "suite": "vigilantes",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.16,
+        "finalLine": "VIGILANTES PASSED: 43 checks (chromium, index.html).",
+        "log": "tests/out/palace-rules-v2/final-source/vigilantes.log"
+      },
+      {
+        "suite": "after-midnight-cases",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 2.98,
+        "finalLine": "AFTER MIDNIGHT CASES PASSED: 99 checks (chromium, index.html).",
+        "log": "tests/out/palace-rules-v2/final-source/after-midnight-cases.log"
+      },
+      {
+        "suite": "after-midnight-modes",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 4.42,
+        "finalLine": "AFTER MIDNIGHT MODES PASSED: 45 checks (index.html).",
+        "log": "tests/out/palace-rules-v2/final-source/after-midnight-modes.log"
+      },
+      {
+        "suite": "after-midnight-integration",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.72,
+        "finalLine": "AFTER MIDNIGHT INTEGRATION PASSED: 36 checks (index.html).",
+        "log": "tests/out/palace-rules-v2/final-source/after-midnight-integration.log"
+      },
+      {
+        "suite": "surveyor-gear",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.45,
+        "finalLine": "SURVEYOR GEAR PASSED: 5 checks (index.html).",
+        "log": "tests/out/palace-rules-v2/final-source/surveyor-gear.log"
+      },
+      {
+        "suite": "glass-palace",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.75,
+        "finalLine": "GLASS PALACE PASSED: 76 checks (chromium, index.html).",
+        "log": "tests/out/palace-rules-v2/final-source/glass-palace.log"
+      },
+      {
+        "suite": "glass-palace-navigation",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 14.72,
+        "finalLine": "GLASS PALACE NAVIGATION PASSED: 47 checks (index.html).",
+        "log": "tests/out/palace-rules-v2/final-source/glass-palace-navigation.log"
+      },
+      {
+        "suite": "glass-palace-backup",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 0.75,
+        "finalLine": "GLASS PALACE BACKUP PASSED: 46 checks (chromium, index.html).",
+        "log": "tests/out/palace-rules-v2/final-source/glass-palace-backup.log"
+      },
+      {
+        "suite": "glass-palace-tracking",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 0.95,
+        "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, index.html).",
+        "log": "tests/out/palace-rules-v2/final-source/glass-palace-tracking.log"
+      },
+      {
+        "suite": "glass-palace-optionality",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.33,
+        "finalLine": "GLASS PALACE OPTIONALITY PASSED: 143 checks; 36 misses + 36 earns (chromium, index.html).",
+        "log": "tests/out/palace-rules-v2/final-source/glass-palace-optionality.log"
+      }
+    ],
+    "finishedAtUtc": "2026-10-31T23:49:40.741Z",
+    "passed": true
+  },
+  "standalone": {
+    "startedAtUtc": "2026-10-31T23:51:40.192Z",
+    "target": "dist/dr-manhattan.html",
+    "method": "One child process at a time; stdout/stderr retained together; real process exit codes.",
+    "sourceScriptsSha256": "caac085a995ae2c786bbd7a8ca683809bbc14279e517f8ca54762caa7b396182",
+    "standaloneSha256": "7bfa4156f3c7d0cfd238394f5bcabdc465e94c75054269d763f952d8b08443a3",
+    "suites": [
+      {
+        "suite": "smoke",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 98.58,
+        "finalLine": "Smoke test passed.",
+        "log": "tests/out/palace-rules-v2/final-standalone/smoke.log"
+      },
+      {
+        "suite": "visual",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 77.37,
+        "finalLine": "All atmosphere checks passed.",
+        "log": "tests/out/palace-rules-v2/final-standalone/visual.log"
+      },
+      {
+        "suite": "audio",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 243.25,
+        "finalLine": "All audio checks passed.",
+        "log": "tests/out/palace-rules-v2/final-standalone/audio.log"
+      },
+      {
+        "suite": "powers",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 53.79,
+        "finalLine": "All mechanics checks passed.",
+        "log": "tests/out/palace-rules-v2/final-standalone/powers.log"
+      },
+      {
+        "suite": "saves",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 109.16,
+        "finalLine": "All save & robustness checks passed.",
+        "log": "tests/out/palace-rules-v2/final-standalone/saves.log"
+      },
+      {
+        "suite": "settings",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 70.28,
+        "finalLine": "All settings & accessibility checks passed.",
+        "log": "tests/out/palace-rules-v2/final-standalone/settings.log"
+      },
+      {
+        "suite": "ledger",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 33.94,
+        "finalLine": "All ledger & combat-feel checks passed.",
+        "log": "tests/out/palace-rules-v2/final-standalone/ledger.log"
+      },
+      {
+        "suite": "encounters",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.11,
+        "finalLine": "All encounter checks passed.",
+        "log": "tests/out/palace-rules-v2/final-standalone/encounters.log"
+      },
+      {
+        "suite": "flows",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 128.66,
+        "finalLine": "All story flow checks passed.",
+        "log": "tests/out/palace-rules-v2/final-standalone/flows.log"
+      },
+      {
+        "suite": "bonus",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 3.22,
+        "finalLine": "BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).",
+        "log": "tests/out/palace-rules-v2/final-standalone/bonus.log"
+      },
+      {
+        "suite": "ninth-minute",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 6.36,
+        "finalLine": "NINTH MINUTE PASSED: 75 checks (normal file loading).",
+        "log": "tests/out/palace-rules-v2/final-standalone/ninth-minute.log"
+      },
+      {
+        "suite": "long-summer",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 9.38,
+        "finalLine": "LONG SUMMER PASSED: 82 checks (normal file loading).",
+        "log": "tests/out/palace-rules-v2/final-standalone/long-summer.log"
+      },
+      {
+        "suite": "vigilantes",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.19,
+        "finalLine": "VIGILANTES PASSED: 43 checks (chromium, dist/dr-manhattan.html).",
+        "log": "tests/out/palace-rules-v2/final-standalone/vigilantes.log"
+      },
+      {
+        "suite": "after-midnight-cases",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 3.05,
+        "finalLine": "AFTER MIDNIGHT CASES PASSED: 99 checks (chromium, dist/dr-manhattan.html).",
+        "log": "tests/out/palace-rules-v2/final-standalone/after-midnight-cases.log"
+      },
+      {
+        "suite": "after-midnight-modes",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 4.57,
+        "finalLine": "AFTER MIDNIGHT MODES PASSED: 45 checks (dist/dr-manhattan.html).",
+        "log": "tests/out/palace-rules-v2/final-standalone/after-midnight-modes.log"
+      },
+      {
+        "suite": "after-midnight-integration",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.71,
+        "finalLine": "AFTER MIDNIGHT INTEGRATION PASSED: 36 checks (dist/dr-manhattan.html).",
+        "log": "tests/out/palace-rules-v2/final-standalone/after-midnight-integration.log"
+      },
+      {
+        "suite": "surveyor-gear",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.57,
+        "finalLine": "SURVEYOR GEAR PASSED: 5 checks (dist/dr-manhattan.html).",
+        "log": "tests/out/palace-rules-v2/final-standalone/surveyor-gear.log"
+      },
+      {
+        "suite": "glass-palace",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 2.56,
+        "finalLine": "GLASS PALACE PASSED: 76 checks (chromium, dist/dr-manhattan.html).",
+        "log": "tests/out/palace-rules-v2/final-standalone/glass-palace.log"
+      },
+      {
+        "suite": "glass-palace-navigation",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 15.19,
+        "finalLine": "GLASS PALACE NAVIGATION PASSED: 47 checks (dist/dr-manhattan.html).",
+        "log": "tests/out/palace-rules-v2/final-standalone/glass-palace-navigation.log"
+      },
+      {
+        "suite": "glass-palace-backup",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 0.78,
+        "finalLine": "GLASS PALACE BACKUP PASSED: 46 checks (chromium, dist/dr-manhattan.html).",
+        "log": "tests/out/palace-rules-v2/final-standalone/glass-palace-backup.log"
+      },
+      {
+        "suite": "glass-palace-tracking",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 0.95,
+        "finalLine": "GLASS PALACE TRACKING PASSED: 86 checks (chromium, dist/dr-manhattan.html).",
+        "log": "tests/out/palace-rules-v2/final-standalone/glass-palace-tracking.log"
+      },
+      {
+        "suite": "glass-palace-optionality",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.31,
+        "finalLine": "GLASS PALACE OPTIONALITY PASSED: 143 checks; 36 misses + 36 earns (chromium, dist/dr-manhattan.html).",
+        "log": "tests/out/palace-rules-v2/final-standalone/glass-palace-optionality.log"
+      }
+    ],
+    "finishedAtUtc": "2026-11-01T00:06:08.172Z",
+    "passed": true
+  },
+  "naturalNiteOwlStandalone": {
+    "target": "dist/dr-manhattan.html",
+    "hero": "niteowl",
+    "checks": [
+      "normal menus and interlude start Undertow as vulnerable Nite Owl",
+      "E physically isolates cable feed 1",
+      "isolating west moves guidance to the enabled east breaker",
+      "E physically isolates cable feed 2",
+      "the second real E advances guidance to the cargo winch",
+      "both isolated feeds stop their actual wet-dock hazards",
+      "real E lowers the powered, cleared cargo winch",
+      "worker 1 actually accepts the E escort request",
+      "worker 2 actually accepts the E escort request",
+      "worker 3 actually accepts the E escort request",
+      "worker 0 actually accepts the E escort request",
+      "escort requests alone have not fabricated four safe workers",
+      "all four workers physically reach the green lifeboat area",
+      "the departure checkpoint retains four genuine rescues",
+      "actual nonlethal combat clears the final lifeboat pursuers",
+      "Nite Owl closes Undertow with all four rescued and none unmade",
+      "the harbour journey never writes old campaign or bonus saves",
+      "no page or engine errors during the full harbour journey"
+    ],
+    "errors": [],
+    "trace": [
+      {
+        "moment": "arrival",
+        "scene": "Play",
+        "chapter": "am_undertow",
+        "stage": 0,
+        "x": 270,
+        "y": 1060,
+        "hp": 110,
+        "energy": 100,
+        "hero": "niteowl",
+        "challenge": "normal",
+        "god": false,
+        "failed": false,
+        "dialog": false,
+        "error": null,
+        "power": 0,
+        "winchOpen": false,
+        "rescued": 0,
+        "mask": 0,
+        "spared": 0,
+        "gone": 0,
+        "gear": {
+          "telekinesis": {
+            "cd": 0,
+            "cost": 3
+          },
+          "disintegrate": {
+            "cd": 0,
+            "cost": 13
+          },
+          "teleport": {
+            "cd": 0,
+            "cost": 16
+          },
+          "duplicate": {
+            "cd": 0,
+            "cost": 28
+          },
+          "timesight": {
+            "cd": 0,
+            "cost": 0
+          },
+          "expand": {
+            "cd": 0,
+            "cost": 42
+          }
+        },
+        "foes": [
+          {
+            "id": 15,
+            "x": 686.1845091917353,
+            "y": 746.6995779314077,
+            "hp": 46,
+            "distance": 520.9286900906147,
+            "los": true,
+            "screen": {
+              "x": 706.7700444674874,
+              "y": 98.48244603113022
+            },
+            "windup": 0
+          },
+          {
+            "id": 16,
+            "x": 1350,
+            "y": 350,
+            "hp": 46,
+            "distance": 1292.4782396620842,
+            "los": true,
+            "screen": {
+              "x": 1390.5,
+              "y": -310.1181192382197
+            },
+            "windup": 0
+          },
+          {
+            "id": 17,
+            "x": 1530,
+            "y": 800,
+            "hp": 40,
+            "distance": 1286.545762886031,
+            "los": true,
+            "screen": {
+              "x": 1575.9,
+              "y": 153.38188076178025
+            },
+            "windup": 0
+          }
+        ]
+      },
+      {
+        "moment": "east-breaker-after-west",
+        "activeStageSeconds": 13.257,
+        "scene": "Play",
+        "chapter": "am_undertow",
+        "stage": 0,
+        "x": 626.3757049620973,
+        "y": 413.382488008906,
+        "hp": 110,
+        "energy": 100,
+        "hero": "niteowl",
+        "challenge": "normal",
+        "god": false,
+        "failed": false,
+        "dialog": false,
+        "error": null,
+        "power": 1,
+        "winchOpen": false,
+        "rescued": 0,
+        "mask": 0,
+        "spared": 1,
+        "gone": 0,
+        "gear": {
+          "telekinesis": {
+            "cd": 0,
+            "cost": 3
+          },
+          "disintegrate": {
+            "cd": 0,
+            "cost": 13
+          },
+          "teleport": {
+            "cd": 0,
+            "cost": 16
+          },
+          "duplicate": {
+            "cd": 0,
+            "cost": 28
+          },
+          "timesight": {
+            "cd": 0,
+            "cost": 0
+          },
+          "expand": {
+            "cd": 0,
+            "cost": 42
+          }
+        },
+        "foes": [
+          {
+            "id": 16,
+            "x": 1350,
+            "y": 350,
+            "hp": 46,
+            "distance": 726.3948376436198,
+            "los": true,
+            "screen": {
+              "x": 1387.1910986809821,
+              "y": 348.4391129321228
+            },
+            "windup": 0
+          },
+          {
+            "id": 17,
+            "x": 1530,
+            "y": 800,
+            "hp": 40,
+            "distance": 982.8580605361745,
+            "los": true,
+            "screen": {
+              "x": 1572.5910986809822,
+              "y": 811.9391129321227
+            },
+            "windup": 0
+          }
+        ]
+      },
+      {
+        "moment": "cables-isolated",
+        "scene": "Play",
+        "chapter": "am_undertow",
+        "stage": 1,
+        "x": 1428.615596665973,
+        "y": 405.23294800085756,
+        "hp": 110,
+        "energy": 100,
+        "hero": "niteowl",
+        "challenge": "normal",
+        "god": false,
+        "failed": false,
+        "dialog": false,
+        "error": null,
+        "power": 3,
+        "winchOpen": false,
+        "rescued": 0,
+        "mask": 0,
+        "spared": 2,
+        "gone": 0,
+        "gear": {
+          "telekinesis": {
+            "cd": 0,
+            "cost": 3
+          },
+          "disintegrate": {
+            "cd": 0,
+            "cost": 13
+          },
+          "teleport": {
+            "cd": 0,
+            "cost": 16
+          },
+          "duplicate": {
+            "cd": 0,
+            "cost": 28
+          },
+          "timesight": {
+            "cd": 0,
+            "cost": 0
+          },
+          "expand": {
+            "cd": 0,
+            "cost": 42
+          }
+        },
+        "foes": [
+          {
+            "id": 17,
+            "x": 1466.202422936647,
+            "y": 751.2149419181027,
+            "hp": 40,
+            "distance": 348.0176857920506,
+            "los": true,
+            "screen": {
+              "x": 812.5884956247464,
+              "y": 773.7513901756458
+            },
+            "windup": 0
+          },
+          {
+            "id": 28,
+            "x": 1447.061934440038,
+            "y": 720.0211541922572,
+            "hp": 46,
+            "distance": 315.3282133499539,
+            "los": true,
+            "screen": {
+              "x": 792.8737924732391,
+              "y": 741.6217888180249
+            },
+            "windup": 0
+          },
+          {
+            "id": 29,
+            "x": 1209.6299603079665,
+            "y": 854.7382662812331,
+            "hp": 46,
+            "distance": 500.00973999859525,
+            "los": true,
+            "screen": {
+              "x": 548.3188591172054,
+              "y": 880.3804142696702
+            },
+            "windup": 0
+          }
+        ]
+      },
+      {
+        "moment": "four-safe",
+        "scene": "Play",
+        "chapter": "am_undertow",
+        "stage": 2,
+        "x": 281.5706658783744,
+        "y": 1053.2626047563035,
+        "hp": 110,
+        "energy": 100,
+        "hero": "niteowl",
+        "challenge": "normal",
+        "god": false,
+        "failed": false,
+        "dialog": true,
+        "error": null,
+        "power": 3,
+        "winchOpen": true,
+        "rescued": 4,
+        "mask": 15,
+        "spared": 5,
+        "gone": 0,
+        "gear": {
+          "telekinesis": {
+            "cd": 0,
+            "cost": 3
+          },
+          "disintegrate": {
+            "cd": 0,
+            "cost": 13
+          },
+          "teleport": {
+            "cd": 0,
+            "cost": 16
+          },
+          "duplicate": {
+            "cd": 0,
+            "cost": 28
+          },
+          "timesight": {
+            "cd": 0,
+            "cost": 0
+          },
+          "expand": {
+            "cd": 0,
+            "cost": 42
+          }
+        },
+        "foes": []
+      },
+      {
+        "moment": "case-closed",
+        "record": {
+          "caseId": "undertow",
+          "run": {
+            "hero": "niteowl",
+            "theme": "harbour",
+            "mode": "story",
+            "upgrades": {
+              "vitality": 0,
+              "capacitor": 0,
+              "mobility": 0
+            }
+          },
+          "score": 1800,
+          "bestScore": 1800,
+          "time": 79.48640000000424,
+          "bestTime": 79.48640000000424,
+          "bestWave": 0,
+          "bestRescued": 4,
+          "attempts": 1,
+          "completed": true,
+          "everCompleted": true,
+          "modeResult": "Case closed",
+          "stats": {
+            "time": 79.48640000000424,
+            "disintegrated": 0,
+            "spared": 8,
+            "memories": 0
+          },
+          "flags": {
+            "power": 3,
+            "winchOpen": true,
+            "rescuedMask": 15,
+            "rescued": 4,
+            "departed": true
+          }
+        }
+      }
+    ],
+    "lowestHealth": 104.9,
+    "method": "Normal title/board/interlude, real keyboard/mouse/RAF, normal damage. Initial settings only; read-only path/target/cooldown telemetry. No placements, tester refills, invulnerability, quest edits or skips."
+  },
+  "naturalProcess": {
+    "exitCode": 0,
+    "finalLine": "UNDERTOW LIVE PASSED: 18 checks; lowest observed health 104.90 (niteowl, dist/dr-manhattan.html)."
+  },
+  "capture": {
+    "path": "docs/screenshots/undertow-breaker-east-live.png",
+    "sha256": "146cd24ad3fed32392492c5ed1a47437f57a34c3aa07611b34759760539bbbb5",
+    "method": "Real menus, keyboard/mouse, ordinary RAF, Normal damage; no placement or state edits after initial settings.",
+    "activeStageSeconds": 13.257
+  },
+  "protectedFiles": [
+    {
+      "path": "src/data/chapters/prologue.js",
+      "unchanged": true,
+      "sha256": "89336acfb4020351805b9a1a05e78c3ed12785e4828529fe76c1f51202882b41"
+    },
+    {
+      "path": "src/data/chapters/reassembly.js",
+      "unchanged": true,
+      "sha256": "6a382b1ca39e78507a6b0faee1c255e45789d476159fab8ee46c7931e44c1e92"
+    },
+    {
+      "path": "src/data/chapters/superman.js",
+      "unchanged": true,
+      "sha256": "02107723da289a293c0305320c8283b4b86ef88374fcdbc862bdf7dce0b1a009"
+    },
+    {
+      "path": "src/data/chapters/deterrent.js",
+      "unchanged": true,
+      "sha256": "3bc020bb95a0229cff7afe41cb93e6d33da41f91651f467e6ebde7f82d2879b1"
+    },
+    {
+      "path": "src/data/chapters/mars.js",
+      "unchanged": true,
+      "sha256": "bd40cf8d7da1d58f3c61d569cdbb651c7c2a53a4e5679a2b73c501f44577e126"
+    },
+    {
+      "path": "src/data/chapters/karnak.js",
+      "unchanged": true,
+      "sha256": "f801f588f3a529dafac2d8e528e0ca8f4e4037c0d22114f5fb34fcfb35c920e3"
+    },
+    {
+      "path": "src/data/music.js",
+      "unchanged": true,
+      "sha256": "ef2db5abae5cb4431c81c936c3565f56267e4473be5782343184edc1d1fed426"
+    },
+    {
+      "path": "src/data/bonus-broadcast-atmosphere.js",
+      "unchanged": true,
+      "sha256": "7791c444df1a6862a12fb60a1ff2cefc1fb3a5e7a25612f677d62bcfad3d49da"
+    },
+    {
+      "path": "src/data/bonus-ninth-atmosphere.js",
+      "unchanged": true,
+      "sha256": "149112e6313ae60b1717a3a86a36fe347692b33cca1bb8617a96e5cc5bbca24d"
+    },
+    {
+      "path": "src/data/bonus-summer-atmosphere.js",
+      "unchanged": true,
+      "sha256": "235e5367aa6f9f5a92ec8c32f20ae074bffb039814f49c8be912fb0bb6c8e1c1"
+    },
+    {
+      "path": "src/data/after-midnight-atmosphere.js",
+      "unchanged": true,
+      "sha256": "cb69e0f531b1ceb21bb36a7aac6b12277b76b0da0a5a9fecbff0bf16f8b1945f"
+    },
+    {
+      "path": "src/data/glass-palace-atmosphere.js",
+      "unchanged": true,
+      "sha256": "a2ddddf0c554a2516658c7f263e3e25cde2544de0a2198084a8893175d622a7c"
+    },
+    {
+      "path": "src/core/gfx.js",
+      "unchanged": true,
+      "sha256": "20d9e86e93452abf17e0dfa54d4778afbbd4c0f245cdafc147a063ab8b00e451"
+    },
+    {
+      "path": "src/core/engine.js",
+      "unchanged": true,
+      "sha256": "62a1f17744145311c613797c5a0200f04369343615b5264968833f6d5cfdb1e8"
+    },
+    {
+      "path": "src/core/lighting.js",
+      "unchanged": true,
+      "sha256": "20529a97d4521ba5e22a56814d6aaca5406abf80848f08a216f5c132cae9a79d"
+    },
+    {
+      "path": "src/core/weather.js",
+      "unchanged": true,
+      "sha256": "9fbc1d6fa17a0a209e3e63036c949ab462fdc3fd94c450e06ea29d89c88003e4"
+    },
+    {
+      "path": "src/core/camera.js",
+      "unchanged": true,
+      "sha256": "81b58f13d7f3df6c40284984c65831ce694f17b6afc6dca8be15e08ec9104bbf"
+    },
+    {
+      "path": "src/core/audio.js",
+      "unchanged": true,
+      "sha256": "bc3592dbee242505b8b39058169b70882087728dc1f1d0f211ec4e71955c2565"
+    },
+    {
+      "path": "src/game/world.js",
+      "unchanged": true,
+      "sha256": "e5a959cb5dd8336397c2d4109f51fd55cd9a96346bc507d70fdfec589b9310b1"
+    },
+    {
+      "path": "src/game/ui/hud.js",
+      "unchanged": true,
+      "sha256": "171bd61e5c67e350dbfdd10a3039a812a8233f7611cfb7e596ecade71c9e0955"
+    }
+  ],
+  "qualifications": [
+    "Controlled case tests exercise actual E input after fixture placement; those are not natural play captures.",
+    "The standalone Nite Owl journey uses ordinary inputs and normal damage.",
+    "Existing review limitations remain recorded in PALACE-REVIEW-RESPONSE.md."
+  ]
+}

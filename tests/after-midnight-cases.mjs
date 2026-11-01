@@ -57,6 +57,35 @@ try {
   check('original six campaign chapters and three bonus cards remain separate', await ev(() =>
     DM.Chapters.list.length === 6 && DM.Bonus.list.length === 3));
   for (const hero of ['niteowl', 'silkspectre', 'rorschach']) {
+    for (const first of [0, 1]) {
+      await ev(hero => { T.start('undertow', 0, hero); T.clear(); }, hero);
+      check(`undertow/${hero}: fresh guidance points to the live west breaker`, await ev(() => {
+        const p = T.play(), west = p.ctx.flags.generators[0], marker = p.hud.marker;
+        return marker?.label === 'WEST BREAKER' && marker.x === west.x && marker.y === west.y;
+      }));
+      await ev(first => T.use(T.play().ctx.flags.generators[first]), first);
+      check(`undertow/${hero}: E on breaker ${first} directs guidance to the remaining live feed`, await ev(first => {
+        const p = T.play(), other = p.ctx.flags.generators[1 - first], marker = p.hud.marker;
+        return p.ctx.stageIndex === 0 && p.ctx.flags.power === (1 << first) &&
+          !p.ctx.flags.generators[first].interact.enabled() && other.interact.enabled() &&
+          marker?.label === (first === 0 ? 'EAST BREAKER' : 'WEST BREAKER') &&
+          marker.x === other.x && marker.y === other.y;
+      }, first));
+      const carry = await ev(() => T.play().ctx.snapshot());
+      await ev(([hero, carry]) => { T.start('undertow', 0, hero, carry); T.clear(); }, [hero, carry]);
+      check(`undertow/${hero}: resumed single-feed progress points to the remaining live breaker`, await ev(first => {
+        const p = T.play(), other = p.ctx.flags.generators[1 - first], marker = p.hud.marker;
+        return p.ctx.flags.power === (1 << first) && other.interact.enabled() &&
+          marker?.label === (first === 0 ? 'EAST BREAKER' : 'WEST BREAKER') &&
+          marker.x === other.x && marker.y === other.y;
+      }, first));
+      await ev(first => { T.use(T.play().ctx.flags.generators[1 - first]); T.transition(); }, first);
+      check(`undertow/${hero}: either breaker order advances to the cargo winch`, await ev(() =>
+        T.play().ctx.flags.power === 3 && T.play().ctx.stageIndex === 1 &&
+        T.play().hud.marker?.label === 'CARGO WINCH'));
+    }
+  }
+  for (const hero of ['niteowl', 'silkspectre', 'rorschach']) {
     for (const id of ['dead_air', 'undertow', 'glass_archive']) {
       await ev(([id, hero]) => T.start(id, 0, hero), [id, hero]);
       check(`${id}/${hero}: vulnerable hero has six gear actions`, await ev(() => {

@@ -9,6 +9,10 @@ WebAudio only.
 
 ## Current work
 
+The [Undertow breaker follow-up](UNDERTOW-BREAKER-FIX.md) fixes a marker that
+kept pointing to the west breaker after it had already been isolated. It records
+fresh regression results separately from the rules-v2 review below.
+
 The current pass responds to the independent review with **optional challenge
 rules v2**. The [36-row old/new matrix](CHALLENGE-RULES-V2-MATRIX.md) was committed
 before implementation (`ce90d308`). Runtime implementation is `4ab7710`;
