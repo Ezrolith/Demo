@@ -27,7 +27,15 @@
     "test:glass-palace": "node tests/glass-palace.mjs",
     "test:glass-palace-all": "node tools/verify-glass-palace.mjs",
     "test:glass-palace-play": "node tests/play-glass-palace.mjs",
-    "test:glass-palace-capture": "node tests/capture-glass-palace.mjs"
+    "test:glass-palace-capture": "node tests/capture-glass-palace.mjs",
+    "test:palace-refinements": "node tools/verify-palace-refinements.mjs",
+    "test:palace-navigation": "node tests/glass-palace-navigation.mjs",
+    "test:palace-backup": "node tests/glass-palace-backup.mjs",
+    "test:palace-tracking": "node tests/glass-palace-tracking.mjs",
+    "test:palace-tracking-capture": "node tests/capture-glass-palace-tracking.mjs",
+    "test:palace-optionality": "node tests/glass-palace-optionality.mjs",
+    "test:palace-reload": "node tests/glass-palace-reload.mjs",
+    "test:palace-time-targets": "node tests/play-palace-time-targets.mjs"
   },
   "devDependencies": {
     "playwright": "^1.56.1"

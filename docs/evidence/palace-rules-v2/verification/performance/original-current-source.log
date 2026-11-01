@@ -1,0 +1,43 @@
+✓ post effects are three pre-composited frames at device size  — {"builds":0,"n":3,"w":1280,"h":720,"cw":1280,"ch":720}
+✓ post effect frames are built once, not per frame  — 0 rebuilds in 60 frames
+✓ FILM GRAIN off leaves the vignette only, and is saved  — {"off":1,"on":3}
+✓ pre-composited post effects cost within 15% of none (DPR 1)  — 2.18 vs 2.01 ms/frame
+✓ pre-composited post effects cost within 15% of none (DPR 2)  — 7.74 vs 7 ms/frame
+✓ glow cache: palace rise creates at most 2 canvases per colour  — 1 canvases, 1 glow sprites, 4 colours
+✓ glow cache: unlock card creates at most 2 canvases per colour  — 2 canvases, 2 glow sprites, 5 colours
+✓ glow cache: expand creates at most 2 canvases per colour  — 0 canvases, 0 glow sprites, 4 colours
+✓ QUALITY sets the render scale (1 / 0.75 / 0.5)  — {"balanced":{"w":960,"dpr":0.75},"low":{"w":640,"dpr":0.5},"high":{"w":1280,"dpr":1}}
+✓ a 30 fps cap with light work keeps HIGH quality  — {"capped":"high","before":"high","after":"balanced","width":960,"toast":true,"saved":"high","ignored":"balanced","chosen":"high"}
+✓ frame governor drops one tier after 2 s above 22 ms  — {"capped":"high","before":"high","after":"balanced","width":960,"toast":true,"saved":"high","ignored":"balanced","chosen":"high"}
+✓ choosing QUALITY in Settings overrides the automatic drop  — high
+✓ governor shows a toast and keeps the saved setting
+✓ Engine.stats {updMs, renderMs, gapMs} feed the debug overlay
+✓ loadMap sets world.mapId  — pier
+✓ the night pier is lit: darkness with light pools  — {"mapId":"pier","lit":true,"lighting":true,"jon":0.00784313725490196,"lamp":0.01568627450980392,"dark":0.8196078431372549,"lights":10}
+✓ Jon and the sodium lamps light their surroundings  — jon 0.01, lamp 0.02, unlit 0.82
+✓ an armed man's flashlight lights the way he faces  — {"facing":0.45,"away":0.76}
+✓ lit map: render() sees world.lit, renderEmissive follows the light layer  — render:true,light,emissive
+✓ Play.render: Temporal Sight, then DM.Feedback.render(ctx, scene), then post effects  — timesight,feedback,postFx
+✓ the light layer adds at most 2 ms of Play.render CPU with ~40 lights  — 0.6 vs 0.1 ms, 44 lights (33 on screen)
+✓ daylight map: no light layer, entities draw their own emissive  — render:false
+✓ alarm: the light layer carries it, the full-screen tint is not drawn  — {"alarm":true,"lighting":true,"green":false,"beacons":6,"full":2.6,"reduced":0.6}
+✓ alarm: rotating red beacon cones; REDUCED flashing slows them  — 6 cones, 2.6 vs 0.6 rad/s
+✓ studio flashbulbs pop, and never with REDUCED flashing  — {"full":16,"reduced":0}
+✓ every map has ambient motion between frames 0.5 s apart  — gila 116, void 113, range 1864, pier 2750, proving 1875, studio 145, mars 6030, karnak 48450
+✓ void stars parallax when the camera moves  — {"unchanged":0,"moved":957,"layers":["stars"]}
+✓ AMBIENT EFFECTS: reduced halves the particles, off removes the layer  — {"full":159,"reduced":79,"off":0,"drew":false}
+✓ Temporal Sight slows the snow  — {"normal":43.3,"sight":12.5}
+✓ walls cast shadows away from the light  — {"shade":317,"open":432}
+✓ pier containers are drawn with their surface
+✓ wall surfaces: ribbed, brick, sandbag, rock, ice, shelf, gold  — ribbed, brick, sandbag, rock, ice, shelf, gold, concrete
+✓ the wall pass costs at most 0.5 ms (pier)  — 0 ms for 7 walls
+✓ proving rocks are drawn with their surface
+✓ Karnak ice are drawn with their surface
+✓ Mars rocks are drawn with their surface
+✓ doors still open and close  — {"open":true,"closed":true,"err":null}
+✓ holding F grades the world within about 0.3 s  — k 0.98, floor saturation 0.72 → 0.30
+✓ Jon and the meteor warning stay in colour  — kept Player,Memory,Memory,Meteor; Jon {"s":0.81,"rgb":[19,64,99]}
+✓ releasing F restores colour  — k 0, floor 0.72
+✓ tachyon jamming still blocks Temporal Sight  — {"timesight":false,"k":0}
+
+All atmosphere checks passed.

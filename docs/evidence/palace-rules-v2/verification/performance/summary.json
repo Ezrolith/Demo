@@ -1,0 +1,240 @@
+{
+  "schemaVersion": 1,
+  "scope": "Time-boxed read-only performance investigation; no production optimization or threshold change.",
+  "reviewedHead": "39e3b237040bbe2ec1d30a38bfbe3bf62cfd3118",
+  "baseline": "ed65bbfb0416f08e5aa507bf221bdcc7ca413dff",
+  "browser": "151.0.7922.34",
+  "browserLaunchOptions": {
+    "headless": true,
+    "args": []
+  },
+  "observedBrowserLaunchLine": "2026-10-31T20:55:47.550Z pw:browser <launching> /Users/peter/Documents/ChatGPT/Watchmen Game/.browser-cache/chromium_headless_shell-1234/chrome-headless-shell-mac-arm64/chrome-headless-shell --disable-field-trial-config --disable-background-networking --disable-background-timer-throttling --disable-backgrounding-occluded-windows --disable-back-forward-cache --disable-breakpad --disable-client-side-phishing-detection --disable-component-extensions-with-background-pages --disable-component-update --no-default-browser-check --disable-default-apps --disable-dev-shm-usage --disable-edgeupdater --disable-extensions --disable-features=AvoidUnnecessaryBeforeUnloadCheckSync,BoundaryEventDispatchTracksNodeRemoval,DestroyProfileOnBrowserClose,DialMediaRouteProvider,GlobalMediaControls,HttpsUpgrades,LensOverlay,MediaRouter,PaintHolding,ThirdPartyStoragePartitioning,BlockOriginHeaderModificationOnRedirect,Translate,AutoDeElevate,OptimizationHints,msForceBrowserSignIn,msEdgeUpdateLaunchServicesPreferredVersion --enable-features=CDPScreenshotNewSurface --allow-pre-commit-input --disable-hang-monitor --disable-ipc-flooding-protection --disable-popup-blocking --disable-prompt-on-repost --disable-renderer-backgrounding --disable-updater-scheduler --force-color-profile=srgb --metrics-recording-only --no-first-run --password-store=basic --use-mock-keychain --no-service-autorun --export-tagged-pdf --disable-search-engine-choice-screen --unsafely-disable-devtools-self-xss-warnings --edge-skip-compat-layer-relaunch --disable-infobars --disable-search-engine-choice-screen --disable-sync --enable-unsafe-swiftshader --headless --hide-scrollbars --mute-audio --blink-settings=primaryHoverType=2,availableHoverTypes=2,primaryPointerType=4,availablePointerTypes=4 --no-sandbox --user-data-dir=/var/folders/jv/yvhp__4n5pv4_9_5syhwxr3w0000gn/T/playwright_chromiumdev_profile-ojyYm0 --remote-debugging-pipe --no-startup-window",
+  "originalAcceptance": {
+    "method": "Unmodified full tests/visual.mjs, sequential real child-process exits; original threshold and built-in one retry retained.",
+    "cases": [
+      {
+        "name": "current-source",
+        "root": "/Users/peter/Documents/ChatGPT/Watchmen Game/game",
+        "target": "index.html",
+        "exitCode": 0,
+        "signal": null,
+        "seconds": 78.129,
+        "log": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/postfx-review/original-current-source.log",
+        "finalLine": "All atmosphere checks passed.",
+        "timings": [
+          {
+            "passed": true,
+            "dpr": 1,
+            "on": 2.18,
+            "off": 2.01,
+            "overheadPercent": 8.457711442786087
+          },
+          {
+            "passed": true,
+            "dpr": 2,
+            "on": 7.74,
+            "off": 7,
+            "overheadPercent": 10.571428571428566
+          }
+        ]
+      },
+      {
+        "name": "current-standalone",
+        "root": "/Users/peter/Documents/ChatGPT/Watchmen Game/game",
+        "target": "dist/dr-manhattan.html",
+        "exitCode": 0,
+        "signal": null,
+        "seconds": 77.275,
+        "log": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/postfx-review/original-current-standalone.log",
+        "finalLine": "All atmosphere checks passed.",
+        "timings": [
+          {
+            "passed": true,
+            "dpr": 1,
+            "on": 2.28,
+            "off": 2.11,
+            "overheadPercent": 8.056872037914697
+          },
+          {
+            "passed": true,
+            "dpr": 2,
+            "on": 7.93,
+            "off": 7.21,
+            "overheadPercent": 9.986130374479885
+          }
+        ]
+      },
+      {
+        "name": "baseline-source",
+        "root": "/private/tmp/watchmen-postfx-ed65bbf",
+        "target": "index.html",
+        "exitCode": 0,
+        "signal": null,
+        "seconds": 77.236,
+        "log": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/postfx-review/original-baseline-source.log",
+        "finalLine": "All atmosphere checks passed.",
+        "timings": [
+          {
+            "passed": true,
+            "dpr": 1,
+            "on": 2.13,
+            "off": 1.96,
+            "overheadPercent": 8.673469387755105
+          },
+          {
+            "passed": true,
+            "dpr": 2,
+            "on": 8.2,
+            "off": 7.43,
+            "overheadPercent": 10.36339165545086
+          }
+        ]
+      }
+    ],
+    "complete": true,
+    "finishedAtUtc": "2026-10-31T21:01:11.277Z"
+  },
+  "diagnosticControls": {
+    "dpr": 2,
+    "viewport": {
+      "width": 1280,
+      "height": 720
+    },
+    "fixedRandomSeed": 20261031,
+    "rafStopped": true,
+    "initialization": "180 manual Play.update+Engine.render frames, then synchronous readback; no actor/camera/health/flag edits.",
+    "benchmark": "6 pairs of 3 warmup + 20 timed frames; each frame separates update, render submission and pixel-readback time.",
+    "order": "ON/OFF for even rounds, OFF/ON for odd rounds; case order rotates by round.",
+    "acceptanceUnchanged": "tests/visual.mjs: on <= off*1.15 OR on-off <=1ms; this controlled diagnostic does not replace that test."
+  },
+  "diagnosticCases": [
+    {
+      "case": "baseline-source",
+      "sourceScripts": {
+        "scripts": 57,
+        "sha256": "586f72fbe54e05744b2b6c4850eb947cd7f07cae975663c24edced25e151c91b"
+      },
+      "targetSha256": "7b73443869ba9eee210114226e4de6f03df85f2019996234585073dbd339511b",
+      "onMs": [
+        7.732499998807907,
+        7.870000001788139,
+        7.925000000000001
+      ],
+      "offMs": [
+        7.097499999403953,
+        7.267499998211861,
+        7.1625
+      ],
+      "overheadPercent": [
+        8.94681225019065,
+        8.290333728579569,
+        10.645724258289713
+      ],
+      "allThreeAtLeastThreePointsHeadroom": true,
+      "statesEqualAcrossRuns": true,
+      "allNoPin": true,
+      "allNoPostFxRebuild": true
+    },
+    {
+      "case": "current-source",
+      "sourceScripts": {
+        "scripts": 71,
+        "sha256": "19ad614594d8737e3a701865e735c8436fcd493ad31649fbf7111f590ceae2ba"
+      },
+      "targetSha256": "e879cd356c2144f57574fcaa9b721cb1b4e52ce3f447c7c86afd9d860d3933cd",
+      "onMs": [
+        7.767499998211861,
+        7.802499997615814,
+        7.819999998807907
+      ],
+      "offMs": [
+        7.042500001192092,
+        7.052499997615814,
+        7.132499998807907
+      ],
+      "overheadPercent": [
+        10.294639643550552,
+        10.634526767154151,
+        9.63897651755914
+      ],
+      "allThreeAtLeastThreePointsHeadroom": true,
+      "statesEqualAcrossRuns": true,
+      "allNoPin": true,
+      "allNoPostFxRebuild": true
+    },
+    {
+      "case": "current-standalone",
+      "sourceScripts": {
+        "scripts": 71,
+        "sha256": "19ad614594d8737e3a701865e735c8436fcd493ad31649fbf7111f590ceae2ba"
+      },
+      "targetSha256": "4d3560157c6c21f027825e5255a0a53c3b2f083328d696bc3f348abe7147a08a",
+      "onMs": [
+        7.829999998211861,
+        7.855000001192093,
+        7.7449999988079075
+      ],
+      "offMs": [
+        7.134999999403954,
+        7.2024999976158135,
+        7.052500000596046
+      ],
+      "overheadPercent": [
+        9.740714770370928,
+        9.059354443488665,
+        9.81921301883495
+      ],
+      "allThreeAtLeastThreePointsHeadroom": true,
+      "statesEqualAcrossRuns": true,
+      "allNoPin": true,
+      "allNoPostFxRebuild": true
+    }
+  ],
+  "diagnosticRaw": "tests/out/postfx-review/advance-matrix.json",
+  "unchangedCoreFiles": [
+    {
+      "path": "src/core/gfx.js",
+      "unchangedBetweenBaselineAndReviewedHead": true,
+      "sha256": "20d9e86e93452abf17e0dfa54d4778afbbd4c0f245cdafc147a063ab8b00e451"
+    },
+    {
+      "path": "src/core/engine.js",
+      "unchangedBetweenBaselineAndReviewedHead": true,
+      "sha256": "62a1f17744145311c613797c5a0200f04369343615b5264968833f6d5cfdb1e8"
+    },
+    {
+      "path": "src/game/world.js",
+      "unchangedBetweenBaselineAndReviewedHead": true,
+      "sha256": "e5a959cb5dd8336397c2d4109f51fd55cd9a96346bc507d70fdfec589b9310b1"
+    },
+    {
+      "path": "tests/visual.mjs",
+      "unchangedBetweenBaselineAndReviewedHead": true,
+      "sha256": "4cbd24549012ea3cfbb6b1d14cdd8152a847868f579552a06a85a88c6a3105a6"
+    }
+  ],
+  "harnesses": [
+    {
+      "path": "/private/tmp/watchmen-postfx-profile.mjs",
+      "sha256": "0f8d77e66668562dc10213f272f057b8459f6c492dfb277738524b2993018e24"
+    },
+    {
+      "path": "/private/tmp/watchmen-postfx-original.mjs",
+      "sha256": "f389216882bf8b46601dcdbd90c67f7429900341b30bca2c3e76b131b0a8ca59"
+    }
+  ],
+  "snapshotProvenance": {
+    "revision": "39e3b237040bbe2ec1d30a38bfbe3bf62cfd3118",
+    "method": "Read-only git archive; source, index, build and unchanged visual test all byte-compared to the current workspace at capture."
+  },
+  "acceptanceSnapshotNote": "Original current-source was already complete when the exact 39e snapshot was byte-compared to workspace; current-standalone DPR2 and both in-memory pages were loaded before production edit/build release. Baseline runs exclusively from the isolated ed65 archive.",
+  "findings": [
+    "The reported 18%/15.4% source failure was not reproduced in this bounded run; no claim is made that the report was false or that timing noise is a proven cause.",
+    "All three controlled diagnostic trials per case meet the <=12% target without changing code. These stopped-RAF, seeded measurements are separate from original acceptance.",
+    "The unmodified complete visual suite passes with real exit 0 for current source, current standalone and baseline source; original DPR2 overheads are about10.57%,9.99%,10.36%.",
+    "Each diagnostic scene has 43 entities, zero particles, no pin and original HUD methods; post-effect frames build once and do not rebuild.",
+    "Measured wall time changes attribution between render submission and synchronous readback: current-source ON median render7.655/readback0.145ms; OFF render0.1025/readback6.9625ms. Totals are the meaningful comparison, not either segment alone.",
+    "No measured new bottleneck justified an output-preserving graphics optimization, so the investigation stopped under its time box."
+  ],
+  "finishedAtUtc": "2026-10-31T21:02:22.900495+00:00"
+}

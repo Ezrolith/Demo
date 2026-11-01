@@ -38,6 +38,7 @@
         { label: 'CONTROLS', action: () => Engine.push(new Controls()) },
         { label: 'QUIT TO TITLE', action: () => toTitle() },
       ], { x: DM.W / 2, y: 364, w: 420, align: 'center', itemH: 48, size: 24, onBack: () => this.close() });
+      if (DM.GlassPalace?.addTrackingPauseAction) DM.GlassPalace.addTrackingPauseAction(this);
     }
     close() {
       DM.Audio.setMusicFilter(this.play.world.timesight ? 650 : 18000);

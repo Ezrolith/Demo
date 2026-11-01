@@ -1,0 +1,85 @@
+{
+  "method": "Unmodified full tests/visual.mjs, sequential real child-process exits; original threshold and built-in one retry retained.",
+  "cases": [
+    {
+      "name": "current-source",
+      "root": "/Users/peter/Documents/ChatGPT/Watchmen Game/game",
+      "target": "index.html",
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 78.129,
+      "log": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/postfx-review/original-current-source.log",
+      "finalLine": "All atmosphere checks passed.",
+      "timings": [
+        {
+          "passed": true,
+          "dpr": 1,
+          "on": 2.18,
+          "off": 2.01,
+          "overheadPercent": 8.457711442786087
+        },
+        {
+          "passed": true,
+          "dpr": 2,
+          "on": 7.74,
+          "off": 7,
+          "overheadPercent": 10.571428571428566
+        }
+      ]
+    },
+    {
+      "name": "current-standalone",
+      "root": "/Users/peter/Documents/ChatGPT/Watchmen Game/game",
+      "target": "dist/dr-manhattan.html",
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 77.275,
+      "log": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/postfx-review/original-current-standalone.log",
+      "finalLine": "All atmosphere checks passed.",
+      "timings": [
+        {
+          "passed": true,
+          "dpr": 1,
+          "on": 2.28,
+          "off": 2.11,
+          "overheadPercent": 8.056872037914697
+        },
+        {
+          "passed": true,
+          "dpr": 2,
+          "on": 7.93,
+          "off": 7.21,
+          "overheadPercent": 9.986130374479885
+        }
+      ]
+    },
+    {
+      "name": "baseline-source",
+      "root": "/private/tmp/watchmen-postfx-ed65bbf",
+      "target": "index.html",
+      "exitCode": 0,
+      "signal": null,
+      "seconds": 77.236,
+      "log": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/postfx-review/original-baseline-source.log",
+      "finalLine": "All atmosphere checks passed.",
+      "timings": [
+        {
+          "passed": true,
+          "dpr": 1,
+          "on": 2.13,
+          "off": 1.96,
+          "overheadPercent": 8.673469387755105
+        },
+        {
+          "passed": true,
+          "dpr": 2,
+          "on": 8.2,
+          "off": 7.43,
+          "overheadPercent": 10.36339165545086
+        }
+      ]
+    }
+  ],
+  "complete": true,
+  "finishedAtUtc": "2026-10-31T21:01:11.277Z"
+}

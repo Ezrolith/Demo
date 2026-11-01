@@ -152,6 +152,8 @@
           this.checkpoint = i;
           this.checkpointCarry = this.snapshot();
           DM.Save.checkpointAt(this.chapter.id, i, this.checkpointCarry);
+          if (DM.GlassPalace?.saveRunCheckpoint)
+            DM.GlassPalace.saveRunCheckpoint(this.scene, i, this.checkpointCarry);
         }
         yield* this.runStage(st);
       }
@@ -322,7 +324,9 @@
       return n;
     }
     add(e) {
-      return this.world.add(e);
+      const entity = this.world.add(e);
+      if (DM.GlassPalace?.observeRuleEntity) DM.GlassPalace.observeRuleEntity(this.scene, entity);
+      return entity;
     }
     objective(text, progress) {
       this.hud.setObjective(text, progress);

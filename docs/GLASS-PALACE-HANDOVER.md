@@ -162,7 +162,9 @@ hub runs pass 76 per build, and the actual keyboard tours pass 56 per build.
 [Machine-readable results](glass-palace-results.json) pin the tested code revision,
 source/build digests, suite outcomes, tours and protected-file hashes.
 The [independent CI run](https://github.com/Ezrolith/Demo/actions/runs/40532192903)
-is still in progress; these local results are not claimed as independent CI success.
+has now passed, including both builds, the other browser engines and the walking
+tour. This result is for the finished Part B code, before the later palace
+navigation and backup follow-up.
 <!-- END_GLASS_PALACE_SUITE_TABLES -->
 
 ## Live views and limits

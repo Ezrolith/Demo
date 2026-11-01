@@ -4,6 +4,12 @@ Choose **THE GLASS PALACE** after New Game on the title screen. Jon can walk
 through the palace on Mars without combat. Use **WASD / arrows** to move,
 **E** to read or enter a nearby moment, and **Esc / P** to leave.
 
+Press **H** or click **MOMENT ATLAS** for an overview of unlocked moments. Filter
+it to missing fragments or saved checkpoints, then select a destination. A glass
+trail and edge pointer guide your walk; selecting a moment does not start it or
+move Jon. Use E at the pane when you arrive. The ledger and unlocked Earth scene
+also appear in the atlas. Clear the guide from the atlas whenever you wish.
+
 ## Moments
 
 The six campaign chapters, three bonus adventures and three After Midnight
@@ -32,10 +38,12 @@ gameplay and its normal progress writes.
 
 ## Thirty-six fragments
 
-Each moment has three optional challenges: finish without unmaking anyone,
-finish under its time target, and complete a level-specific objective. Examples
-include all six memories, a complete evidence trail, or six residents rescued
-with City Heat below 30. The challenges are listed at each pane.
+Each moment has three optional goals described at its pane: a time target and
+two level-specific observations or restrictions. Examples include the Gila Flats
+photograph, passive atom gathering, combat performance before a safe ending,
+all six memories, optional field notes and damage limits. Story completion alone
+is not the condition for the level-specific fragment. See the
+[complete rules-v2 matrix](CHALLENGE-RULES-V2-MATRIX.md).
 
 Challenges are detected when a level actually completes. Each can be earned once;
 you can collect missing challenges on later attempts. Existing completed levels
@@ -43,10 +51,46 @@ unlock their moments but do not silently award new challenges retroactively.
 End-of-level screens show **0–3 / 3 moments**. Each new challenge contributes a
 glass fragment, and the palace's central structure grows toward thirty-six.
 
+Fragments earned under the earlier rules are retained and labelled as legacy
+awards. They are never removed, counted twice or presented as proof that the new
+condition was performed. New awards record rules version 2.
+
+Choose **Track This** beside a challenge, either at its pane or under
+**Pause → Moment Challenges** during a level. One challenge can be tracked at a
+time. Its small field panel shows the current attempt's progress; timed challenges
+show elapsed time, the target and time left. Pause freezes the actual field timer.
+Retry and Resume use the level's existing carried stats, so they do not invent a
+fresh clock or erase an earlier outcome from that checkpoint.
+
+Clean-run restrictions require a fresh run or its matching rules-v2 checkpoint.
+Their observed damage, forbidden casts, losses and lethal outcomes remain across
+Retry, including failed portions. An older or mismatched checkpoint cannot invent
+clean evidence; the panel explains when a fresh replay is needed. Time keeps the
+original field-clock rule: Retry restores checkpoint time, discarding failed
+attempt time, and Pause does not advance it.
+
+The tracker stays out of dialogue, captions, cutscenes and overlapping interaction
+prompts. Use Pause to inspect all three conditions or stop tracking. A provisional
+condition being met does not award a fragment. Already recovered fragments remain
+recovered, including when the current attempt misses them.
+
+At completion, choose **Challenge Details** or press **H** to see which fragments
+are new, were recovered earlier, or were missed this run, with the completion
+reason. Tracking applies to the twelve moments; Night Patrol and Rescue Clock keep
+their existing score and timer rules. The selected challenge is saved only with
+palace progress and is included in palace backups; older backups remain supported.
+
 Palace challenges and epilogue history have their own save slot. If saving is
 blocked or a newer palace save is protected, the hub displays a warning. Session
 progress can remain visible even when it has not been saved; enable browser
 storage before relying on it after closing the game.
+
+Open **Esc / P → BACK UP / RESTORE PALACE** to export fragments and reflection
+history as a JSON file. Export works for unsaved session progress too. Selecting
+a file previews its counts; **Restore** is a separate action that replaces palace
+progress only. Export your current progress first. Campaign, bonus, After Midnight
+and settings are excluded. A failed restore leaves the current progress intact;
+an unreadable or newer existing palace save stays protected.
 
 ## Earth
 

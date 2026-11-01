@@ -1,0 +1,38 @@
+[
+  {
+    "run": "opening-initial",
+    "actualExitCode": 0,
+    "termination": "normal",
+    "evidence": "exec session15435 completion"
+  },
+  {
+    "run": "remaining-initial",
+    "actualExitCode": 1,
+    "termination": "intentional SIGTERM of exact owned pilot/browser tree after proven stagnation",
+    "evidence": "exec session58252 completion and process-stop.json"
+  },
+  {
+    "run": "remaining-retry-all6",
+    "actualExitCode": 1,
+    "termination": "intentional SIGTERM of exact owned pilot/browser tree after proven LOS stagnation",
+    "evidence": "exec session70206 completion and process-stop.json"
+  },
+  {
+    "run": "final-campaign-bonus",
+    "actualExitCode": 1,
+    "termination": "normal, actual failed or post-finish controller attempts retained",
+    "evidence": "exec session25188 completion"
+  },
+  {
+    "run": "final-four",
+    "actualExitCode": 1,
+    "termination": "normal, Last Broadcast Normal defeat retained; three actual completions",
+    "evidence": "exec session28754 completion"
+  },
+  {
+    "run": "last-broadcast-final",
+    "actualExitCode": 1,
+    "termination": "normal, genuine Normal defeat preserved",
+    "evidence": "exec session53157 completion"
+  }
+]

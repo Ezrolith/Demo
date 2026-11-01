@@ -1,0 +1,155 @@
+/* Diagnostic only: acceptance remains the unchanged tests/visual.mjs suite.
+ * Fresh contexts, stopped RAF and fixed random seed make stage progression
+ * comparable. No screenshots produced; no source file or save owner is edited.
+ */
+import {createRequire} from 'node:module';
+import fs from 'node:fs';
+import path from 'node:path';
+import {pathToFileURL} from 'node:url';
+import {createHash} from 'node:crypto';
+import {execFileSync} from 'node:child_process';
+const require=createRequire(import.meta.url);
+const pw=require(process.env.PLAYWRIGHT_PATH || 'playwright');
+const root='/Users/peter/Documents/ChatGPT/Watchmen Game/game';
+const baseline='/private/tmp/watchmen-postfx-ed65bbf';
+const arg=name=>process.argv.find(value=>value.startsWith('--'+name+'='))?.split('=').slice(1).join('=');
+const rounds=Number(arg('rounds')||3);
+const mode=arg('mode')||'advance';
+const output=arg('output')||path.join(root,'tests/out/postfx-review/dpr2-diagnostic.json');
+if(!['advance','render'].includes(mode)||!Number.isInteger(rounds)||rounds<1||rounds>6)throw Error('Invalid diagnostic options.');
+fs.mkdirSync(path.dirname(output),{recursive:true});
+const hash=bytes=>createHash('sha256').update(bytes).digest('hex');
+const sourceHash=directory=>{
+ const html=fs.readFileSync(path.join(directory,'index.html'),'utf8');
+ const scripts=[...html.matchAll(/<script src="([^"]+)"><\/script>/g)].map(match=>match[1]);
+ const h=createHash('sha256');
+ for(const name of scripts)h.update(name+'\0'+fs.readFileSync(path.join(directory,name)));
+ return {scripts:scripts.length,sha256:h.digest('hex')};
+};
+const cases=[
+ {name:'baseline-source',root:baseline,target:'index.html'},
+ {name:'current-source',root,target:'index.html'},
+ {name:'current-standalone',root,target:'dist/dr-manhattan.html'},
+];
+for(const item of cases){
+ item.source=sourceHash(item.root);
+ item.targetSha256=hash(fs.readFileSync(path.join(item.root,item.target)));
+}
+const launchOptions={headless:true,args:[]};
+const report={
+ diagnosticOnly:true,mode,rounds,startedAtUtc:new Date().toISOString(),
+ currentRevision:execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8'}).trim(),
+ baseline:JSON.parse(fs.readFileSync(path.join(baseline,'baseline-provenance.json'),'utf8')),
+ browserLaunchOptions:launchOptions,browserExecutable:pw.chromium.executablePath(),
+ controls:{dpr:2,viewport:{width:1280,height:720},fixedRandomSeed:20261031,rafStopped:true,
+  initialization:'180 manual Play.update+Engine.render frames, then synchronous readback; no actor/camera/health/flag edits.',
+  benchmark:'6 pairs of 3 warmup + 20 timed frames; each frame separates update, render submission and pixel-readback time.',
+  order:'ON/OFF for even rounds, OFF/ON for odd rounds; case order rotates by round.',
+  acceptanceUnchanged:'tests/visual.mjs: on <= off*1.15 OR on-off <=1ms; this controlled diagnostic does not replace that test.'},
+ cases,trials:[],errors:[],
+};
+const save=()=>fs.writeFileSync(output,JSON.stringify(report,null,2)+'\n');
+const browser=await pw.chromium.launch(launchOptions);
+report.browser=browser.version();save();
+try{
+ for(let round=0;round<rounds;round++){
+  const order=cases.map((_,i)=>cases[(i+round)%cases.length]);
+  for(const item of order){
+   if(JSON.stringify(sourceHash(item.root))!==JSON.stringify(item.source))throw Error('Source changed during diagnostic: '+item.name);
+   if(hash(fs.readFileSync(path.join(item.root,item.target)))!==item.targetSha256)throw Error('Target changed: '+item.name);
+   const context=await browser.newContext({viewport:{width:1280,height:720},deviceScaleFactor:2});
+   const page=await context.newPage();
+   const errors=[];
+   page.on('pageerror',error=>errors.push(String(error)));
+   await page.addInitScript(()=>{
+    window.requestAnimationFrame=()=>0;
+    let seed=20261031;
+    Math.random=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
+   });
+   const began=Date.now();
+   try{
+    await page.goto(pathToFileURL(path.join(item.root,item.target)).href+'?dev',{waitUntil:'domcontentloaded'});
+    await page.waitForFunction(()=>window.DM?.dev&&DM.Engine.canvas,null,{polling:100});
+    await page.mouse.click(640,360);
+    await page.evaluate(()=>{
+     const {Engine:E,SettingsSchema:S,Save}=DM;
+     E.governor.enabled=false;
+     E.governor.drop=0;
+     Save.settings.focusPause=false;
+     S.set('quality','high');
+     S.set('grain',true);
+     E.frame(E.last+1000/60);
+     DM.dev.start('mars',1);
+     const play=DM.dev.play();
+     for(let n=0;n<180;n++){
+      play.update(1/60);
+      E.render();
+      DM.Input.endFrame();
+     }
+     E.ctx.getImageData(0,0,1,1);
+    });
+    const result=await page.evaluate(({mode,round})=>{
+     const {Engine:E,Gfx:G}=DM;
+     const play=DM.dev.play();
+     const original=G.postFx;
+     const state=()=>({
+      top:E.top().constructor.name,stage:play.ctx.stageIndex,fieldTime:play.ctx.stats.time,
+      worldTime:play.world.time,worldRealTime:play.world.realTime,
+      entities:play.world.entities.length,particles:play.world.particles?.list?.length??null,
+      captions:play.hud.captions.map(item=>({text:item.text,t:item.t})),
+      dialog:play.dialog.active,locked:play.ctx.locked,
+      hudOwnUpdate:Object.hasOwn(play.hud,'update'),hudOwnRender:Object.hasOwn(play.hud,'render'),
+      tracking:play.glassPalaceTracking?{challengeId:play.glassPalaceTracking.challengeId}:null,
+      dpr:E.dpr,width:E.canvas.width,height:E.canvas.height,quality:E.qualityTier(),governorDrop:E.governor.drop,
+      postFx:{key:G.postFxState.key,builds:G.postFxState.builds,n:G.postFxState.n,
+       frames:G.postFxState.frames.map(f=>({width:f.width,height:f.height}))},
+     });
+     const before=state();
+     if(before.tracking)throw Error('Fresh diagnostic unexpectedly has a tracked challenge.');
+     const rows=[];
+     function block(on,n,pair,warmup){
+      G.postFx=on?original:()=>{};
+      const frames=[];
+      for(let i=0;i<n;i++){
+       const a=performance.now();
+       if(mode==='advance')play.update(1/60);
+       const b=performance.now();
+       E.render();
+       const c=performance.now();
+       E.ctx.getImageData(0,0,1,1);
+       const d=performance.now();
+       DM.Input.endFrame();
+       frames.push({update:b-a,render:c-b,readback:d-c,total:d-a});
+      }
+      const means=Object.fromEntries(['update','render','readback','total'].map(key=>[
+       key,frames.reduce((sum,frame)=>sum+frame[key],0)/frames.length,
+      ]));
+      if(!warmup)rows.push({pair,on,means,frames,after:state()});
+     }
+     try{
+      for(let pair=0;pair<6;pair++){
+       const order=round%2?[false,true]:[true,false];
+       for(const on of order){block(on,3,pair,true);block(on,20,pair,false);}
+      }
+     }finally{G.postFx=original;}
+     const med=values=>{const s=[...values].sort((a,b)=>a-b);return(s[2]+s[3])/2;};
+     const on=med(rows.filter(row=>row.on).map(row=>row.means.total));
+     const off=med(rows.filter(row=>!row.on).map(row=>row.means.total));
+     return {before,after:state(),rows,summary:{on,off,delta:on-off,overheadPercent:(on/off-1)*100,
+      withinOriginalThreshold:on<=off*1.15||on-off<=1,atLeastThreePointsHeadroom:on<=off*1.12}};
+    },{mode,round});
+    if(errors.length)throw Error(errors.join('\n'));
+    report.trials.push({case:item.name,round,seconds:(Date.now()-began)/1000,...result,errors});save();
+    const s=result.summary;
+    console.log(`${mode} round=${round+1} ${item.name}: on=${s.on.toFixed(3)} off=${s.off.toFixed(3)} `+
+     `delta=${s.delta.toFixed(3)} overhead=${s.overheadPercent.toFixed(2)}% `+
+     `withinOriginal=${s.withinOriginalThreshold} headroom3points=${s.atLeastThreePointsHeadroom}`);
+   }finally{await context.close();}
+  }
+ }
+ report.finishedAtUtc=new Date().toISOString();
+ report.complete=report.trials.length===rounds*cases.length;
+ save();
+ console.log('POSTFX DIAGNOSTIC COMPLETE: '+report.trials.length+' trials. Acceptance suite unchanged.');
+}catch(error){report.errors.push(String(error.stack||error));save();throw error;}
+finally{await browser.close();}

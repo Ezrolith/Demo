@@ -1,0 +1,229 @@
+{
+  "before": {
+    "accepted": true,
+    "documentNonce": "8944b884-5814-42f4-ad51-ecf7b5228a30",
+    "timeOrigin": 1793479928989.8,
+    "readyState": "complete",
+    "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/index.html",
+    "booted": true,
+    "raw": "{\"version\":1,\"challenges\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"}}",
+    "parsed": {
+      "version": 1,
+      "challenges": {},
+      "epilogueSeen": {},
+      "visits": 0,
+      "tracking": {
+        "momentId": "prologue",
+        "challengeId": "swift"
+      }
+    },
+    "storageError": null,
+    "data": {
+      "version": 1,
+      "challenges": {},
+      "epilogueSeen": {},
+      "visits": 0,
+      "tracking": {
+        "momentId": "prologue",
+        "challengeId": "swift"
+      }
+    },
+    "available": true,
+    "readOnly": false,
+    "warning": "",
+    "blocked": false,
+    "writes": [
+      {
+        "method": "setItem",
+        "key": "dr-manhattan.glass-palace.v1"
+      }
+    ],
+    "gets": [
+      "dr-manhattan.save",
+      "dr-manhattan.bonus.v1",
+      "dr-manhattan.after-midnight.v1",
+      "dr-manhattan.glass-palace.v1"
+    ],
+    "campaignIds": [
+      "prologue",
+      "reassembly",
+      "superman",
+      "deterrent",
+      "mars",
+      "karnak"
+    ],
+    "bonusIds": [
+      "last_broadcast",
+      "ninth_minute",
+      "long_summer"
+    ],
+    "caseIds": [
+      "am_dead_air",
+      "am_undertow",
+      "am_glass_archive",
+      "am_patrol",
+      "am_rescue_clock"
+    ]
+  },
+  "accepted": true,
+  "afterBoot": {
+    "documentNonce": "47f1202a-b8d8-442d-be26-bd43d9c6c04e",
+    "timeOrigin": 1793479929831.6,
+    "readyState": "complete",
+    "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/index.html",
+    "booted": true,
+    "raw": "{\"version\":1,\"challenges\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"}}",
+    "parsed": {
+      "version": 1,
+      "challenges": {},
+      "epilogueSeen": {},
+      "visits": 0,
+      "tracking": {
+        "momentId": "prologue",
+        "challengeId": "swift"
+      }
+    },
+    "storageError": null,
+    "data": null,
+    "available": true,
+    "readOnly": false,
+    "warning": "",
+    "blocked": false,
+    "writes": [],
+    "gets": [
+      "dr-manhattan.save",
+      "dr-manhattan.glass-palace.v1"
+    ],
+    "campaignIds": [
+      "prologue",
+      "reassembly",
+      "superman",
+      "deterrent",
+      "mars",
+      "karnak"
+    ],
+    "bonusIds": [
+      "last_broadcast",
+      "ninth_minute",
+      "long_summer"
+    ],
+    "caseIds": [
+      "am_dead_air",
+      "am_undertow",
+      "am_glass_archive",
+      "am_patrol",
+      "am_rescue_clock"
+    ]
+  },
+  "afterInstall": {
+    "documentNonce": "47f1202a-b8d8-442d-be26-bd43d9c6c04e",
+    "timeOrigin": 1793479929831.6,
+    "readyState": "complete",
+    "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/index.html",
+    "booted": true,
+    "raw": "{\"version\":1,\"challenges\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"}}",
+    "parsed": {
+      "version": 1,
+      "challenges": {},
+      "epilogueSeen": {},
+      "visits": 0,
+      "tracking": {
+        "momentId": "prologue",
+        "challengeId": "swift"
+      }
+    },
+    "storageError": null,
+    "data": null,
+    "available": true,
+    "readOnly": false,
+    "warning": "",
+    "blocked": false,
+    "writes": [],
+    "gets": [
+      "dr-manhattan.save",
+      "dr-manhattan.glass-palace.v1",
+      "dr-manhattan.glass-palace.v1"
+    ],
+    "campaignIds": [
+      "prologue",
+      "reassembly",
+      "superman",
+      "deterrent",
+      "mars",
+      "karnak"
+    ],
+    "bonusIds": [
+      "last_broadcast",
+      "ninth_minute",
+      "long_summer"
+    ],
+    "caseIds": [
+      "am_dead_air",
+      "am_undertow",
+      "am_glass_archive",
+      "am_patrol",
+      "am_rescue_clock"
+    ]
+  },
+  "afterRead": {
+    "documentNonce": "47f1202a-b8d8-442d-be26-bd43d9c6c04e",
+    "timeOrigin": 1793479929831.6,
+    "readyState": "complete",
+    "url": "file:///Users/peter/Documents/ChatGPT/Watchmen%20Game/game/index.html",
+    "booted": true,
+    "raw": "{\"version\":1,\"challenges\":{},\"epilogueSeen\":{},\"visits\":0,\"tracking\":{\"momentId\":\"prologue\",\"challengeId\":\"swift\"}}",
+    "parsed": {
+      "version": 1,
+      "challenges": {},
+      "epilogueSeen": {},
+      "visits": 0,
+      "tracking": {
+        "momentId": "prologue",
+        "challengeId": "swift"
+      }
+    },
+    "storageError": null,
+    "data": {
+      "version": 1,
+      "challenges": {},
+      "epilogueSeen": {},
+      "visits": 0,
+      "tracking": {
+        "momentId": "prologue",
+        "challengeId": "swift"
+      }
+    },
+    "available": true,
+    "readOnly": false,
+    "warning": "",
+    "blocked": false,
+    "writes": [],
+    "gets": [
+      "dr-manhattan.save",
+      "dr-manhattan.glass-palace.v1",
+      "dr-manhattan.glass-palace.v1",
+      "dr-manhattan.glass-palace.v1",
+      "dr-manhattan.glass-palace.v1"
+    ],
+    "campaignIds": [
+      "prologue",
+      "reassembly",
+      "superman",
+      "deterrent",
+      "mars",
+      "karnak"
+    ],
+    "bonusIds": [
+      "last_broadcast",
+      "ninth_minute",
+      "long_summer"
+    ],
+    "caseIds": [
+      "am_dead_air",
+      "am_undertow",
+      "am_glass_archive",
+      "am_patrol",
+      "am_rescue_clock"
+    ]
+  }
+}

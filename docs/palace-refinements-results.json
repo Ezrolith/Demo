@@ -1,0 +1,1240 @@
+{
+  "schemaVersion": 1,
+  "scope": "Palace atlas, walking guide and progress backups",
+  "branch": "codex/glass-palace-refinements",
+  "baseRevision": "48e08737bd4399be795b56561d89b15f08b1dac3",
+  "codeRevision": "6f21f6cce865b59dfa2451663ab8ba0f94a7a44d",
+  "validationRevision": "e777c87f2ca4a8c5e8c5857d8804e0cd2f54352d",
+  "pullRequest": "https://github.com/Ezrolith/Demo/pull/8",
+  "sourceScriptsSha256": "71c7722cd27e64104e7759a820fbb974687173349db96b60d19afa842ea7a66a",
+  "standaloneSha256": "facbe13aa9a266996c9c171715721860d3a3da6499f83da9635cc3bfe1d69f90",
+  "sourceInitialRun": {
+    "startedAtUtc": "2026-10-31T15:07:54.116Z",
+    "target": "index.html",
+    "method": "One child process at a time; stdout/stderr retained together; real process exit codes.",
+    "sourceScriptsSha256": "71c7722cd27e64104e7759a820fbb974687173349db96b60d19afa842ea7a66a",
+    "standaloneSha256": "facbe13aa9a266996c9c171715721860d3a3da6499f83da9635cc3bfe1d69f90",
+    "suites": [
+      {
+        "suite": "smoke",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 98.49,
+        "finalLine": "Smoke test passed.",
+        "log": "tests/out/palace-refinements/final-source/smoke.log"
+      },
+      {
+        "suite": "visual",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 78.59,
+        "finalLine": "All atmosphere checks passed.",
+        "log": "tests/out/palace-refinements/final-source/visual.log"
+      },
+      {
+        "suite": "audio",
+        "exitCode": 1,
+        "signal": null,
+        "error": null,
+        "seconds": 242.88,
+        "finalLine": "1 audio check(s) failed.",
+        "log": "tests/out/palace-refinements/final-source/audio.log"
+      },
+      {
+        "suite": "powers",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 54.63,
+        "finalLine": "All mechanics checks passed.",
+        "log": "tests/out/palace-refinements/final-source/powers.log"
+      },
+      {
+        "suite": "saves",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 110.62,
+        "finalLine": "All save & robustness checks passed.",
+        "log": "tests/out/palace-refinements/final-source/saves.log"
+      },
+      {
+        "suite": "settings",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 68.57,
+        "finalLine": "All settings & accessibility checks passed.",
+        "log": "tests/out/palace-refinements/final-source/settings.log"
+      },
+      {
+        "suite": "ledger",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 34.88,
+        "finalLine": "All ledger & combat-feel checks passed.",
+        "log": "tests/out/palace-refinements/final-source/ledger.log"
+      },
+      {
+        "suite": "encounters",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.06,
+        "finalLine": "All encounter checks passed.",
+        "log": "tests/out/palace-refinements/final-source/encounters.log"
+      },
+      {
+        "suite": "flows",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 133.34,
+        "finalLine": "All story flow checks passed.",
+        "log": "tests/out/palace-refinements/final-source/flows.log"
+      },
+      {
+        "suite": "bonus",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 2.67,
+        "finalLine": "BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).",
+        "log": "tests/out/palace-refinements/final-source/bonus.log"
+      },
+      {
+        "suite": "ninth-minute",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 5.79,
+        "finalLine": "NINTH MINUTE PASSED: 75 checks (normal file loading).",
+        "log": "tests/out/palace-refinements/final-source/ninth-minute.log"
+      },
+      {
+        "suite": "long-summer",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 9.29,
+        "finalLine": "LONG SUMMER PASSED: 82 checks (normal file loading).",
+        "log": "tests/out/palace-refinements/final-source/long-summer.log"
+      },
+      {
+        "suite": "vigilantes",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.15,
+        "finalLine": "VIGILANTES PASSED: 43 checks (chromium, index.html).",
+        "log": "tests/out/palace-refinements/final-source/vigilantes.log"
+      },
+      {
+        "suite": "after-midnight-cases",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 2.58,
+        "finalLine": "AFTER MIDNIGHT CASES PASSED: 75 checks (chromium, index.html).",
+        "log": "tests/out/palace-refinements/final-source/after-midnight-cases.log"
+      },
+      {
+        "suite": "after-midnight-modes",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 5.26,
+        "finalLine": "AFTER MIDNIGHT MODES PASSED: 45 checks (index.html).",
+        "log": "tests/out/palace-refinements/final-source/after-midnight-modes.log"
+      },
+      {
+        "suite": "after-midnight-integration",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 2.56,
+        "finalLine": "AFTER MIDNIGHT INTEGRATION PASSED: 36 checks (index.html).",
+        "log": "tests/out/palace-refinements/final-source/after-midnight-integration.log"
+      },
+      {
+        "suite": "surveyor-gear",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.45,
+        "finalLine": "SURVEYOR GEAR PASSED: 5 checks (index.html).",
+        "log": "tests/out/palace-refinements/final-source/surveyor-gear.log"
+      },
+      {
+        "suite": "glass-palace",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.73,
+        "finalLine": "GLASS PALACE PASSED: 76 checks (chromium, index.html).",
+        "log": "tests/out/palace-refinements/final-source/glass-palace.log"
+      },
+      {
+        "suite": "glass-palace-navigation",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 15.13,
+        "finalLine": "GLASS PALACE NAVIGATION PASSED: 47 checks (index.html).",
+        "log": "tests/out/palace-refinements/final-source/glass-palace-navigation.log"
+      },
+      {
+        "suite": "glass-palace-backup",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 0.77,
+        "finalLine": "GLASS PALACE BACKUP PASSED: 46 checks (chromium, index.html).",
+        "log": "tests/out/palace-refinements/final-source/glass-palace-backup.log"
+      }
+    ],
+    "finishedAtUtc": "2026-10-31T15:22:25.574Z",
+    "passed": false
+  },
+  "sourceAudioRecheck": {
+    "suite": "audio",
+    "target": "index.html",
+    "exitCode": 0,
+    "finalLine": "All audio checks passed.",
+    "log": "tests/out/palace-refinements/source-audio-recheck.log",
+    "method": "One unchanged full-suite recheck after initial randomized whoosh peak failure; real process exit 0 observed."
+  },
+  "sourceLatestAttempts": [
+    {
+      "suite": "smoke",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 98.49,
+      "finalLine": "Smoke test passed.",
+      "log": "tests/out/palace-refinements/final-source/smoke.log"
+    },
+    {
+      "suite": "visual",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 78.59,
+      "finalLine": "All atmosphere checks passed.",
+      "log": "tests/out/palace-refinements/final-source/visual.log"
+    },
+    {
+      "suite": "audio",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": null,
+      "finalLine": "All audio checks passed.",
+      "log": "tests/out/palace-refinements/source-audio-recheck.log",
+      "target": "index.html",
+      "method": "One unchanged full-suite recheck after initial randomized whoosh peak failure; real process exit 0 observed.",
+      "initialSeconds": 242.88,
+      "initialExitCode": 1
+    },
+    {
+      "suite": "powers",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 54.63,
+      "finalLine": "All mechanics checks passed.",
+      "log": "tests/out/palace-refinements/final-source/powers.log"
+    },
+    {
+      "suite": "saves",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 110.62,
+      "finalLine": "All save & robustness checks passed.",
+      "log": "tests/out/palace-refinements/final-source/saves.log"
+    },
+    {
+      "suite": "settings",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 68.57,
+      "finalLine": "All settings & accessibility checks passed.",
+      "log": "tests/out/palace-refinements/final-source/settings.log"
+    },
+    {
+      "suite": "ledger",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 34.88,
+      "finalLine": "All ledger & combat-feel checks passed.",
+      "log": "tests/out/palace-refinements/final-source/ledger.log"
+    },
+    {
+      "suite": "encounters",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 1.06,
+      "finalLine": "All encounter checks passed.",
+      "log": "tests/out/palace-refinements/final-source/encounters.log"
+    },
+    {
+      "suite": "flows",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 133.34,
+      "finalLine": "All story flow checks passed.",
+      "log": "tests/out/palace-refinements/final-source/flows.log"
+    },
+    {
+      "suite": "bonus",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 2.67,
+      "finalLine": "BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).",
+      "log": "tests/out/palace-refinements/final-source/bonus.log"
+    },
+    {
+      "suite": "ninth-minute",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 5.79,
+      "finalLine": "NINTH MINUTE PASSED: 75 checks (normal file loading).",
+      "log": "tests/out/palace-refinements/final-source/ninth-minute.log"
+    },
+    {
+      "suite": "long-summer",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 9.29,
+      "finalLine": "LONG SUMMER PASSED: 82 checks (normal file loading).",
+      "log": "tests/out/palace-refinements/final-source/long-summer.log"
+    },
+    {
+      "suite": "vigilantes",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 1.15,
+      "finalLine": "VIGILANTES PASSED: 43 checks (chromium, index.html).",
+      "log": "tests/out/palace-refinements/final-source/vigilantes.log"
+    },
+    {
+      "suite": "after-midnight-cases",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 2.58,
+      "finalLine": "AFTER MIDNIGHT CASES PASSED: 75 checks (chromium, index.html).",
+      "log": "tests/out/palace-refinements/final-source/after-midnight-cases.log"
+    },
+    {
+      "suite": "after-midnight-modes",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 5.26,
+      "finalLine": "AFTER MIDNIGHT MODES PASSED: 45 checks (index.html).",
+      "log": "tests/out/palace-refinements/final-source/after-midnight-modes.log"
+    },
+    {
+      "suite": "after-midnight-integration",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 2.56,
+      "finalLine": "AFTER MIDNIGHT INTEGRATION PASSED: 36 checks (index.html).",
+      "log": "tests/out/palace-refinements/final-source/after-midnight-integration.log"
+    },
+    {
+      "suite": "surveyor-gear",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 1.45,
+      "finalLine": "SURVEYOR GEAR PASSED: 5 checks (index.html).",
+      "log": "tests/out/palace-refinements/final-source/surveyor-gear.log"
+    },
+    {
+      "suite": "glass-palace",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 1.73,
+      "finalLine": "GLASS PALACE PASSED: 76 checks (chromium, index.html).",
+      "log": "tests/out/palace-refinements/final-source/glass-palace.log"
+    },
+    {
+      "suite": "glass-palace-navigation",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 15.13,
+      "finalLine": "GLASS PALACE NAVIGATION PASSED: 47 checks (index.html).",
+      "log": "tests/out/palace-refinements/final-source/glass-palace-navigation.log"
+    },
+    {
+      "suite": "glass-palace-backup",
+      "exitCode": 0,
+      "signal": null,
+      "error": null,
+      "seconds": 0.77,
+      "finalLine": "GLASS PALACE BACKUP PASSED: 46 checks (chromium, index.html).",
+      "log": "tests/out/palace-refinements/final-source/glass-palace-backup.log"
+    }
+  ],
+  "standaloneRun": {
+    "startedAtUtc": "2026-10-31T15:30:49.501Z",
+    "target": "dist/dr-manhattan.html",
+    "method": "One child process at a time; stdout/stderr retained together; real process exit codes.",
+    "sourceScriptsSha256": "71c7722cd27e64104e7759a820fbb974687173349db96b60d19afa842ea7a66a",
+    "standaloneSha256": "facbe13aa9a266996c9c171715721860d3a3da6499f83da9635cc3bfe1d69f90",
+    "suites": [
+      {
+        "suite": "smoke",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 98.05,
+        "finalLine": "Smoke test passed.",
+        "log": "tests/out/palace-refinements/final-standalone/smoke.log"
+      },
+      {
+        "suite": "visual",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 79.84,
+        "finalLine": "All atmosphere checks passed.",
+        "log": "tests/out/palace-refinements/final-standalone/visual.log"
+      },
+      {
+        "suite": "audio",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 243.59,
+        "finalLine": "All audio checks passed.",
+        "log": "tests/out/palace-refinements/final-standalone/audio.log"
+      },
+      {
+        "suite": "powers",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 54.58,
+        "finalLine": "All mechanics checks passed.",
+        "log": "tests/out/palace-refinements/final-standalone/powers.log"
+      },
+      {
+        "suite": "saves",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 108.9,
+        "finalLine": "All save & robustness checks passed.",
+        "log": "tests/out/palace-refinements/final-standalone/saves.log"
+      },
+      {
+        "suite": "settings",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 69.82,
+        "finalLine": "All settings & accessibility checks passed.",
+        "log": "tests/out/palace-refinements/final-standalone/settings.log"
+      },
+      {
+        "suite": "ledger",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 34.22,
+        "finalLine": "All ledger & combat-feel checks passed.",
+        "log": "tests/out/palace-refinements/final-standalone/ledger.log"
+      },
+      {
+        "suite": "encounters",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.08,
+        "finalLine": "All encounter checks passed.",
+        "log": "tests/out/palace-refinements/final-standalone/encounters.log"
+      },
+      {
+        "suite": "flows",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 131.97,
+        "finalLine": "All story flow checks passed.",
+        "log": "tests/out/palace-refinements/final-standalone/flows.log"
+      },
+      {
+        "suite": "bonus",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 2.77,
+        "finalLine": "BONUS ACCEPTANCE PASSED: 42 checks (normal file loading).",
+        "log": "tests/out/palace-refinements/final-standalone/bonus.log"
+      },
+      {
+        "suite": "ninth-minute",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 5.94,
+        "finalLine": "NINTH MINUTE PASSED: 75 checks (normal file loading).",
+        "log": "tests/out/palace-refinements/final-standalone/ninth-minute.log"
+      },
+      {
+        "suite": "long-summer",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 9.49,
+        "finalLine": "LONG SUMMER PASSED: 82 checks (normal file loading).",
+        "log": "tests/out/palace-refinements/final-standalone/long-summer.log"
+      },
+      {
+        "suite": "vigilantes",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.19,
+        "finalLine": "VIGILANTES PASSED: 43 checks (chromium, dist/dr-manhattan.html).",
+        "log": "tests/out/palace-refinements/final-standalone/vigilantes.log"
+      },
+      {
+        "suite": "after-midnight-cases",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 2.6,
+        "finalLine": "AFTER MIDNIGHT CASES PASSED: 75 checks (chromium, dist/dr-manhattan.html).",
+        "log": "tests/out/palace-refinements/final-standalone/after-midnight-cases.log"
+      },
+      {
+        "suite": "after-midnight-modes",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 4.54,
+        "finalLine": "AFTER MIDNIGHT MODES PASSED: 45 checks (dist/dr-manhattan.html).",
+        "log": "tests/out/palace-refinements/final-standalone/after-midnight-modes.log"
+      },
+      {
+        "suite": "after-midnight-integration",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.71,
+        "finalLine": "AFTER MIDNIGHT INTEGRATION PASSED: 36 checks (dist/dr-manhattan.html).",
+        "log": "tests/out/palace-refinements/final-standalone/after-midnight-integration.log"
+      },
+      {
+        "suite": "surveyor-gear",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.49,
+        "finalLine": "SURVEYOR GEAR PASSED: 5 checks (dist/dr-manhattan.html).",
+        "log": "tests/out/palace-refinements/final-standalone/surveyor-gear.log"
+      },
+      {
+        "suite": "glass-palace",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 1.81,
+        "finalLine": "GLASS PALACE PASSED: 76 checks (chromium, dist/dr-manhattan.html).",
+        "log": "tests/out/palace-refinements/final-standalone/glass-palace.log"
+      },
+      {
+        "suite": "glass-palace-navigation",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 14.67,
+        "finalLine": "GLASS PALACE NAVIGATION PASSED: 47 checks (dist/dr-manhattan.html).",
+        "log": "tests/out/palace-refinements/final-standalone/glass-palace-navigation.log"
+      },
+      {
+        "suite": "glass-palace-backup",
+        "exitCode": 0,
+        "signal": null,
+        "error": null,
+        "seconds": 0.78,
+        "finalLine": "GLASS PALACE BACKUP PASSED: 46 checks (chromium, dist/dr-manhattan.html).",
+        "log": "tests/out/palace-refinements/final-standalone/glass-palace-backup.log"
+      }
+    ],
+    "finishedAtUtc": "2026-10-31T15:45:18.545Z",
+    "passed": true
+  },
+  "chromiumNavigation": {
+    "target": "index.html",
+    "engine": "chromium",
+    "browser": "151.0.7922.34",
+    "checks": [
+      "actual title input opens the hub without changing a source save",
+      "fresh navigation lists the seven normally unlocked moments and ledger only",
+      "locked campaign and gated Earth destinations cannot be selected",
+      "H opens the atlas through actual input and keeps locked names out of its entries",
+      "the atlas shows at most five destinations with readable rows inside its panel",
+      "Escape closes the atlas back to the walking hub",
+      "the visible atlas button opens the same screen with the mouse",
+      "the leave menu keeps the atlas reachable",
+      "opening the atlas from the leave menu returns directly to the hub",
+      "fresh-save atlas discovery makes no write attempt against any source slot",
+      "live atlas and trail captures use fresh zero-fragment saves after ten seconds of normal game frames",
+      "external progression refresh exposes all twelve moments, the ledger and gated Earth",
+      "each moment index reads its real fragment count and selected-hero checkpoint",
+      "refreshing navigation after an external save change preserves all three new source snapshots",
+      "a route can start beside a wall using the actual thirteen-pixel player footprint",
+      "routing accepts physical wall contact and rejects actual wall penetration",
+      "prologue: guide segments clear every actual map wall at the player radius",
+      "reassembly: guide segments clear every actual map wall at the player radius",
+      "superman: guide segments clear every actual map wall at the player radius",
+      "deterrent: guide segments clear every actual map wall at the player radius",
+      "mars: guide segments clear every actual map wall at the player radius",
+      "karnak: guide segments clear every actual map wall at the player radius",
+      "last_broadcast: guide segments clear every actual map wall at the player radius",
+      "ninth_minute: guide segments clear every actual map wall at the player radius",
+      "long_summer: guide segments clear every actual map wall at the player radius",
+      "am_dead_air: guide segments clear every actual map wall at the player radius",
+      "am_undertow: guide segments clear every actual map wall at the player radius",
+      "am_glass_archive: guide segments clear every actual map wall at the player radius",
+      "ledger: guide segments clear every actual map wall at the player radius",
+      "earth: guide segments clear every actual map wall at the player radius",
+      "the ordinary world renderer draws an active guide at the unchanged spawn camera",
+      "clearing a guide removes both its target and its route",
+      "keyboard filtering shows only moments with fragments still to earn",
+      "the checkpoint filter lists only existing selected-character resumes",
+      "mouse filter adjustment restores the complete index and resets pagination",
+      "mouse pagination exposes the next five destinations without repeating the first page",
+      "all fourteen destinations are reachable across three bounded pages",
+      "keyboard destination selection closes the atlas and creates a walking guide",
+      "the clear-guide action works through its visible menu row",
+      "mouse destination selection changes no actor position by itself",
+      "real WASD follows the guide to a pane and physical arrival clears it",
+      "E at the guided destination opens the real moment menu",
+      "rebuilding the hub refreshes a valid guide at the current physical position",
+      "rebuilding a guide does not warp Jon",
+      "all atlas filters, route selections and real walking preserve the full-progression source saves",
+      "a destination that becomes locked is removed with its stale walking guide",
+      "navigation, filters, walking and refreshes leave source slots byte-for-byte unchanged",
+      "no browser or engine error occurred during navigation"
+    ],
+    "errors": [],
+    "routes": [
+      {
+        "id": "prologue",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 359,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 420,
+            "y": 450
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "reassembly",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 299,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 840,
+            "y": 450
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "superman",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 299,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 1260,
+            "y": 450
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "deterrent",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 359,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 1680,
+            "y": 450
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "mars",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 292,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 350,
+            "y": 800
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "karnak",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 292,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 1750,
+            "y": 800
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "last_broadcast",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 243,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 350,
+            "y": 1150
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "ninth_minute",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 243,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 1750,
+            "y": 1150
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "long_summer",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 242,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 720,
+            "y": 1320
+          },
+          {
+            "x": 420,
+            "y": 1550
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "am_dead_air",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 110,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 840,
+            "y": 1550
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "am_undertow",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 110,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 1260,
+            "y": 1550
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "am_glass_archive",
+        "kind": "moment",
+        "accepted": true,
+        "samples": 242,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 1380,
+            "y": 1320
+          },
+          {
+            "x": 1680,
+            "y": 1550
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "ledger",
+        "kind": "ledger",
+        "accepted": true,
+        "samples": 30,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 1050,
+            "y": 1230
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      },
+      {
+        "id": "earth",
+        "kind": "earth",
+        "accepted": true,
+        "samples": 158,
+        "blocked": null,
+        "route": [
+          {
+            "x": 1050,
+            "y": 1310
+          },
+          {
+            "x": 1510,
+            "y": 1260
+          }
+        ],
+        "nearGoal": true,
+        "finite": true
+      }
+    ],
+    "walks": [
+      {
+        "label": "prologue",
+        "goal": {
+          "id": "prologue",
+          "kind": "moment",
+          "x": 420,
+          "y": 450
+        },
+        "x": 422.0672210874135,
+        "y": 492.19778873996495,
+        "polls": 235,
+        "seconds": 9.971
+      }
+    ],
+    "captures": [
+      {
+        "view": "atlas",
+        "path": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/glass-palace-navigation/chromium/source/atlas-fresh-live.png",
+        "navigation": {
+          "onTop": false,
+          "id": null,
+          "target": null,
+          "route": [],
+          "x": 1050,
+          "y": 1310,
+          "interactId": null,
+          "error": null,
+          "down": false,
+          "god": false,
+          "combat": false
+        },
+        "sourceUnchanged": true
+      },
+      {
+        "view": "guide",
+        "path": "/Users/peter/Documents/ChatGPT/Watchmen Game/game/tests/out/glass-palace-navigation/chromium/source/guide-fresh-live.png",
+        "navigation": {
+          "onTop": true,
+          "id": "prologue",
+          "target": {
+            "id": "prologue",
+            "kind": "moment",
+            "x": 420,
+            "y": 450
+          },
+          "route": [
+            {
+              "x": 1050,
+              "y": 1310
+            },
+            {
+              "x": 420,
+              "y": 450
+            }
+          ],
+          "x": 1050,
+          "y": 1310,
+          "interactId": null,
+          "error": null,
+          "down": false,
+          "god": false,
+          "combat": false
+        },
+        "sourceUnchanged": true
+      }
+    ],
+    "sourceSlotsUnchanged": true,
+    "sourceWrites": [],
+    "fixtureProvenance": "Explicit fresh/full/external-restore saves, with controlled completion and challenge records. These records are not naturally earned. Each observation phase snapshots all source bytes and traces writes.",
+    "method": "Normal RAF and real keyboard/mouse inputs; no actor/camera placement, no invulnerability, route segments independently sampled every three world pixels with the actual player collision radius."
+  },
+  "chromiumBackup": {
+    "engine": "chromium",
+    "target": "index.html",
+    "checks": [
+      "export has the palace-specific versioned envelope",
+      "decode returns a detached sanitized preview with exact counts",
+      "preview and export never write source slots or settings",
+      "blocked-storage session progress is still exportable without writes",
+      "unreadable JSON is rejected",
+      "non-object packets are rejected",
+      "other progress formats are rejected",
+      "future wrapper versions are rejected",
+      "unexpected envelope fields are rejected",
+      "missing progress data is rejected",
+      "future palace data versions are rejected",
+      "unknown progress fields are rejected",
+      "unknown moments are rejected",
+      "unknown challenge names are rejected",
+      "non-boolean challenge values are rejected",
+      "unknown reflections are rejected",
+      "non-boolean reflections are rejected",
+      "negative visit counts are rejected",
+      "fractional visit counts are rejected",
+      "unsafe nested JSON fields are rejected",
+      "oversized text is rejected",
+      "the size limit counts UTF-8 bytes",
+      "all rejected previews preserve existing progress and protected slots",
+      "restore commits only the palace slot and clears a session warning",
+      "failed writes preserve the exact session object, flags and stored bytes",
+      "protected session state cannot be replaced by restore",
+      "a newer stored palace is protected even before the session reloads",
+      "an unreadable stored palace is protected from overwrite",
+      "the native backup dialog is labelled and focuses Export",
+      "Restore is disabled until a compatible file is previewed",
+      "Export downloads the actual current palace progress",
+      "Shift+Tab wraps from Export to Back while Restore is disabled",
+      "Tab wraps from Back to Export",
+      "choosing a file previews counts without changing stored progress",
+      "explicit Restore updates palace progress and reports the result",
+      "successful restore disables its old action and moves focus to Back",
+      "Escape closes the modal and the normal hub resume rebuilds its structure",
+      "all API and native modal actions preserve source-slot bytes and settings",
+      "an invalid file cannot enable Restore or alter progress",
+      "a superseded slow file cannot replace the latest preview",
+      "selecting another file immediately clears the old pending restore",
+      "a read completing after close cannot affect a newly opened dialog",
+      "Tab recovers focus from outside the modal",
+      "closing removes the modal keyboard listener without swallowing later keys",
+      "race and cleanup checks preserve source slots and settings",
+      "no uncaught browser errors"
+    ],
+    "errors": [],
+    "finalLine": "GLASS PALACE BACKUP PASSED: 46 checks (chromium, index.html).",
+    "exit": 0
+  },
+  "crossEngine": [
+    {
+      "suite": "glass-palace-navigation",
+      "target": "index.html",
+      "browser": "webkit",
+      "exitCode": 0,
+      "finalLine": "GLASS PALACE NAVIGATION PASSED: 47 checks (index.html).",
+      "seconds": 15.236,
+      "log": "tests/out/palace-refinements/webkit-glass-palace-navigation-index.html.log"
+    },
+    {
+      "suite": "glass-palace-backup",
+      "target": "index.html",
+      "browser": "webkit",
+      "exitCode": 0,
+      "finalLine": "GLASS PALACE BACKUP PASSED: 46 checks (webkit, index.html).",
+      "seconds": 0.923,
+      "log": "tests/out/palace-refinements/webkit-glass-palace-backup-index.html.log"
+    },
+    {
+      "suite": "glass-palace-navigation",
+      "target": "dist/dr-manhattan.html",
+      "browser": "webkit",
+      "exitCode": 0,
+      "finalLine": "GLASS PALACE NAVIGATION PASSED: 47 checks (dist/dr-manhattan.html).",
+      "seconds": 14.951,
+      "log": "tests/out/palace-refinements/webkit-glass-palace-navigation-dr-manhattan.html.log"
+    },
+    {
+      "suite": "glass-palace-backup",
+      "target": "dist/dr-manhattan.html",
+      "browser": "webkit",
+      "exitCode": 0,
+      "finalLine": "GLASS PALACE BACKUP PASSED: 46 checks (webkit, dist/dr-manhattan.html).",
+      "seconds": 0.804,
+      "log": "tests/out/palace-refinements/webkit-glass-palace-backup-dr-manhattan.html.log"
+    }
+  ],
+  "crossEngineInitialRun": [
+    {
+      "suite": "glass-palace-navigation",
+      "target": "index.html",
+      "browser": "webkit",
+      "exitCode": 0,
+      "finalLine": "GLASS PALACE NAVIGATION PASSED: 47 checks (index.html).",
+      "seconds": 15.272,
+      "log": null,
+      "logNote": "Original summary retained; passing logs were replaced by the later recheck."
+    },
+    {
+      "suite": "glass-palace-backup",
+      "target": "index.html",
+      "browser": "webkit",
+      "exitCode": 0,
+      "finalLine": "GLASS PALACE BACKUP PASSED: 46 checks (webkit, index.html).",
+      "seconds": 1.093,
+      "log": null,
+      "logNote": "Original summary retained; passing logs were replaced by the later recheck."
+    },
+    {
+      "suite": "glass-palace-navigation",
+      "target": "dist/dr-manhattan.html",
+      "browser": "webkit",
+      "exitCode": 1,
+      "finalLine": "}",
+      "seconds": 30.88,
+      "log": "tests/out/palace-refinements/webkit-navigation-before-gate-wait.log",
+      "logNote": "Original failed log retained."
+    },
+    {
+      "suite": "glass-palace-backup",
+      "target": "dist/dr-manhattan.html",
+      "browser": "webkit",
+      "exitCode": 0,
+      "finalLine": "GLASS PALACE BACKUP PASSED: 46 checks (webkit, dist/dr-manhattan.html).",
+      "seconds": 0.979,
+      "log": null,
+      "logNote": "Original summary retained; passing logs were replaced by the later recheck."
+    }
+  ],
+  "validationCorrection": "The first WebKit standalone navigation attempt raced the title click-to-begin gate. The test now waits for gate=false; all assertions and runtime files are unchanged. Revised navigation passes on both builds in Chromium and WebKit.",
+  "protectedFiles": [
+    {
+      "path": "src/data/chapters/prologue.js",
+      "sha256": "89336acfb4020351805b9a1a05e78c3ed12785e4828529fe76c1f51202882b41",
+      "unchanged": true
+    },
+    {
+      "path": "src/data/chapters/reassembly.js",
+      "sha256": "6a382b1ca39e78507a6b0faee1c255e45789d476159fab8ee46c7931e44c1e92",
+      "unchanged": true
+    },
+    {
+      "path": "src/data/chapters/superman.js",
+      "sha256": "02107723da289a293c0305320c8283b4b86ef88374fcdbc862bdf7dce0b1a009",
+      "unchanged": true
+    },
+    {
+      "path": "src/data/chapters/deterrent.js",
+      "sha256": "3bc020bb95a0229cff7afe41cb93e6d33da41f91651f467e6ebde7f82d2879b1",
+      "unchanged": true
+    },
+    {
+      "path": "src/data/chapters/mars.js",
+      "sha256": "bd40cf8d7da1d58f3c61d569cdbb651c7c2a53a4e5679a2b73c501f44577e126",
+      "unchanged": true
+    },
+    {
+      "path": "src/data/chapters/karnak.js",
+      "sha256": "f801f588f3a529dafac2d8e528e0ca8f4e4037c0d22114f5fb34fcfb35c920e3",
+      "unchanged": true
+    },
+    {
+      "path": "src/data/music.js",
+      "sha256": "ef2db5abae5cb4431c81c936c3565f56267e4473be5782343184edc1d1fed426",
+      "unchanged": true
+    },
+    {
+      "path": "src/data/bonus-broadcast-atmosphere.js",
+      "sha256": "7791c444df1a6862a12fb60a1ff2cefc1fb3a5e7a25612f677d62bcfad3d49da",
+      "unchanged": true
+    },
+    {
+      "path": "src/data/bonus-ninth-atmosphere.js",
+      "sha256": "149112e6313ae60b1717a3a86a36fe347692b33cca1bb8617a96e5cc5bbca24d",
+      "unchanged": true
+    },
+    {
+      "path": "src/data/bonus-summer-atmosphere.js",
+      "sha256": "235e5367aa6f9f5a92ec8c32f20ae074bffb039814f49c8be912fb0bb6c8e1c1",
+      "unchanged": true
+    },
+    {
+      "path": "src/core/engine.js",
+      "sha256": "62a1f17744145311c613797c5a0200f04369343615b5264968833f6d5cfdb1e8",
+      "unchanged": true
+    },
+    {
+      "path": "src/core/gfx.js",
+      "sha256": "20d9e86e93452abf17e0dfa54d4778afbbd4c0f245cdafc147a063ab8b00e451",
+      "unchanged": true
+    },
+    {
+      "path": "src/core/lighting.js",
+      "sha256": "20529a97d4521ba5e22a56814d6aaca5406abf80848f08a216f5c132cae9a79d",
+      "unchanged": true
+    },
+    {
+      "path": "src/core/weather.js",
+      "sha256": "9fbc1d6fa17a0a209e3e63036c949ab462fdc3fd94c450e06ea29d89c88003e4",
+      "unchanged": true
+    },
+    {
+      "path": "src/core/camera.js",
+      "sha256": "81b58f13d7f3df6c40284984c65831ce694f17b6afc6dca8be15e08ec9104bbf",
+      "unchanged": true
+    },
+    {
+      "path": "src/core/audio.js",
+      "sha256": "bc3592dbee242505b8b39058169b70882087728dc1f1d0f211ec4e71955c2565",
+      "unchanged": true
+    },
+    {
+      "path": "src/game/world.js",
+      "sha256": "e5a959cb5dd8336397c2d4109f51fd55cd9a96346bc507d70fdfec589b9310b1",
+      "unchanged": true
+    }
+  ],
+  "audioQualification": {
+    "initialExitCode": 1,
+    "recheckExitCode": 0,
+    "initialWhooshPeakDbfs": -20.3,
+    "recheckWhooshPeakDbfs": -18.5,
+    "unchangedThresholdDbfs": -20,
+    "sourceAndTestUnchanged": true,
+    "olderFailure": "tests/out/after-midnight-legacy/audio-normalized.log measured whoosh -20.9 dBFS.",
+    "causeEvidence": "Offline probe fills fresh unseeded white noise and the original noise player uses a random offset.",
+    "conclusion": "Existing intermittent measurement; initial failure retained, sound and test thresholds unchanged."
+  },
+  "independentCI": {
+    "id": 41216601719,
+    "status": "pending",
+    "conclusion": null,
+    "url": "https://github.com/Ezrolith/Demo/actions/runs/41216601719",
+    "commit": "e777c87f2ca4a8c5e8c5857d8804e0cd2f54352d",
+    "checkedAtUtc": "2026-10-31T15:50:29.445985+00:00"
+  },
+  "captureManifest": "screenshots/palace-refinements/capture-source.json",
+  "limits": [
+    "Controlled progression fixtures exercise all destinations and save edge cases; they are not naturally earned completions.",
+    "Live atlas/trail captures use fresh zero-fragment saves, normal frames and real inputs without actor or camera placement.",
+    "All fourteen routes are geometrically checked; the new actual guided keyboard trip targets one pane.",
+    "First-time human discovery, all twelve natural challenge runs, physical devices and assistive technology remain unverified.",
+    "No merge or deployment; original campaign, music and engine presentation remain unchanged."
+  ]
+}

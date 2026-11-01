@@ -1,0 +1,1909 @@
+{
+  "schemaVersion": 1,
+  "scope": "Curated reachability of real time targets; failed controllers are not game defects.",
+  "method": "Fresh normal-menu starts, unlock-only initial campaign eligibility fixtures, real keyboard/mouse/RAF. No actor/health/flags/stat/clock edits.",
+  "dataSha256": "08aa76a62c6c0020db3e675a486463324ada628432b71c9cb8d5d96052bf9681",
+  "moments": [
+    {
+      "momentId": "prologue",
+      "actualCompletion": true,
+      "controllerClean": true,
+      "time": 107.5659000000044,
+      "targetSeconds": 480,
+      "headroomPercent": 77.59043749999908,
+      "atLeast25PercentHeadroom": true,
+      "minimumObservedHealth": 100,
+      "gpV2Result": {
+        "momentId": "prologue",
+        "id": "prologue",
+        "unlocked": true,
+        "completed": true,
+        "earned": 1,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "name": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "name": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 480,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "name": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          }
+        ],
+        "fragments": 1,
+        "passed": [
+          "swift"
+        ],
+        "newlyEarned": [
+          "swift"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "Palisades Park",
+            "description": "Look at the workshop photograph before leaving Gila Flats.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "0 / 1 photograph inspected",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 0 / 1 photograph inspected. Look at the workshop photograph before leaving Gila Flats."
+          },
+          {
+            "id": "swift",
+            "label": "Before the chamber seals",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "1:47 / 8:00 \u00b7 6:12 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "Beyond the assignment",
+            "description": "Read the chalkboard, listen to the canteen radio and check the records files.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "0 / 3 optional observations",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 0 / 3 optional observations. Read the chalkboard, listen to the canteen radio and check the records files."
+          }
+        ]
+      },
+      "evidenceFile": "palace-natural-play-attempts/opening-initial.json",
+      "rawControllerStatus": "completed",
+      "capture": null,
+      "runSourceHash": null,
+      "runtimeFilesUnchanged": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/opening-initial/results.json",
+      "timeTargetVerified": true,
+      "captureStatus": {
+        "available": false,
+        "reason": "The successful opening run did not record a raw capture. No older or controlled image is substituted."
+      }
+    },
+    {
+      "momentId": "reassembly",
+      "actualCompletion": true,
+      "controllerClean": true,
+      "time": 192.92090000000897,
+      "targetSeconds": 360,
+      "headroomPercent": 46.41086111110862,
+      "atLeast25PercentHeadroom": true,
+      "minimumObservedHealth": 100,
+      "gpV2Result": {
+        "momentId": "reassembly",
+        "id": "reassembly",
+        "unlocked": true,
+        "completed": true,
+        "earned": 3,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "Keep the pattern",
+            "name": "Keep the pattern",
+            "description": "Fresh run: lose no carried atoms to vortices; Retry retains losses.",
+            "type": "budget",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "A quickened pattern",
+            "name": "A quickened pattern",
+            "description": "Finish a fresh run in under 6 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 360,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "A gentler pull",
+            "name": "A gentler pull",
+            "description": "Absorb 30 atoms while Coalesce is not held, then finish the reconstruction.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          }
+        ],
+        "fragments": 3,
+        "passed": [
+          "mercy",
+          "swift",
+          "detail"
+        ],
+        "newlyEarned": [
+          "mercy",
+          "swift",
+          "detail"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "Keep the pattern",
+            "description": "Fresh run: lose no carried atoms to vortices; Retry retains losses.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "0 atoms lost \u00b7 Limit 0",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "swift",
+            "label": "A quickened pattern",
+            "description": "Finish a fresh run in under 6 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "3:12 / 6:00 \u00b7 2:47 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "A gentler pull",
+            "description": "Absorb 30 atoms while Coalesce is not held, then finish the reconstruction.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "70 / 30 passively gathered atoms",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          }
+        ]
+      },
+      "evidenceFile": "palace-natural-play-attempts/opening-initial.json",
+      "rawControllerStatus": "completed",
+      "capture": null,
+      "runSourceHash": null,
+      "runtimeFilesUnchanged": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/opening-initial/results.json",
+      "timeTargetVerified": true,
+      "captureStatus": {
+        "available": false,
+        "reason": "The successful opening run did not record a raw capture. No older or controlled image is substituted."
+      }
+    },
+    {
+      "momentId": "superman",
+      "actualCompletion": true,
+      "controllerClean": true,
+      "time": 157.05560000000975,
+      "targetSeconds": 480,
+      "headroomPercent": 67.28008333333129,
+      "atLeast25PercentHeadroom": true,
+      "minimumObservedHealth": 88,
+      "gpV2Result": {
+        "momentId": "superman",
+        "id": "superman",
+        "unlocked": true,
+        "completed": true,
+        "earned": 1,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "A hand left open",
+            "name": "A hand left open",
+            "description": "Fresh run: finish without unmaking a person; Retry retains outcomes.",
+            "type": "budget",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the pier sleeps",
+            "name": "Before the pier sleeps",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 480,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "Someone's badge",
+            "name": "Someone's badge",
+            "description": "Inspect the smiley-face badge in the pier office before finishing.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          }
+        ],
+        "fragments": 1,
+        "passed": [
+          "swift"
+        ],
+        "newlyEarned": [
+          "swift"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "A hand left open",
+            "description": "Fresh run: finish without unmaking a person; Retry retains outcomes.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "12 people unmade \u00b7 Limit 0",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 12 people unmade \u00b7 Limit 0. The run exceeded this limit. Retry retains the observed total."
+          },
+          {
+            "id": "swift",
+            "label": "Before the pier sleeps",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "2:37 / 8:00 \u00b7 5:22 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "Someone's badge",
+            "description": "Inspect the smiley-face badge in the pier office before finishing.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "0 / 1 badge inspected",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 0 / 1 badge inspected. Inspect the smiley-face badge in the pier office before finishing."
+          }
+        ]
+      },
+      "evidenceFile": "palace-natural-play-attempts/final-campaign-bonus.json",
+      "rawControllerStatus": "completed",
+      "capture": {
+        "filename": "superman-natural-live.png",
+        "bytes": 1665462,
+        "sha256": "0a3526bdef1b1ac1fbe8e9cda826aaab048bc0e3d280fb0370d5fc26af556989",
+        "elapsedWallSinceFirstPlay": 10.899,
+        "fieldTime": 10.004600000000016,
+        "worldTime": 10.004600000000016,
+        "x": 1326.7777186563496,
+        "y": 475.281912903545,
+        "health": 100,
+        "invulnerable": false,
+        "godMode": false,
+        "stage": 0,
+        "chapter": "superman",
+        "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+        "localRawFile": "tests/out/palace-time-targets/source/final-campaign-bonus/superman-natural-live.png",
+        "file": "screenshots/palace-rules-v2/natural/superman-natural-live.png",
+        "dimensions": {
+          "width": 1280,
+          "height": 720
+        },
+        "publicationByteIdenticalToRawCapture": true,
+        "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+      },
+      "runSourceHash": {
+        "scripts": 73,
+        "sha256": "9fd4fc95b30891912cc1391d1097ef7168fa9921a039829ed2b26f220c99e38d"
+      },
+      "runtimeFilesUnchanged": true,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-campaign-bonus/results.json",
+      "timeTargetVerified": true,
+      "captureStatus": {
+        "available": true,
+        "rawPixelsUnchanged": true,
+        "minimumTenSecondsValidated": true
+      }
+    },
+    {
+      "momentId": "deterrent",
+      "actualCompletion": true,
+      "controllerClean": true,
+      "time": 106.23170000000599,
+      "targetSeconds": 540,
+      "headroomPercent": 80.32746296296186,
+      "atLeast25PercentHeadroom": true,
+      "minimumObservedHealth": 21.297355120324113,
+      "gpV2Result": {
+        "momentId": "deterrent",
+        "id": "deterrent",
+        "unlocked": true,
+        "completed": true,
+        "earned": 2,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "Return fire",
+            "name": "Return fire",
+            "description": "Fresh run: defeat the Behemoth without firing Disintegrate during its fight.",
+            "type": "restraint",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the next warhead",
+            "name": "Before the next warhead",
+            "description": "Finish a fresh run in under 9 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 540,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "A steady outline",
+            "name": "A steady outline",
+            "description": "Have at least 75% coherence when the Behemoth falls, before the safe outro.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          }
+        ],
+        "fragments": 2,
+        "passed": [
+          "swift",
+          "detail"
+        ],
+        "newlyEarned": [
+          "swift",
+          "detail"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "Return fire",
+            "description": "Fresh run: defeat the Behemoth without firing Disintegrate during its fight.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "22 Disintegrate casts during this fight",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 22 Disintegrate casts during this fight. Disintegrate was fired during the fight. Retry retains that cast."
+          },
+          {
+            "id": "swift",
+            "label": "Before the next warhead",
+            "description": "Finish a fresh run in under 9 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "1:46 / 9:00 \u00b7 7:13 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "A steady outline",
+            "description": "Have at least 75% coherence when the Behemoth falls, before the safe outro.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "83% coherence at combat end",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          }
+        ]
+      },
+      "evidenceFile": "palace-natural-play-attempts/final-four.json",
+      "rawControllerStatus": "completed",
+      "capture": {
+        "filename": "deterrent-natural-live.png",
+        "bytes": 1709765,
+        "sha256": "c841cc46eb63343fc4264f99b571bcc297148df9cce730cf399ed28ff82cb6d2",
+        "elapsedWallSinceFirstPlay": 10.914,
+        "fieldTime": 10.021300000000034,
+        "worldTime": 10.021300000000034,
+        "x": 1670.541242357544,
+        "y": 939.8063804557958,
+        "health": 100,
+        "invulnerable": false,
+        "godMode": false,
+        "stage": 1,
+        "chapter": "deterrent",
+        "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+        "localRawFile": "tests/out/palace-time-targets/source/final-four/deterrent-natural-live.png",
+        "file": "screenshots/palace-rules-v2/natural/deterrent-natural-live.png",
+        "dimensions": {
+          "width": 1280,
+          "height": 720
+        },
+        "publicationByteIdenticalToRawCapture": true,
+        "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+      },
+      "runSourceHash": {
+        "scripts": 73,
+        "sha256": "9fd4fc95b30891912cc1391d1097ef7168fa9921a039829ed2b26f220c99e38d"
+      },
+      "runtimeFilesUnchanged": true,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-four/results.json",
+      "timeTargetVerified": true,
+      "captureStatus": {
+        "available": true,
+        "rawPixelsUnchanged": true,
+        "minimumTenSecondsValidated": true
+      }
+    },
+    {
+      "momentId": "mars",
+      "actualCompletion": true,
+      "controllerClean": false,
+      "qualification": "Actual ChapterComplete/ctx.done/Normal telemetry observed; the route later failed after gameplay ended. Raw error is retained.",
+      "time": 320.8795000000255,
+      "targetSeconds": 600,
+      "targetSource": "Published rules-v2 data snapshot, not reconstructed completion output.",
+      "headroomPercent": 46.52008333332909,
+      "atLeast25PercentHeadroom": true,
+      "minimumObservedHealth": 91.48292364509824,
+      "gpV2Result": null,
+      "unavailable": [
+        "Completion result breakdown was not read before context close."
+      ],
+      "evidenceFile": "palace-natural-play-attempts/final-campaign-bonus.json",
+      "rawControllerStatus": "route-failed",
+      "capture": {
+        "filename": "mars-natural-live.png",
+        "bytes": 1690586,
+        "sha256": "5adfbd0fa12d5156928790f74f5c5ff0b0d4e7d2e52773049a457b102c25d559",
+        "elapsedWallSinceFirstPlay": 14.769,
+        "fieldTime": 14.039500000000011,
+        "worldTime": 10.054300000000017,
+        "x": 1098.3535599126712,
+        "y": 1312.8164359241318,
+        "health": 92.93079303159946,
+        "invulnerable": false,
+        "godMode": false,
+        "stage": 1,
+        "chapter": "mars",
+        "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+        "localRawFile": "tests/out/palace-time-targets/source/final-campaign-bonus/mars-natural-live.png",
+        "file": "screenshots/palace-rules-v2/natural/mars-natural-live.png",
+        "dimensions": {
+          "width": 1280,
+          "height": 720
+        },
+        "publicationByteIdenticalToRawCapture": true,
+        "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+      },
+      "runSourceHash": {
+        "scripts": 73,
+        "sha256": "9fd4fc95b30891912cc1391d1097ef7168fa9921a039829ed2b26f220c99e38d"
+      },
+      "runtimeFilesUnchanged": true,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-campaign-bonus/results.json",
+      "timeTargetVerified": true,
+      "captureStatus": {
+        "available": true,
+        "rawPixelsUnchanged": true,
+        "minimumTenSecondsValidated": true
+      }
+    },
+    {
+      "momentId": "karnak",
+      "actualCompletion": true,
+      "controllerClean": true,
+      "time": 67.84750000000193,
+      "targetSeconds": 600,
+      "headroomPercent": 88.69208333333302,
+      "atLeast25PercentHeadroom": true,
+      "minimumObservedHealth": 70,
+      "gpV2Result": {
+        "momentId": "karnak",
+        "id": "karnak",
+        "unlocked": true,
+        "completed": true,
+        "earned": 1,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "Hands, not light",
+            "name": "Hands, not light",
+            "description": "Fresh run: defeat Veidt without firing Disintegrate during his fight.",
+            "type": "restraint",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the last hand turns",
+            "name": "Before the last hand turns",
+            "description": "Finish a fresh run in under 10 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 600,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "A quiet approach",
+            "name": "A quiet approach",
+            "description": "Fresh run: take at most 40 coherence damage before the last courtyard emitter falls.",
+            "type": "budget",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          }
+        ],
+        "fragments": 1,
+        "passed": [
+          "swift"
+        ],
+        "newlyEarned": [
+          "swift"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "Hands, not light",
+            "description": "Fresh run: defeat Veidt without firing Disintegrate during his fight.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "12 Disintegrate casts during this fight",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 12 Disintegrate casts during this fight. Disintegrate was fired during the fight. Retry retains that cast."
+          },
+          {
+            "id": "swift",
+            "label": "Before the last hand turns",
+            "description": "Finish a fresh run in under 10 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "1:07 / 10:00 \u00b7 8:52 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "A quiet approach",
+            "description": "Fresh run: take at most 40 coherence damage before the last courtyard emitter falls.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "45 courtyard damage \u00b7 Limit 40",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 45 courtyard damage \u00b7 Limit 40. The run exceeded this limit. Retry retains the observed total."
+          }
+        ]
+      },
+      "evidenceFile": "palace-natural-play-attempts/final-four.json",
+      "rawControllerStatus": "completed",
+      "capture": {
+        "filename": "karnak-natural-live.png",
+        "bytes": 1672590,
+        "sha256": "f77cba7e371feca9e3332f1c48b9c17b40064302d9b48d2fe3cc9e1543d8c408",
+        "elapsedWallSinceFirstPlay": 10.055,
+        "fieldTime": 10.204600000000017,
+        "worldTime": 10.204600000000017,
+        "x": 673.0495146625857,
+        "y": 367.70174396103135,
+        "health": 100,
+        "invulnerable": false,
+        "godMode": false,
+        "stage": 0,
+        "chapter": "karnak",
+        "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+        "localRawFile": "tests/out/palace-time-targets/source/final-four/karnak-natural-live.png",
+        "file": "screenshots/palace-rules-v2/natural/karnak-natural-live.png",
+        "dimensions": {
+          "width": 1280,
+          "height": 720
+        },
+        "publicationByteIdenticalToRawCapture": true,
+        "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+      },
+      "runSourceHash": {
+        "scripts": 73,
+        "sha256": "9fd4fc95b30891912cc1391d1097ef7168fa9921a039829ed2b26f220c99e38d"
+      },
+      "runtimeFilesUnchanged": true,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-four/results.json",
+      "timeTargetVerified": true,
+      "captureStatus": {
+        "available": true,
+        "rawPixelsUnchanged": true,
+        "minimumTenSecondsValidated": true
+      }
+    },
+    {
+      "momentId": "last_broadcast",
+      "actualCompletion": false,
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/last-broadcast-final.json",
+      "reason": "Error: Normal-damage actor was defeated: {\"scene\":\"Play\",\"onTop\":true,\"chapter\":\"last_broadcast\",\"stage\":2,\"stageId\":\"carrier\",\"map\":\"broadcast_tower\",\"x\":1058.7447078815853,\"y\":677.278141079791,\"r\":13,\"hp\":0,\"maxHp\":100,\"energy\":100,\"carry\":0,\"carryMax\":25,\"body\":null,\"form\":\"manhattan\",\"scale\":1,\"hero\":null,\"locked\":false,\"dialog\":false,\"captionSkippable\":false,\"failed\":true,\"down\":true,\"god\":false,\"challenge\":\"normal\",\"stats\":{\"time\":95.97630000000342,\"disintegrated\":14,\"spared\":0,\"memories\":0},\"flags\":{\"enterRelay\":true,\"engineers\":7,\"coils\":3,\"enterTower\":true},\"done\":false,\"objective\":\"Break the three shield pylons \u00b7 Disable the carrier\",\"interaction\":null,\"powers\":{\"telekinesis\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"telekinesis\"},\"disintegrate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":20,\"action\":\"disintegrate\"},\"teleport\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":16,\"action\":\"teleport\"},\"duplicate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":50,\"action\":\"duplicate\"},\"timesight\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"timesight\"},\"expand\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":55,\"action\":\"expand\"}},\"foes\":[{\"id\":97,\"x\":895,\"y\":480,\"hp\":700,\"human\":false,\"boss\":true,\"phase\":1,\"distance\":256.3805653849832,\"los\":true,\"screen\":{\"x\":541.5685852297918,\"y\":267.29011733045024}},{\"id\":100,\"x\":1040.2621540442194,\"y\":975.3181472816259,\"hp\":40,\"human\":true,\"boss\":false,\"distance\":298.612541754597,\"los\":true,\"screen\":{\"x\":674.9187343565535,\"y\":721.9904433705663}}],\"completion\":null,\"error\":null}",
+      "lastObserved": {
+        "scene": "Play",
+        "onTop": true,
+        "chapter": "last_broadcast",
+        "stage": 2,
+        "stageId": "carrier",
+        "map": "broadcast_tower",
+        "x": 1058.7447078815853,
+        "y": 677.278141079791,
+        "r": 13,
+        "hp": 0,
+        "maxHp": 100,
+        "energy": 100,
+        "carry": 0,
+        "carryMax": 25,
+        "body": null,
+        "form": "manhattan",
+        "scale": 1,
+        "hero": null,
+        "locked": false,
+        "dialog": false,
+        "captionSkippable": false,
+        "failed": true,
+        "down": true,
+        "god": false,
+        "challenge": "normal",
+        "stats": {
+          "time": 95.97630000000342,
+          "disintegrated": 14,
+          "spared": 0,
+          "memories": 0
+        },
+        "flags": {
+          "enterRelay": true,
+          "engineers": 7,
+          "coils": 3,
+          "enterTower": true
+        },
+        "done": false,
+        "objective": "Break the three shield pylons \u00b7 Disable the carrier",
+        "interaction": null,
+        "powers": {
+          "telekinesis": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 0,
+            "action": "telekinesis"
+          },
+          "disintegrate": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 20,
+            "action": "disintegrate"
+          },
+          "teleport": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 16,
+            "action": "teleport"
+          },
+          "duplicate": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 50,
+            "action": "duplicate"
+          },
+          "timesight": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 0,
+            "action": "timesight"
+          },
+          "expand": {
+            "cd": 0,
+            "active": false,
+            "targetId": null,
+            "cost": 55,
+            "action": "expand"
+          }
+        },
+        "foes": [
+          {
+            "id": 97,
+            "x": 895,
+            "y": 480,
+            "hp": 700,
+            "human": false,
+            "boss": true,
+            "phase": 1,
+            "distance": 256.3805653849832,
+            "los": true,
+            "screen": {
+              "x": 541.5685852297918,
+              "y": 267.29011733045024
+            }
+          },
+          {
+            "id": 100,
+            "x": 1040.2621540442194,
+            "y": 975.3181472816259,
+            "hp": 40,
+            "human": true,
+            "boss": false,
+            "distance": 298.612541754597,
+            "los": true,
+            "screen": {
+              "x": 674.9187343565535,
+              "y": 721.9904433705663
+            }
+          }
+        ],
+        "completion": null,
+        "error": null
+      },
+      "localEvidenceFile": "tests/out/palace-time-targets/source/last-broadcast-final/results.json",
+      "timeTargetVerified": false
+    },
+    {
+      "momentId": "ninth_minute",
+      "actualCompletion": true,
+      "controllerClean": true,
+      "time": 144.83310000000915,
+      "targetSeconds": 720,
+      "headroomPercent": 79.88429166666539,
+      "atLeast25PercentHeadroom": true,
+      "minimumObservedHealth": 81,
+      "gpV2Result": {
+        "momentId": "ninth_minute",
+        "id": "ninth_minute",
+        "unlocked": true,
+        "completed": true,
+        "earned": 1,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "A second chance",
+            "name": "A second chance",
+            "description": "Fresh run: finish without unmaking a person; Retry retains outcomes.",
+            "type": "budget",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Beyond the ninth minute",
+            "name": "Beyond the ninth minute",
+            "description": "Finish a fresh run in under 12 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 720,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "Three lost moments",
+            "name": "Three lost moments",
+            "description": "Use Temporal Sight to find and hear all three optional gold echoes.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          }
+        ],
+        "fragments": 1,
+        "passed": [
+          "swift"
+        ],
+        "newlyEarned": [
+          "swift"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "A second chance",
+            "description": "Fresh run: finish without unmaking a person; Retry retains outcomes.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "2 people unmade \u00b7 Limit 0",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 2 people unmade \u00b7 Limit 0. The run exceeded this limit. Retry retains the observed total."
+          },
+          {
+            "id": "swift",
+            "label": "Beyond the ninth minute",
+            "description": "Finish a fresh run in under 12 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "2:24 / 12:00 \u00b7 9:35 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "Three lost moments",
+            "description": "Use Temporal Sight to find and hear all three optional gold echoes.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "0 / 3 lost moments heard",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 0 / 3 lost moments heard. Use Temporal Sight to find and hear all three optional gold echoes."
+          }
+        ]
+      },
+      "evidenceFile": "palace-natural-play-attempts/final-four.json",
+      "rawControllerStatus": "completed",
+      "capture": {
+        "filename": "ninth_minute-natural-live.png",
+        "bytes": 1589041,
+        "sha256": "246608dd1690d5d29aad07413f95d470f2f8451a3cdee2cf61dfa5fa4029f8fb",
+        "elapsedWallSinceFirstPlay": 10.091,
+        "fieldTime": 10.238300000000004,
+        "worldTime": 10.238300000000004,
+        "x": 1107.1534938912482,
+        "y": 839.2248309247104,
+        "health": 100,
+        "invulnerable": false,
+        "godMode": false,
+        "stage": 0,
+        "chapter": "ninth_minute",
+        "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+        "localRawFile": "tests/out/palace-time-targets/source/final-four/ninth_minute-natural-live.png",
+        "file": "screenshots/palace-rules-v2/natural/ninth_minute-natural-live.png",
+        "dimensions": {
+          "width": 1280,
+          "height": 720
+        },
+        "publicationByteIdenticalToRawCapture": true,
+        "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+      },
+      "runSourceHash": {
+        "scripts": 73,
+        "sha256": "9fd4fc95b30891912cc1391d1097ef7168fa9921a039829ed2b26f220c99e38d"
+      },
+      "runtimeFilesUnchanged": true,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-four/results.json",
+      "timeTargetVerified": true,
+      "captureStatus": {
+        "available": true,
+        "rawPixelsUnchanged": true,
+        "minimumTenSecondsValidated": true
+      }
+    },
+    {
+      "momentId": "long_summer",
+      "actualCompletion": true,
+      "controllerClean": true,
+      "time": 112.4187000000048,
+      "targetSeconds": 720,
+      "headroomPercent": 84.386291666666,
+      "atLeast25PercentHeadroom": true,
+      "minimumObservedHealth": 83,
+      "gpV2Result": {
+        "momentId": "long_summer",
+        "id": "long_summer",
+        "unlocked": true,
+        "completed": true,
+        "earned": 3,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "A city left standing",
+            "name": "A city left standing",
+            "description": "Fresh run: finish without unmaking a person; Retry retains outcomes.",
+            "type": "budget",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the street burns out",
+            "name": "Before the street burns out",
+            "description": "Finish a fresh run in under 12 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 720,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "A cooler street",
+            "name": "A cooler street",
+            "description": "Rescue all six residents and finish with City Heat below 30.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          }
+        ],
+        "fragments": 3,
+        "passed": [
+          "mercy",
+          "swift",
+          "detail"
+        ],
+        "newlyEarned": [
+          "mercy",
+          "swift",
+          "detail"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "A city left standing",
+            "description": "Fresh run: finish without unmaking a person; Retry retains outcomes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "0 people unmade \u00b7 Limit 0",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "swift",
+            "label": "Before the street burns out",
+            "description": "Finish a fresh run in under 12 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "1:52 / 12:00 \u00b7 10:07 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "A cooler street",
+            "description": "Rescue all six residents and finish with City Heat below 30.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "6 / 6 residents \u00b7 Heat 0 (below 30)",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          }
+        ]
+      },
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "rawControllerStatus": "completed",
+      "capture": {
+        "filename": "long_summer-natural-live.png",
+        "bytes": 1613763,
+        "sha256": "9f5b8bf891a1a0df3df286946168de4ae9df066098752763465197bafd0503ed",
+        "elapsedWallSinceFirstPlay": 10.921,
+        "fieldTime": 11.055000000000016,
+        "worldTime": 11.055000000000016,
+        "x": 780.5491916679827,
+        "y": 662.6513901507035,
+        "health": 100,
+        "invulnerable": false,
+        "godMode": false,
+        "stage": 0,
+        "chapter": "long_summer",
+        "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+        "localRawFile": "tests/out/palace-time-targets/source/remaining-initial/long_summer-natural-live.png",
+        "file": "screenshots/palace-rules-v2/natural/long_summer-natural-live.png",
+        "dimensions": {
+          "width": 1280,
+          "height": 720
+        },
+        "publicationByteIdenticalToRawCapture": true,
+        "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+      },
+      "runSourceHash": {
+        "scripts": 73,
+        "sha256": "9fd4fc95b30891912cc1391d1097ef7168fa9921a039829ed2b26f220c99e38d"
+      },
+      "runtimeFilesUnchanged": true,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json",
+      "timeTargetVerified": true,
+      "captureStatus": {
+        "available": true,
+        "rawPixelsUnchanged": true,
+        "minimumTenSecondsValidated": true
+      }
+    },
+    {
+      "momentId": "am_dead_air",
+      "actualCompletion": true,
+      "controllerClean": true,
+      "time": 58.47660000000087,
+      "targetSeconds": 480,
+      "headroomPercent": 87.81737499999981,
+      "atLeast25PercentHeadroom": true,
+      "minimumObservedHealth": 84,
+      "gpV2Result": {
+        "momentId": "am_dead_air",
+        "id": "am_dead_air",
+        "unlocked": true,
+        "completed": true,
+        "earned": 2,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "A clean frequency",
+            "name": "A clean frequency",
+            "description": "Fresh run: take at most 80 total health damage; healing and Retry do not reset it.",
+            "type": "budget",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the channel closes",
+            "name": "Before the channel closes",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 480,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "Off the call sheet",
+            "name": "Off the call sheet",
+            "description": "Read the optional tower-maintenance note and dispatch handover note on the roofs.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          }
+        ],
+        "fragments": 2,
+        "passed": [
+          "mercy",
+          "swift"
+        ],
+        "newlyEarned": [
+          "mercy",
+          "swift"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "A clean frequency",
+            "description": "Fresh run: take at most 80 total health damage; healing and Retry do not reset it.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "6 total health damage \u00b7 Limit 80",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "swift",
+            "label": "Before the channel closes",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "0:58 / 8:00 \u00b7 7:01 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "Off the call sheet",
+            "description": "Read the optional tower-maintenance note and dispatch handover note on the roofs.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "0 / 2 optional field notes",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 0 / 2 optional field notes. Read the optional tower-maintenance note and dispatch handover note on the roofs."
+          }
+        ]
+      },
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "rawControllerStatus": "completed",
+      "capture": {
+        "filename": "am_dead_air-natural-live.png",
+        "bytes": 1559187,
+        "sha256": "f31e391f4a2d3ee47eac05e0d4ab9442d89a0f7b81221bc068278b0c2383de9d",
+        "elapsedWallSinceFirstPlay": 10.074,
+        "fieldTime": 10.220800000000008,
+        "worldTime": 10.220800000000008,
+        "x": 477.0186127452505,
+        "y": 416.8608199669221,
+        "health": 90,
+        "invulnerable": false,
+        "godMode": false,
+        "stage": 0,
+        "chapter": "am_dead_air",
+        "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+        "localRawFile": "tests/out/palace-time-targets/source/remaining-initial/am_dead_air-natural-live.png",
+        "file": "screenshots/palace-rules-v2/natural/am_dead_air-natural-live.png",
+        "dimensions": {
+          "width": 1280,
+          "height": 720
+        },
+        "publicationByteIdenticalToRawCapture": true,
+        "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+      },
+      "runSourceHash": {
+        "scripts": 73,
+        "sha256": "9fd4fc95b30891912cc1391d1097ef7168fa9921a039829ed2b26f220c99e38d"
+      },
+      "runtimeFilesUnchanged": true,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json",
+      "timeTargetVerified": true,
+      "captureStatus": {
+        "available": true,
+        "rawPixelsUnchanged": true,
+        "minimumTenSecondsValidated": true
+      }
+    },
+    {
+      "momentId": "am_undertow",
+      "actualCompletion": true,
+      "controllerClean": true,
+      "time": 68.53190000000181,
+      "targetSeconds": 600,
+      "headroomPercent": 88.57801666666637,
+      "atLeast25PercentHeadroom": true,
+      "minimumObservedHealth": 84,
+      "gpV2Result": {
+        "momentId": "am_undertow",
+        "id": "am_undertow",
+        "unlocked": true,
+        "completed": true,
+        "earned": 2,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "A steady crossing",
+            "name": "A steady crossing",
+            "description": "Fresh run: take at most 100 total health damage; healing and Retry do not reset it.",
+            "type": "budget",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the tide turns",
+            "name": "Before the tide turns",
+            "description": "Finish a fresh run in under 10 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 600,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "Not listed as cargo",
+            "name": "Not listed as cargo",
+            "description": "Read the optional pier lease and cargo tally beside the harbour stores.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          }
+        ],
+        "fragments": 2,
+        "passed": [
+          "mercy",
+          "swift"
+        ],
+        "newlyEarned": [
+          "mercy",
+          "swift"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "A steady crossing",
+            "description": "Fresh run: take at most 100 total health damage; healing and Retry do not reset it.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "6 total health damage \u00b7 Limit 100",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "swift",
+            "label": "Before the tide turns",
+            "description": "Finish a fresh run in under 10 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "1:08 / 10:00 \u00b7 8:51 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "Not listed as cargo",
+            "description": "Read the optional pier lease and cargo tally beside the harbour stores.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "0 / 2 optional field notes",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 0 / 2 optional field notes. Read the optional pier lease and cargo tally beside the harbour stores."
+          }
+        ]
+      },
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "rawControllerStatus": "completed",
+      "capture": {
+        "filename": "am_undertow-natural-live.png",
+        "bytes": 1577245,
+        "sha256": "8f9b6a526e240100f7b5c4a5ac6e3bbfec1f4bb8f5b44a914f8603d1ab2e3ae8",
+        "elapsedWallSinceFirstPlay": 10.071,
+        "fieldTime": 10.222000000000019,
+        "worldTime": 10.222000000000019,
+        "x": 881.7281647269984,
+        "y": 360.5231911620459,
+        "health": 90,
+        "invulnerable": false,
+        "godMode": false,
+        "stage": 0,
+        "chapter": "am_undertow",
+        "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+        "localRawFile": "tests/out/palace-time-targets/source/remaining-initial/am_undertow-natural-live.png",
+        "file": "screenshots/palace-rules-v2/natural/am_undertow-natural-live.png",
+        "dimensions": {
+          "width": 1280,
+          "height": 720
+        },
+        "publicationByteIdenticalToRawCapture": true,
+        "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+      },
+      "runSourceHash": {
+        "scripts": 73,
+        "sha256": "9fd4fc95b30891912cc1391d1097ef7168fa9921a039829ed2b26f220c99e38d"
+      },
+      "runtimeFilesUnchanged": true,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json",
+      "timeTargetVerified": true,
+      "captureStatus": {
+        "available": true,
+        "rawPixelsUnchanged": true,
+        "minimumTenSecondsValidated": true
+      }
+    },
+    {
+      "momentId": "am_glass_archive",
+      "actualCompletion": true,
+      "controllerClean": true,
+      "time": 55.458500000000804,
+      "targetSeconds": 480,
+      "headroomPercent": 88.44614583333316,
+      "atLeast25PercentHeadroom": true,
+      "minimumObservedHealth": 93.35,
+      "gpV2Result": {
+        "momentId": "am_glass_archive",
+        "id": "am_glass_archive",
+        "unlocked": true,
+        "completed": true,
+        "earned": 2,
+        "total": 3,
+        "challenges": [
+          {
+            "id": "mercy",
+            "label": "An unbroken line",
+            "name": "An unbroken line",
+            "description": "Fresh run: take at most 120 total health damage; healing and Retry do not reset it.",
+            "type": "budget",
+            "rulesVersion": 2,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "swift",
+            "label": "Before the gallery goes dark",
+            "name": "Before the gallery goes dark",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "type": "time",
+            "rulesVersion": 2,
+            "targetSeconds": 480,
+            "complete": true,
+            "earned": true,
+            "awardVersion": 2,
+            "legacy": false
+          },
+          {
+            "id": "detail",
+            "label": "The missing catalogue",
+            "name": "The missing catalogue",
+            "description": "Read the optional loan register and private index in the museum side galleries.",
+            "type": "level",
+            "rulesVersion": 2,
+            "complete": false,
+            "earned": false,
+            "awardVersion": 0,
+            "legacy": false
+          }
+        ],
+        "fragments": 2,
+        "passed": [
+          "mercy",
+          "swift"
+        ],
+        "newlyEarned": [
+          "mercy",
+          "swift"
+        ],
+        "maxFragments": 36,
+        "breakdown": [
+          {
+            "id": "mercy",
+            "label": "An unbroken line",
+            "description": "Fresh run: take at most 120 total health damage; healing and Retry do not reset it.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "12.4 total health damage \u00b7 Limit 120",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "swift",
+            "label": "Before the gallery goes dark",
+            "description": "Finish a fresh run in under 8 minutes.",
+            "outcome": "new",
+            "passed": true,
+            "progress": "0:55 / 8:00 \u00b7 7:04 left",
+            "awardVersion": 2,
+            "legacy": false,
+            "reason": "Requirement met at completion under rules version 2."
+          },
+          {
+            "id": "detail",
+            "label": "The missing catalogue",
+            "description": "Read the optional loan register and private index in the museum side galleries.",
+            "outcome": "missed",
+            "passed": false,
+            "progress": "0 / 2 optional field notes",
+            "awardVersion": 0,
+            "legacy": false,
+            "reason": "Requirement not met at completion: 0 / 2 optional field notes. Read the optional loan register and private index in the museum side galleries."
+          }
+        ]
+      },
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "rawControllerStatus": "completed",
+      "capture": {
+        "filename": "am_glass_archive-natural-live.png",
+        "bytes": 1581668,
+        "sha256": "917a247aa1d9cd6cc1db5aed79a0146e9ab0be81e7801fc695822c70d526ee12",
+        "elapsedWallSinceFirstPlay": 10.038,
+        "fieldTime": 10.187100000000012,
+        "worldTime": 10.187100000000012,
+        "x": 698.8419516972286,
+        "y": 360.41191781506143,
+        "health": 100,
+        "invulnerable": false,
+        "godMode": false,
+        "stage": 0,
+        "chapter": "am_glass_archive",
+        "method": "Raw canvas after ten wall/field seconds, during normal input and RAF. No actor/camera/state staging.",
+        "localRawFile": "tests/out/palace-time-targets/source/remaining-initial/am_glass_archive-natural-live.png",
+        "file": "screenshots/palace-rules-v2/natural/am_glass_archive-natural-live.png",
+        "dimensions": {
+          "width": 1280,
+          "height": 720
+        },
+        "publicationByteIdenticalToRawCapture": true,
+        "captureRepresents": "Ordinary live play from this attempt, not an ending or completion screenshot."
+      },
+      "runSourceHash": {
+        "scripts": 73,
+        "sha256": "9fd4fc95b30891912cc1391d1097ef7168fa9921a039829ed2b26f220c99e38d"
+      },
+      "runtimeFilesUnchanged": true,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json",
+      "timeTargetVerified": true,
+      "captureStatus": {
+        "available": true,
+        "rawPixelsUnchanged": true,
+        "minimumTenSecondsValidated": true
+      }
+    }
+  ],
+  "actualCompletions": 11,
+  "cleanControllerCompletions": 10,
+  "atLeast25PercentHeadroom": 11,
+  "total": 12,
+  "attemptHistory": [
+    {
+      "momentId": "prologue",
+      "status": "completed",
+      "evidenceFile": "palace-natural-play-attempts/opening-initial.json",
+      "time": 107.5659000000044,
+      "error": null,
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/opening-initial/results.json"
+    },
+    {
+      "momentId": "reassembly",
+      "status": "completed",
+      "evidenceFile": "palace-natural-play-attempts/opening-initial.json",
+      "time": 192.92090000000897,
+      "error": null,
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/opening-initial/results.json"
+    },
+    {
+      "momentId": "am_dead_air",
+      "status": "completed",
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "time": 58.47660000000087,
+      "error": null,
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json"
+    },
+    {
+      "momentId": "am_undertow",
+      "status": "completed",
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "time": 68.53190000000181,
+      "error": null,
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json"
+    },
+    {
+      "momentId": "am_glass_archive",
+      "status": "completed",
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "time": 55.458500000000804,
+      "error": null,
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json"
+    },
+    {
+      "momentId": "long_summer",
+      "status": "completed",
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "time": 112.4187000000048,
+      "error": null,
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json"
+    },
+    {
+      "momentId": "last_broadcast",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "time": 23.21049999999984,
+      "error": "Error: Required normal interaction was not found",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json"
+    },
+    {
+      "momentId": "ninth_minute",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "time": 26.145299999999718,
+      "error": "Error: Interaction entity unavailable: flags.doors",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json"
+    },
+    {
+      "momentId": "superman",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "time": 90.80850000000157,
+      "error": "Error: A real held object did not reach its target: 8",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json"
+    },
+    {
+      "momentId": "deterrent",
+      "status": "interrupted-controller-stagnation",
+      "evidenceFile": "palace-natural-play-attempts/remaining-initial.json",
+      "time": 347.2251000000337,
+      "error": null,
+      "interruption": {
+        "reason": "Pilot selected a stationary mine outside screen y<=712; nearest target already inside fallback330px range, so neither aiming nor movement occurred. No game fault or defeat occurred.",
+        "stoppedAtUtc": "2026-10-31T21:39:25.665088+00:00",
+        "method": "SIGTERM of the exact owned Node pilot process and its browser descendants; no game state changed."
+      },
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-initial/results.json"
+    },
+    {
+      "momentId": "last_broadcast",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/remaining-retry-all6.json",
+      "time": 82.0206000000032,
+      "error": "Error: Timed out: coil physically docked {\"scene\":\"Play\",\"onTop\":true,\"chapter\":\"last_broadcast\",\"stage\":1,\"stageId\":\"relay\",\"map\":\"broadcast_relay\",\"x\":756.5013152904602,\"y\":692.639121750178,\"r\":13,\"hp\":100,\"maxHp\":100,\"energy\":100,\"carry\":0,\"carryMax\":25,\"body\":null,\"form\":\"manhattan\",\"hero\":null,\"locked\":false,\"dialog\":false,\"captionSkippable\":false,\"failed\":false,\"down\":false,\"god\":false,\"challenge\":\"normal\",\"stats\":{\"time\":82.0206000000032,\"disintegrated\":12,\"spared\":0,\"memories\":0},\"flags\":{\"enterRelay\":true,\"engineers\":7,\"coils\":0},\"done\":false,\"objective\":\"Rescue the engineers \u00b7 Ground the carrier\",\"interaction\":null,\"powers\":{\"telekinesis\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"telekinesis\"},\"disintegrate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":20,\"action\":\"disintegrate\"},\"teleport\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":16,\"action\":\"teleport\"},\"duplicate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":50,\"action\":\"duplicate\"},\"timesight\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"timesight\"},\"expand\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":55,\"action\":\"expand\"}},\"foes\":[],\"error\":null}",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-retry-all6/results.json"
+    },
+    {
+      "momentId": "ninth_minute",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/remaining-retry-all6.json",
+      "time": 143.8823000000055,
+      "error": "Error: Walking route blocked at {\"scene\":\"Play\",\"onTop\":true,\"chapter\":\"ninth_minute\",\"stage\":2,\"stageId\":\"pendulum\",\"map\":\"ninth_engine\",\"x\":852.0464346255374,\"y\":656.9835400829993,\"r\":13,\"hp\":70.12548956661358,\"maxHp\":100,\"energy\":100,\"carry\":0,\"carryMax\":25,\"body\":null,\"form\":\"manhattan\",\"hero\":null,\"locked\":false,\"dialog\":false,\"captionSkippable\":false,\"failed\":false,\"down\":false,\"god\":false,\"challenge\":\"normal\",\"stats\":{\"time\":143.8823000000055,\"disintegrated\":2,\"spared\":2,\"memories\":0},\"flags\":{\"route\":1,\"enterTrain\":true,\"passengers\":6,\"opened\":7,\"activeDoor\":null,\"laurieReacted\":true,\"enterEngine\":true},\"done\":false,\"objective\":\"Stop the Pendulum \u00b7 Strike when the core turns teal\",\"interaction\":null,\"powers\":{\"telekinesis\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"telekinesis\"},\"disintegrate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":20,\"action\":\"disintegrate\"},\"teleport\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":16,\"action\":\"teleport\"},\"duplicate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":50,\"action\":\"duplicate\"},\"timesight\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"timesight\"},\"expand\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":55,\"action\":\"expand\"}},\"foes\":[{\"id\":103,\"x\":950,\"y\":660,\"hp\":840,\"human\":false,\"boss\":true,\"phase\":1,\"distance\":98,\"los\":true,\"screen\":{\"x\":695.5323880763765,\"y\":266.3549999999992}}],\"error\":null} goal 1380,660",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-retry-all6/results.json"
+    },
+    {
+      "momentId": "superman",
+      "status": "interrupted-controller-LOS",
+      "evidenceFile": "palace-natural-play-attempts/remaining-retry-all6.json",
+      "time": 345.2733000000264,
+      "error": null,
+      "interruption": {
+        "reason": "Exact proven LOS approach stagnation; helper refused17px peek while fallback already accepted189px enemy distance. No game error or defeat.",
+        "stoppedAtUtc": "2026-10-31T21:51:34.057339+00:00"
+      },
+      "localEvidenceFile": "tests/out/palace-time-targets/source/remaining-retry-all6/results.json"
+    },
+    {
+      "momentId": "deterrent",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/final-campaign-bonus.json",
+      "time": 96.11070000000299,
+      "error": "Error: Teleport aim is outside the actual viewport",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-campaign-bonus/results.json"
+    },
+    {
+      "momentId": "mars",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/final-campaign-bonus.json",
+      "time": 320.8795000000255,
+      "error": "Error: Walking route blocked at {\"scene\":\"ChapterComplete\",\"onTop\":false,\"chapter\":\"mars\",\"stage\":3,\"stageId\":\"laurie\",\"map\":\"mars\",\"x\":1236.302133616699,\"y\":1179.0075278534548,\"r\":13.000000580179048,\"hp\":100,\"maxHp\":100,\"energy\":100,\"carry\":0,\"carryMax\":25,\"body\":null,\"form\":\"manhattan\",\"scale\":1.0000000446291575,\"hero\":null,\"locked\":true,\"dialog\":false,\"captionSkippable\":false,\"failed\":false,\"down\":false,\"god\":false,\"challenge\":\"normal\",\"stats\":{\"time\":320.8795000000255,\"disintegrated\":0,\"spared\":0,\"memories\":0},\"flags\":{\"left\":true,\"palaceDone\":true},\"done\":true,\"objective\":\"\",\"interaction\":null,\"powers\":{\"coalesce\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"telekinesis\"},\"telekinesis\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"telekinesis\"},\"disintegrate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":20,\"action\":\"disintegrate\"},\"teleport\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":16,\"action\":\"teleport\"},\"duplicate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":50,\"action\":\"duplicate\"},\"timesight\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"timesight\"},\"expand\":{\"cd\":6.1623000000000925,\"active\":false,\"targetId\":null,\"cost\":55,\"action\":\"expand\"}},\"foes\":[],\"error\":null} goal 1177.7817459305202,1177.2182540694798",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-campaign-bonus/results.json"
+    },
+    {
+      "momentId": "karnak",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/final-campaign-bonus.json",
+      "time": 38.317999999999905,
+      "error": "Error: Normal-damage actor was defeated: {\"scene\":\"Play\",\"onTop\":true,\"chapter\":\"karnak\",\"stage\":0,\"stageId\":\"emitters\",\"map\":\"karnak\",\"x\":566.4891200993694,\"y\":1462.8899589600173,\"r\":13,\"hp\":0,\"maxHp\":100,\"energy\":100,\"carry\":0,\"carryMax\":25,\"body\":null,\"form\":\"manhattan\",\"scale\":1,\"hero\":null,\"locked\":false,\"dialog\":false,\"captionSkippable\":false,\"failed\":true,\"down\":true,\"god\":false,\"challenge\":\"normal\",\"stats\":{\"time\":38.317999999999905,\"disintegrated\":0,\"spared\":0,\"memories\":0},\"flags\":{},\"done\":false,\"objective\":\"Destroy the tachyon emitters\",\"interaction\":null,\"powers\":{\"coalesce\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"telekinesis\"},\"telekinesis\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"telekinesis\"},\"disintegrate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":20,\"action\":\"disintegrate\"},\"teleport\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":16,\"action\":\"teleport\"},\"duplicate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":50,\"action\":\"duplicate\"},\"timesight\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"timesight\"},\"expand\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":55,\"action\":\"expand\"}},\"foes\":[{\"id\":5,\"x\":520,\"y\":1580,\"hp\":140,\"human\":false,\"boss\":false,\"distance\":126.00000000000006,\"los\":true,\"screen\":{\"x\":584.4879714882903,\"y\":506.2982792923401}},{\"id\":6,\"x\":1050,\"y\":1420,\"hp\":140,\"human\":false,\"boss\":false,\"distance\":485.409434974099,\"los\":true,\"screen\":{\"x\":1220.4879714882904,\"y\":314.29827929234017}},{\"id\":7,\"x\":620,\"y\":520,\"hp\":90,\"human\":false,\"boss\":false,\"distance\":944.4071627086289,\"los\":true,\"screen\":{\"x\":704.4879714882903,\"y\":-765.7017207076599}},{\"id\":8,\"x\":1130,\"y\":440,\"hp\":90,\"human\":false,\"boss\":false,\"distance\":1167.8391926577942,\"los\":false,\"screen\":{\"x\":1316.4879714882904,\"y\":-861.7017207076599}},{\"id\":9,\"x\":700,\"y\":1480,\"hp\":90,\"human\":false,\"boss\":false,\"distance\":134.60278064078204,\"los\":true,\"screen\":{\"x\":800.4879714882903,\"y\":386.29827929234017}},{\"id\":10,\"x\":1180,\"y\":1260,\"hp\":90,\"human\":false,\"boss\":false,\"distance\":646.1887767543193,\"los\":true,\"screen\":{\"x\":1376.4879714882904,\"y\":122.29827929234017}},{\"id\":11,\"x\":579.5195551420506,\"y\":1354.949326011373,\"hp\":30,\"human\":false,\"boss\":false,\"distance\":108.72429571515059,\"los\":true,\"screen\":{\"x\":655.9114376587511,\"y\":236.2374705059877}},{\"id\":12,\"x\":603.1829507345659,\"y\":1325.8833778383112,\"hp\":30,\"human\":false,\"boss\":false,\"distance\":141.83525823060756,\"los\":true,\"screen\":{\"x\":684.3075123697695,\"y\":201.35833269831355}},{\"id\":13,\"x\":656.2590970266276,\"y\":1416.9944596834405,\"hp\":30,\"human\":false,\"boss\":false,\"distance\":100.82185086263163,\"los\":true,\"screen\":{\"x\":747.9988879202435,\"y\":310.6916309124687}}],\"error\":null}",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-campaign-bonus/results.json"
+    },
+    {
+      "momentId": "superman",
+      "status": "completed",
+      "evidenceFile": "palace-natural-play-attempts/final-campaign-bonus.json",
+      "time": 157.05560000000975,
+      "error": null,
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-campaign-bonus/results.json"
+    },
+    {
+      "momentId": "last_broadcast",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/final-campaign-bonus.json",
+      "time": 80.65330000000341,
+      "error": "Error: No collision-safe object route to the coil dock",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-campaign-bonus/results.json"
+    },
+    {
+      "momentId": "ninth_minute",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/final-campaign-bonus.json",
+      "time": 187.38540000001169,
+      "error": "Error: Normal-damage actor was defeated: {\"scene\":\"Play\",\"onTop\":true,\"chapter\":\"ninth_minute\",\"stage\":2,\"stageId\":\"pendulum\",\"map\":\"ninth_engine\",\"x\":974.137081490597,\"y\":962.0743851750226,\"r\":13,\"hp\":0,\"maxHp\":100,\"energy\":100,\"carry\":0,\"carryMax\":25,\"body\":null,\"form\":\"manhattan\",\"scale\":1,\"hero\":null,\"locked\":false,\"dialog\":false,\"captionSkippable\":false,\"failed\":true,\"down\":true,\"god\":false,\"challenge\":\"normal\",\"stats\":{\"time\":187.38540000001169,\"disintegrated\":2,\"spared\":2,\"memories\":0},\"flags\":{\"route\":1,\"enterTrain\":true,\"passengers\":6,\"opened\":7,\"activeDoor\":null,\"laurieReacted\":true,\"enterEngine\":true},\"done\":false,\"objective\":\"Stop the Pendulum \u00b7 Strike when the core turns teal\",\"interaction\":null,\"powers\":{\"telekinesis\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"telekinesis\"},\"disintegrate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":20,\"action\":\"disintegrate\"},\"teleport\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":16,\"action\":\"teleport\"},\"duplicate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":50,\"action\":\"duplicate\"},\"timesight\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"timesight\"},\"expand\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":55,\"action\":\"expand\"}},\"foes\":[{\"id\":104,\"x\":950,\"y\":660,\"hp\":770,\"human\":false,\"boss\":true,\"phase\":1,\"distance\":303.037180691993,\"los\":true,\"screen\":{\"x\":642.4539422510624,\"y\":242.8550000000023}}],\"completion\":null,\"error\":null}",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-campaign-bonus/results.json"
+    },
+    {
+      "momentId": "deterrent",
+      "status": "completed",
+      "evidenceFile": "palace-natural-play-attempts/final-four.json",
+      "time": 106.23170000000599,
+      "error": null,
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-four/results.json"
+    },
+    {
+      "momentId": "karnak",
+      "status": "completed",
+      "evidenceFile": "palace-natural-play-attempts/final-four.json",
+      "time": 67.84750000000193,
+      "error": null,
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-four/results.json"
+    },
+    {
+      "momentId": "last_broadcast",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/final-four.json",
+      "time": 96.39410000000505,
+      "error": "Error: Normal-damage actor was defeated: {\"scene\":\"Play\",\"onTop\":true,\"chapter\":\"last_broadcast\",\"stage\":2,\"stageId\":\"carrier\",\"map\":\"broadcast_tower\",\"x\":1007.9258083348161,\"y\":762.39956162372,\"r\":13,\"hp\":0,\"maxHp\":100,\"energy\":28.396000000000697,\"carry\":0,\"carryMax\":25,\"body\":null,\"form\":\"manhattan\",\"scale\":1,\"hero\":null,\"locked\":false,\"dialog\":false,\"captionSkippable\":false,\"failed\":true,\"down\":true,\"god\":false,\"challenge\":\"normal\",\"stats\":{\"time\":96.39410000000505,\"disintegrated\":15,\"spared\":0,\"memories\":0},\"flags\":{\"enterRelay\":true,\"engineers\":7,\"coils\":3,\"enterTower\":true},\"done\":false,\"objective\":\"Break the three shield pylons \u00b7 Disable the carrier\",\"interaction\":null,\"powers\":{\"telekinesis\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"telekinesis\"},\"disintegrate\":{\"cd\":0.3328999999999941,\"active\":false,\"targetId\":null,\"cost\":20,\"action\":\"disintegrate\"},\"teleport\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":16,\"action\":\"teleport\"},\"duplicate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":50,\"action\":\"duplicate\"},\"timesight\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"timesight\"},\"expand\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":55,\"action\":\"expand\"}},\"foes\":[{\"id\":97,\"x\":895,\"y\":480,\"hp\":700,\"human\":false,\"boss\":true,\"phase\":1,\"distance\":304.14100445901875,\"los\":true,\"screen\":{\"x\":572.6173888133942,\"y\":267.2900013651399}}],\"completion\":null,\"error\":null}",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-four/results.json"
+    },
+    {
+      "momentId": "ninth_minute",
+      "status": "completed",
+      "evidenceFile": "palace-natural-play-attempts/final-four.json",
+      "time": 144.83310000000915,
+      "error": null,
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/final-four/results.json"
+    },
+    {
+      "momentId": "last_broadcast",
+      "status": "route-failed",
+      "evidenceFile": "palace-natural-play-attempts/last-broadcast-final.json",
+      "time": 95.97630000000342,
+      "error": "Error: Normal-damage actor was defeated: {\"scene\":\"Play\",\"onTop\":true,\"chapter\":\"last_broadcast\",\"stage\":2,\"stageId\":\"carrier\",\"map\":\"broadcast_tower\",\"x\":1058.7447078815853,\"y\":677.278141079791,\"r\":13,\"hp\":0,\"maxHp\":100,\"energy\":100,\"carry\":0,\"carryMax\":25,\"body\":null,\"form\":\"manhattan\",\"scale\":1,\"hero\":null,\"locked\":false,\"dialog\":false,\"captionSkippable\":false,\"failed\":true,\"down\":true,\"god\":false,\"challenge\":\"normal\",\"stats\":{\"time\":95.97630000000342,\"disintegrated\":14,\"spared\":0,\"memories\":0},\"flags\":{\"enterRelay\":true,\"engineers\":7,\"coils\":3,\"enterTower\":true},\"done\":false,\"objective\":\"Break the three shield pylons \u00b7 Disable the carrier\",\"interaction\":null,\"powers\":{\"telekinesis\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"telekinesis\"},\"disintegrate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":20,\"action\":\"disintegrate\"},\"teleport\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":16,\"action\":\"teleport\"},\"duplicate\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":50,\"action\":\"duplicate\"},\"timesight\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":0,\"action\":\"timesight\"},\"expand\":{\"cd\":0,\"active\":false,\"targetId\":null,\"cost\":55,\"action\":\"expand\"}},\"foes\":[{\"id\":97,\"x\":895,\"y\":480,\"hp\":700,\"human\":false,\"boss\":true,\"phase\":1,\"distance\":256.3805653849832,\"los\":true,\"screen\":{\"x\":541.5685852297918,\"y\":267.29011733045024}},{\"id\":100,\"x\":1040.2621540442194,\"y\":975.3181472816259,\"hp\":40,\"human\":true,\"boss\":false,\"distance\":298.612541754597,\"los\":true,\"screen\":{\"x\":674.9187343565535,\"y\":721.9904433705663}}],\"completion\":null,\"error\":null}",
+      "interruption": null,
+      "localEvidenceFile": "tests/out/palace-time-targets/source/last-broadcast-final/results.json"
+    }
+  ],
+  "rawReports": [
+    {
+      "file": "palace-natural-play-attempts/opening-initial.json",
+      "sha256": "3da3f57dd1a03219121d24d1bbd251a05a702143881f935db6598108b52a081f",
+      "finishedAtUtc": "2026-10-31T21:17:02.681Z",
+      "interrupted": false,
+      "actualProcessExitCode": null,
+      "localFile": "tests/out/palace-time-targets/source/opening-initial/results.json",
+      "byteIdenticalToRawReport": true,
+      "bytes": 50076
+    },
+    {
+      "file": "palace-natural-play-attempts/remaining-initial.json",
+      "sha256": "a04251cf094eb57548e3fa7549a6463c30becc9216e7ed6b4186f432a126bb1e",
+      "finishedAtUtc": null,
+      "interrupted": true,
+      "actualProcessExitCode": 1,
+      "localFile": "tests/out/palace-time-targets/source/remaining-initial/results.json",
+      "byteIdenticalToRawReport": true,
+      "bytes": 343135
+    },
+    {
+      "file": "palace-natural-play-attempts/remaining-retry-all6.json",
+      "sha256": "e10913a12383731e70b5890d30a1b0541a03113be593bb4f4331087e47cc11b6",
+      "finishedAtUtc": null,
+      "interrupted": true,
+      "actualProcessExitCode": 1,
+      "localFile": "tests/out/palace-time-targets/source/remaining-retry-all6/results.json",
+      "byteIdenticalToRawReport": true,
+      "bytes": 136595
+    },
+    {
+      "file": "palace-natural-play-attempts/final-campaign-bonus.json",
+      "sha256": "d1698672093711f240b320dc66167e69059df253e27f55447d4088e05da01a65",
+      "finishedAtUtc": "2026-10-31T22:08:00.810Z",
+      "interrupted": false,
+      "actualProcessExitCode": null,
+      "localFile": "tests/out/palace-time-targets/source/final-campaign-bonus/results.json",
+      "byteIdenticalToRawReport": true,
+      "bytes": 299263
+    },
+    {
+      "file": "palace-natural-play-attempts/final-four.json",
+      "sha256": "66a9340ebfd1de043f5daeeee35d68ec9c01729a9e6bd71639121a641e8a5ce9",
+      "finishedAtUtc": "2026-10-31T22:18:36.899Z",
+      "interrupted": false,
+      "actualProcessExitCode": null,
+      "localFile": "tests/out/palace-time-targets/source/final-four/results.json",
+      "byteIdenticalToRawReport": true,
+      "bytes": 368606
+    },
+    {
+      "file": "palace-natural-play-attempts/last-broadcast-final.json",
+      "sha256": "f273b967bfc9d4677f3468b1d174c40420fcd2ed40cdebf3f3c958c29d66ef60",
+      "finishedAtUtc": "2026-10-31T22:25:04.347Z",
+      "interrupted": false,
+      "actualProcessExitCode": null,
+      "localFile": "tests/out/palace-time-targets/source/last-broadcast-final/results.json",
+      "byteIdenticalToRawReport": true,
+      "bytes": 84474
+    }
+  ],
+  "actualProcessExits": [
+    {
+      "run": "opening-initial",
+      "actualExitCode": 0,
+      "termination": "normal",
+      "evidence": "exec session15435 completion"
+    },
+    {
+      "run": "remaining-initial",
+      "actualExitCode": 1,
+      "termination": "intentional SIGTERM of exact owned pilot/browser tree after proven stagnation",
+      "evidence": "exec session58252 completion and process-stop.json"
+    },
+    {
+      "run": "remaining-retry-all6",
+      "actualExitCode": 1,
+      "termination": "intentional SIGTERM of exact owned pilot/browser tree after proven LOS stagnation",
+      "evidence": "exec session70206 completion and process-stop.json"
+    },
+    {
+      "run": "final-campaign-bonus",
+      "actualExitCode": 1,
+      "termination": "normal, actual failed or post-finish controller attempts retained",
+      "evidence": "exec session25188 completion"
+    },
+    {
+      "run": "final-four",
+      "actualExitCode": 1,
+      "termination": "normal, Last Broadcast Normal defeat retained; three actual completions",
+      "evidence": "exec session28754 completion"
+    },
+    {
+      "run": "last-broadcast-final",
+      "actualExitCode": 1,
+      "termination": "normal, genuine Normal defeat preserved",
+      "evidence": "exec session53157 completion"
+    }
+  ],
+  "limitations": [
+    "Known-route automation is not an unfamiliar human playtest.",
+    "Normal completion records/scene telemetry can establish time reachability; a controller teardown error remains explicit.",
+    "A failed or interrupted pilot does not establish that its level is unwinnable or unbalanced.",
+    "Only the chosen Normal routes/characters were played; this is not every hero/mode or every optional challenge."
+  ],
+  "updatedAtUtc": "2026-10-31T22:29:14.249Z",
+  "processExitEvidence": "palace-natural-play-attempts/process-exits.json",
+  "processExitEvidenceSha256": "070b4d931f7f22cdf86ff731a03ccc996626843531892d9041ca9836dd17a1f9",
+  "fixturePolicy": {
+    "beforeBootOnly": true,
+    "campaignEligibility": "Reached=5 only for later campaign chapter selection; reached=0 for opening/optional entries.",
+    "completedRecords": false,
+    "checkpoints": false,
+    "normalDifficulty": true,
+    "settings": "Normal difficulty and normal text speed; focus pause disabled to permit the isolated headless run.",
+    "developerEntry": false,
+    "runtimeControl": "Actual menus, keys and mouse; browser evaluations read telemetry only.",
+    "invulnerabilitySetting": false,
+    "godMode": false,
+    "naturalAbilityEffectsPreserved": true
+  },
+  "verdict": "Eleven of twelve moments have observed real Normal completions with at least25% time headroom. Last Broadcast remains unverified after a genuine defeat.",
+  "regressionDistinction": "Gameplay-pilot diagnostics are separate from regression-suite passes. Nonzero/interrupted process exits are retained even when other moments completed.",
+  "snapshotCaveat": "Runs were recorded at multiple candidate snapshots; use each raw report and its actual hashes. Opening run has index/build hashes but no source aggregate.",
+  "telemetryCaveat": "Recorded action/state samples are diagnostic evidence, not an exhaustive recording of every keyboard event.",
+  "captureOverview": {
+    "published": 9,
+    "missingForCompletedMoments": [
+      {
+        "momentId": "prologue",
+        "reason": "The successful opening run did not record a raw capture. No older or controlled image is substituted."
+      },
+      {
+        "momentId": "reassembly",
+        "reason": "The successful opening run did not record a raw capture. No older or controlled image is substituted."
+      }
+    ],
+    "failedAttemptImagesExcluded": true
+  },
+  "limits": [
+    "Known-route automation is not an unfamiliar human playtest or a balance guarantee for all players.",
+    "Last Broadcast did not complete on Normal in the retained pilot attempts; its time target remains unverified.",
+    "Mars visibly completed but the post-finish controller errored; no missing GPv2 result breakdown is invented.",
+    "Only the selected characters and Normal routes were played; this does not cover every hero/mode or all optional challenges.",
+    "Nine published images are unchanged raw captures after ten wall/field/world seconds. The opening two have no capture here.",
+    "The pilots made no direct assignments or tester overrides to mechanics, health, quest state, statistics or clocks; changes came from ordinary gameplay input."
+  ]
+}

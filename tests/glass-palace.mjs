@@ -167,10 +167,24 @@ try {
           evidence: 7, engineers: 7, passengers: 6, rescued: 6, heat: 10,
           clues: 7, downloaded: true, departed: true,
           ledger: true, surveyorCaptured: true, archiveReturned: true,
+          choice: 'broadcast', moments: 7,
+        });
+        // Controlled positive evidence for the published v2 boundary fixture.
+        // Actual event wiring is tested separately by glass-palace-optionality.
+        const run = play.glassPalaceRun;
+        if (!run) throw new Error('Fresh Play did not establish rules-v2 run evidence.');
+        Object.assign(run, {
+          photoSeen: true, researchMask: options.detail === false ? 3 : 7, badgeSeen: true,
+          vortexAtomsLost: 0, passiveAtoms: 30, unmade: options.unmade ?? 0,
+          behemothSeen: true, behemothDefeated: true, behemothDisintegrations: 0,
+          behemothCoherence: 100, behemothMaxCoherence: 100,
+          marsSeen: true, marsDamage: 0, emittersSeen: true, emittersComplete: true, emittersDamage: 0,
+          veidtSeen: true, veidtDefeated: true, veidtDisintegrations: 0, damageTaken: 0, fieldNotesMask: 3,
         });
         if (options.detail === false) {
-          play.ctx.flags.repaired = false;
-          play.ctx.flags.calibrated = false;
+          // Mandatory repairs/calibration stay valid while an optional observation is omitted.
+          play.ctx.flags.repaired = true;
+          play.ctx.flags.calibrated = true;
         }
         play.ctx.refs.emitters = [{ dead: true }, { neutralized: true }, { dead: true }, { dead: true }];
         play.player.setForm(id === 'reassembly' ? 'manhattan' : play.player.form);
@@ -205,20 +219,25 @@ try {
       return definitions.length === 3 && new Set(definitions.map(def => def.id)).size === 3 &&
         definitions.every(def => typeof def.test === 'function' && def.label && def.description);
     }) && DM.GlassPalace.maxFragments() === 36));
-  check('Karnak detail uses the actual four-emitter map and rejects an incomplete shutdown', await ev(() => {
+  check('Karnak keeps its actual four-emitter map and requires an observed optional damage budget', await ev(() => {
     const GP = DM.GlassPalace;
     const preview = new GP.MomentPreview(GP.find('karnak'));
     preview.build();
     const emitters = preview.context?.refs.emitters;
     const definition = GP.challengeDefs('karnak').find(value => value.id === 'detail');
     if (!emitters || emitters.length !== 4) { preview.dispose(); return false; }
-    for (let i = 0; i < 3; i++) emitters[i].dead = true;
-    const incomplete = definition.test({ refs: { emitters } });
-    const truncated = definition.test({ refs: { emitters: emitters.slice(0, 3) } });
-    emitters[3].dead = true;
-    const complete = definition.test({ refs: { emitters } });
+    for (const emitter of emitters) emitter.dead = true;
+    const mandatoryOnly = definition.test({ refs: { emitters }, run: null });
+    const run = { rulesVersion: 2, chapterId: 'karnak', eligible: true,
+      emittersSeen: true, emittersComplete: false, emittersDamage: 0 };
+    const incomplete = definition.test({ refs: { emitters }, run });
+    run.emittersComplete = true;
+    run.emittersDamage = 41;
+    const overBudget = definition.test({ refs: { emitters }, run });
+    run.emittersDamage = 40;
+    const complete = definition.test({ refs: { emitters }, run });
     preview.dispose();
-    return !incomplete && !truncated && complete;
+    return !mandatoryOnly && !incomplete && !overBudget && complete;
   }));
   const original = await slots();
   check('fresh saves unlock the first campaign pane and the existing optional content only', await ev(() => {
@@ -418,7 +437,7 @@ try {
   await seed(fresh);
   await ev(() => {
     const GP = DM.GlassPalace;
-    GP.data = { version: 1, challenges: {}, epilogueSeen: {}, visits: 0 };
+    GP.data = GP.sanitize({ version: 1, challenges: {}, epilogueSeen: {}, visits: 0 });
     GP.available = true; GP.readOnly = false; GP.warning = '';
     GP.write();
   });

@@ -182,6 +182,7 @@
       if (best && Input.pressed('interact')) {
         Input.consume('interact');
         Input.consume('confirm');
+        DM.Events.emit('player:interact', { player: this, world, entity: best, label: best.interact.label });
         best.interact.onInteract(best, this);
       }
     }
@@ -194,7 +195,11 @@
       if (this.locked || this.invuln > 0 || this.down || this.godMode || this.form === 'human') return false;
       if (this.scale > 1.4 && (kind === 'bullet' || kind === 'pulse')) amount *= 0.15;
       amount *= this.damageMul == null ? 1 : this.damageMul;
+      const beforeDamage = this.coherence;
       this.coherence -= amount;
+      DM.Events.emit('player:damage-accepted', {
+        player: this, world: this.world, amount: Math.min(beforeDamage, amount), source, kind,
+      });
       this.regenDelay = this.regenDelayBase == null ? 2.6 : this.regenDelayBase;
       this.hurtT = 0.25;
       this.invuln = Math.max(this.invuln, 0.08);
